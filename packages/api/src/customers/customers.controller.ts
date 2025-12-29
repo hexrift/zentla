@@ -87,6 +87,12 @@ class QueryCustomersDto {
   externalId?: string;
 }
 
+class CreatePortalSessionDto {
+  @ApiProperty({ description: 'URL to redirect after portal session' })
+  @IsString()
+  returnUrl!: string;
+}
+
 @ApiTags('customers')
 @ApiSecurity('api-key')
 @Controller('customers')
@@ -158,5 +164,23 @@ export class CustomersController {
     @Param('id', ParseUUIDPipe) id: string
   ) {
     await this.customersService.delete(workspaceId, id);
+  }
+
+  @Post(':id/portal')
+  @MemberOnly()
+  @ApiOperation({ summary: 'Create customer portal session' })
+  @ApiResponse({ status: 201, description: 'Portal session created with redirect URL' })
+  @ApiResponse({ status: 404, description: 'Customer not found' })
+  async createPortalSession(
+    @WorkspaceId() workspaceId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreatePortalSessionDto
+  ) {
+    const session = await this.customersService.createPortalSession(
+      workspaceId,
+      id,
+      dto.returnUrl
+    );
+    return session;
   }
 }

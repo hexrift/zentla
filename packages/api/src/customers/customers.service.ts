@@ -272,4 +272,43 @@ export class CustomersService {
 
     return this.create(workspaceId, { email, name });
   }
+
+  async createPortalSession(
+    workspaceId: string,
+    customerId: string,
+    returnUrl: string
+  ): Promise<{ id: string; url: string }> {
+    // Verify customer exists
+    const customer = await this.findById(workspaceId, customerId);
+    if (!customer) {
+      throw new NotFoundException(`Customer ${customerId} not found`);
+    }
+
+    // Get Stripe customer ID
+    const stripeCustomerId = await this.providerRefService.getStripeCustomerId(
+      workspaceId,
+      customerId
+    );
+
+    if (!stripeCustomerId) {
+      throw new NotFoundException(
+        `Customer ${customerId} is not linked to Stripe. Customer must have an active subscription.`
+      );
+    }
+
+    // Create portal session via Stripe
+    const stripeAdapter = this.billingService.getStripeAdapter();
+    const session = await stripeAdapter.createPortalSession({
+      workspaceId,
+      customerId: stripeCustomerId,
+      returnUrl,
+    });
+
+    this.logger.log(`Created portal session for customer ${customerId}`);
+
+    return {
+      id: session.id,
+      url: session.url,
+    };
+  }
 }
