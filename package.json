@@ -1,0 +1,44 @@
+{
+  "name": "relay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Provider-agnostic subscription commerce orchestration platform",
+  "workspaces": [
+    "packages/*",
+    "packages/adapters/*"
+  ],
+  "scripts": {
+    "build": "yarn workspaces foreach -p run build",
+    "dev": "yarn workspace @relay/api dev",
+    "dev:ui": "yarn workspace @relay/admin-ui dev",
+    "dev:stripe": "stripe listen --forward-to localhost:3002/api/v1/webhooks/stripe",
+    "dev:all": "concurrently \"yarn dev\" \"yarn dev:ui\"",
+    "start": "yarn workspace @relay/api start:prod",
+    "typecheck": "yarn workspace @relay/core build && yarn workspace @relay/database build && yarn tsc --noEmit -p packages/api/tsconfig.json",
+    "test": "yarn workspaces foreach -p run test",
+    "lint": "yarn workspaces foreach -p run lint",
+    "db:generate": "yarn workspace @relay/database generate",
+    "db:migrate": "yarn workspace @relay/database migrate",
+    "db:migrate:deploy": "yarn workspace @relay/database migrate:deploy",
+    "db:push": "yarn workspace @relay/database push",
+    "db:seed": "yarn workspace @relay/database seed",
+    "db:studio": "yarn workspace @relay/database studio",
+    "clean": "yarn workspaces foreach -p run clean && rm -rf node_modules",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "setup": "yarn install && yarn docker:up && yarn db:generate && yarn db:migrate && yarn db:seed"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "yarn@4.12.0",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "concurrently": "^8.2.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0"
+  }
+}
