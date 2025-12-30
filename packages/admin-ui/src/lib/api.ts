@@ -1,4 +1,27 @@
+import type {
+  Offer,
+  Subscription,
+  Customer,
+  WebhookEndpoint,
+  Promotion,
+  CheckoutSession,
+  CheckoutIntent,
+  Event,
+  DeadLetterEvent,
+  AuditLog,
+  ApiKey,
+  Workspace,
+  PaginatedResponse,
+  AuthResponse,
+  AuthUser,
+  AuthWorkspace,
+} from './types';
+
 const API_BASE = '/api/v1';
+
+// Storage keys
+const SESSION_TOKEN_KEY = 'relay_session_token';
+const CURRENT_WORKSPACE_KEY = 'relay_current_workspace';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -12,29 +35,126 @@ interface ApiResponse<T> {
   };
 }
 
-async function fetchApi<T>(
+// Get session token for auth
+export function getSessionToken(): string | null {
+  return localStorage.getItem(SESSION_TOKEN_KEY);
+}
+
+// Set session token
+export function setSessionToken(token: string): void {
+  localStorage.setItem(SESSION_TOKEN_KEY, token);
+}
+
+// Clear session token
+export function clearSessionToken(): void {
+  localStorage.removeItem(SESSION_TOKEN_KEY);
+  localStorage.removeItem(CURRENT_WORKSPACE_KEY);
+}
+
+// Get current workspace
+export function getCurrentWorkspace(): string | null {
+  return localStorage.getItem(CURRENT_WORKSPACE_KEY);
+}
+
+// Set current workspace
+export function setCurrentWorkspace(workspaceId: string): void {
+  localStorage.setItem(CURRENT_WORKSPACE_KEY, workspaceId);
+}
+
+// Fetch with session auth (for dashboard endpoints)
+async function fetchWithSession<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const apiKey = localStorage.getItem('relay_api_key') ?? '';
+  const token = getSessionToken();
+
+  if (!token) {
+    throw new Error('Not authenticated');
+  }
 
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      clearSessionToken();
+      window.location.href = '/login';
+      throw new Error('Session expired');
+    }
+    const errorBody = await response.json().catch(() => ({ message: 'Request failed' }));
+    const errorMessage = errorBody.error?.message ?? errorBody.message ?? `HTTP ${response.status}`;
+    throw new Error(errorMessage);
+  }
+
+  const json = await response.json() as ApiResponse<T>;
+  return json.data as T;
+}
+
+// Fetch without auth (for public endpoints like login/signup)
+async function fetchPublic<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
       ...options.headers,
     },
   });
 
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({ message: 'Request failed' }));
+    const errorMessage = errorBody.error?.message ?? errorBody.message ?? `HTTP ${response.status}`;
+    throw new Error(errorMessage);
+  }
+
+  // Unwrap the response data
+  const json = await response.json() as ApiResponse<T>;
+  return json.data as T;
+}
+
+async function fetchApi<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  // Prefer session token, fall back to API key for backwards compatibility
+  const sessionToken = getSessionToken();
+  const apiKey = localStorage.getItem('relay_api_key') ?? '';
+  const token = sessionToken || apiKey;
+
+  if (!token) {
+    throw new Error('Not authenticated');
+  }
+
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401 && sessionToken) {
+      clearSessionToken();
+      window.location.href = '/login';
+      throw new Error('Session expired');
+    }
+    const errorBody = await response.json().catch(() => ({ message: 'Request failed' }));
     // Handle both old format (message) and new format (error.message)
     const errorMessage = errorBody.error?.message ?? errorBody.message ?? `HTTP ${response.status}`;
     throw new Error(errorMessage);
   }
 
-  const json = await response.json() as ApiResponse<unknown>;
+  const json = await response.json() as ApiResponse<T>;
 
   // If response has pagination metadata, reconstruct the expected format
   if (json.meta?.pagination) {
@@ -58,28 +178,28 @@ export const api = {
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.cursor) searchParams.set('cursor', params.cursor);
       const query = searchParams.toString();
-      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+      return fetchApi<PaginatedResponse<Offer>>(
         `/offers${query ? `?${query}` : ''}`
       );
     },
-    get: (id: string) => fetchApi<Record<string, unknown>>(`/offers/${id}`),
+    get: (id: string) => fetchApi<Offer>(`/offers/${id}`),
     create: (data: Record<string, unknown>) =>
-      fetchApi<Record<string, unknown>>('/offers', {
+      fetchApi<Offer>('/offers', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
     update: (id: string, data: Record<string, unknown>) =>
-      fetchApi<Record<string, unknown>>(`/offers/${id}`, {
+      fetchApi<Offer>(`/offers/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
     publish: (id: string, versionId?: string) =>
-      fetchApi<Record<string, unknown>>(`/offers/${id}/publish`, {
+      fetchApi<Offer>(`/offers/${id}/publish`, {
         method: 'POST',
         body: JSON.stringify({ versionId }),
       }),
     createVersion: (id: string, config: Record<string, unknown>) =>
-      fetchApi<Record<string, unknown>>(`/offers/${id}/versions`, {
+      fetchApi<Offer>(`/offers/${id}/versions`, {
         method: 'POST',
         body: JSON.stringify({ config }),
       }),
@@ -92,13 +212,13 @@ export const api = {
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.cursor) searchParams.set('cursor', params.cursor);
       const query = searchParams.toString();
-      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+      return fetchApi<PaginatedResponse<Subscription>>(
         `/subscriptions${query ? `?${query}` : ''}`
       );
     },
-    get: (id: string) => fetchApi<Record<string, unknown>>(`/subscriptions/${id}`),
+    get: (id: string) => fetchApi<Subscription>(`/subscriptions/${id}`),
     cancel: (id: string, data: { cancelAtPeriodEnd?: boolean; reason?: string }) =>
-      fetchApi<Record<string, unknown>>(`/subscriptions/${id}/cancel`, {
+      fetchApi<Subscription>(`/subscriptions/${id}/cancel`, {
         method: 'POST',
         body: JSON.stringify(data),
       }),
@@ -110,18 +230,20 @@ export const api = {
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.cursor) searchParams.set('cursor', params.cursor);
       const query = searchParams.toString();
-      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+      return fetchApi<PaginatedResponse<Customer>>(
         `/customers${query ? `?${query}` : ''}`
       );
     },
-    get: (id: string) => fetchApi<Record<string, unknown>>(`/customers/${id}`),
+    get: (id: string) => fetchApi<Customer>(`/customers/${id}`),
     create: (data: { email: string; name?: string; externalId?: string }) =>
-      fetchApi<Record<string, unknown>>('/customers', {
+      fetchApi<Customer>('/customers', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
     getEntitlements: (customerId: string) =>
-      fetchApi<Record<string, unknown>>(`/customers/${customerId}/entitlements`),
+      fetchApi<{ customerId: string; entitlements: Array<{ featureKey: string; hasAccess: boolean; value: unknown }> }>(
+        `/customers/${customerId}/entitlements`
+      ),
   },
   webhooks: {
     list: (params?: { limit?: number; cursor?: string }) => {
@@ -129,12 +251,12 @@ export const api = {
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.cursor) searchParams.set('cursor', params.cursor);
       const query = searchParams.toString();
-      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+      return fetchApi<PaginatedResponse<WebhookEndpoint>>(
         `/webhook-endpoints${query ? `?${query}` : ''}`
       );
     },
     create: (data: { url: string; events: string[]; description?: string }) =>
-      fetchApi<Record<string, unknown>>('/webhook-endpoints', {
+      fetchApi<WebhookEndpoint>('/webhook-endpoints', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
@@ -142,7 +264,7 @@ export const api = {
       fetchApi<void>(`/webhook-endpoints/${id}`, { method: 'DELETE' }),
   },
   apiKeys: {
-    list: () => fetchApi<unknown[]>('/api-keys'),
+    list: () => fetchApi<ApiKey[]>('/api-keys'),
     create: (data: { name: string; role: string; environment: string }) =>
       fetchApi<{ id: string; secret: string }>('/api-keys', {
         method: 'POST',
@@ -152,9 +274,9 @@ export const api = {
       fetchApi<void>(`/api-keys/${id}`, { method: 'DELETE' }),
   },
   workspace: {
-    get: () => fetchApi<Record<string, unknown>>('/workspaces/current'),
+    get: () => fetchApi<Workspace>('/workspaces/current'),
     update: (data: Record<string, unknown>) =>
-      fetchApi<Record<string, unknown>>('/workspaces/current', {
+      fetchApi<Workspace>('/workspaces/current', {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
@@ -167,36 +289,36 @@ export const api = {
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.cursor) searchParams.set('cursor', params.cursor);
       const query = searchParams.toString();
-      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+      return fetchApi<PaginatedResponse<Promotion>>(
         `/promotions${query ? `?${query}` : ''}`
       );
     },
-    get: (id: string) => fetchApi<Record<string, unknown>>(`/promotions/${id}`),
+    get: (id: string) => fetchApi<Promotion>(`/promotions/${id}`),
     create: (data: Record<string, unknown>) =>
-      fetchApi<Record<string, unknown>>('/promotions', {
+      fetchApi<Promotion>('/promotions', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
     update: (id: string, data: Record<string, unknown>) =>
-      fetchApi<Record<string, unknown>>(`/promotions/${id}`, {
+      fetchApi<Promotion>(`/promotions/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
     publish: (id: string, versionId?: string) =>
-      fetchApi<Record<string, unknown>>(`/promotions/${id}/publish`, {
+      fetchApi<Promotion>(`/promotions/${id}/publish`, {
         method: 'POST',
         body: JSON.stringify({ versionId }),
       }),
     createVersion: (id: string, config: Record<string, unknown>) =>
-      fetchApi<Record<string, unknown>>(`/promotions/${id}/versions`, {
+      fetchApi<Promotion>(`/promotions/${id}/versions`, {
         method: 'POST',
         body: JSON.stringify({ config }),
       }),
     archive: (id: string) =>
-      fetchApi<Record<string, unknown>>(`/promotions/${id}/archive`, {
+      fetchApi<Promotion>(`/promotions/${id}/archive`, {
         method: 'POST',
       }),
-    getUsage: (id: string) => fetchApi<Record<string, unknown>>(`/promotions/${id}/usage`),
+    getUsage: (id: string) => fetchApi<{ redemptionCount: number; totalDiscount: number }>(`/promotions/${id}/usage`),
   },
   events: {
     list: (params?: { status?: string; eventType?: string; limit?: number; cursor?: string }) => {
@@ -206,7 +328,7 @@ export const api = {
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.cursor) searchParams.set('cursor', params.cursor);
       const query = searchParams.toString();
-      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+      return fetchApi<PaginatedResponse<Event>>(
         `/events${query ? `?${query}` : ''}`
       );
     },
@@ -215,7 +337,7 @@ export const api = {
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.cursor) searchParams.set('cursor', params.cursor);
       const query = searchParams.toString();
-      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+      return fetchApi<PaginatedResponse<DeadLetterEvent>>(
         `/events/dead-letter${query ? `?${query}` : ''}`
       );
     },
@@ -239,7 +361,7 @@ export const api = {
       if (params?.startDate) searchParams.set('startDate', params.startDate);
       if (params?.endDate) searchParams.set('endDate', params.endDate);
       const query = searchParams.toString();
-      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+      return fetchApi<PaginatedResponse<AuditLog>>(
         `/audit-logs${query ? `?${query}` : ''}`
       );
     },
@@ -251,7 +373,7 @@ export const api = {
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.cursor) searchParams.set('cursor', params.cursor);
       const query = searchParams.toString();
-      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+      return fetchApi<PaginatedResponse<CheckoutSession>>(
         `/checkout/sessions${query ? `?${query}` : ''}`
       );
     },
@@ -261,7 +383,7 @@ export const api = {
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.cursor) searchParams.set('cursor', params.cursor);
       const query = searchParams.toString();
-      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+      return fetchApi<PaginatedResponse<CheckoutIntent>>(
         `/checkout/intents${query ? `?${query}` : ''}`
       );
     },
@@ -282,5 +404,64 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(data),
       }),
+  },
+
+  // Auth endpoints (public, no token required)
+  auth: {
+    signup: (data: { email: string; password: string; name?: string }) =>
+      fetchPublic<AuthResponse>('/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    login: (data: { email: string; password: string }) =>
+      fetchPublic<AuthResponse>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    getGitHubUrl: () =>
+      fetchPublic<{ url: string }>('/auth/github'),
+    githubCallback: (code: string) =>
+      fetchPublic<AuthResponse>('/auth/github/callback', {
+        method: 'POST',
+        body: JSON.stringify({ code }),
+      }),
+    me: () =>
+      fetchWithSession<{ user: AuthUser; workspaces: AuthWorkspace[] }>('/auth/me'),
+    logout: () =>
+      fetchWithSession<void>('/auth/session', { method: 'DELETE' }),
+  },
+
+  // Dashboard endpoints (session auth)
+  dashboard: {
+    apiKeys: {
+      list: (workspaceId: string) =>
+        fetchWithSession<Array<{
+          id: string;
+          name: string;
+          keyPrefix: string;
+          role: string;
+          environment: string;
+          lastUsedAt: string | null;
+          expiresAt: string | null;
+          createdAt: string;
+        }>>(`/dashboard/workspaces/${workspaceId}/api-keys`),
+      create: (workspaceId: string, data: { name: string; role: string; environment: string; expiresAt?: string }) =>
+        fetchWithSession<{
+          id: string;
+          secret: string;
+          prefix: string;
+          name: string;
+          role: string;
+          environment: string;
+          message: string;
+        }>(`/dashboard/workspaces/${workspaceId}/api-keys`, {
+          method: 'POST',
+          body: JSON.stringify(data),
+        }),
+      revoke: (workspaceId: string, keyId: string) =>
+        fetchWithSession<void>(`/dashboard/workspaces/${workspaceId}/api-keys/${keyId}`, {
+          method: 'DELETE',
+        }),
+    },
   },
 };

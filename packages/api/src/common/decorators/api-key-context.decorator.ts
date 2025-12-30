@@ -8,6 +8,12 @@ export interface ApiKeyContext {
   environment: 'live' | 'test';
 }
 
+export interface SessionContext {
+  userId: string;
+  sessionId: string;
+  expiresAt: Date;
+}
+
 export const CurrentApiKey = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext): ApiKeyContext => {
     const request = ctx.switchToHttp().getRequest<Request>();
@@ -34,11 +40,38 @@ export const WorkspaceId = createParamDecorator(
   }
 );
 
+export const CurrentSession = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext): SessionContext => {
+    const request = ctx.switchToHttp().getRequest<Request>();
+    const sessionContext = request.sessionContext;
+
+    if (!sessionContext) {
+      throw new Error('Session context not found on request');
+    }
+
+    return sessionContext;
+  }
+);
+
+export const CurrentUserId = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext): string => {
+    const request = ctx.switchToHttp().getRequest<Request>();
+    const sessionContext = request.sessionContext;
+
+    if (!sessionContext) {
+      throw new Error('Session context not found on request');
+    }
+
+    return sessionContext.userId;
+  }
+);
+
 // Extend Express Request type
 declare global {
   namespace Express {
     interface Request {
       apiKeyContext?: ApiKeyContext;
+      sessionContext?: SessionContext;
       rawBody?: Buffer;
     }
   }

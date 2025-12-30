@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { clsx } from 'clsx';
+import { useAuth } from '../lib/auth-context';
+
+const DOCS_URL = 'http://localhost:3000/docs';
+const API_DOCS_URL = 'http://localhost:3002/docs';
+const FEEDBACK_URL = 'https://github.com/your-org/relay/issues';
 
 const navigation = [
   { name: 'Checkouts', href: '/checkouts', icon: CreditCardIcon },
@@ -114,8 +119,17 @@ function XIcon({ className }: { className?: string }) {
   );
 }
 
+function LogoutIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+    </svg>
+  );
+}
+
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -142,6 +156,9 @@ export function Layout() {
                 <span className="text-white font-bold text-sm">R</span>
               </div>
               <span className="text-lg font-semibold text-gray-900">Relay</span>
+              <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">
+                Beta
+              </span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -182,6 +199,69 @@ export function Layout() {
             ))}
           </nav>
 
+          {/* External Links */}
+          <div className="px-3 py-4 border-t border-gray-200/80">
+            <div className="space-y-1">
+              <a
+                href={DOCS_URL}
+                target="_blank"
+                rel="noopener"
+                className="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                </svg>
+                Documentation
+              </a>
+              <a
+                href={API_DOCS_URL}
+                target="_blank"
+                rel="noopener"
+                className="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                </svg>
+                API Reference
+              </a>
+              <a
+                href={FEEDBACK_URL}
+                target="_blank"
+                rel="noopener"
+                className="flex items-center gap-3 px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                </svg>
+                Give Feedback
+              </a>
+            </div>
+          </div>
+
+          {/* User info and logout */}
+          <div className="px-3 py-4 border-t border-gray-200/80">
+            <div className="flex items-center justify-between px-3 py-2 mb-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-purple-700 font-medium text-sm">
+                    {user?.name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? '?'}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{user?.name ?? 'User'}</p>
+                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={logout}
+              className="flex items-center gap-3 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <LogoutIcon className="w-5 h-5" />
+              Sign out
+            </button>
+          </div>
+
           {/* Environment indicator */}
           <div className="p-4 border-t border-gray-200/80">
             <div className="flex items-center px-3 py-2.5 text-sm bg-amber-50 text-amber-700 rounded-lg border border-amber-200/50">
@@ -202,6 +282,9 @@ export function Layout() {
                 <span className="text-white font-bold text-sm">R</span>
               </div>
               <span className="text-lg font-semibold text-gray-900">Relay</span>
+              <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">
+                Beta
+              </span>
             </div>
           </div>
 
@@ -235,6 +318,69 @@ export function Layout() {
             ))}
           </nav>
 
+          {/* External Links */}
+          <div className="px-3 py-4 border-t border-gray-200/80">
+            <div className="space-y-1">
+              <a
+                href={DOCS_URL}
+                target="_blank"
+                rel="noopener"
+                className="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                </svg>
+                Documentation
+              </a>
+              <a
+                href={API_DOCS_URL}
+                target="_blank"
+                rel="noopener"
+                className="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                </svg>
+                API Reference
+              </a>
+              <a
+                href={FEEDBACK_URL}
+                target="_blank"
+                rel="noopener"
+                className="flex items-center gap-3 px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                </svg>
+                Give Feedback
+              </a>
+            </div>
+          </div>
+
+          {/* User info and logout */}
+          <div className="px-3 py-4 border-t border-gray-200/80">
+            <div className="flex items-center justify-between px-3 py-2 mb-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-purple-700 font-medium text-sm">
+                    {user?.name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? '?'}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{user?.name ?? 'User'}</p>
+                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={logout}
+              className="flex items-center gap-3 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <LogoutIcon className="w-5 h-5" />
+              Sign out
+            </button>
+          </div>
+
           {/* Environment indicator */}
           <div className="p-4 border-t border-gray-200/80">
             <div className="flex items-center px-3 py-2.5 text-sm bg-amber-50 text-amber-700 rounded-lg border border-amber-200/50">
@@ -260,6 +406,9 @@ export function Layout() {
               <span className="text-white font-bold text-xs">R</span>
             </div>
             <span className="text-base font-semibold text-gray-900">Relay</span>
+            <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">
+              Beta
+            </span>
           </div>
         </div>
 

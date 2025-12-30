@@ -34,6 +34,13 @@ export class WorkspaceGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<Request>();
+
+    // Skip workspace validation for session-authenticated users
+    // Session users access workspaces through their memberships
+    if (request.sessionContext) {
+      return true;
+    }
+
     const apiKeyContext = request.apiKeyContext;
 
     if (!apiKeyContext) {

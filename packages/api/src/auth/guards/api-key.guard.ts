@@ -28,6 +28,12 @@ export class ApiKeyGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<Request>();
+
+    // Skip if already authenticated via session
+    if (request.sessionContext) {
+      return true;
+    }
+
     const authHeader = request.headers.authorization;
 
     if (!authHeader) {

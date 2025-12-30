@@ -1,15 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
-
-interface Subscription {
-  id: string;
-  status: string;
-  customer: { id: string; email: string; name?: string };
-  offer: { id: string; name: string };
-  currentPeriodEnd: string;
-  createdAt: string;
-}
+import type { Subscription } from '../lib/types';
 
 export function SubscriptionsPage() {
   const navigate = useNavigate();

@@ -3,41 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { clsx } from 'clsx';
-
-interface CheckoutSession {
-  id: string;
-  status: string;
-  customerEmail?: string;
-  offer: { id: string; name: string };
-  customer?: { id: string; email: string; name?: string };
-  sessionUrl?: string;
-  providerSessionId?: string;
-  expiresAt: string;
-  completedAt?: string;
-  createdAt: string;
-}
-
-interface CheckoutIntent {
-  id: string;
-  status: string;
-  customerEmail?: string;
-  offer: { id: string; name: string };
-  customer?: { id: string; email: string; name?: string };
-  subscription?: { id: string; status: string };
-  promotion?: { id: string; name: string; code: string };
-  providerPaymentId?: string;
-  failureReason?: string;
-  currency: string;
-  totalAmount: number;
-  discountAmount: number;
-  trialDays?: number;
-  createdAt: string;
-}
-
-interface Offer {
-  id: string;
-  name: string;
-}
+import type { CheckoutSession, CheckoutIntent, Offer } from '../lib/types';
 
 type Tab = 'sessions' | 'intents';
 

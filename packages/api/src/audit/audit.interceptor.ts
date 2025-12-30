@@ -4,14 +4,15 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import { AuditService } from './audit.service';
 import type { Request } from 'express';
-import type { ApiKeyContext } from '../common/decorators';
+import type { ApiKeyContext, SessionContext } from '../common/decorators';
 
-interface RequestWithApiKey extends Request {
+interface RequestWithAuth extends Request {
   apiKeyContext?: ApiKeyContext;
+  sessionContext?: SessionContext;
 }
 
 // PII fields to anonymize
@@ -86,8 +87,21 @@ function anonymizePII(data: unknown): unknown {
 
 // Map HTTP methods and paths to actions
 function getActionFromRequest(method: string, path: string): string | null {
-  // Skip GET requests (read-only)
-  if (method === 'GET') return null;
+  // Skip GET requests (read-only) except for specific audit-worthy reads
+  if (method === 'GET') {
+    // Log access to sensitive endpoints
+    if (path.includes('/api-keys')) return 'view_api_keys';
+    if (path.includes('/audit-logs')) return 'view_audit_logs';
+    return null;
+  }
+
+  // Auth actions
+  if (path.includes('/auth/signup')) return 'signup';
+  if (path.includes('/auth/login')) return 'login';
+  if (path.includes('/auth/logout') || path.includes('/auth/session')) {
+    if (method === 'DELETE') return 'logout';
+  }
+  if (path.includes('/auth/github')) return 'github_auth';
 
   // Extract resource from path (e.g., /api/v1/offers/123 -> offers)
   const pathParts = path.split('/').filter(Boolean);
@@ -107,6 +121,7 @@ function getActionFromRequest(method: string, path: string): string | null {
     if (path.includes('/checkout/sessions')) return 'create_checkout_session';
     if (path.includes('/checkout/intents')) return 'create_checkout_intent';
     if (path.includes('/checkout/quotes')) return 'get_checkout_quote';
+    if (path.includes('/validate')) return 'validate';
     return 'create';
   }
   if (method === 'PATCH' || method === 'PUT') return 'update';
@@ -116,6 +131,9 @@ function getActionFromRequest(method: string, path: string): string | null {
 }
 
 function getResourceTypeFromPath(path: string): string | null {
+  // Handle auth endpoints specially
+  if (path.includes('/auth/')) return 'auth';
+
   const pathParts = path.split('/').filter(Boolean);
   const apiIndex = pathParts.indexOf('api');
   const resourceIndex = apiIndex >= 0 ? apiIndex + 2 : 0;
@@ -136,6 +154,9 @@ function getResourceTypeFromPath(path: string): string | null {
     sessions: 'checkout_session',
     intents: 'checkout_intent',
     quotes: 'checkout_quote',
+    dashboard: 'dashboard',
+    auth: 'auth',
+    'audit-logs': 'audit_log',
   };
 
   return resourceMap[resource] ?? resource;
@@ -162,12 +183,12 @@ export class AuditInterceptor implements NestInterceptor {
   constructor(private readonly auditService: AuditService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context.switchToHttp().getRequest<RequestWithApiKey>();
+    const request = context.switchToHttp().getRequest<RequestWithAuth>();
     const { method, path, ip, headers, body } = request;
 
     const action = getActionFromRequest(method, path);
 
-    // Skip if no action to log (e.g., GET requests)
+    // Skip if no action to log (e.g., most GET requests)
     if (!action) {
       return next.handle();
     }
@@ -175,14 +196,66 @@ export class AuditInterceptor implements NestInterceptor {
     const resourceType = getResourceTypeFromPath(path);
     const resourceIdFromPath = getResourceIdFromPath(path);
     const apiKeyContext = request.apiKeyContext;
+    const sessionContext = request.sessionContext;
 
-    // Skip if no workspace context
-    if (!apiKeyContext?.workspaceId) {
+    // Determine actor type and ID
+    let actorType: 'api_key' | 'user' | 'system' = 'api_key';
+    let actorId = 'unknown';
+    let workspaceId: string | undefined;
+    let environment: 'test' | 'live' = 'test';
+
+    if (sessionContext) {
+      actorType = 'user';
+      actorId = sessionContext.userId;
+      // For session auth, workspace comes from apiKeyContext (set by SessionGuard)
+      workspaceId = apiKeyContext?.workspaceId;
+      environment = (apiKeyContext?.environment as 'test' | 'live') ?? 'test';
+    } else if (apiKeyContext) {
+      actorType = 'api_key';
+      actorId = apiKeyContext.keyId;
+      workspaceId = apiKeyContext.workspaceId;
+      environment = apiKeyContext.environment;
+    }
+
+    // For auth actions (signup/login), we may not have workspace context yet
+    const isAuthAction = ['signup', 'login', 'github_auth', 'logout'].includes(action);
+
+    // Skip if no workspace context and not an auth action
+    if (!workspaceId && !isAuthAction) {
       return next.handle();
     }
 
     // Anonymize request body for logging
     const anonymizedBody = body ? anonymizePII(body) : undefined;
+
+    // Helper to create audit log
+    const createLog = (success: boolean, resourceId: string, errorMessage?: string) => {
+      // For auth actions without workspace, use a placeholder
+      const logWorkspaceId = workspaceId ?? '00000000-0000-0000-0000-000000000000';
+
+      this.auditService
+        .createAuditLog({
+          workspaceId: logWorkspaceId,
+          actorType,
+          actorId,
+          action: success ? action : `${action}_failed`,
+          resourceType: resourceType ?? 'unknown',
+          resourceId: resourceId,
+          changes: anonymizedBody as Record<string, unknown> | undefined,
+          metadata: {
+            method,
+            path,
+            environment,
+            success,
+            ...(errorMessage ? { error: errorMessage } : {}),
+          },
+          ipAddress: ip,
+          userAgent: headers['user-agent'],
+        })
+        .catch(() => {
+          // Silently ignore audit log failures
+        });
+    };
 
     return next.handle().pipe(
       tap({
@@ -194,28 +267,24 @@ export class AuditInterceptor implements NestInterceptor {
             resourceId = (data?.id as string) ?? (response as Record<string, unknown>).id as string ?? 'unknown';
           }
 
-          // Log the action asynchronously (fire and forget)
-          this.auditService
-            .createAuditLog({
-              workspaceId: apiKeyContext.workspaceId,
-              actorType: 'api_key',
-              actorId: apiKeyContext.keyId,
-              action,
-              resourceType: resourceType ?? 'unknown',
-              resourceId: resourceId ?? 'unknown',
-              changes: anonymizedBody as Record<string, unknown> | undefined,
-              metadata: {
-                method,
-                path,
-                environment: apiKeyContext.environment,
-              },
-              ipAddress: ip,
-              userAgent: headers['user-agent'],
-            })
-            .catch(() => {
-              // Silently ignore audit log failures
-            });
+          // For signup, try to get the new workspace ID from response
+          if (action === 'signup' && response && typeof response === 'object') {
+            const data = (response as Record<string, unknown>).data as Record<string, unknown> | undefined;
+            const workspaces = (data?.workspaces ?? (response as Record<string, unknown>).workspaces) as Array<{ id: string }> | undefined;
+            if (workspaces?.[0]?.id) {
+              resourceId = workspaces[0].id;
+            }
+          }
+
+          // Log successful action
+          createLog(true, resourceId ?? 'unknown');
         },
+      }),
+      catchError((error) => {
+        // Log failed action
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        createLog(false, resourceIdFromPath ?? 'unknown', errorMessage);
+        return throwError(() => error);
       })
     );
   }

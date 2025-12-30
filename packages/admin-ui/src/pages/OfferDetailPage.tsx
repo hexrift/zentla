@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import { api } from '../lib/api';
+import type { Offer } from '../lib/types';
 
 type Tab = 'details' | 'pricing' | 'trials' | 'entitlements' | 'checkout' | 'json';
 
@@ -42,7 +43,7 @@ export function OfferDetailPage() {
   }
 
   const currentVersion = offer.currentVersion;
-  const draftVersion = offer.versions?.find((v: { status: string }) => v.status === 'draft');
+  const draftVersion = offer.versions?.find((v) => v.status === 'draft');
 
   return (
     <div>
@@ -123,21 +124,21 @@ export function OfferDetailPage() {
   );
 }
 
-function DetailsTab({ offer }: { offer: Record<string, unknown> }) {
+function DetailsTab({ offer }: { offer: Offer }) {
   return (
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700">Name</label>
         <input
           type="text"
-          defaultValue={offer.name as string}
+          defaultValue={offer.name}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
         />
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">Description</label>
         <textarea
-          defaultValue={(offer.description as string) ?? ''}
+          defaultValue={offer.description ?? ''}
           rows={3}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
         />
@@ -146,9 +147,9 @@ function DetailsTab({ offer }: { offer: Record<string, unknown> }) {
   );
 }
 
-function PricingTab({ offer }: { offer: Record<string, unknown> }) {
-  const config = (offer.currentVersion as Record<string, unknown>)?.config as Record<string, unknown> | undefined;
-  const pricing = config?.pricing as Record<string, unknown> | undefined;
+function PricingTab({ offer }: { offer: Offer }) {
+  const config = offer.currentVersion?.config;
+  const pricing = config?.pricing;
 
   return (
     <div className="space-y-4">
@@ -156,7 +157,7 @@ function PricingTab({ offer }: { offer: Record<string, unknown> }) {
         <div>
           <label className="block text-sm font-medium text-gray-700">Pricing Model</label>
           <select
-            defaultValue={(pricing?.model as string) ?? 'flat'}
+            defaultValue={pricing?.model ?? 'flat'}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
           >
             <option value="flat">Flat</option>
@@ -169,7 +170,7 @@ function PricingTab({ offer }: { offer: Record<string, unknown> }) {
           <label className="block text-sm font-medium text-gray-700">Currency</label>
           <input
             type="text"
-            defaultValue={(pricing?.currency as string) ?? 'USD'}
+            defaultValue={pricing?.currency ?? 'USD'}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
           />
         </div>
@@ -177,14 +178,14 @@ function PricingTab({ offer }: { offer: Record<string, unknown> }) {
           <label className="block text-sm font-medium text-gray-700">Amount (cents)</label>
           <input
             type="number"
-            defaultValue={(pricing?.amount as number) ?? 0}
+            defaultValue={pricing?.amount ?? 0}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Billing Interval</label>
           <select
-            defaultValue={(pricing?.interval as string) ?? 'month'}
+            defaultValue={pricing?.interval ?? 'month'}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
           >
             <option value="day">Daily</option>
@@ -198,9 +199,9 @@ function PricingTab({ offer }: { offer: Record<string, unknown> }) {
   );
 }
 
-function TrialsTab({ offer }: { offer: Record<string, unknown> }) {
-  const config = (offer.currentVersion as Record<string, unknown>)?.config as Record<string, unknown> | undefined;
-  const trial = config?.trial as Record<string, unknown> | undefined;
+function TrialsTab({ offer }: { offer: Offer }) {
+  const config = offer.currentVersion?.config;
+  const trial = config?.trial;
 
   return (
     <div className="space-y-4">
@@ -214,7 +215,7 @@ function TrialsTab({ offer }: { offer: Record<string, unknown> }) {
             <label className="block text-sm font-medium text-gray-700">Trial Days</label>
             <input
               type="number"
-              defaultValue={(trial.days as number) ?? 14}
+              defaultValue={trial.days ?? 14}
               className="mt-1 block w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
             />
           </div>
@@ -224,7 +225,7 @@ function TrialsTab({ offer }: { offer: Record<string, unknown> }) {
             </label>
             <input
               type="checkbox"
-              defaultChecked={(trial.requirePaymentMethod as boolean) ?? false}
+              defaultChecked={trial.requirePaymentMethod ?? false}
               className="rounded"
             />
           </div>
@@ -234,9 +235,9 @@ function TrialsTab({ offer }: { offer: Record<string, unknown> }) {
   );
 }
 
-function EntitlementsTab({ offer }: { offer: Record<string, unknown> }) {
-  const config = (offer.currentVersion as Record<string, unknown>)?.config as Record<string, unknown> | undefined;
-  const entitlements = (config?.entitlements as Array<Record<string, unknown>>) ?? [];
+function EntitlementsTab({ offer }: { offer: Offer }) {
+  const config = offer.currentVersion?.config;
+  const entitlements = config?.entitlements ?? [];
 
   return (
     <div className="space-y-4">
@@ -257,9 +258,9 @@ function EntitlementsTab({ offer }: { offer: Record<string, unknown> }) {
         <tbody className="divide-y divide-gray-200">
           {entitlements.map((e, i) => (
             <tr key={i}>
-              <td className="px-4 py-2 text-sm text-gray-900">{e.featureKey as string}</td>
+              <td className="px-4 py-2 text-sm text-gray-900">{e.featureKey}</td>
               <td className="px-4 py-2 text-sm text-gray-500">{String(e.value)}</td>
-              <td className="px-4 py-2 text-sm text-gray-500">{e.valueType as string}</td>
+              <td className="px-4 py-2 text-sm text-gray-500">{e.valueType}</td>
             </tr>
           ))}
         </tbody>
@@ -271,12 +272,12 @@ function EntitlementsTab({ offer }: { offer: Record<string, unknown> }) {
   );
 }
 
-function CheckoutTab({ offer }: { offer: Record<string, unknown> }) {
+function CheckoutTab({ offer }: { offer: Offer }) {
   const [copied, setCopied] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);
 
-  const currentVersion = offer.currentVersion as Record<string, unknown> | undefined;
+  const currentVersion = offer.currentVersion;
   const hasPublishedVersion = !!currentVersion;
 
   // Generate the API endpoint for creating checkout sessions
@@ -304,7 +305,7 @@ function CheckoutTab({ offer }: { offer: Record<string, unknown> }) {
       // Use http://localhost URLs for local dev, which IsUrl() accepts
       const baseUrl = window.location.origin;
       const response = await api.checkout.createSession({
-        offerId: offer.id as string,
+        offerId: offer.id,
         successUrl: `${baseUrl}/checkouts`,
         cancelUrl: `${baseUrl}/checkouts`,
       });
@@ -432,7 +433,7 @@ function CheckoutTab({ offer }: { offer: Record<string, unknown> }) {
             <div className="space-y-2 text-sm">
               <div className="flex items-start gap-2">
                 <code className="px-1.5 py-0.5 bg-gray-200 rounded text-xs font-mono">offerId</code>
-                <span className="text-gray-600">The offer ID: <code className="text-purple-600">{offer.id as string}</code></span>
+                <span className="text-gray-600">The offer ID: <code className="text-purple-600">{offer.id}</code></span>
               </div>
               <div className="flex items-start gap-2">
                 <code className="px-1.5 py-0.5 bg-gray-200 rounded text-xs font-mono">successUrl</code>
@@ -474,15 +475,15 @@ function CheckoutTab({ offer }: { offer: Record<string, unknown> }) {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-500">Offer ID:</span>
-              <code className="ml-2 px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">{offer.id as string}</code>
+              <code className="ml-2 px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">{offer.id}</code>
             </div>
             <div>
               <span className="text-gray-500">Version:</span>
-              <span className="ml-2 font-medium">v{currentVersion.version as number}</span>
+              <span className="ml-2 font-medium">v{currentVersion.version}</span>
             </div>
             <div>
               <span className="text-gray-500">Version ID:</span>
-              <code className="ml-2 px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">{currentVersion.id as string}</code>
+              <code className="ml-2 px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">{currentVersion.id}</code>
             </div>
             <div>
               <span className="text-gray-500">Status:</span>
@@ -497,8 +498,8 @@ function CheckoutTab({ offer }: { offer: Record<string, unknown> }) {
   );
 }
 
-function JsonTab({ offer }: { offer: Record<string, unknown> }) {
-  const config = (offer.currentVersion as Record<string, unknown>)?.config;
+function JsonTab({ offer }: { offer: Offer }) {
+  const config = offer.currentVersion?.config;
 
   return (
     <div>

@@ -2,19 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api';
-
-interface Offer {
-  id: string;
-  name: string;
-  description?: string;
-  status: 'active' | 'archived';
-  currentVersion?: {
-    id: string;
-    version: number;
-    status: string;
-  };
-  createdAt: string;
-}
+import type { Offer } from '../lib/types';
 
 export function OffersPage() {
   const [search, setSearch] = useState('');

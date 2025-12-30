@@ -12,6 +12,7 @@ import { BillingModule } from './billing/billing.module';
 
 // Feature modules
 import { WorkspacesModule } from './workspaces/workspaces.module';
+import { UsersModule } from './users/users.module';
 import { OffersModule } from './offers/offers.module';
 import { PromotionsModule } from './promotions/promotions.module';
 import { CheckoutModule } from './checkout/checkout.module';
@@ -28,6 +29,7 @@ import { AuditModule } from './audit/audit.module';
 import { ApiKeyGuard } from './auth/guards/api-key.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { WorkspaceGuard } from './auth/guards/workspace.guard';
+import { SessionGuard } from './users/session.guard';
 
 // Interceptors
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -83,6 +85,7 @@ import { configuration, validationSchema } from './config/configuration';
     // Features
     HealthModule,
     WorkspacesModule,
+    UsersModule,
     OffersModule,
     PromotionsModule,
     CheckoutModule,
@@ -112,6 +115,10 @@ import { configuration, validationSchema } from './config/configuration';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: SessionGuard,
     },
     {
       provide: APP_GUARD,

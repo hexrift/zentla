@@ -8,19 +8,75 @@ datasource db {
 }
 
 // ============================================================================
+// USERS & AUTHENTICATION
+// ============================================================================
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @unique @db.VarChar(255)
+  name            String?   @db.VarChar(200)
+  avatarUrl       String?   @map("avatar_url") @db.VarChar(2048)
+  passwordHash    String?   @map("password_hash") @db.VarChar(255)
+
+  // OAuth providers
+  githubId        String?   @unique @map("github_id") @db.VarChar(255)
+  googleId        String?   @unique @map("google_id") @db.VarChar(255)
+
+  // Email verification
+  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz
+
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  memberships     WorkspaceMembership[]
+  sessions        UserSession[]
+
+  @@index([email])
+  @@map("user")
+}
+
+model UserSession {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  token     String   @unique @db.VarChar(255)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  ipAddress String?  @map("ip_address") @db.VarChar(45)
+  userAgent String?  @map("user_agent") @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("user_session")
+}
+
+// ============================================================================
 // WORKSPACE & TENANCY
 // ============================================================================
 
 model Workspace {
-  id              String   @id @default(uuid()) @db.Uuid
-  name            String   @db.VarChar(100)
-  slug            String   @unique @db.VarChar(100)
-  defaultProvider Provider @default(stripe) @map("default_provider")
-  settings        Json     @default("{}")
+  id              String        @id @default(uuid()) @db.Uuid
+  name            String        @db.VarChar(100)
+  slug            String        @unique @db.VarChar(100)
+  defaultProvider Provider      @default(stripe) @map("default_provider")
+  settings        Json          @default("{}")
+
+  // Environment mode - default to test for safety
+  mode            WorkspaceMode @default(test)
+
+  // Live mode access control
+  liveAccessRequestedAt DateTime? @map("live_access_requested_at") @db.Timestamptz
+  liveAccessGrantedAt   DateTime? @map("live_access_granted_at") @db.Timestamptz
+  liveAccessDeniedAt    DateTime? @map("live_access_denied_at") @db.Timestamptz
+
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   // Relations
+  memberships       WorkspaceMembership[]
   customers         Customer[]
   offers            Offer[]
   promotions        Promotion[]
@@ -38,6 +94,37 @@ model Workspace {
   deadLetterEvents  DeadLetterEvent[]
 
   @@map("workspace")
+}
+
+enum WorkspaceMode {
+  test
+  live
+
+  @@map("workspace_mode")
+}
+
+model WorkspaceMembership {
+  id          String        @id @default(uuid()) @db.Uuid
+  workspaceId String        @map("workspace_id") @db.Uuid
+  userId      String        @map("user_id") @db.Uuid
+  role        WorkspaceRole @default(admin)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@index([workspaceId])
+  @@map("workspace_membership")
+}
+
+enum WorkspaceRole {
+  owner
+  admin
+
+  @@map("workspace_role")
 }
 
 enum Provider {

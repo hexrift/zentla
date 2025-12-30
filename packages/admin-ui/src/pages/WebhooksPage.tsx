@@ -1,14 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
-
-interface WebhookEndpoint {
-  id: string;
-  url: string;
-  events: string[];
-  status: 'active' | 'disabled';
-  description?: string;
-  createdAt: string;
-}
+import type { WebhookEndpoint } from '../lib/types';
 
 export function WebhooksPage() {
   const queryClient = useQueryClient();

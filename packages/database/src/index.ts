@@ -19,6 +19,8 @@ export {
   ActorType,
   EntityType,
   OutboxEventStatus,
+  WorkspaceRole,
+  WorkspaceMode,
 } from '@prisma/client';
 
 // Re-export model types
@@ -38,6 +40,9 @@ export type {
   OutboxEvent,
   DeadLetterEvent,
   IdempotencyKey,
+  User,
+  UserSession,
+  WorkspaceMembership,
 } from '@prisma/client';
 
 // Pagination types

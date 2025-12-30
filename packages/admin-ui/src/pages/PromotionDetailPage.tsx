@@ -1,34 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
-
-interface PromotionVersion {
-  id: string;
-  version: number;
-  status: 'draft' | 'published' | 'archived';
-  config: {
-    discountType: 'percent' | 'fixed_amount' | 'free_trial_days';
-    discountValue: number;
-    currency?: string;
-    maxRedemptions?: number;
-    validFrom?: string;
-    validUntil?: string;
-  };
-  publishedAt?: string;
-  createdAt: string;
-}
-
-interface Promotion {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
-  status: 'active' | 'archived';
-  currentVersion?: PromotionVersion;
-  versions: PromotionVersion[];
-  createdAt: string;
-  updatedAt: string;
-}
+import type { Promotion, PromotionVersion } from '../lib/types';
 
 export function PromotionDetailPage() {
   const { id } = useParams<{ id: string }>();

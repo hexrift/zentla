@@ -3,30 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api';
 import { clsx } from 'clsx';
 
-interface Event {
-  id: string;
-  eventType: string;
-  aggregateType: string;
-  aggregateId: string;
-  status: 'pending' | 'processed' | 'failed';
-  payload: Record<string, unknown>;
-  processedAt: string | null;
-  createdAt: string;
-}
-
-interface DeadLetterEvent {
-  id: string;
-  originalEventId: string;
-  endpointId: string;
-  endpointUrl?: string;
-  eventType: string;
-  payload: Record<string, unknown>;
-  failureReason: string;
-  attempts: number;
-  lastAttemptAt: string | null;
-  createdAt: string;
-}
-
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
   processed: 'bg-green-100 text-green-800',
@@ -50,8 +26,8 @@ export function EventsPage() {
     enabled: tab === 'deadLetter',
   });
 
-  const events = (eventsQuery.data?.data ?? []) as Event[];
-  const deadLetterEvents = (deadLetterQuery.data?.data ?? []) as DeadLetterEvent[];
+  const events = eventsQuery.data?.data ?? [];
+  const deadLetterEvents = deadLetterQuery.data?.data ?? [];
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleString();

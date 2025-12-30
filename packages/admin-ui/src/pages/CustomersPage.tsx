@@ -1,14 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api';
-
-interface Customer {
-  id: string;
-  email: string;
-  name?: string;
-  externalId?: string;
-  createdAt: string;
-}
+import type { Customer } from '../lib/types';
 
 export function CustomersPage() {
   const [search, setSearch] = useState('');

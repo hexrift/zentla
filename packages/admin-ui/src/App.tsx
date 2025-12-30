@@ -1,5 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './lib/auth-context';
+import ProtectedRoute from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
 import { CheckoutsPage } from './pages/CheckoutsPage';
 import { OffersPage } from './pages/OffersPage';
 import { OfferNewPage } from './pages/OfferNewPage';
@@ -18,25 +22,39 @@ import { SettingsPage } from './pages/SettingsPage';
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Navigate to="/checkouts" replace />} />
-        <Route path="checkouts" element={<CheckoutsPage />} />
-        <Route path="offers" element={<OffersPage />} />
-        <Route path="offers/new" element={<OfferNewPage />} />
-        <Route path="offers/:id" element={<OfferDetailPage />} />
-        <Route path="promotions" element={<PromotionsPage />} />
-        <Route path="promotions/new" element={<PromotionNewPage />} />
-        <Route path="promotions/:id" element={<PromotionDetailPage />} />
-        <Route path="subscriptions" element={<SubscriptionsPage />} />
-        <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
-        <Route path="customers" element={<CustomersPage />} />
-        <Route path="webhooks" element={<WebhooksPage />} />
-        <Route path="events" element={<EventsPage />} />
-        <Route path="audit-logs" element={<AuditLogsPage />} />
-        <Route path="api-keys" element={<ApiKeysPage />} />
-        <Route path="settings" element={<SettingsPage />} />
-      </Route>
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+
+        {/* Protected routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="/checkouts" replace />} />
+          <Route path="checkouts" element={<CheckoutsPage />} />
+          <Route path="offers" element={<OffersPage />} />
+          <Route path="offers/new" element={<OfferNewPage />} />
+          <Route path="offers/:id" element={<OfferDetailPage />} />
+          <Route path="promotions" element={<PromotionsPage />} />
+          <Route path="promotions/new" element={<PromotionNewPage />} />
+          <Route path="promotions/:id" element={<PromotionDetailPage />} />
+          <Route path="subscriptions" element={<SubscriptionsPage />} />
+          <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
+          <Route path="customers" element={<CustomersPage />} />
+          <Route path="webhooks" element={<WebhooksPage />} />
+          <Route path="events" element={<EventsPage />} />
+          <Route path="audit-logs" element={<AuditLogsPage />} />
+          <Route path="api-keys" element={<ApiKeysPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+        </Route>
+      </Routes>
+    </AuthProvider>
   );
 }
