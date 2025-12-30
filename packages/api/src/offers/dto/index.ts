@@ -246,6 +246,14 @@ export class CreateOfferRequestDto {
   @ValidateNested()
   @Type(() => OfferConfigDto)
   config!: OfferConfigDto;
+
+  @ApiPropertyOptional({
+    description: 'Campaign and context metadata for attribution tracking. Flows through to subscriptions and webhook events.',
+    example: { campaign: 'summer_2025', channel: 'website', source: 'google', internal_ref: 'deal-123' },
+  })
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, unknown>;
 }
 
 export class CreateVersionRequestDto {
@@ -277,6 +285,14 @@ export class UpdateOfferDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Campaign and context metadata for attribution tracking. Merged with existing metadata.',
+    example: { campaign: 'winter_2025', source: 'affiliate' },
+  })
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, unknown>;
 }
 
 export class PublishOfferDto {

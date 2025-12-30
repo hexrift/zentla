@@ -28,8 +28,10 @@ async function fetchApi<T>(
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Request failed' }));
-    throw new Error(error.message ?? `HTTP ${response.status}`);
+    const errorBody = await response.json().catch(() => ({ message: 'Request failed' }));
+    // Handle both old format (message) and new format (error.message)
+    const errorMessage = errorBody.error?.message ?? errorBody.message ?? `HTTP ${response.status}`;
+    throw new Error(errorMessage);
   }
 
   const json = await response.json() as ApiResponse<unknown>;
@@ -241,5 +243,44 @@ export const api = {
         `/audit-logs${query ? `?${query}` : ''}`
       );
     },
+  },
+  checkout: {
+    listSessions: (params?: { status?: string; limit?: number; cursor?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.status) searchParams.set('status', params.status);
+      if (params?.limit) searchParams.set('limit', params.limit.toString());
+      if (params?.cursor) searchParams.set('cursor', params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+        `/checkout/sessions${query ? `?${query}` : ''}`
+      );
+    },
+    listIntents: (params?: { status?: string; limit?: number; cursor?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.status) searchParams.set('status', params.status);
+      if (params?.limit) searchParams.set('limit', params.limit.toString());
+      if (params?.cursor) searchParams.set('cursor', params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+        `/checkout/intents${query ? `?${query}` : ''}`
+      );
+    },
+    getStats: () => fetchApi<{
+      sessions: { total: number; pending: number; completed: number; expired: number; conversionRate: number };
+      intents: { total: number; pending: number; processing: number; requiresAction: number; succeeded: number; failed: number; expired: number; conversionRate: number };
+    }>('/checkout/stats'),
+    createSession: (data: {
+      offerId: string;
+      successUrl: string;
+      cancelUrl: string;
+      customerId?: string;
+      customerEmail?: string;
+      promotionCode?: string;
+      metadata?: Record<string, string>;
+    }) =>
+      fetchApi<{ id: string; url: string; expiresAt: string }>('/checkout/sessions', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
   },
 };

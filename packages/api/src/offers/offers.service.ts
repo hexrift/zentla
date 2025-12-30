@@ -19,6 +19,7 @@ export interface CreateOfferDto {
   name: string;
   description?: string;
   config: OfferConfigDto;
+  metadata?: Record<string, unknown>;
 }
 
 export interface OfferConfigDto {
@@ -140,6 +141,7 @@ export class OffersService {
           name: dto.name,
           description: dto.description,
           status: 'active',
+          metadata: (dto.metadata ?? {}) as Prisma.InputJsonValue,
         },
       });
 
@@ -164,7 +166,7 @@ export class OffersService {
   async update(
     workspaceId: string,
     id: string,
-    dto: Partial<Pick<Offer, 'name' | 'description'>>
+    dto: Partial<Pick<Offer, 'name' | 'description'>> & { metadata?: Record<string, unknown> }
   ): Promise<Offer> {
     const offer = await this.prisma.offer.findFirst({
       where: { id, workspaceId },
@@ -174,9 +176,22 @@ export class OffersService {
       throw new NotFoundException(`Offer ${id} not found`);
     }
 
+    // Merge metadata if provided
+    const updateData: Prisma.OfferUpdateInput = {
+      ...(dto.name && { name: dto.name }),
+      ...(dto.description !== undefined && { description: dto.description }),
+      version: { increment: 1 },
+    };
+
+    if (dto.metadata) {
+      // Merge new metadata with existing
+      const existingMetadata = (offer.metadata as Record<string, unknown>) ?? {};
+      updateData.metadata = { ...existingMetadata, ...dto.metadata } as Prisma.InputJsonValue;
+    }
+
     return this.prisma.offer.update({
       where: { id },
-      data: { ...dto, version: { increment: 1 } },
+      data: updateData,
     });
   }
 

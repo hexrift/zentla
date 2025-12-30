@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import { CheckoutsPage } from './pages/CheckoutsPage';
 import { OffersPage } from './pages/OffersPage';
 import { OfferNewPage } from './pages/OfferNewPage';
 import { OfferDetailPage } from './pages/OfferDetailPage';
@@ -19,7 +20,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        <Route index element={<Navigate to="/offers" replace />} />
+        <Route index element={<Navigate to="/checkouts" replace />} />
+        <Route path="checkouts" element={<CheckoutsPage />} />
         <Route path="offers" element={<OffersPage />} />
         <Route path="offers/new" element={<OfferNewPage />} />
         <Route path="offers/:id" element={<OfferDetailPage />} />

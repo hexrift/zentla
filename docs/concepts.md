@@ -1,8 +1,8 @@
 # Core Concepts
 
-## Provider-Agnostic Architecture
+## What is Relay?
 
-Relay acts as an orchestration layer between your application and billing providers like Stripe or Zuora. Your application code only interacts with Relay's canonical domain model - never directly with provider-specific APIs.
+Relay manages subscriptions, customers, entitlements, and checkouts. It connects your application to billing providers like Stripe, handling the complexity so you don't have to.
 
 ### ProviderRef Mapping
 
@@ -139,3 +139,42 @@ Outbox Event -> Fan-out to Endpoints -> Sign Payload -> Deliver with Retry
 8. Relay creates Customer, Subscription, Entitlements
 9. Redirect to successUrl
 ```
+
+## Metadata
+
+Attach custom metadata to offers, checkouts, and subscriptions for tracking campaigns, attribution, or internal references.
+
+### Supported Fields
+
+```json
+{
+  "metadata": {
+    "campaign": "summer_2025",
+    "channel": "website",
+    "source": "google",
+    "medium": "cpc",
+    "experiment": "pricing_test_v2",
+    "internal_ref": "deal-123"
+  }
+}
+```
+
+### Metadata Flow
+
+Metadata flows through the system automatically:
+
+```
+Offer (metadata) → Checkout (metadata) → Subscription (metadata) → Webhook Events
+```
+
+- **Offer metadata**: Set when creating/updating offers. Useful for campaign-level tracking.
+- **Checkout metadata**: Set when creating checkout sessions. Useful for session-specific attribution.
+- **Subscription metadata**: Inherits from checkout, stored with the subscription.
+- **Webhook events**: All events include the subscription's metadata for downstream processing.
+
+### Use Cases
+
+- **Attribution**: Track which marketing campaigns drive conversions
+- **Analytics**: Segment customers by acquisition channel
+- **CRM Integration**: Pass internal references to your CRM
+- **A/B Testing**: Tag subscriptions with experiment variants

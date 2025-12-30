@@ -77,73 +77,70 @@ async function bootstrap(): Promise<void> {
   if (nodeEnv !== 'production') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('Relay API')
-      .setDescription(`# Provider-Agnostic Subscription Commerce Platform
+      .setDescription(`# Relay API
 
-Relay is a **provider-agnostic** subscription commerce orchestration platform. It provides a unified API layer for managing subscriptions, customers, entitlements, and checkouts across different billing providers.
+Relay manages subscriptions, customers, entitlements, and checkouts. It connects your application to billing providers like Stripe, handling the complexity so you don't have to.
 
-## Architecture
+## Quick Start
 
-Relay abstracts billing provider complexity behind a clean API:
-
-| Component | Description |
-|-----------|-------------|
-| **Relay API** | This unified interface for your application |
-| **Adapters** | Provider-specific implementations (Stripe, Zuora, etc.) |
-| **Provider Refs** | Mapping between Relay entities and external provider IDs |
-
-## Supported Providers
-
-| Provider | Status | Adapter |
-|----------|--------|---------|
-| **Stripe** | Production Ready | \`@relay/adapters-stripe\` |
-| **Zuora** | Planned | \`@relay/adapters-zuora\` |
+1. Create an **Offer** with pricing and entitlements
+2. Generate a **Checkout** link for customers
+3. Customers subscribe → Relay creates the **Subscription** and grants **Entitlements**
+4. Query entitlements to control feature access in your app
 
 ## Authentication
 
-All API requests require authentication via API key in the Authorization header:
+Include your API key in the Authorization header:
 
 \`\`\`
 Authorization: Bearer relay_live_xxx
 \`\`\`
 
-API keys come in two environments:
-- \`relay_live_xxx\` - Production API keys
-- \`relay_test_xxx\` - Test/sandbox API keys
+- \`relay_live_xxx\` - Production
+- \`relay_test_xxx\` - Test/sandbox (uses Stripe test mode)
 
-## Rate Limiting
+## Metadata
 
-| Limit Type | Requests | Window |
-|------------|----------|--------|
-| Burst | 10 | per second |
-| Short-term | 50 | per 10 seconds |
-| Standard | 100 | per minute |
+Attach custom metadata to offers, checkouts, and subscriptions for tracking campaigns, attribution, or internal references:
 
-When rate limited, responses include headers:
-- \`X-RateLimit-Limit\`: Request limit
-- \`X-RateLimit-Remaining\`: Remaining requests
-- \`X-RateLimit-Reset\`: Unix timestamp when limit resets
+\`\`\`json
+{
+  "metadata": {
+    "campaign": "summer_2025",
+    "channel": "website",
+    "source": "google",
+    "internal_ref": "deal-123"
+  }
+}
+\`\`\`
 
-## Concurrency Control
+Metadata flows through: **Offer → Checkout → Subscription → Webhook Events**
 
-Mutable resources (customers, subscriptions, offers) support optimistic locking via ETags:
+## Rate Limits
 
-1. \`GET\` responses include an \`ETag\` header
-2. Include \`If-Match: <etag>\` on \`PATCH\`/\`PUT\` requests
-3. \`412 Precondition Failed\` if the resource was modified
+| Limit | Requests | Window |
+|-------|----------|--------|
+| Burst | 10 | /second |
+| Short | 50 | /10 seconds |
+| Standard | 100 | /minute |
+
+Rate limit headers: \`X-RateLimit-Limit\`, \`X-RateLimit-Remaining\`, \`X-RateLimit-Reset\`
+
+## Concurrency (ETags)
+
+Mutable resources support optimistic locking:
+1. \`GET\` → \`ETag\` header
+2. \`PATCH\` with \`If-Match: <etag>\`
+3. \`412 Precondition Failed\` if modified
 
 ## Idempotency
 
-For \`POST\` requests, include an \`Idempotency-Key\` header:
-
+For \`POST\` requests, include:
 \`\`\`
 Idempotency-Key: unique-request-id-123
 \`\`\`
 
-Duplicate requests with the same key within 24 hours return the cached response.
-
-## Error Handling
-
-All errors follow a consistent format:
+## Error Format
 
 \`\`\`json
 {
@@ -152,16 +149,11 @@ All errors follow a consistent format:
     "code": "RESOURCE_NOT_FOUND",
     "message": "Customer not found",
     "details": { "id": "..." }
-  },
-  "meta": {
-    "requestId": "abc-123",
-    "timestamp": "2025-01-15T10:30:00Z",
-    "path": "/api/v1/customers/..."
   }
 }
 \`\`\`
 
-Use \`error.code\` for programmatic error handling.
+Use \`error.code\` for programmatic handling.
 `)
       .setVersion('1.0')
       .addServer('http://localhost:3000', 'Local Development')
@@ -223,7 +215,7 @@ Use \`error.code\` for programmatic error handling.
         darkMode: true,
         metaData: {
           title: 'Relay API Documentation',
-          description: 'Provider-agnostic subscription commerce orchestration platform',
+          description: 'Subscription management API for offers, customers, and entitlements',
         },
       })
     );

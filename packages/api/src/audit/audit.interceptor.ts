@@ -104,8 +104,9 @@ function getActionFromRequest(method: string, path: string): string | null {
     if (path.includes('/cancel')) return 'cancel';
     if (path.includes('/versions')) return 'create_version';
     if (path.includes('/rotate-secret')) return 'rotate_secret';
-    if (path.includes('/checkout/quotes')) return 'quote';
-    if (path.includes('/checkout/intents')) return 'create_checkout';
+    if (path.includes('/checkout/sessions')) return 'create_checkout_session';
+    if (path.includes('/checkout/intents')) return 'create_checkout_intent';
+    if (path.includes('/checkout/quotes')) return 'get_checkout_quote';
     return 'create';
   }
   if (method === 'PATCH' || method === 'PUT') return 'update';
@@ -132,6 +133,9 @@ function getResourceTypeFromPath(path: string): string | null {
     'api-keys': 'api_key',
     workspaces: 'workspace',
     checkout: 'checkout',
+    sessions: 'checkout_session',
+    intents: 'checkout_intent',
+    quotes: 'checkout_quote',
   };
 
   return resourceMap[resource] ?? resource;

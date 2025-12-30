@@ -105,6 +105,128 @@ export class CheckoutService {
     });
   }
 
+  async listSessions(
+    workspaceId: string,
+    params: {
+      status?: string;
+      limit?: number;
+      cursor?: string;
+    } = {}
+  ) {
+    const { status, limit = 50, cursor } = params;
+    const take = Math.min(limit, 100);
+
+    const sessions = await this.prisma.checkout.findMany({
+      where: {
+        workspaceId,
+        ...(status && { status: status as any }),
+      },
+      include: {
+        offer: { select: { id: true, name: true } },
+        customer: { select: { id: true, email: true, name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: take + 1,
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+    });
+
+    const hasMore = sessions.length > take;
+    const data = hasMore ? sessions.slice(0, take) : sessions;
+
+    return {
+      data,
+      hasMore,
+      nextCursor: hasMore ? data[data.length - 1]?.id : undefined,
+    };
+  }
+
+  async listIntents(
+    workspaceId: string,
+    params: {
+      status?: string;
+      limit?: number;
+      cursor?: string;
+    } = {}
+  ) {
+    const { status, limit = 50, cursor } = params;
+    const take = Math.min(limit, 100);
+
+    const intents = await this.prisma.checkoutIntent.findMany({
+      where: {
+        workspaceId,
+        ...(status && { status: status as any }),
+      },
+      include: {
+        offer: { select: { id: true, name: true } },
+        customer: { select: { id: true, email: true, name: true } },
+        subscription: { select: { id: true, status: true } },
+        promotion: { select: { id: true, name: true, code: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: take + 1,
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+    });
+
+    const hasMore = intents.length > take;
+    const data = hasMore ? intents.slice(0, take) : intents;
+
+    return {
+      data,
+      hasMore,
+      nextCursor: hasMore ? data[data.length - 1]?.id : undefined,
+    };
+  }
+
+  async getCheckoutStats(workspaceId: string) {
+    const [sessions, intents] = await Promise.all([
+      this.prisma.checkout.groupBy({
+        by: ['status'],
+        where: { workspaceId },
+        _count: { id: true },
+      }),
+      this.prisma.checkoutIntent.groupBy({
+        by: ['status'],
+        where: { workspaceId },
+        _count: { id: true },
+      }),
+    ]);
+
+    const sessionStats = sessions.reduce((acc, s) => {
+      acc[s.status] = s._count.id;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const intentStats = intents.reduce((acc, s) => {
+      acc[s.status] = s._count.id;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const totalSessions = Object.values(sessionStats).reduce((a, b) => a + b, 0);
+    const totalIntents = Object.values(intentStats).reduce((a, b) => a + b, 0);
+    const completedSessions = sessionStats['completed'] || 0;
+    const succeededIntents = intentStats['succeeded'] || 0;
+
+    return {
+      sessions: {
+        total: totalSessions,
+        pending: sessionStats['pending'] || 0,
+        completed: completedSessions,
+        expired: sessionStats['expired'] || 0,
+        conversionRate: totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0,
+      },
+      intents: {
+        total: totalIntents,
+        pending: intentStats['pending'] || 0,
+        processing: intentStats['processing'] || 0,
+        requiresAction: intentStats['requires_action'] || 0,
+        succeeded: succeededIntents,
+        failed: intentStats['failed'] || 0,
+        expired: intentStats['expired'] || 0,
+        conversionRate: totalIntents > 0 ? (succeededIntents / totalIntents) * 100 : 0,
+      },
+    };
+  }
+
   async create(workspaceId: string, dto: CreateCheckoutDto): Promise<CheckoutSessionResult> {
     // Validate offer exists
     const offer = await this.prisma.offer.findFirst({

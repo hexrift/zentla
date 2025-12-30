@@ -4,6 +4,7 @@ import {
   Post,
   Param,
   Body,
+  Query,
   ParseUUIDPipe,
   NotFoundException,
   Headers,
@@ -110,7 +111,7 @@ class CreateCheckoutSessionDto {
 - Should be a page in your application that handles post-checkout logic`,
     example: "https://app.example.com/checkout/success",
   })
-  @IsUrl()
+  @IsUrl({ require_tld: false, require_protocol: true })
   successUrl!: string;
 
   @ApiProperty({
@@ -124,7 +125,7 @@ class CreateCheckoutSessionDto {
 The checkout session remains valid (until expiration) so they can return to complete it.`,
     example: "https://app.example.com/pricing",
   })
-  @IsUrl()
+  @IsUrl({ require_tld: false, require_protocol: true })
   cancelUrl!: string;
 
   @ApiPropertyOptional({
@@ -328,6 +329,59 @@ class CreateCheckoutIntentDto {
 @Controller("checkout")
 export class CheckoutController {
   constructor(private readonly checkoutService: CheckoutService) {}
+
+  // ============================================================================
+  // LIST & STATS ENDPOINTS
+  // ============================================================================
+
+  @Get("sessions")
+  @MemberOnly()
+  @ApiOperation({
+    summary: "List checkout sessions",
+    description: "List all checkout sessions with optional status filter.",
+  })
+  @ApiResponse({ status: 200, description: "List of checkout sessions" })
+  async listSessions(
+    @WorkspaceId() workspaceId: string,
+    @Query("status") status?: string,
+    @Query("limit") limitParam?: string,
+    @Query("cursor") cursor?: string
+  ) {
+    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
+    return this.checkoutService.listSessions(workspaceId, { status, limit, cursor });
+  }
+
+  @Get("intents")
+  @MemberOnly()
+  @ApiOperation({
+    summary: "List checkout intents",
+    description: "List all checkout intents (headless) with optional status filter.",
+  })
+  @ApiResponse({ status: 200, description: "List of checkout intents" })
+  async listIntents(
+    @WorkspaceId() workspaceId: string,
+    @Query("status") status?: string,
+    @Query("limit") limitParam?: string,
+    @Query("cursor") cursor?: string
+  ) {
+    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
+    return this.checkoutService.listIntents(workspaceId, { status, limit, cursor });
+  }
+
+  @Get("stats")
+  @MemberOnly()
+  @ApiOperation({
+    summary: "Get checkout statistics",
+    description: "Get aggregated statistics for checkout sessions and intents.",
+  })
+  @ApiResponse({ status: 200, description: "Checkout statistics" })
+  async getStats(@WorkspaceId() workspaceId: string) {
+    return this.checkoutService.getCheckoutStats(workspaceId);
+  }
+
+  // ============================================================================
+  // SESSION ENDPOINTS
+  // ============================================================================
 
   @Post("sessions")
   @MemberOnly()

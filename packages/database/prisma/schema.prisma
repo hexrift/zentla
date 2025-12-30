@@ -88,6 +88,7 @@ model Offer {
   description      String?     @db.VarChar(1000)
   status           OfferStatus @default(active)
   currentVersionId String?     @map("current_version_id") @db.Uuid
+  metadata         Json        @default("{}") // Campaign/context metadata (e.g., campaign, channel, source)
   version          Int         @default(1)
   createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz
@@ -164,6 +165,7 @@ model Promotion {
   versions          PromotionVersion[]
   currentVersion    PromotionVersion?  @relation("CurrentPromotionVersion", fields: [currentVersionId], references: [id])
   appliedPromotions AppliedPromotion[]
+  checkoutIntents   CheckoutIntent[]
 
   @@unique([workspaceId, code])
   @@index([workspaceId])
@@ -191,6 +193,7 @@ model PromotionVersion {
   promotion           Promotion          @relation(fields: [promotionId], references: [id], onDelete: Cascade)
   currentForPromotion Promotion?         @relation("CurrentPromotionVersion")
   appliedPromotions   AppliedPromotion[]
+  checkoutIntents     CheckoutIntent[]
 
   @@unique([promotionId, version])
   @@index([promotionId])
@@ -411,6 +414,8 @@ model CheckoutIntent {
   offer                Offer                @relation(fields: [offerId], references: [id])
   offerVersion         OfferVersion         @relation(fields: [offerVersionId], references: [id])
   subscription         Subscription?        @relation(fields: [subscriptionId], references: [id])
+  promotion            Promotion?           @relation(fields: [promotionId], references: [id])
+  promotionVersion     PromotionVersion?    @relation(fields: [promotionVersionId], references: [id])
 
   @@index([workspaceId])
   @@index([workspaceId, status])

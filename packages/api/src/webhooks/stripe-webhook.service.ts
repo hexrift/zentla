@@ -317,6 +317,7 @@ export class StripeWebhookService {
           currentPeriodEnd: subscription.currentPeriodEnd,
           trialStart: subscription.trialStart,
           trialEnd: subscription.trialEnd,
+          metadata: subscription.metadata,
         },
       },
     });
@@ -412,6 +413,7 @@ export class StripeWebhookService {
           currentPeriodStart: updatedSubscription.currentPeriodStart,
           currentPeriodEnd: updatedSubscription.currentPeriodEnd,
           cancelAt: updatedSubscription.cancelAt,
+          metadata: updatedSubscription.metadata,
         },
       },
     });
@@ -466,6 +468,7 @@ export class StripeWebhookService {
           status: canceledSubscription.status,
           canceledAt: canceledSubscription.canceledAt,
           endedAt: canceledSubscription.endedAt,
+          metadata: canceledSubscription.metadata,
         },
       },
     });
@@ -700,6 +703,7 @@ export class StripeWebhookService {
           subscriptionId: subscription.id,
           offerId: checkoutIntent.offerId,
           total: checkoutIntent.totalAmount,
+          metadata: checkoutIntent.metadata,
         },
       },
     });
@@ -815,6 +819,7 @@ export class StripeWebhookService {
           subscriptionId: subscription.id,
           offerId: checkoutIntent.offerId,
           trialDays: checkoutIntent.trialDays,
+          metadata: checkoutIntent.metadata,
         },
       },
     });
@@ -935,6 +940,7 @@ export class StripeWebhookService {
           currentPeriodEnd,
           trialStart,
           trialEnd,
+          metadata: checkoutIntent.metadata,
         },
       },
     });
