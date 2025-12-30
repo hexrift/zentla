@@ -21,6 +21,7 @@ import {
 import { OffersService } from './offers.service';
 import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
 import { CreateOfferRequestDto, CreateVersionRequestDto, QueryOffersDto, PublishOfferDto, RollbackOfferDto, UpdateOfferDto } from './dto';
+import { OfferSchema, OfferVersionSchema, PaginationSchema } from '../common/schemas';
 
 @ApiTags('offers')
 @ApiSecurity('api-key')
@@ -49,35 +50,13 @@ export class OffersController {
     schema: {
       type: 'object',
       properties: {
-        data: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string', format: 'uuid', description: 'Unique offer identifier' },
-              name: { type: 'string', description: 'Offer display name' },
-              description: { type: 'string', nullable: true },
-              status: { type: 'string', enum: ['active', 'archived'] },
-              currentVersion: {
-                type: 'object',
-                nullable: true,
-                description: 'Currently published version, null if no version is published',
-                properties: {
-                  id: { type: 'string', format: 'uuid' },
-                  version: { type: 'integer', description: 'Version number (1, 2, 3...)' },
-                  status: { type: 'string', enum: ['published'] },
-                },
-              },
-              createdAt: { type: 'string', format: 'date-time' },
-              updatedAt: { type: 'string', format: 'date-time' },
-            },
-          },
-        },
-        hasMore: { type: 'boolean', description: 'True if more pages exist' },
-        nextCursor: { type: 'string', nullable: true, description: 'Pass to cursor param for next page' },
+        data: { type: 'array', items: OfferSchema },
+        ...PaginationSchema.properties,
       },
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   async findAll(
     @WorkspaceId() workspaceId: string,
     @Query() query: QueryOffersDto
@@ -119,11 +98,11 @@ export class OffersController {
   @ApiResponse({
     status: 200,
     description: 'Offer with all versions',
+    schema: OfferSchema,
   })
-  @ApiResponse({
-    status: 404,
-    description: 'Offer not found in this workspace',
-  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({ status: 404, description: 'Offer not found in this workspace' })
   async findOne(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string
@@ -158,11 +137,11 @@ export class OffersController {
   @ApiResponse({
     status: 201,
     description: 'Offer created with draft version 1. Publish to make available for checkouts.',
+    schema: OfferSchema,
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid configuration. Check that pricing model matches provided fields (e.g., tiers required for tiered pricing).',
-  })
+  @ApiResponse({ status: 400, description: 'Invalid configuration. Check that pricing model matches provided fields.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   async create(
     @WorkspaceId() workspaceId: string,
     @Body() dto: CreateOfferRequestDto
@@ -193,7 +172,9 @@ Changes take effect immediately and are reflected in all API responses.`,
     description: 'Offer ID to update',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @ApiResponse({ status: 200, description: 'Offer metadata updated' })
+  @ApiResponse({ status: 200, description: 'Offer metadata updated', schema: OfferSchema })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({ status: 404, description: 'Offer not found' })
   async update(
     @WorkspaceId() workspaceId: string,
@@ -232,7 +213,9 @@ Changes take effect immediately and are reflected in all API responses.`,
     description: 'Offer ID to archive',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @ApiResponse({ status: 200, description: 'Offer archived successfully' })
+  @ApiResponse({ status: 200, description: 'Offer archived successfully', schema: OfferSchema })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({ status: 404, description: 'Offer not found' })
   async archive(
     @WorkspaceId() workspaceId: string,
@@ -267,7 +250,13 @@ Only one version can be \`published\` at a time.`,
   @ApiResponse({
     status: 200,
     description: 'List of all versions with their configurations',
+    schema: {
+      type: 'array',
+      items: OfferVersionSchema,
+    },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Offer not found' })
   async getVersions(
     @WorkspaceId() workspaceId: string,
@@ -309,11 +298,14 @@ Only one version can be \`published\` at a time.`,
   @ApiResponse({
     status: 201,
     description: 'Draft version created. Call publish to make it active.',
+    schema: OfferVersionSchema,
   })
   @ApiResponse({
     status: 400,
     description: 'A draft version already exists. Publish or delete it first.',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({ status: 404, description: 'Offer not found' })
   async createVersion(
     @WorkspaceId() workspaceId: string,
@@ -361,11 +353,14 @@ Only one version can be \`published\` at a time.`,
   @ApiResponse({
     status: 200,
     description: 'Version published (immediately or scheduled) and synced to billing provider',
+    schema: OfferSchema,
   })
   @ApiResponse({
     status: 400,
     description: 'Only draft versions can be published',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({
     status: 404,
     description: 'Offer not found or no draft version exists',
@@ -407,20 +402,11 @@ Immediately-effective versions are not included.`,
     description: 'List of scheduled versions',
     schema: {
       type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          id: { type: 'string', format: 'uuid' },
-          version: { type: 'integer' },
-          status: { type: 'string', enum: ['published'] },
-          effectiveFrom: { type: 'string', format: 'date-time' },
-          config: { type: 'object' },
-          publishedAt: { type: 'string', format: 'date-time' },
-          createdAt: { type: 'string', format: 'date-time' },
-        },
-      },
+      items: OfferVersionSchema,
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Offer not found' })
   async getScheduledVersions(
     @WorkspaceId() workspaceId: string,
@@ -458,11 +444,14 @@ Immediately-effective versions are not included.`,
   @ApiResponse({
     status: 200,
     description: 'New draft version created with copied configuration',
+    schema: OfferVersionSchema,
   })
   @ApiResponse({
     status: 400,
     description: 'A draft version already exists. Publish or delete it first.',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({
     status: 404,
     description: 'Offer or target version not found',

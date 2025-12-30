@@ -21,6 +21,7 @@ import {
 } from '@nestjs/swagger';
 import { WebhooksService } from './webhooks.service';
 import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
+import { WebhookEndpointSchema, PaginationSchema } from '../common/schemas';
 import {
   IsString,
   IsOptional,
@@ -203,25 +204,14 @@ export class WebhookEndpointsController {
       properties: {
         data: {
           type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string', format: 'uuid' },
-              url: { type: 'string', format: 'uri' },
-              events: { type: 'array', items: { type: 'string' } },
-              status: { type: 'string', enum: ['active', 'disabled'] },
-              description: { type: 'string', nullable: true },
-              metadata: { type: 'object' },
-              createdAt: { type: 'string', format: 'date-time' },
-              updatedAt: { type: 'string', format: 'date-time' },
-            },
-          },
+          items: WebhookEndpointSchema,
         },
-        hasMore: { type: 'boolean' },
-        nextCursor: { type: 'string', nullable: true },
+        ...PaginationSchema.properties,
       },
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   async findAll(
     @WorkspaceId() workspaceId: string,
     @Query() query: QueryEndpointsDto
@@ -253,20 +243,10 @@ export class WebhookEndpointsController {
   @ApiResponse({
     status: 200,
     description: 'Webhook endpoint details',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string', format: 'uuid' },
-        url: { type: 'string', format: 'uri' },
-        events: { type: 'array', items: { type: 'string' } },
-        status: { type: 'string', enum: ['active', 'disabled'] },
-        description: { type: 'string', nullable: true },
-        metadata: { type: 'object' },
-        createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' },
-      },
-    },
+    schema: WebhookEndpointSchema,
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Endpoint not found' })
   async findOne(
     @WorkspaceId() workspaceId: string,
@@ -328,6 +308,8 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
     status: 400,
     description: 'Invalid URL or events list',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   async create(
     @WorkspaceId() workspaceId: string,
     @Body() dto: CreateWebhookEndpointDto
@@ -360,7 +342,10 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
   @ApiResponse({
     status: 200,
     description: 'Webhook endpoint updated',
+    schema: WebhookEndpointSchema,
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({ status: 404, description: 'Endpoint not found' })
   async update(
     @WorkspaceId() workspaceId: string,
@@ -395,6 +380,8 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
     status: 204,
     description: 'Webhook endpoint deleted (no content)',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({ status: 404, description: 'Endpoint not found' })
   async delete(
     @WorkspaceId() workspaceId: string,
@@ -445,6 +432,8 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
       },
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({ status: 404, description: 'Endpoint not found' })
   async rotateSecret(
     @WorkspaceId() workspaceId: string,

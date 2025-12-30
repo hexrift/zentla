@@ -15,6 +15,7 @@ import {
 } from '@nestjs/swagger';
 import { EntitlementsService } from './entitlements.service';
 import { WorkspaceId, MemberOnly } from '../common/decorators';
+import { EntitlementSchema, EntitlementCheckSchema } from '../common/schemas';
 import { IsString, IsArray, ArrayMinSize } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -90,39 +91,13 @@ export class EntitlementsController {
         customerId: { type: 'string', format: 'uuid' },
         entitlements: {
           type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              featureKey: {
-                type: 'string',
-                description: 'Unique identifier for the feature',
-                example: 'api_calls',
-              },
-              value: {
-                description: 'The entitlement value (type varies by valueType)',
-                oneOf: [
-                  { type: 'boolean' },
-                  { type: 'number' },
-                  { type: 'string' },
-                ],
-                example: 1000,
-              },
-              valueType: {
-                type: 'string',
-                enum: ['boolean', 'number', 'string', 'unlimited'],
-                description: 'How to interpret the value',
-              },
-              subscriptionId: {
-                type: 'string',
-                format: 'uuid',
-                description: 'Subscription granting this entitlement',
-              },
-            },
-          },
+          items: EntitlementSchema,
         },
       },
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({
     status: 404,
     description: 'Customer not found',
@@ -174,40 +149,10 @@ if (result.hasAccess) {
   @ApiResponse({
     status: 200,
     description: 'Entitlement check result',
-    schema: {
-      type: 'object',
-      properties: {
-        featureKey: { type: 'string', example: 'premium_features' },
-        hasAccess: {
-          type: 'boolean',
-          description: 'Whether the customer has this entitlement',
-          example: true,
-        },
-        value: {
-          description: 'The entitlement value (null if no access)',
-          oneOf: [
-            { type: 'boolean' },
-            { type: 'number' },
-            { type: 'string' },
-            { type: 'null' },
-          ],
-          example: true,
-        },
-        valueType: {
-          type: 'string',
-          enum: ['boolean', 'number', 'string', 'unlimited'],
-          nullable: true,
-          description: 'How to interpret the value (null if no access)',
-        },
-        subscriptionId: {
-          type: 'string',
-          format: 'uuid',
-          nullable: true,
-          description: 'Subscription granting this entitlement (null if no access)',
-        },
-      },
-    },
+    schema: EntitlementCheckSchema,
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   async checkSingleEntitlement(
     @WorkspaceId() workspaceId: string,
     @Param('customerId', ParseUUIDPipe) customerId: string,
@@ -263,43 +208,13 @@ const { api_calls, premium_features, seats } = await api.entitlements.checkMany(
         customerId: { type: 'string', format: 'uuid' },
         results: {
           type: 'object',
-          additionalProperties: {
-            type: 'object',
-            properties: {
-              hasAccess: { type: 'boolean' },
-              value: {},
-              valueType: {
-                type: 'string',
-                enum: ['boolean', 'number', 'string', 'unlimited'],
-                nullable: true,
-              },
-              subscriptionId: { type: 'string', format: 'uuid', nullable: true },
-            },
-          },
-          example: {
-            api_calls: {
-              hasAccess: true,
-              value: 1000,
-              valueType: 'number',
-              subscriptionId: '123e4567-e89b-12d3-a456-426614174000',
-            },
-            premium_features: {
-              hasAccess: true,
-              value: true,
-              valueType: 'boolean',
-              subscriptionId: '123e4567-e89b-12d3-a456-426614174000',
-            },
-            advanced_analytics: {
-              hasAccess: false,
-              value: null,
-              valueType: null,
-              subscriptionId: null,
-            },
-          },
+          additionalProperties: EntitlementCheckSchema,
         },
       },
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   async checkMultipleEntitlements(
     @WorkspaceId() workspaceId: string,
     @Param('customerId', ParseUUIDPipe) customerId: string,

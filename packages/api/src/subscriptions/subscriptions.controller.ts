@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { SubscriptionsService } from './subscriptions.service';
 import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
+import { SubscriptionSchema, PaginationSchema } from '../common/schemas';
 import {
   IsString,
   IsOptional,
@@ -209,30 +210,14 @@ export class SubscriptionsController {
       properties: {
         data: {
           type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string', format: 'uuid', description: 'Subscription ID' },
-              customerId: { type: 'string', format: 'uuid' },
-              offerId: { type: 'string', format: 'uuid' },
-              offerVersionId: { type: 'string', format: 'uuid' },
-              status: {
-                type: 'string',
-                enum: ['active', 'trialing', 'canceled', 'past_due', 'paused'],
-              },
-              currentPeriodStart: { type: 'string', format: 'date-time' },
-              currentPeriodEnd: { type: 'string', format: 'date-time' },
-              cancelAtPeriodEnd: { type: 'boolean' },
-              trialEnd: { type: 'string', format: 'date-time', nullable: true },
-              createdAt: { type: 'string', format: 'date-time' },
-            },
-          },
+          items: SubscriptionSchema,
         },
-        hasMore: { type: 'boolean', description: 'True if more pages exist' },
-        nextCursor: { type: 'string', nullable: true },
+        ...PaginationSchema.properties,
       },
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   async findAll(
     @WorkspaceId() workspaceId: string,
     @Query() query: QuerySubscriptionsDto
@@ -273,67 +258,10 @@ export class SubscriptionsController {
   @ApiResponse({
     status: 200,
     description: 'Subscription details',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string', format: 'uuid' },
-        customerId: { type: 'string', format: 'uuid' },
-        offerId: { type: 'string', format: 'uuid' },
-        offerVersionId: { type: 'string', format: 'uuid' },
-        status: {
-          type: 'string',
-          enum: ['active', 'trialing', 'canceled', 'past_due', 'paused'],
-          description: 'Current subscription status',
-        },
-        currentPeriodStart: {
-          type: 'string',
-          format: 'date-time',
-          description: 'Start of current billing period',
-        },
-        currentPeriodEnd: {
-          type: 'string',
-          format: 'date-time',
-          description: 'End of current billing period (next renewal or expiration)',
-        },
-        cancelAtPeriodEnd: {
-          type: 'boolean',
-          description: 'If true, subscription will cancel at currentPeriodEnd',
-        },
-        canceledAt: {
-          type: 'string',
-          format: 'date-time',
-          nullable: true,
-          description: 'When cancellation was requested (null if not canceled)',
-        },
-        trialStart: {
-          type: 'string',
-          format: 'date-time',
-          nullable: true,
-        },
-        trialEnd: {
-          type: 'string',
-          format: 'date-time',
-          nullable: true,
-          description: 'When trial ends and billing begins',
-        },
-        entitlements: {
-          type: 'array',
-          description: 'Features/quotas granted by this subscription',
-          items: {
-            type: 'object',
-            properties: {
-              featureKey: { type: 'string' },
-              value: {},
-              valueType: { type: 'string', enum: ['boolean', 'number', 'string', 'unlimited'] },
-            },
-          },
-        },
-        metadata: { type: 'object' },
-        createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' },
-      },
-    },
+    schema: SubscriptionSchema,
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({
     status: 404,
     description: 'Subscription not found in this workspace',
@@ -386,28 +314,17 @@ export class SubscriptionsController {
   @ApiResponse({
     status: 200,
     description: 'Subscription canceled (or scheduled for cancellation)',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string', format: 'uuid' },
-        status: { type: 'string', description: 'Updated status' },
-        cancelAtPeriodEnd: { type: 'boolean' },
-        canceledAt: { type: 'string', format: 'date-time' },
-        effectiveCancelDate: {
-          type: 'string',
-          format: 'date-time',
-          description: 'When access actually ends',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Subscription not found',
+    schema: SubscriptionSchema,
   })
   @ApiResponse({
     status: 400,
     description: 'Subscription already canceled or in invalid state',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 404,
+    description: 'Subscription not found',
   })
   async cancel(
     @WorkspaceId() workspaceId: string,
@@ -462,24 +379,7 @@ With \`none\`: They keep $99 plan until renewal, then switch to $29.
   @ApiResponse({
     status: 200,
     description: 'Subscription plan changed successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string', format: 'uuid' },
-        offerId: { type: 'string', format: 'uuid', description: 'New offer ID' },
-        offerVersionId: { type: 'string', format: 'uuid' },
-        status: { type: 'string' },
-        entitlements: {
-          type: 'array',
-          description: 'Updated entitlements from new offer',
-        },
-        prorationAmount: {
-          type: 'integer',
-          nullable: true,
-          description: 'Proration amount in cents (positive = charge, negative = credit)',
-        },
-      },
-    },
+    schema: SubscriptionSchema,
   })
   @ApiResponse({
     status: 400,
@@ -488,6 +388,8 @@ With \`none\`: They keep $99 plan until renewal, then switch to $29.
 - New offer has no published version
 - Proration calculation failed`,
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({
     status: 404,
     description: 'Subscription or new offer not found',

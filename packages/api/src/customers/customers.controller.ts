@@ -25,6 +25,7 @@ import {
 import { CustomersService } from './customers.service';
 import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
 import { ETagInterceptor, parseETagVersion } from '../common/interceptors/etag.interceptor';
+import { CustomerSchema, PaginationSchema } from '../common/schemas';
 import {
   IsString,
   IsEmail,
@@ -229,24 +230,14 @@ export class CustomersController {
       properties: {
         data: {
           type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string', format: 'uuid', description: 'Relay customer ID' },
-              email: { type: 'string', format: 'email' },
-              name: { type: 'string', nullable: true },
-              externalId: { type: 'string', nullable: true, description: 'Your system ID' },
-              metadata: { type: 'object' },
-              createdAt: { type: 'string', format: 'date-time' },
-              updatedAt: { type: 'string', format: 'date-time' },
-            },
-          },
+          items: CustomerSchema,
         },
-        hasMore: { type: 'boolean', description: 'True if more pages exist' },
-        nextCursor: { type: 'string', nullable: true },
+        ...PaginationSchema.properties,
       },
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   async findAll(
     @WorkspaceId() workspaceId: string,
     @Query() query: QueryCustomersDto
@@ -295,20 +286,10 @@ Use this value in the \`If-Match\` header when updating to prevent concurrent mo
         schema: { type: 'string', example: 'W/"123e4567-e89b-12d3-a456-426614174000-1"' },
       },
     },
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string', format: 'uuid' },
-        email: { type: 'string', format: 'email' },
-        name: { type: 'string', nullable: true },
-        externalId: { type: 'string', nullable: true },
-        metadata: { type: 'object' },
-        version: { type: 'integer', description: 'Resource version for concurrency control' },
-        createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' },
-      },
-    },
+    schema: CustomerSchema,
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({
     status: 404,
     description: 'Customer not found in this workspace',
@@ -347,22 +328,14 @@ Use this value in the \`If-Match\` header when updating to prevent concurrent mo
   @ApiResponse({
     status: 201,
     description: 'Customer created successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string', format: 'uuid', description: 'New customer ID' },
-        email: { type: 'string', format: 'email' },
-        name: { type: 'string', nullable: true },
-        externalId: { type: 'string', nullable: true },
-        metadata: { type: 'object' },
-        createdAt: { type: 'string', format: 'date-time' },
-      },
-    },
+    schema: CustomerSchema,
   })
   @ApiResponse({
     status: 400,
     description: 'Invalid request (e.g., duplicate email or external ID)',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   async create(
     @WorkspaceId() workspaceId: string,
     @Body() dto: CreateCustomerDto
@@ -420,7 +393,10 @@ If the resource has been modified since you fetched it, the update will fail wit
         schema: { type: 'string', example: 'W/"123e4567-e89b-12d3-a456-426614174000-2"' },
       },
     },
+    schema: CustomerSchema,
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({
     status: 404,
     description: 'Customer not found',
@@ -476,12 +452,14 @@ If the resource has been modified since you fetched it, the update will fail wit
     description: 'Customer deleted successfully (no content)',
   })
   @ApiResponse({
-    status: 404,
-    description: 'Customer not found',
-  })
-  @ApiResponse({
     status: 400,
     description: 'Cannot delete customer with active subscriptions',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer not found',
   })
   async delete(
     @WorkspaceId() workspaceId: string,
@@ -537,6 +515,8 @@ If the resource has been modified since you fetched it, the update will fail wit
       },
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({
     status: 404,
     description: 'Customer not found or has no Stripe customer record',

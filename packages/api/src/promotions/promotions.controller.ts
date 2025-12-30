@@ -28,6 +28,7 @@ import {
   UpdatePromotionDto,
   ValidatePromotionDto,
 } from './dto';
+import { PromotionSchema, PaginationSchema } from '../common/schemas';
 
 @ApiTags('promotions')
 @ApiSecurity('api-key')
@@ -58,38 +59,14 @@ export class PromotionsController {
       properties: {
         data: {
           type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string', format: 'uuid', description: 'Unique promotion identifier' },
-              code: { type: 'string', description: 'Customer-facing promotion code' },
-              name: { type: 'string', description: 'Promotion display name' },
-              description: { type: 'string', nullable: true },
-              status: { type: 'string', enum: ['active', 'archived'] },
-              currentVersion: {
-                type: 'object',
-                nullable: true,
-                description: 'Currently published version, null if no version is published',
-                properties: {
-                  id: { type: 'string', format: 'uuid' },
-                  version: { type: 'integer', description: 'Version number (1, 2, 3...)' },
-                  status: { type: 'string', enum: ['published'] },
-                  config: {
-                    type: 'object',
-                    description: 'Discount configuration for this version',
-                  },
-                },
-              },
-              createdAt: { type: 'string', format: 'date-time' },
-              updatedAt: { type: 'string', format: 'date-time' },
-            },
-          },
+          items: PromotionSchema,
         },
-        hasMore: { type: 'boolean', description: 'True if more pages exist' },
-        nextCursor: { type: 'string', nullable: true, description: 'Pass to cursor param for next page' },
+        ...PaginationSchema.properties,
       },
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   async findAll(
     @WorkspaceId() workspaceId: string,
     @Query() query: QueryPromotionsDto
@@ -131,7 +108,10 @@ export class PromotionsController {
   @ApiResponse({
     status: 200,
     description: 'Promotion with all versions',
+    schema: PromotionSchema,
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({
     status: 404,
     description: 'Promotion not found in this workspace',
@@ -176,11 +156,14 @@ export class PromotionsController {
   @ApiResponse({
     status: 201,
     description: 'Promotion created with draft version 1. Publish to make available for checkouts.',
+    schema: PromotionSchema,
   })
   @ApiResponse({
     status: 400,
     description: 'Invalid configuration or duplicate promotion code.',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   async create(
     @WorkspaceId() workspaceId: string,
     @Body() dto: CreatePromotionRequestDto
@@ -212,7 +195,9 @@ Changes take effect immediately and are reflected in all API responses.`,
     description: 'Promotion ID to update',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @ApiResponse({ status: 200, description: 'Promotion metadata updated' })
+  @ApiResponse({ status: 200, description: 'Promotion metadata updated', schema: PromotionSchema })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({ status: 404, description: 'Promotion not found' })
   async update(
     @WorkspaceId() workspaceId: string,
@@ -251,7 +236,9 @@ Changes take effect immediately and are reflected in all API responses.`,
     description: 'Promotion ID to archive',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @ApiResponse({ status: 200, description: 'Promotion archived successfully' })
+  @ApiResponse({ status: 200, description: 'Promotion archived successfully', schema: PromotionSchema })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({ status: 404, description: 'Promotion not found' })
   async archive(
     @WorkspaceId() workspaceId: string,
@@ -287,6 +274,8 @@ Only one version can be \`published\` at a time. Each version contains the compl
     status: 200,
     description: 'List of all versions with their configurations',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Promotion not found' })
   async getVersions(
     @WorkspaceId() workspaceId: string,
@@ -334,6 +323,8 @@ Only one version can be \`published\` at a time. Each version contains the compl
     status: 400,
     description: 'A draft version already exists. Publish or delete it first.',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({ status: 404, description: 'Promotion not found' })
   async createVersion(
     @WorkspaceId() workspaceId: string,
@@ -378,11 +369,14 @@ Only one version can be \`published\` at a time. Each version contains the compl
   @ApiResponse({
     status: 200,
     description: 'Version published and synced to billing provider',
+    schema: PromotionSchema,
   })
   @ApiResponse({
     status: 400,
     description: 'Only draft versions can be published',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
   @ApiResponse({
     status: 404,
     description: 'Promotion not found or no draft version exists',
@@ -463,6 +457,8 @@ Only one version can be \`published\` at a time. Each version contains the compl
       },
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   async validate(
     @WorkspaceId() workspaceId: string,
     @Body() dto: ValidatePromotionDto
@@ -518,6 +514,8 @@ Only one version can be \`published\` at a time. Each version contains the compl
       },
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Promotion not found' })
   async getUsage(
     @WorkspaceId() workspaceId: string,

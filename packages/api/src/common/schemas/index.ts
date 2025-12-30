@@ -78,7 +78,7 @@ export const PricingConfigSchema = {
   properties: {
     model: {
       type: 'string',
-      enum: ['flat', 'per_unit', 'tiered', 'usage'],
+      enum: ['flat', 'per_unit', 'tiered', 'usage'] as string[],
       description: 'Pricing model type',
     },
     amount: {
@@ -93,7 +93,7 @@ export const PricingConfigSchema = {
     },
     interval: {
       type: 'string',
-      enum: ['month', 'year', 'week', 'day'],
+      enum: ['month', 'year', 'week', 'day'] as string[],
       description: 'Billing interval',
     },
     intervalCount: {
@@ -115,7 +115,7 @@ export const PricingConfigSchema = {
       },
     },
   },
-} as const;
+};
 
 export const TrialConfigSchema = {
   type: 'object',
@@ -133,11 +133,11 @@ export const TrialConfigSchema = {
       description: 'Whether to collect payment method upfront',
     },
   },
-} as const;
+};
 
 export const EntitlementConfigSchema = {
   type: 'object',
-  required: ['featureKey', 'valueType', 'value'],
+  required: ['featureKey', 'valueType', 'value'] as string[],
   properties: {
     featureKey: {
       type: 'string',
@@ -146,7 +146,7 @@ export const EntitlementConfigSchema = {
     },
     valueType: {
       type: 'string',
-      enum: ['boolean', 'number', 'string', 'unlimited'],
+      enum: ['boolean', 'number', 'string', 'unlimited'] as string[],
     },
     value: {
       description: 'Feature value (type depends on valueType)',
@@ -157,11 +157,11 @@ export const EntitlementConfigSchema = {
       ],
     },
   },
-} as const;
+};
 
 export const OfferConfigSchema = {
   type: 'object',
-  required: ['pricing'],
+  required: ['pricing'] as string[],
   properties: {
     pricing: PricingConfigSchema,
     trial: TrialConfigSchema,
@@ -170,14 +170,14 @@ export const OfferConfigSchema = {
       items: EntitlementConfigSchema,
     },
   },
-} as const;
+};
 
 export const OfferVersionSchema = {
   type: 'object',
   properties: {
     id: { type: 'string', format: 'uuid' },
     version: { type: 'integer', description: 'Version number (1, 2, 3...)' },
-    status: { type: 'string', enum: ['draft', 'published', 'archived'] },
+    status: { type: 'string', enum: ['draft', 'published', 'archived'] as string[] },
     config: OfferConfigSchema,
     effectiveFrom: {
       type: 'string',
@@ -188,7 +188,7 @@ export const OfferVersionSchema = {
     publishedAt: { type: 'string', format: 'date-time', nullable: true },
     createdAt: { type: 'string', format: 'date-time' },
   },
-} as const;
+};
 
 export const OfferSchema = {
   type: 'object',
@@ -196,7 +196,7 @@ export const OfferSchema = {
     id: { type: 'string', format: 'uuid' },
     name: { type: 'string', description: 'Offer display name' },
     description: { type: 'string', nullable: true },
-    status: { type: 'string', enum: ['active', 'archived'] },
+    status: { type: 'string', enum: ['active', 'archived'] as string[] },
     version: { type: 'integer', description: 'Resource version for concurrency control' },
     currentVersion: {
       ...OfferVersionSchema,
@@ -206,7 +206,7 @@ export const OfferSchema = {
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
   },
-} as const;
+};
 
 // ============================================================================
 // CUSTOMER SCHEMAS
@@ -228,7 +228,7 @@ export const CustomerSchema = {
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
   },
-} as const;
+};
 
 // ============================================================================
 // SUBSCRIPTION SCHEMAS
@@ -243,7 +243,7 @@ export const SubscriptionSchema = {
     offerVersionId: { type: 'string', format: 'uuid' },
     status: {
       type: 'string',
-      enum: ['trialing', 'active', 'past_due', 'canceled', 'unpaid', 'incomplete', 'paused'],
+      enum: ['trialing', 'active', 'past_due', 'canceled', 'unpaid', 'incomplete', 'paused'] as string[],
     },
     currentPeriodStart: { type: 'string', format: 'date-time' },
     currentPeriodEnd: { type: 'string', format: 'date-time' },
@@ -256,7 +256,7 @@ export const SubscriptionSchema = {
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
   },
-} as const;
+};
 
 // ============================================================================
 // PROMOTION SCHEMAS
@@ -264,11 +264,11 @@ export const SubscriptionSchema = {
 
 export const PromotionConfigSchema = {
   type: 'object',
-  required: ['discountType'],
+  required: ['discountType'] as string[],
   properties: {
     discountType: {
       type: 'string',
-      enum: ['percentage', 'fixed_amount'],
+      enum: ['percentage', 'fixed_amount'] as string[],
     },
     discountValue: {
       type: 'integer',
@@ -276,7 +276,7 @@ export const PromotionConfigSchema = {
     },
     duration: {
       type: 'string',
-      enum: ['once', 'forever', 'repeating'],
+      enum: ['once', 'forever', 'repeating'] as string[],
     },
     durationInMonths: {
       type: 'integer',
@@ -302,7 +302,7 @@ export const PromotionConfigSchema = {
       description: 'Limit to specific offers (null = all offers)',
     },
   },
-} as const;
+};
 
 export const PromotionSchema = {
   type: 'object',
@@ -311,21 +311,21 @@ export const PromotionSchema = {
     code: { type: 'string', description: 'Promo code customers enter' },
     name: { type: 'string' },
     description: { type: 'string', nullable: true },
-    status: { type: 'string', enum: ['active', 'archived'] },
+    status: { type: 'string', enum: ['active', 'archived'] as string[] },
     currentVersion: {
       type: 'object',
       nullable: true,
       properties: {
         id: { type: 'string', format: 'uuid' },
         version: { type: 'integer' },
-        status: { type: 'string', enum: ['draft', 'published', 'archived'] },
+        status: { type: 'string', enum: ['draft', 'published', 'archived'] as string[] },
         config: PromotionConfigSchema,
       },
     },
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
   },
-} as const;
+};
 
 // ============================================================================
 // CHECKOUT SCHEMAS
@@ -338,7 +338,7 @@ export const CheckoutSessionSchema = {
     offerId: { type: 'string', format: 'uuid' },
     offerVersionId: { type: 'string', format: 'uuid' },
     customerId: { type: 'string', format: 'uuid', nullable: true },
-    status: { type: 'string', enum: ['pending', 'open', 'complete', 'expired'] },
+    status: { type: 'string', enum: ['pending', 'open', 'complete', 'expired'] as string[] },
     sessionUrl: {
       type: 'string',
       format: 'uri',
@@ -351,7 +351,7 @@ export const CheckoutSessionSchema = {
     metadata: { type: 'object' },
     createdAt: { type: 'string', format: 'date-time' },
   },
-} as const;
+};
 
 // ============================================================================
 // ENTITLEMENT SCHEMAS
@@ -365,11 +365,11 @@ export const EntitlementSchema = {
     subscriptionId: { type: 'string', format: 'uuid' },
     featureKey: { type: 'string' },
     value: { type: 'string' },
-    valueType: { type: 'string', enum: ['boolean', 'number', 'string', 'unlimited'] },
+    valueType: { type: 'string', enum: ['boolean', 'number', 'string', 'unlimited'] as string[] },
     expiresAt: { type: 'string', format: 'date-time', nullable: true },
     createdAt: { type: 'string', format: 'date-time' },
   },
-} as const;
+};
 
 export const EntitlementCheckSchema = {
   type: 'object',
@@ -377,14 +377,14 @@ export const EntitlementCheckSchema = {
     hasAccess: { type: 'boolean', description: 'Whether customer has access to this feature' },
     featureKey: { type: 'string' },
     value: { description: 'Current value for this feature' },
-    valueType: { type: 'string', enum: ['boolean', 'number', 'string', 'unlimited'] },
+    valueType: { type: 'string', enum: ['boolean', 'number', 'string', 'unlimited'] as string[] },
     source: {
       type: 'string',
-      enum: ['subscription', 'override', 'default'],
+      enum: ['subscription', 'override', 'default'] as string[],
       description: 'Where this entitlement came from',
     },
   },
-} as const;
+};
 
 // ============================================================================
 // WEBHOOK SCHEMAS
@@ -400,13 +400,13 @@ export const WebhookEndpointSchema = {
       items: { type: 'string' },
       description: 'Event types this endpoint receives',
     },
-    status: { type: 'string', enum: ['active', 'disabled'] },
+    status: { type: 'string', enum: ['active', 'disabled'] as string[] },
     description: { type: 'string', nullable: true },
     version: { type: 'integer' },
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
   },
-} as const;
+};
 
 // ============================================================================
 // PROVIDER SCHEMAS
@@ -483,13 +483,13 @@ export const ApiKeySchema = {
       type: 'string',
       description: 'Visible prefix for identification (e.g., relay_live_abc)',
     },
-    role: { type: 'string', enum: ['owner', 'admin', 'member', 'readonly'] },
-    environment: { type: 'string', enum: ['live', 'test'] },
+    role: { type: 'string', enum: ['owner', 'admin', 'member', 'readonly'] as string[] },
+    environment: { type: 'string', enum: ['live', 'test'] as string[] },
     lastUsedAt: { type: 'string', format: 'date-time', nullable: true },
     expiresAt: { type: 'string', format: 'date-time', nullable: true },
     createdAt: { type: 'string', format: 'date-time' },
   },
-} as const;
+};
 
 // ============================================================================
 // STANDARD API RESPONSE DECORATORS

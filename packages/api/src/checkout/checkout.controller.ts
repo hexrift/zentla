@@ -16,6 +16,7 @@ import {
 } from '@nestjs/swagger';
 import { CheckoutService } from './checkout.service';
 import { WorkspaceId, MemberOnly } from '../common/decorators';
+import { CheckoutSessionSchema } from '../common/schemas';
 import {
   IsOptional,
   Matches,
@@ -263,29 +264,7 @@ export class CheckoutController {
   @ApiResponse({
     status: 201,
     description: 'Checkout session created. Redirect customer to the URL.',
-    schema: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-          format: 'uuid',
-          description: 'Relay checkout session ID. Use this to query status.',
-          example: '123e4567-e89b-12d3-a456-426614174000',
-        },
-        url: {
-          type: 'string',
-          format: 'uri',
-          description: 'Hosted checkout page URL. Redirect the customer here.',
-          example: 'https://checkout.stripe.com/c/pay/cs_test_...',
-        },
-        expiresAt: {
-          type: 'string',
-          format: 'date-time',
-          description: 'When the session expires (typically 24 hours). After this, the URL is invalid.',
-          example: '2024-01-16T12:00:00Z',
-        },
-      },
-    },
+    schema: CheckoutSessionSchema,
   })
   @ApiResponse({
     status: 400,
@@ -294,6 +273,8 @@ export class CheckoutController {
 - Invalid promotion code (not found, expired, not applicable)
 - Customer ID not found in workspace`,
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   async createSession(
     @WorkspaceId() workspaceId: string,
     @Body() dto: CreateCheckoutSessionDto
@@ -339,49 +320,10 @@ export class CheckoutController {
   @ApiResponse({
     status: 200,
     description: 'Checkout session details',
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string', format: 'uuid', description: 'Session ID' },
-        status: {
-          type: 'string',
-          enum: ['pending', 'completed', 'expired'],
-          description: 'Current session status',
-        },
-        offerId: { type: 'string', format: 'uuid', description: 'Offer used for this checkout' },
-        offerVersionId: { type: 'string', format: 'uuid', description: 'Specific version used' },
-        customerId: {
-          type: 'string',
-          format: 'uuid',
-          nullable: true,
-          description: 'Customer ID (set after completion for new customers)',
-        },
-        subscriptionId: {
-          type: 'string',
-          format: 'uuid',
-          nullable: true,
-          description: 'Created subscription ID (only set when status is completed)',
-        },
-        promotionCode: {
-          type: 'string',
-          nullable: true,
-          description: 'Promotion code applied to this checkout (if any)',
-        },
-        metadata: {
-          type: 'object',
-          description: 'Custom metadata passed when creating the session',
-        },
-        createdAt: { type: 'string', format: 'date-time' },
-        expiresAt: { type: 'string', format: 'date-time' },
-        completedAt: {
-          type: 'string',
-          format: 'date-time',
-          nullable: true,
-          description: 'When checkout was completed (null if pending/expired)',
-        },
-      },
-    },
+    schema: CheckoutSessionSchema,
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   @ApiResponse({
     status: 404,
     description: 'Checkout session not found in this workspace',

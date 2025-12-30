@@ -18,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { ApiKeyService } from '../auth/services/api-key.service';
 import { WorkspaceId, OwnerOnly } from '../common/decorators';
+import { ApiKeySchema } from '../common/schemas';
 import { IsString, IsEnum, IsOptional, IsDateString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -124,38 +125,11 @@ export class ApiKeysController {
     description: 'List of API keys (secrets are not included)',
     schema: {
       type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          id: { type: 'string', format: 'uuid', description: 'Key ID for management operations' },
-          name: { type: 'string', description: 'Human-readable key name' },
-          keyPrefix: {
-            type: 'string',
-            description: 'First few characters of the key for identification',
-            example: 'rl_test_abc...',
-          },
-          role: {
-            type: 'string',
-            enum: ['owner', 'admin', 'member', 'readonly'],
-          },
-          environment: { type: 'string', enum: ['live', 'test'] },
-          lastUsedAt: {
-            type: 'string',
-            format: 'date-time',
-            nullable: true,
-            description: 'When this key was last used (null if never)',
-          },
-          expiresAt: {
-            type: 'string',
-            format: 'date-time',
-            nullable: true,
-            description: 'When this key expires (null if no expiration)',
-          },
-          createdAt: { type: 'string', format: 'date-time' },
-        },
-      },
+      items: ApiKeySchema,
     },
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Requires owner role' })
   async findAll(@WorkspaceId() workspaceId: string) {
     const keys = await this.apiKeyService.listApiKeys(workspaceId);
     // Don't expose the hash, just return safe fields
@@ -234,9 +208,10 @@ X-API-Key: rl_test_your_key_here
     status: 400,
     description: 'Invalid request (e.g., invalid role or environment)',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
   @ApiResponse({
     status: 403,
-    description: 'Requires owner role to create API keys',
+    description: 'Forbidden - Requires owner role to create API keys',
   })
   async create(
     @WorkspaceId() workspaceId: string,
@@ -286,13 +261,14 @@ X-API-Key: rl_test_your_key_here
     status: 204,
     description: 'API key revoked (no content)',
   })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Requires owner role to revoke API keys',
+  })
   @ApiResponse({
     status: 404,
     description: 'API key not found',
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Requires owner role to revoke API keys',
   })
   async revoke(
     @WorkspaceId() workspaceId: string,
