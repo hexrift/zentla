@@ -76,8 +76,96 @@ async function bootstrap(): Promise<void> {
   if (nodeEnv !== 'production') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('Relay API')
-      .setDescription('Provider-agnostic subscription commerce orchestration platform')
+      .setDescription(`# Provider-Agnostic Subscription Commerce Platform
+
+Relay is a **provider-agnostic** subscription commerce orchestration platform. It provides a unified API layer for managing subscriptions, customers, entitlements, and checkouts across different billing providers.
+
+## Architecture
+
+Relay abstracts billing provider complexity behind a clean API:
+
+| Component | Description |
+|-----------|-------------|
+| **Relay API** | This unified interface for your application |
+| **Adapters** | Provider-specific implementations (Stripe, Zuora, etc.) |
+| **Provider Refs** | Mapping between Relay entities and external provider IDs |
+
+## Supported Providers
+
+| Provider | Status | Adapter |
+|----------|--------|---------|
+| **Stripe** | Production Ready | \`@relay/adapters-stripe\` |
+| **Zuora** | Planned | \`@relay/adapters-zuora\` |
+
+## Authentication
+
+All API requests require authentication via API key in the Authorization header:
+
+\`\`\`
+Authorization: Bearer relay_live_xxx
+\`\`\`
+
+API keys come in two environments:
+- \`relay_live_xxx\` - Production API keys
+- \`relay_test_xxx\` - Test/sandbox API keys
+
+## Rate Limiting
+
+| Limit Type | Requests | Window |
+|------------|----------|--------|
+| Burst | 10 | per second |
+| Short-term | 50 | per 10 seconds |
+| Standard | 100 | per minute |
+
+When rate limited, responses include headers:
+- \`X-RateLimit-Limit\`: Request limit
+- \`X-RateLimit-Remaining\`: Remaining requests
+- \`X-RateLimit-Reset\`: Unix timestamp when limit resets
+
+## Concurrency Control
+
+Mutable resources (customers, subscriptions, offers) support optimistic locking via ETags:
+
+1. \`GET\` responses include an \`ETag\` header
+2. Include \`If-Match: <etag>\` on \`PATCH\`/\`PUT\` requests
+3. \`412 Precondition Failed\` if the resource was modified
+
+## Idempotency
+
+For \`POST\` requests, include an \`Idempotency-Key\` header:
+
+\`\`\`
+Idempotency-Key: unique-request-id-123
+\`\`\`
+
+Duplicate requests with the same key within 24 hours return the cached response.
+
+## Error Handling
+
+All errors follow a consistent format:
+
+\`\`\`json
+{
+  "success": false,
+  "error": {
+    "code": "RESOURCE_NOT_FOUND",
+    "message": "Customer not found",
+    "details": { "id": "..." }
+  },
+  "meta": {
+    "requestId": "abc-123",
+    "timestamp": "2025-01-15T10:30:00Z",
+    "path": "/api/v1/customers/..."
+  }
+}
+\`\`\`
+
+Use \`error.code\` for programmatic error handling.
+`)
       .setVersion('1.0')
+      .addServer('http://localhost:3000', 'Local Development')
+      .addServer('https://api.staging.relay.example.com', 'Staging')
+      .addServer('https://api.relay.example.com', 'Production')
       .addApiKey(
         {
           type: 'apiKey',
@@ -88,12 +176,13 @@ async function bootstrap(): Promise<void> {
         'api-key'
       )
       .addTag('workspaces', 'Workspace management')
-      .addTag('offers', 'Offer and pricing management')
+      .addTag('offers', 'Offer and pricing management with versioning')
+      .addTag('promotions', 'Discount codes and promotional offers')
       .addTag('checkout', 'Checkout session management')
-      .addTag('subscriptions', 'Subscription management')
-      .addTag('customers', 'Customer management')
-      .addTag('entitlements', 'Entitlement checks')
-      .addTag('webhooks', 'Webhook management')
+      .addTag('subscriptions', 'Subscription lifecycle management')
+      .addTag('customers', 'Customer management with Stripe/Zuora sync')
+      .addTag('entitlements', 'Feature access checks')
+      .addTag('webhooks', 'Inbound provider webhooks and outbound event delivery')
       .addTag('api-keys', 'API key management')
       .build();
 

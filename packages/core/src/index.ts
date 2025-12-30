@@ -21,3 +21,6 @@ export * from './billing-provider.interface';
 
 // Schemas (Zod validation)
 export * from './schemas';
+
+// Errors
+export * from './errors';

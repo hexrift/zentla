@@ -33,8 +33,12 @@ export class StripeWebhookService {
     const event = stripeAdapter.parseWebhookEvent(rawBody, signature);
 
     // Check if we've already processed this event (idempotency)
-    const existingEvent = await this.prisma.processedStripeEvent.findUnique({
-      where: { stripeEventId: event.id },
+    // Use the new provider-agnostic table
+    const existingEvent = await this.prisma.processedProviderEvent.findFirst({
+      where: {
+        provider: 'stripe',
+        providerEventId: event.id,
+      },
     });
 
     if (existingEvent) {
@@ -46,9 +50,10 @@ export class StripeWebhookService {
     await this.handleEvent(event);
 
     // Mark event as processed (for deduplication)
-    await this.prisma.processedStripeEvent.create({
+    await this.prisma.processedProviderEvent.create({
       data: {
-        stripeEventId: event.id,
+        provider: 'stripe',
+        providerEventId: event.id,
         eventType: event.type,
       },
     });

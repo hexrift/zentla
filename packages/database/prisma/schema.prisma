@@ -57,6 +57,7 @@ model Customer {
   email       String   @db.VarChar(255)
   name        String?  @db.VarChar(200)
   metadata    Json     @default("{}")
+  version     Int      @default(1)
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -85,6 +86,7 @@ model Offer {
   description      String?     @db.VarChar(1000)
   status           OfferStatus @default(active)
   currentVersionId String?     @map("current_version_id") @db.Uuid
+  version          Int         @default(1)
   createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -246,6 +248,7 @@ model Subscription {
   trialStart         DateTime?          @map("trial_start") @db.Timestamptz
   trialEnd           DateTime?          @map("trial_end") @db.Timestamptz
   metadata           Json               @default("{}")
+  version            Int                @default(1)
   createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz
   updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -369,6 +372,7 @@ model WebhookEndpoint {
   status      WebhookEndpointStatus @default(active)
   description String?               @db.VarChar(500)
   metadata    Json                  @default("{}")
+  version     Int                   @default(1)
   createdAt   DateTime              @default(now()) @map("created_at") @db.Timestamptz
   updatedAt   DateTime              @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -611,14 +615,28 @@ model IdempotencyKey {
 }
 
 // ============================================================================
-// PROCESSED STRIPE EVENTS (for webhook deduplication)
+// PROCESSED PROVIDER EVENTS (for webhook deduplication)
 // ============================================================================
 
+model ProcessedProviderEvent {
+  id              String   @id @default(uuid()) @db.Uuid
+  provider        Provider
+  providerEventId String   @map("provider_event_id") @db.VarChar(255)
+  eventType       String   @map("event_type") @db.VarChar(100)
+  processedAt     DateTime @default(now()) @map("processed_at") @db.Timestamptz
+
+  @@unique([provider, providerEventId])
+  @@index([processedAt])
+  @@map("processed_provider_event")
+}
+
+// Legacy table alias - kept for backward compatibility during migration
+// Will be removed after migration completes
 model ProcessedStripeEvent {
-  id          String   @id @default(uuid()) @db.Uuid
-  stripeEventId String @unique @map("stripe_event_id") @db.VarChar(255)
-  eventType   String   @map("event_type") @db.VarChar(100)
-  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz
+  id            String   @id @default(uuid()) @db.Uuid
+  stripeEventId String   @unique @map("stripe_event_id") @db.VarChar(255)
+  eventType     String   @map("event_type") @db.VarChar(100)
+  processedAt   DateTime @default(now()) @map("processed_at") @db.Timestamptz
 
   @@index([stripeEventId])
   @@index([processedAt])

@@ -7,10 +7,12 @@ import {
   Param,
   Body,
   Query,
+  Headers,
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
   NotFoundException,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -18,9 +20,11 @@ import {
   ApiResponse,
   ApiSecurity,
   ApiParam,
+  ApiHeader,
 } from '@nestjs/swagger';
 import { CustomersService } from './customers.service';
 import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
+import { ETagInterceptor, parseETagVersion } from '../common/interceptors/etag.interceptor';
 import {
   IsString,
   IsEmail,
@@ -257,6 +261,7 @@ export class CustomersController {
 
   @Get(':id')
   @MemberOnly()
+  @UseInterceptors(ETagInterceptor)
   @ApiOperation({
     summary: 'Get customer details',
     description: `Retrieves complete details for a single customer.
@@ -269,7 +274,12 @@ export class CustomersController {
 **Response includes:**
 - Customer profile (email, name, external ID)
 - Custom metadata
-- Timestamps`,
+- Version number for concurrency control
+- Timestamps
+
+**Concurrency Control:**
+The response includes an \`ETag\` header with the format \`W/"id-version"\`.
+Use this value in the \`If-Match\` header when updating to prevent concurrent modification conflicts.`,
   })
   @ApiParam({
     name: 'id',
@@ -279,6 +289,12 @@ export class CustomersController {
   @ApiResponse({
     status: 200,
     description: 'Customer details',
+    headers: {
+      ETag: {
+        description: 'Resource version for concurrency control. Use in If-Match header for updates.',
+        schema: { type: 'string', example: 'W/"123e4567-e89b-12d3-a456-426614174000-1"' },
+      },
+    },
     schema: {
       type: 'object',
       properties: {
@@ -287,6 +303,7 @@ export class CustomersController {
         name: { type: 'string', nullable: true },
         externalId: { type: 'string', nullable: true },
         metadata: { type: 'object' },
+        version: { type: 'integer', description: 'Resource version for concurrency control' },
         createdAt: { type: 'string', format: 'date-time' },
         updatedAt: { type: 'string', format: 'date-time' },
       },
@@ -355,6 +372,7 @@ export class CustomersController {
 
   @Patch(':id')
   @AdminOnly()
+  @UseInterceptors(ETagInterceptor)
   @ApiOperation({
     summary: 'Update customer',
     description: `Updates an existing customer's information.
@@ -365,9 +383,20 @@ export class CustomersController {
 - \`externalId\`: Your system identifier (must remain unique)
 - \`metadata\`: Custom key-value data (replaces entire object)
 
+**Concurrency Control (Optimistic Locking):**
+To prevent concurrent modification conflicts, include the \`If-Match\` header with the ETag value from a previous GET request.
+
+If the resource has been modified since you fetched it, the update will fail with a 412 Precondition Failed error.
+
+**Workflow:**
+1. GET the customer to obtain the ETag header
+2. PATCH with \`If-Match: <etag>\` header
+3. If 412 error, re-fetch and retry
+
 **Side effects:**
 - Updates Relay customer record
 - Syncs changes to Stripe customer
+- Increments version number
 
 **Note on metadata:** The metadata update replaces the entire object. To preserve existing keys, include them in your update request.`,
   })
@@ -376,24 +405,43 @@ export class CustomersController {
     description: 'Customer ID to update',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
+  @ApiHeader({
+    name: 'If-Match',
+    required: false,
+    description: 'ETag from a previous GET request for concurrency control. Format: W/"id-version"',
+    example: 'W/"123e4567-e89b-12d3-a456-426614174000-1"',
+  })
   @ApiResponse({
     status: 200,
     description: 'Customer updated successfully',
+    headers: {
+      ETag: {
+        description: 'New resource version after update',
+        schema: { type: 'string', example: 'W/"123e4567-e89b-12d3-a456-426614174000-2"' },
+      },
+    },
   })
   @ApiResponse({
     status: 404,
     description: 'Customer not found',
   })
   @ApiResponse({
-    status: 400,
-    description: 'Invalid request (e.g., duplicate email or external ID)',
+    status: 409,
+    description: 'Conflict - duplicate email/externalId or version mismatch',
+  })
+  @ApiResponse({
+    status: 412,
+    description: 'Precondition Failed - If-Match header does not match current version. Re-fetch and retry.',
   })
   async update(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string,
+    @Headers('if-match') ifMatch: string | undefined,
     @Body() dto: UpdateCustomerDto
   ) {
-    return this.customersService.update(workspaceId, id, dto);
+    // Parse version from If-Match header if provided
+    const requiredVersion = ifMatch ? parseETagVersion(ifMatch) ?? undefined : undefined;
+    return this.customersService.update(workspaceId, id, dto, requiredVersion);
   }
 
   @Delete(':id')

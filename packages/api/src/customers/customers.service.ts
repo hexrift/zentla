@@ -149,10 +149,31 @@ export class CustomersService {
     }
   }
 
-  async update(workspaceId: string, id: string, dto: UpdateCustomerDto): Promise<Customer> {
+  /**
+   * Update a customer with optional optimistic concurrency control.
+   *
+   * @param workspaceId - Workspace ID
+   * @param id - Customer ID
+   * @param dto - Update data
+   * @param requiredVersion - If provided, update will fail if current version doesn't match
+   * @returns Updated customer with incremented version
+   */
+  async update(
+    workspaceId: string,
+    id: string,
+    dto: UpdateCustomerDto,
+    requiredVersion?: number
+  ): Promise<Customer> {
     const customer = await this.findById(workspaceId, id);
     if (!customer) {
       throw new NotFoundException(`Customer ${id} not found`);
+    }
+
+    // Optimistic concurrency check
+    if (requiredVersion !== undefined && customer.version !== requiredVersion) {
+      throw new ConflictException(
+        `Customer ${id} has been modified. Expected version ${requiredVersion}, current version ${customer.version}.`
+      );
     }
 
     // Check for duplicate email
@@ -178,6 +199,7 @@ export class CustomersService {
         ...(dto.name !== undefined && { name: dto.name }),
         ...(dto.externalId !== undefined && { externalId: dto.externalId }),
         ...(dto.metadata && { metadata: dto.metadata as Prisma.InputJsonValue }),
+        version: { increment: 1 },
       },
     });
 

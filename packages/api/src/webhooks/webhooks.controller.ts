@@ -21,16 +21,121 @@ export class WebhooksController {
 
   constructor(private readonly stripeWebhookService: StripeWebhookService) {}
 
-  @Post('stripe')
+  // ============================================================================
+  // Provider-Agnostic Routes (Preferred)
+  // ============================================================================
+
+  @Post('providers/stripe')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Handle Stripe webhook' })
-  @ApiResponse({ status: 200, description: 'Webhook processed' })
-  @ApiResponse({ status: 400, description: 'Invalid webhook' })
+  @ApiOperation({
+    summary: 'Handle Stripe webhook',
+    description: `Receives and processes webhook events from Stripe.
+
+**Setup in Stripe Dashboard:**
+1. Go to Developers > Webhooks
+2. Add endpoint: \`https://your-domain.com/api/v1/webhooks/providers/stripe\`
+3. Select events to receive
+
+**Required Headers:**
+- \`stripe-signature\`: Signature from Stripe for verification
+
+**Supported Events:**
+- \`checkout.session.completed\` - Checkout completed, subscription created
+- \`customer.subscription.created\` - New subscription
+- \`customer.subscription.updated\` - Subscription changed
+- \`customer.subscription.deleted\` - Subscription canceled
+- \`invoice.paid\` - Payment succeeded
+- \`invoice.payment_failed\` - Payment failed
+
+**Security:**
+Webhook signatures are verified using the STRIPE_WEBHOOK_SECRET environment variable.`,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Webhook processed successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        received: { type: 'boolean', example: true },
+        eventType: { type: 'string', example: 'checkout.session.completed' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid webhook (signature verification failed or malformed payload)',
+  })
   async handleStripeWebhook(
     @Req() req: Request,
     @Res() res: Response,
     @Headers('stripe-signature') signature: string
+  ) {
+    return this.processStripeWebhook(req, res, signature);
+  }
+
+  @Post('providers/zuora')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Handle Zuora webhook',
+    description: `Receives and processes webhook events from Zuora.
+
+**Note:** Zuora integration is planned for future release.`,
+  })
+  @ApiResponse({ status: 200, description: 'Webhook acknowledged' })
+  async handleZuoraWebhook(
+    @Req() _req: Request,
+    @Res() res: Response
+  ) {
+    // Zuora webhook handler stub - planned for future release
+    res.status(200).json({ received: true, message: 'Zuora integration coming soon' });
+  }
+
+  // ============================================================================
+  // Legacy Routes (Deprecated - kept for backward compatibility)
+  // These routes will be removed in a future version.
+  // Migrate to /webhooks/providers/{provider} endpoints.
+  // ============================================================================
+
+  /**
+   * @deprecated Use POST /webhooks/providers/stripe instead.
+   * This endpoint is maintained for backward compatibility.
+   */
+  @Post('stripe')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiExcludeEndpoint() // Hide from API docs
+  async handleStripeWebhookLegacy(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Headers('stripe-signature') signature: string
+  ) {
+    return this.processStripeWebhook(req, res, signature);
+  }
+
+  /**
+   * @deprecated Use POST /webhooks/providers/zuora instead.
+   */
+  @Post('zuora')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiExcludeEndpoint()
+  async handleZuoraWebhookLegacy(
+    @Req() _req: Request,
+    @Res() res: Response
+  ) {
+    res.status(200).json({ received: true });
+  }
+
+  // ============================================================================
+  // Private Methods
+  // ============================================================================
+
+  private async processStripeWebhook(
+    req: Request,
+    res: Response,
+    signature: string
   ) {
     const rawBody = req.rawBody;
 
@@ -57,17 +162,5 @@ export class WebhooksController {
         res.status(500).json({ error: 'Processing failed' });
       }
     }
-  }
-
-  @Post('zuora')
-  @Public()
-  @HttpCode(HttpStatus.OK)
-  @ApiExcludeEndpoint()
-  async handleZuoraWebhook(
-    @Req() _req: Request,
-    @Res() res: Response
-  ) {
-    // Zuora webhook handler stub
-    res.status(200).json({ received: true });
   }
 }
