@@ -21,6 +21,8 @@ import { EntitlementsModule } from './entitlements/entitlements.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { HealthModule } from './health/health.module';
+import { EventsModule } from './events/events.module';
+import { AuditModule } from './audit/audit.module';
 
 // Guards
 import { ApiKeyGuard } from './auth/guards/api-key.guard';
@@ -88,6 +90,8 @@ import { configuration, validationSchema } from './config/configuration';
     EntitlementsModule,
     WebhooksModule,
     ApiKeysModule,
+    EventsModule,
+    AuditModule,
   ],
   providers: [
     // Global interceptors

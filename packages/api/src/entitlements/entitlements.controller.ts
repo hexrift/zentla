@@ -5,19 +5,19 @@ import {
   Param,
   Body,
   ParseUUIDPipe,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiSecurity,
   ApiParam,
-} from '@nestjs/swagger';
-import { EntitlementsService } from './entitlements.service';
-import { WorkspaceId, MemberOnly } from '../common/decorators';
-import { EntitlementSchema, EntitlementCheckSchema } from '../common/schemas';
-import { IsString, IsArray, ArrayMinSize } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+} from "@nestjs/swagger";
+import { EntitlementsService } from "./entitlements.service";
+import { WorkspaceId, MemberOnly } from "../common/decorators";
+import { EntitlementSchema, EntitlementCheckSchema } from "../common/schemas";
+import { IsString, IsArray, ArrayMinSize } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
 
 // ============================================================================
 // REQUEST DTOs
@@ -35,7 +35,7 @@ class CheckEntitlementsDto {
 
 Check multiple keys in a single request to minimize API calls.`,
     type: [String],
-    example: ['api_calls', 'premium_features', 'seats'],
+    example: ["api_calls", "premium_features", "seats"],
     minItems: 1,
   })
   @IsArray()
@@ -48,16 +48,16 @@ Check multiple keys in a single request to minimize API calls.`,
 // CONTROLLER
 // ============================================================================
 
-@ApiTags('entitlements')
-@ApiSecurity('api-key')
-@Controller('customers/:customerId/entitlements')
+@ApiTags("entitlements")
+@ApiSecurity("api-key")
+@Controller("customers/:customerId/entitlements")
 export class EntitlementsController {
   constructor(private readonly entitlementsService: EntitlementsService) {}
 
   @Get()
   @MemberOnly()
   @ApiOperation({
-    summary: 'Get all customer entitlements',
+    summary: "Get all customer entitlements",
     description: `Retrieves all entitlements currently granted to a customer from their active subscriptions.
 
 **Use this to:**
@@ -78,41 +78,50 @@ export class EntitlementsController {
 **Caching recommendation:** Cache entitlements client-side for performance. Invalidate when receiving \`subscription.created\`, \`subscription.updated\`, or \`subscription.canceled\` webhooks.`,
   })
   @ApiParam({
-    name: 'customerId',
-    description: 'Customer ID to get entitlements for',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "customerId",
+    description: "Customer ID to get entitlements for",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'All entitlements for the customer',
+    description: "All entitlements for the customer",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        customerId: { type: 'string', format: 'uuid' },
+        customerId: { type: "string", format: "uuid" },
         entitlements: {
-          type: 'array',
+          type: "array",
           items: EntitlementSchema,
         },
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   @ApiResponse({
     status: 404,
-    description: 'Customer not found',
+    description: "Customer not found",
   })
   async getCustomerEntitlements(
     @WorkspaceId() workspaceId: string,
-    @Param('customerId', ParseUUIDPipe) customerId: string
+    @Param("customerId", ParseUUIDPipe) customerId: string
   ) {
-    return this.entitlementsService.getCustomerEntitlements(workspaceId, customerId);
+    return this.entitlementsService.getCustomerEntitlements(
+      workspaceId,
+      customerId
+    );
   }
 
-  @Get('check/:featureKey')
+  @Get("check/:featureKey")
   @MemberOnly()
   @ApiOperation({
-    summary: 'Check single entitlement',
+    summary: "Check single entitlement",
     description: `Checks if a customer has access to a specific feature and returns its value.
 
 **Use this for:**
@@ -137,34 +146,44 @@ if (result.hasAccess) {
 **Performance:** This endpoint is optimized for low-latency. Consider caching results client-side with webhook-based invalidation for high-frequency checks.`,
   })
   @ApiParam({
-    name: 'customerId',
-    description: 'Customer ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "customerId",
+    description: "Customer ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiParam({
-    name: 'featureKey',
-    description: 'Feature key to check (as defined in offer entitlements)',
-    example: 'premium_features',
+    name: "featureKey",
+    description: "Feature key to check (as defined in offer entitlements)",
+    example: "premium_features",
   })
   @ApiResponse({
     status: 200,
-    description: 'Entitlement check result',
+    description: "Entitlement check result",
     schema: EntitlementCheckSchema,
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   async checkSingleEntitlement(
     @WorkspaceId() workspaceId: string,
-    @Param('customerId', ParseUUIDPipe) customerId: string,
-    @Param('featureKey') featureKey: string
+    @Param("customerId", ParseUUIDPipe) customerId: string,
+    @Param("featureKey") featureKey: string
   ) {
-    return this.entitlementsService.checkEntitlement(workspaceId, customerId, featureKey);
+    return this.entitlementsService.checkEntitlement(
+      workspaceId,
+      customerId,
+      featureKey
+    );
   }
 
-  @Post('check')
+  @Post("check")
   @MemberOnly()
   @ApiOperation({
-    summary: 'Check multiple entitlements',
+    summary: "Check multiple entitlements",
     description: `Checks multiple entitlements in a single request, more efficient than individual calls.
 
 **Use this for:**
@@ -195,29 +214,35 @@ const { api_calls, premium_features, seats } = await api.entitlements.checkMany(
 \`\`\``,
   })
   @ApiParam({
-    name: 'customerId',
-    description: 'Customer ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "customerId",
+    description: "Customer ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Entitlement check results for all requested features',
+    description: "Entitlement check results for all requested features",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        customerId: { type: 'string', format: 'uuid' },
+        customerId: { type: "string", format: "uuid" },
         results: {
-          type: 'object',
+          type: "object",
           additionalProperties: EntitlementCheckSchema,
         },
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   async checkMultipleEntitlements(
     @WorkspaceId() workspaceId: string,
-    @Param('customerId', ParseUUIDPipe) customerId: string,
+    @Param("customerId", ParseUUIDPipe) customerId: string,
     @Body() dto: CheckEntitlementsDto
   ) {
     return this.entitlementsService.checkMultipleEntitlements(

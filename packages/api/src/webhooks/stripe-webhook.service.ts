@@ -83,6 +83,12 @@ export class StripeWebhookService {
       case 'invoice.payment_failed':
         await this.handleInvoicePaymentFailed(event);
         break;
+      case 'payment_intent.succeeded':
+        await this.handlePaymentIntentSucceeded(event);
+        break;
+      case 'setup_intent.succeeded':
+        await this.handleSetupIntentSucceeded(event);
+        break;
       default:
         this.logger.log(`Unhandled event type: ${event.type}`);
     }
@@ -583,6 +589,357 @@ export class StripeWebhookService {
     });
 
     this.logger.log(`Payment failed for subscription ${subscriptionRef.entityId}`);
+  }
+
+  /**
+   * Handle payment_intent.succeeded for headless checkout flow.
+   * This is triggered when a customer completes payment via Stripe.js.
+   */
+  private async handlePaymentIntentSucceeded(event: Stripe.Event): Promise<void> {
+    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+    const metadata = paymentIntent.metadata ?? {};
+    const checkoutIntentId = metadata.checkoutIntentId;
+    const workspaceId = metadata.workspaceId;
+
+    if (!checkoutIntentId || !workspaceId) {
+      this.logger.log('PaymentIntent not from headless checkout, skipping');
+      return;
+    }
+
+    // Find the checkout intent
+    const checkoutIntent = await this.prisma.checkoutIntent.findUnique({
+      where: { id: checkoutIntentId },
+      include: {
+        offerVersion: true,
+        customer: true,
+      },
+    });
+
+    if (!checkoutIntent) {
+      this.logger.warn(`CheckoutIntent ${checkoutIntentId} not found`);
+      return;
+    }
+
+    if (checkoutIntent.status === 'succeeded') {
+      this.logger.log(`CheckoutIntent ${checkoutIntentId} already succeeded`);
+      return;
+    }
+
+    // Get or create customer
+    let customerId = checkoutIntent.customerId;
+    const stripeCustomerId = paymentIntent.customer as string | null;
+
+    if (!customerId && checkoutIntent.customerEmail) {
+      // Find or create customer from email
+      let customer = await this.prisma.customer.findFirst({
+        where: { workspaceId, email: checkoutIntent.customerEmail },
+      });
+
+      if (!customer) {
+        customer = await this.prisma.customer.create({
+          data: {
+            workspaceId,
+            email: checkoutIntent.customerEmail,
+            metadata: {
+              source: 'headless_checkout',
+              checkoutIntentId,
+            },
+          },
+        });
+      }
+      customerId = customer.id;
+
+      // Store Stripe customer ref if available and not already stored
+      if (stripeCustomerId) {
+        const existingRef = await this.providerRefService.findByEntity(workspaceId, 'customer', customer.id, 'stripe');
+        if (!existingRef) {
+          await this.providerRefService.create({
+            workspaceId,
+            entityType: 'customer',
+            entityId: customer.id,
+            provider: 'stripe',
+            externalId: stripeCustomerId,
+          });
+        }
+      }
+    }
+
+    if (!customerId) {
+      this.logger.error(`No customer for checkout intent ${checkoutIntentId}`);
+      return;
+    }
+
+    // Create the subscription
+    const subscription = await this.createSubscriptionFromIntent(
+      workspaceId,
+      customerId,
+      checkoutIntent
+    );
+
+    // Update checkout intent
+    await this.prisma.checkoutIntent.update({
+      where: { id: checkoutIntentId },
+      data: {
+        status: 'succeeded',
+        customerId,
+        subscriptionId: subscription.id,
+        completedAt: new Date(),
+      },
+    });
+
+    // Emit checkout.intent.completed event
+    await this.outboxService.createEvent({
+      workspaceId,
+      eventType: 'checkout.intent.completed',
+      aggregateType: 'checkout_intent',
+      aggregateId: checkoutIntentId,
+      payload: {
+        checkoutIntent: {
+          id: checkoutIntentId,
+          customerId,
+          subscriptionId: subscription.id,
+          offerId: checkoutIntent.offerId,
+          total: checkoutIntent.totalAmount,
+        },
+      },
+    });
+
+    this.logger.log(`Payment succeeded for checkout intent ${checkoutIntentId}, subscription ${subscription.id}`);
+  }
+
+  /**
+   * Handle setup_intent.succeeded for headless checkout with trials.
+   * This is triggered when a customer sets up payment method for future use.
+   */
+  private async handleSetupIntentSucceeded(event: Stripe.Event): Promise<void> {
+    const setupIntent = event.data.object as Stripe.SetupIntent;
+    const metadata = setupIntent.metadata ?? {};
+    const checkoutIntentId = metadata.checkoutIntentId;
+    const workspaceId = metadata.workspaceId;
+
+    if (!checkoutIntentId || !workspaceId) {
+      this.logger.log('SetupIntent not from headless checkout, skipping');
+      return;
+    }
+
+    // Find the checkout intent
+    const checkoutIntent = await this.prisma.checkoutIntent.findUnique({
+      where: { id: checkoutIntentId },
+      include: {
+        offerVersion: true,
+        customer: true,
+      },
+    });
+
+    if (!checkoutIntent) {
+      this.logger.warn(`CheckoutIntent ${checkoutIntentId} not found`);
+      return;
+    }
+
+    if (checkoutIntent.status === 'succeeded') {
+      this.logger.log(`CheckoutIntent ${checkoutIntentId} already succeeded`);
+      return;
+    }
+
+    // Get or create customer
+    let customerId = checkoutIntent.customerId;
+    const stripeCustomerId = setupIntent.customer as string | null;
+
+    if (!customerId && checkoutIntent.customerEmail) {
+      // Find or create customer from email
+      let customer = await this.prisma.customer.findFirst({
+        where: { workspaceId, email: checkoutIntent.customerEmail },
+      });
+
+      if (!customer) {
+        customer = await this.prisma.customer.create({
+          data: {
+            workspaceId,
+            email: checkoutIntent.customerEmail,
+            metadata: {
+              source: 'headless_checkout',
+              checkoutIntentId,
+            },
+          },
+        });
+      }
+      customerId = customer.id;
+
+      // Store Stripe customer ref if available and not already stored
+      if (stripeCustomerId) {
+        const existingRef = await this.providerRefService.findByEntity(workspaceId, 'customer', customer.id, 'stripe');
+        if (!existingRef) {
+          await this.providerRefService.create({
+            workspaceId,
+            entityType: 'customer',
+            entityId: customer.id,
+            provider: 'stripe',
+            externalId: stripeCustomerId,
+          });
+        }
+      }
+    }
+
+    if (!customerId) {
+      this.logger.error(`No customer for checkout intent ${checkoutIntentId}`);
+      return;
+    }
+
+    // Create the subscription (will be in trialing status)
+    const subscription = await this.createSubscriptionFromIntent(
+      workspaceId,
+      customerId,
+      checkoutIntent
+    );
+
+    // Update checkout intent
+    await this.prisma.checkoutIntent.update({
+      where: { id: checkoutIntentId },
+      data: {
+        status: 'succeeded',
+        customerId,
+        subscriptionId: subscription.id,
+        completedAt: new Date(),
+      },
+    });
+
+    await this.outboxService.createEvent({
+      workspaceId,
+      eventType: 'checkout.intent.completed',
+      aggregateType: 'checkout_intent',
+      aggregateId: checkoutIntentId,
+      payload: {
+        checkoutIntent: {
+          id: checkoutIntentId,
+          customerId,
+          subscriptionId: subscription.id,
+          offerId: checkoutIntent.offerId,
+          trialDays: checkoutIntent.trialDays,
+        },
+      },
+    });
+
+    this.logger.log(`Setup succeeded for checkout intent ${checkoutIntentId}, subscription ${subscription.id}`);
+  }
+
+  /**
+   * Create a subscription from a checkout intent.
+   */
+  private async createSubscriptionFromIntent(
+    workspaceId: string,
+    customerId: string,
+    checkoutIntent: {
+      id: string;
+      offerId: string;
+      offerVersionId: string;
+      trialDays: number | null;
+      promotionId: string | null;
+      promotionVersionId: string | null;
+      metadata: unknown;
+      offerVersion: { id: string; config: Prisma.JsonValue };
+    }
+  ): Promise<{ id: string }> {
+    const now = new Date();
+    const trialDays = checkoutIntent.trialDays;
+
+    // Calculate period dates
+    let currentPeriodStart = now;
+    let currentPeriodEnd: Date;
+    let trialStart: Date | null = null;
+    let trialEnd: Date | null = null;
+
+    if (trialDays && trialDays > 0) {
+      trialStart = now;
+      trialEnd = new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000);
+      currentPeriodEnd = trialEnd;
+    } else {
+      // Get billing interval from offer config
+      const config = checkoutIntent.offerVersion.config as {
+        pricing?: { interval?: string; intervalCount?: number };
+      };
+      const interval = config?.pricing?.interval ?? 'month';
+      const intervalCount = config?.pricing?.intervalCount ?? 1;
+
+      // Calculate period end based on interval
+      currentPeriodEnd = new Date(now);
+      switch (interval) {
+        case 'day':
+          currentPeriodEnd.setDate(currentPeriodEnd.getDate() + intervalCount);
+          break;
+        case 'week':
+          currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 7 * intervalCount);
+          break;
+        case 'month':
+          currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + intervalCount);
+          break;
+        case 'year':
+          currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + intervalCount);
+          break;
+      }
+    }
+
+    const status = trialDays && trialDays > 0 ? 'trialing' : 'active';
+
+    // Create subscription
+    const subscription = await this.prisma.subscription.create({
+      data: {
+        workspaceId,
+        customerId,
+        offerId: checkoutIntent.offerId,
+        offerVersionId: checkoutIntent.offerVersionId,
+        status,
+        currentPeriodStart,
+        currentPeriodEnd,
+        trialStart,
+        trialEnd,
+        metadata: checkoutIntent.metadata as object ?? {},
+      },
+    });
+
+    // Grant entitlements
+    await this.grantEntitlements(
+      workspaceId,
+      subscription.id,
+      customerId,
+      checkoutIntent.offerVersion
+    );
+
+    // Record promotion usage if applicable
+    if (checkoutIntent.promotionId && checkoutIntent.promotionVersionId) {
+      await this.prisma.appliedPromotion.create({
+        data: {
+          workspaceId,
+          promotionId: checkoutIntent.promotionId,
+          promotionVersionId: checkoutIntent.promotionVersionId,
+          subscriptionId: subscription.id,
+          customerId,
+          discountAmount: 0, // Captured in checkout intent
+        },
+      });
+    }
+
+    // Emit subscription.created event
+    await this.outboxService.createEvent({
+      workspaceId,
+      eventType: 'subscription.created',
+      aggregateType: 'subscription',
+      aggregateId: subscription.id,
+      payload: {
+        subscription: {
+          id: subscription.id,
+          customerId,
+          offerId: checkoutIntent.offerId,
+          offerVersionId: checkoutIntent.offerVersionId,
+          status,
+          currentPeriodStart,
+          currentPeriodEnd,
+          trialStart,
+          trialEnd,
+        },
+      },
+    });
+
+    return subscription;
   }
 
   private mapStripeStatus(

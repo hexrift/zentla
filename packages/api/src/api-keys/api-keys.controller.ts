@@ -8,19 +8,19 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiSecurity,
   ApiParam,
-} from '@nestjs/swagger';
-import { ApiKeyService } from '../auth/services/api-key.service';
-import { WorkspaceId, OwnerOnly } from '../common/decorators';
-import { ApiKeySchema } from '../common/schemas';
-import { IsString, IsEnum, IsOptional, IsDateString } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+} from "@nestjs/swagger";
+import { ApiKeyService } from "../auth/services/api-key.service";
+import { WorkspaceId, OwnerOnly } from "../common/decorators";
+import { ApiKeySchema } from "../common/schemas";
+import { IsString, IsEnum, IsOptional, IsDateString } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 // ============================================================================
 // REQUEST DTOs
@@ -34,7 +34,7 @@ class CreateApiKeyDto {
 - Include environment: "Production Backend", "Staging CI/CD"
 - Include purpose: "Webhook Service", "Admin Dashboard"
 - Include owner: "John's Local Dev", "GitHub Actions"`,
-    example: 'Production Backend Service',
+    example: "Production Backend Service",
     minLength: 1,
     maxLength: 100,
   })
@@ -55,11 +55,11 @@ class CreateApiKeyDto {
 - Use \`member\` for backend services managing subscriptions
 - Use \`admin\` sparingly for admin tools
 - Reserve \`owner\` for critical operations`,
-    enum: ['owner', 'admin', 'member', 'readonly'],
-    example: 'member',
+    enum: ["owner", "admin", "member", "readonly"],
+    example: "member",
   })
-  @IsEnum(['owner', 'admin', 'member', 'readonly'])
-  role!: 'owner' | 'admin' | 'member' | 'readonly';
+  @IsEnum(["owner", "admin", "member", "readonly"])
+  role!: "owner" | "admin" | "member" | "readonly";
 
   @ApiProperty({
     description: `Environment this key operates in. Keys are isolated by environment.
@@ -69,11 +69,11 @@ class CreateApiKeyDto {
 - **live**: Use for production. Affects real customer data and billing.
 
 **Important:** Test keys cannot access live data and vice versa. Create separate keys for each environment.`,
-    enum: ['live', 'test'],
-    example: 'test',
+    enum: ["live", "test"],
+    example: "test",
   })
-  @IsEnum(['live', 'test'])
-  environment!: 'live' | 'test';
+  @IsEnum(["live", "test"])
+  environment!: "live" | "test";
 
   @ApiPropertyOptional({
     description: `Optional expiration date (ISO 8601 format). After this date, the key becomes invalid.
@@ -84,7 +84,7 @@ class CreateApiKeyDto {
 - Security policy compliance
 
 **Omit** for keys that should not expire (you can always revoke manually).`,
-    example: '2025-12-31T23:59:59Z',
+    example: "2025-12-31T23:59:59Z",
   })
   @IsOptional()
   @IsDateString()
@@ -95,16 +95,16 @@ class CreateApiKeyDto {
 // CONTROLLER
 // ============================================================================
 
-@ApiTags('api-keys')
-@ApiSecurity('api-key')
-@Controller('api-keys')
+@ApiTags("api-keys")
+@ApiSecurity("api-key")
+@Controller("api-keys")
 export class ApiKeysController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
 
   @Get()
   @OwnerOnly()
   @ApiOperation({
-    summary: 'List API keys',
+    summary: "List API keys",
     description: `Retrieves all API keys for your workspace.
 
 **Use this to:**
@@ -122,14 +122,17 @@ export class ApiKeysController {
   })
   @ApiResponse({
     status: 200,
-    description: 'List of API keys (secrets are not included)',
+    description: "List of API keys (secrets are not included)",
     schema: {
-      type: 'array',
+      type: "array",
       items: ApiKeySchema,
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Requires owner role' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({ status: 403, description: "Forbidden - Requires owner role" })
   async findAll(@WorkspaceId() workspaceId: string) {
     const keys = await this.apiKeyService.listApiKeys(workspaceId);
     // Don't expose the hash, just return safe fields
@@ -148,7 +151,7 @@ export class ApiKeysController {
   @Post()
   @OwnerOnly()
   @ApiOperation({
-    summary: 'Create API key',
+    summary: "Create API key",
     description: `Creates a new API key for authenticating with the Relay API.
 
 **Important:** The secret is only returned once in this response. Store it securely immediately.
@@ -177,41 +180,45 @@ X-API-Key: rl_test_your_key_here
   })
   @ApiResponse({
     status: 201,
-    description: 'API key created. The secret is shown only once!',
+    description: "API key created. The secret is shown only once!",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         id: {
-          type: 'string',
-          format: 'uuid',
-          description: 'Key ID for future management operations (revocation)',
+          type: "string",
+          format: "uuid",
+          description: "Key ID for future management operations (revocation)",
         },
         secret: {
-          type: 'string',
-          description: 'The complete API key secret. Store securely - this is the only time it will be shown!',
-          example: 'rl_test_abc123def456...',
+          type: "string",
+          description:
+            "The complete API key secret. Store securely - this is the only time it will be shown!",
+          example: "rl_test_abc123def456...",
         },
         prefix: {
-          type: 'string',
-          description: 'Key prefix for identification in logs and the key list',
-          example: 'rl_test_abc...',
+          type: "string",
+          description: "Key prefix for identification in logs and the key list",
+          example: "rl_test_abc...",
         },
         message: {
-          type: 'string',
-          description: 'Important reminder about storing the secret',
-          example: 'Store this secret securely. It will not be shown again.',
+          type: "string",
+          description: "Important reminder about storing the secret",
+          example: "Store this secret securely. It will not be shown again.",
         },
       },
     },
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid request (e.g., invalid role or environment)',
+    description: "Invalid request (e.g., invalid role or environment)",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
   @ApiResponse({
     status: 403,
-    description: 'Forbidden - Requires owner role to create API keys',
+    description: "Forbidden - Requires owner role to create API keys",
   })
   async create(
     @WorkspaceId() workspaceId: string,
@@ -229,15 +236,15 @@ X-API-Key: rl_test_your_key_here
       id: result.id,
       secret: result.secret, // Only shown once!
       prefix: result.prefix,
-      message: 'Store this secret securely. It will not be shown again.',
+      message: "Store this secret securely. It will not be shown again.",
     };
   }
 
-  @Delete(':id')
+  @Delete(":id")
   @OwnerOnly()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
-    summary: 'Revoke API key',
+    summary: "Revoke API key",
     description: `Permanently revokes an API key, immediately preventing any further use.
 
 **Use this when:**
@@ -253,26 +260,30 @@ X-API-Key: rl_test_your_key_here
 **Best practice:** Before revoking a production key, ensure any services using it have been updated with a new key to avoid outages.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'API key ID to revoke (from the key list, not the secret itself)',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description:
+      "API key ID to revoke (from the key list, not the secret itself)",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 204,
-    description: 'API key revoked (no content)',
+    description: "API key revoked (no content)",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
   @ApiResponse({
     status: 403,
-    description: 'Forbidden - Requires owner role to revoke API keys',
+    description: "Forbidden - Requires owner role to revoke API keys",
   })
   @ApiResponse({
     status: 404,
-    description: 'API key not found',
+    description: "API key not found",
   })
   async revoke(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string
   ) {
     await this.apiKeyService.revokeApiKey(workspaceId, id);
   }

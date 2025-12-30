@@ -6,45 +6,50 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { WorkspacesService } from './workspaces.service';
-import { BillingService } from '../billing/billing.service';
-import { WorkspaceId, OwnerOnly, MemberOnly } from '../common/decorators';
-import { IsString, IsOptional, IsEnum, IsObject } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ProviderStatusSchema } from '../common/schemas';
+} from "@nestjs/common";
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiSecurity,
+} from "@nestjs/swagger";
+import { WorkspacesService } from "./workspaces.service";
+import { BillingService } from "../billing/billing.service";
+import { WorkspaceId, OwnerOnly, MemberOnly } from "../common/decorators";
+import { IsString, IsOptional, IsEnum, IsObject } from "class-validator";
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { ProviderStatusSchema } from "../common/schemas";
 
 class UpdateWorkspaceDto {
-  @ApiPropertyOptional({ description: 'Workspace name' })
+  @ApiPropertyOptional({ description: "Workspace name" })
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiPropertyOptional({ enum: ['stripe', 'zuora'] })
+  @ApiPropertyOptional({ enum: ["stripe", "zuora"] })
   @IsOptional()
-  @IsEnum(['stripe', 'zuora'])
-  defaultProvider?: 'stripe' | 'zuora';
+  @IsEnum(["stripe", "zuora"])
+  defaultProvider?: "stripe" | "zuora";
 
-  @ApiPropertyOptional({ description: 'Workspace settings' })
+  @ApiPropertyOptional({ description: "Workspace settings" })
   @IsOptional()
   @IsObject()
   settings?: Record<string, unknown>;
 }
 
-@ApiTags('workspaces')
-@ApiSecurity('api-key')
-@Controller('workspaces')
+@ApiTags("workspaces")
+@ApiSecurity("api-key")
+@Controller("workspaces")
 export class WorkspacesController {
   constructor(
     private readonly workspacesService: WorkspacesService,
     private readonly billingService: BillingService
   ) {}
 
-  @Get('current')
+  @Get("current")
   @MemberOnly()
   @ApiOperation({
-    summary: 'Get current workspace',
+    summary: "Get current workspace",
     description: `Retrieves details for the workspace associated with your API key.
 
 **Response includes:**
@@ -54,29 +59,35 @@ export class WorkspacesController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Current workspace details',
+    description: "Current workspace details",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        id: { type: 'string', format: 'uuid' },
-        name: { type: 'string' },
-        defaultProvider: { type: 'string', enum: ['stripe', 'zuora'] },
-        settings: { type: 'object' },
-        createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' },
+        id: { type: "string", format: "uuid" },
+        name: { type: "string" },
+        defaultProvider: { type: "string", enum: ["stripe", "zuora"] },
+        settings: { type: "object" },
+        createdAt: { type: "string", format: "date-time" },
+        updatedAt: { type: "string", format: "date-time" },
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   async getCurrent(@WorkspaceId() workspaceId: string) {
     return this.workspacesService.findById(workspaceId);
   }
 
-  @Get('current/providers')
+  @Get("current/providers")
   @MemberOnly()
   @ApiOperation({
-    summary: 'Get billing provider status',
+    summary: "Get billing provider status",
     description: `Returns the connection status of all billing providers for this workspace.
 
 **Use this for:**
@@ -96,25 +107,31 @@ export class WorkspacesController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Provider connection status',
+    description: "Provider connection status",
     schema: ProviderStatusSchema,
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   async getProviderStatus(@WorkspaceId() workspaceId: string) {
     const workspace = await this.workspacesService.findById(workspaceId);
     const providerStatus = await this.billingService.getProviderStatus();
 
     return {
-      defaultProvider: workspace?.defaultProvider ?? 'stripe',
+      defaultProvider: workspace?.defaultProvider ?? "stripe",
       ...providerStatus,
     };
   }
 
-  @Patch('current')
+  @Patch("current")
   @OwnerOnly()
-  @ApiOperation({ summary: 'Update current workspace' })
-  @ApiResponse({ status: 200, description: 'Workspace updated' })
+  @ApiOperation({ summary: "Update current workspace" })
+  @ApiResponse({ status: 200, description: "Workspace updated" })
   async updateCurrent(
     @WorkspaceId() workspaceId: string,
     @Body() dto: UpdateWorkspaceDto
@@ -122,11 +139,11 @@ export class WorkspacesController {
     return this.workspacesService.update(workspaceId, dto);
   }
 
-  @Delete('current')
+  @Delete("current")
   @OwnerOnly()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete current workspace' })
-  @ApiResponse({ status: 204, description: 'Workspace deleted' })
+  @ApiOperation({ summary: "Delete current workspace" })
+  @ApiResponse({ status: 204, description: "Workspace deleted" })
   async deleteCurrent(@WorkspaceId() workspaceId: string) {
     await this.workspacesService.delete(workspaceId);
   }

@@ -353,6 +353,118 @@ export const CheckoutSessionSchema = {
   },
 };
 
+export const CheckoutQuoteSchema = {
+  type: 'object',
+  description: 'Price breakdown for an offer with optional promotion applied',
+  properties: {
+    offerId: { type: 'string', format: 'uuid' },
+    offerVersionId: { type: 'string', format: 'uuid' },
+    currency: {
+      type: 'string',
+      description: 'Three-letter ISO currency code',
+      example: 'USD',
+    },
+    subtotal: {
+      type: 'integer',
+      description: 'Price before discount in smallest currency unit (cents)',
+      example: 2999,
+    },
+    discount: {
+      type: 'integer',
+      description: 'Discount amount in smallest currency unit',
+      example: 500,
+    },
+    tax: {
+      type: 'integer',
+      description: 'Tax amount in smallest currency unit (0 if not calculated)',
+      example: 0,
+    },
+    total: {
+      type: 'integer',
+      description: 'Final amount to charge in smallest currency unit',
+      example: 2499,
+    },
+    interval: {
+      type: 'string',
+      enum: ['month', 'year', 'week', 'day'] as string[],
+      nullable: true,
+      description: 'Billing interval (null for one-time purchases)',
+    },
+    intervalCount: {
+      type: 'integer',
+      description: 'Number of intervals between billings',
+      example: 1,
+    },
+    trial: {
+      type: 'object',
+      nullable: true,
+      description: 'Trial information if offer includes a trial',
+      properties: {
+        days: { type: 'integer', description: 'Trial duration in days' },
+        requiresPaymentMethod: { type: 'boolean' },
+      },
+    },
+    promotion: {
+      type: 'object',
+      nullable: true,
+      description: 'Applied promotion details',
+      properties: {
+        id: { type: 'string', format: 'uuid' },
+        code: { type: 'string' },
+        discountType: { type: 'string', enum: ['percent', 'fixed_amount'] as string[] },
+        discountValue: { type: 'integer' },
+        duration: { type: 'string', enum: ['once', 'repeating', 'forever'] as string[] },
+        durationInMonths: { type: 'integer', nullable: true },
+      },
+    },
+    validationErrors: {
+      type: 'array',
+      items: { type: 'string' },
+      description: 'Any validation errors (e.g., expired promo code)',
+    },
+  },
+};
+
+export const CheckoutIntentSchema = {
+  type: 'object',
+  description: 'Checkout intent for headless payment flow',
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    status: {
+      type: 'string',
+      enum: ['pending', 'processing', 'requires_action', 'succeeded', 'failed', 'expired'] as string[],
+      description: 'Current status of the checkout intent',
+    },
+    clientSecret: {
+      type: 'string',
+      description: 'Stripe client secret for client-side payment confirmation. Use with stripe.confirmPayment().',
+    },
+    offerId: { type: 'string', format: 'uuid' },
+    offerVersionId: { type: 'string', format: 'uuid' },
+    customerId: { type: 'string', format: 'uuid', nullable: true },
+    // Quote snapshot
+    currency: { type: 'string', example: 'USD' },
+    subtotal: { type: 'integer', description: 'Subtotal in cents' },
+    discount: { type: 'integer', description: 'Discount in cents' },
+    tax: { type: 'integer', description: 'Tax in cents' },
+    total: { type: 'integer', description: 'Total to charge in cents' },
+    trialDays: { type: 'integer', nullable: true },
+    // Promotion
+    promotionCode: { type: 'string', nullable: true },
+    // Result
+    subscriptionId: {
+      type: 'string',
+      format: 'uuid',
+      nullable: true,
+      description: 'Subscription ID after successful payment',
+    },
+    expiresAt: { type: 'string', format: 'date-time' },
+    completedAt: { type: 'string', format: 'date-time', nullable: true },
+    metadata: { type: 'object' },
+    createdAt: { type: 'string', format: 'date-time' },
+  },
+};
+
 // ============================================================================
 // ENTITLEMENT SCHEMAS
 // ============================================================================

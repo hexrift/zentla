@@ -7,6 +7,8 @@ const navigation = [
   { name: 'Subscriptions', href: '/subscriptions' },
   { name: 'Customers', href: '/customers' },
   { name: 'Webhooks', href: '/webhooks' },
+  { name: 'Events', href: '/events' },
+  { name: 'Audit Logs', href: '/audit-logs' },
   { name: 'API Keys', href: '/api-keys' },
   { name: 'Settings', href: '/settings' },
 ];

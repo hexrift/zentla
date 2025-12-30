@@ -13,7 +13,7 @@ import {
   HttpStatus,
   NotFoundException,
   UseInterceptors,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
@@ -21,11 +21,14 @@ import {
   ApiSecurity,
   ApiParam,
   ApiHeader,
-} from '@nestjs/swagger';
-import { CustomersService } from './customers.service';
-import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
-import { ETagInterceptor, parseETagVersion } from '../common/interceptors/etag.interceptor';
-import { CustomerSchema, PaginationSchema } from '../common/schemas';
+} from "@nestjs/swagger";
+import { CustomersService } from "./customers.service";
+import { WorkspaceId, AdminOnly, MemberOnly } from "../common/decorators";
+import {
+  ETagInterceptor,
+  parseETagVersion,
+} from "../common/interceptors/etag.interceptor";
+import { CustomerSchema, PaginationSchema } from "../common/schemas";
 import {
   IsString,
   IsEmail,
@@ -34,9 +37,9 @@ import {
   Min,
   Max,
   IsObject,
-} from 'class-validator';
-import { Transform } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+} from "class-validator";
+import { Transform } from "class-transformer";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 // ============================================================================
 // REQUEST DTOs
@@ -50,15 +53,16 @@ class CreateCustomerDto {
 - Pre-filling checkout forms
 
 **Uniqueness:** Email is unique per workspace. Creating a customer with an existing email will fail.`,
-    example: 'customer@example.com',
-    format: 'email',
+    example: "customer@example.com",
+    format: "email",
   })
   @IsEmail()
   email!: string;
 
   @ApiPropertyOptional({
-    description: 'Customer display name. Shown in admin dashboards and may be used in billing communications.',
-    example: 'Acme Corporation',
+    description:
+      "Customer display name. Shown in admin dashboards and may be used in billing communications.",
+    example: "Acme Corporation",
     maxLength: 200,
   })
   @IsOptional()
@@ -74,7 +78,7 @@ class CreateCustomerDto {
 - Maintain sync with your authentication system
 
 **Uniqueness:** External ID is unique per workspace if provided.`,
-    example: 'user_12345',
+    example: "user_12345",
     maxLength: 255,
   })
   @IsOptional()
@@ -95,7 +99,7 @@ class CreateCustomerDto {
   "referral_source": "product_hunt"
 }
 \`\`\``,
-    example: { company_size: '50-100', source: 'website' },
+    example: { company_size: "50-100", source: "website" },
   })
   @IsOptional()
   @IsObject()
@@ -104,17 +108,17 @@ class CreateCustomerDto {
 
 class UpdateCustomerDto {
   @ApiPropertyOptional({
-    description: 'Updated email address. Must be unique within the workspace.',
-    example: 'newemail@example.com',
-    format: 'email',
+    description: "Updated email address. Must be unique within the workspace.",
+    example: "newemail@example.com",
+    format: "email",
   })
   @IsOptional()
   @IsEmail()
   email?: string;
 
   @ApiPropertyOptional({
-    description: 'Updated customer name.',
-    example: 'Acme Corp (Enterprise)',
+    description: "Updated customer name.",
+    example: "Acme Corp (Enterprise)",
     maxLength: 200,
   })
   @IsOptional()
@@ -122,8 +126,9 @@ class UpdateCustomerDto {
   name?: string;
 
   @ApiPropertyOptional({
-    description: 'Updated external ID. Must be unique within the workspace if provided.',
-    example: 'user_67890',
+    description:
+      "Updated external ID. Must be unique within the workspace if provided.",
+    example: "user_67890",
     maxLength: 255,
   })
   @IsOptional()
@@ -131,8 +136,9 @@ class UpdateCustomerDto {
   externalId?: string;
 
   @ApiPropertyOptional({
-    description: 'Updated metadata. This replaces the entire metadata object (not a partial merge). To keep existing values, include them in the update.',
-    example: { company_size: '100-500', upgraded: true },
+    description:
+      "Updated metadata. This replaces the entire metadata object (not a partial merge). To keep existing values, include them in the update.",
+    example: { company_size: "100-500", upgraded: true },
   })
   @IsOptional()
   @IsObject()
@@ -141,7 +147,7 @@ class UpdateCustomerDto {
 
 class QueryCustomersDto {
   @ApiPropertyOptional({
-    description: 'Maximum number of customers to return per page.',
+    description: "Maximum number of customers to return per page.",
     example: 20,
     default: 20,
     minimum: 1,
@@ -155,24 +161,27 @@ class QueryCustomersDto {
   limit?: number;
 
   @ApiPropertyOptional({
-    description: 'Pagination cursor from a previous response. Pass `nextCursor` from the last response to fetch the next page.',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description:
+      "Pagination cursor from a previous response. Pass `nextCursor` from the last response to fetch the next page.",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @IsOptional()
   @IsString()
   cursor?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter by exact email match. Useful for finding a specific customer by their email address.',
-    example: 'customer@example.com',
+    description:
+      "Filter by exact email match. Useful for finding a specific customer by their email address.",
+    example: "customer@example.com",
   })
   @IsOptional()
   @IsString()
   email?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter by exact external ID match. Useful for finding a customer by your system ID.',
-    example: 'user_12345',
+    description:
+      "Filter by exact external ID match. Useful for finding a customer by your system ID.",
+    example: "user_12345",
   })
   @IsOptional()
   @IsString()
@@ -191,7 +200,7 @@ class CreatePortalSessionDto {
 **Requirements:**
 - Must be a valid HTTPS URL (HTTP allowed for localhost)
 - Should be a page in your application`,
-    example: 'https://app.example.com/settings/billing',
+    example: "https://app.example.com/settings/billing",
   })
   @IsString()
   returnUrl!: string;
@@ -201,16 +210,16 @@ class CreatePortalSessionDto {
 // CONTROLLER
 // ============================================================================
 
-@ApiTags('customers')
-@ApiSecurity('api-key')
-@Controller('customers')
+@ApiTags("customers")
+@ApiSecurity("api-key")
+@Controller("customers")
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
   @Get()
   @MemberOnly()
   @ApiOperation({
-    summary: 'List customers',
+    summary: "List customers",
     description: `Retrieves a paginated list of customers in your workspace.
 
 **Use this to:**
@@ -224,20 +233,26 @@ export class CustomersController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Paginated list of customers',
+    description: "Paginated list of customers",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         data: {
-          type: 'array',
+          type: "array",
           items: CustomerSchema,
         },
         ...PaginationSchema.properties,
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   async findAll(
     @WorkspaceId() workspaceId: string,
     @Query() query: QueryCustomersDto
@@ -250,11 +265,11 @@ export class CustomersController {
     });
   }
 
-  @Get(':id')
+  @Get(":id")
   @MemberOnly()
   @UseInterceptors(ETagInterceptor)
   @ApiOperation({
-    summary: 'Get customer details',
+    summary: "Get customer details",
     description: `Retrieves complete details for a single customer.
 
 **Use this to:**
@@ -273,30 +288,40 @@ The response includes an \`ETag\` header with the format \`W/"id-version"\`.
 Use this value in the \`If-Match\` header when updating to prevent concurrent modification conflicts.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Customer ID (UUID)',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Customer ID (UUID)",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Customer details',
+    description: "Customer details",
     headers: {
       ETag: {
-        description: 'Resource version for concurrency control. Use in If-Match header for updates.',
-        schema: { type: 'string', example: 'W/"123e4567-e89b-12d3-a456-426614174000-1"' },
+        description:
+          "Resource version for concurrency control. Use in If-Match header for updates.",
+        schema: {
+          type: "string",
+          example: 'W/"123e4567-e89b-12d3-a456-426614174000-1"',
+        },
       },
     },
     schema: CustomerSchema,
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   @ApiResponse({
     status: 404,
-    description: 'Customer not found in this workspace',
+    description: "Customer not found in this workspace",
   })
   async findOne(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string
   ) {
     const customer = await this.customersService.findById(workspaceId, id);
     if (!customer) {
@@ -308,7 +333,7 @@ Use this value in the \`If-Match\` header when updating to prevent concurrent mo
   @Post()
   @AdminOnly()
   @ApiOperation({
-    summary: 'Create customer',
+    summary: "Create customer",
     description: `Creates a new customer in your workspace.
 
 **When to create customers explicitly:**
@@ -327,15 +352,21 @@ Use this value in the \`If-Match\` header when updating to prevent concurrent mo
   })
   @ApiResponse({
     status: 201,
-    description: 'Customer created successfully',
+    description: "Customer created successfully",
     schema: CustomerSchema,
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid request (e.g., duplicate email or external ID)',
+    description: "Invalid request (e.g., duplicate email or external ID)",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
   async create(
     @WorkspaceId() workspaceId: string,
     @Body() dto: CreateCustomerDto
@@ -343,11 +374,11 @@ Use this value in the \`If-Match\` header when updating to prevent concurrent mo
     return this.customersService.create(workspaceId, dto);
   }
 
-  @Patch(':id')
+  @Patch(":id")
   @AdminOnly()
   @UseInterceptors(ETagInterceptor)
   @ApiOperation({
-    summary: 'Update customer',
+    summary: "Update customer",
     description: `Updates an existing customer's information.
 
 **Updatable fields:**
@@ -374,57 +405,70 @@ If the resource has been modified since you fetched it, the update will fail wit
 **Note on metadata:** The metadata update replaces the entire object. To preserve existing keys, include them in your update request.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Customer ID to update',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Customer ID to update",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiHeader({
-    name: 'If-Match',
+    name: "If-Match",
     required: false,
-    description: 'ETag from a previous GET request for concurrency control. Format: W/"id-version"',
+    description:
+      'ETag from a previous GET request for concurrency control. Format: W/"id-version"',
     example: 'W/"123e4567-e89b-12d3-a456-426614174000-1"',
   })
   @ApiResponse({
     status: 200,
-    description: 'Customer updated successfully',
+    description: "Customer updated successfully",
     headers: {
       ETag: {
-        description: 'New resource version after update',
-        schema: { type: 'string', example: 'W/"123e4567-e89b-12d3-a456-426614174000-2"' },
+        description: "New resource version after update",
+        schema: {
+          type: "string",
+          example: 'W/"123e4567-e89b-12d3-a456-426614174000-2"',
+        },
       },
     },
     schema: CustomerSchema,
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
   @ApiResponse({
     status: 404,
-    description: 'Customer not found',
+    description: "Customer not found",
   })
   @ApiResponse({
     status: 409,
-    description: 'Conflict - duplicate email/externalId or version mismatch',
+    description: "Conflict - duplicate email/externalId or version mismatch",
   })
   @ApiResponse({
     status: 412,
-    description: 'Precondition Failed - If-Match header does not match current version. Re-fetch and retry.',
+    description:
+      "Precondition Failed - If-Match header does not match current version. Re-fetch and retry.",
   })
   async update(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
-    @Headers('if-match') ifMatch: string | undefined,
+    @Param("id", ParseUUIDPipe) id: string,
+    @Headers("if-match") ifMatch: string | undefined,
     @Body() dto: UpdateCustomerDto
   ) {
     // Parse version from If-Match header if provided
-    const requiredVersion = ifMatch ? parseETagVersion(ifMatch) ?? undefined : undefined;
+    const requiredVersion = ifMatch
+      ? (parseETagVersion(ifMatch) ?? undefined)
+      : undefined;
     return this.customersService.update(workspaceId, id, dto, requiredVersion);
   }
 
-  @Delete(':id')
+  @Delete(":id")
   @AdminOnly()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
-    summary: 'Delete customer',
+    summary: "Delete customer",
     description: `Permanently deletes a customer and all associated data.
 
 **Warning:** This is a destructive operation that cannot be undone.
@@ -443,35 +487,41 @@ If the resource has been modified since you fetched it, the update will fail wit
 - Cancel all subscriptions first before deleting`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Customer ID to delete',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Customer ID to delete",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 204,
-    description: 'Customer deleted successfully (no content)',
+    description: "Customer deleted successfully (no content)",
   })
   @ApiResponse({
     status: 400,
-    description: 'Cannot delete customer with active subscriptions',
+    description: "Cannot delete customer with active subscriptions",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
   @ApiResponse({
     status: 404,
-    description: 'Customer not found',
+    description: "Customer not found",
   })
   async delete(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string
   ) {
     await this.customersService.delete(workspaceId, id);
   }
 
-  @Post(':id/portal')
+  @Post(":id/portal")
   @MemberOnly()
   @ApiOperation({
-    summary: 'Create billing portal session',
+    summary: "Create billing portal session",
     description: `Creates a Stripe Customer Portal session for self-service billing management.
 
 **Portal capabilities (configurable in Stripe Dashboard):**
@@ -493,37 +543,46 @@ If the resource has been modified since you fetched it, the update will fail wit
 **Security:** Only authenticated customers should be able to access their own portal. Verify the customer ID belongs to the requesting user.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Customer ID to create portal session for',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Customer ID to create portal session for",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 201,
-    description: 'Portal session created',
+    description: "Portal session created",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        id: { type: 'string', description: 'Portal session ID' },
+        id: { type: "string", description: "Portal session ID" },
         url: {
-          type: 'string',
-          format: 'uri',
-          description: 'URL to redirect customer to',
-          example: 'https://billing.stripe.com/session/...',
+          type: "string",
+          format: "uri",
+          description: "URL to redirect customer to",
+          example: "https://billing.stripe.com/session/...",
         },
-        returnUrl: { type: 'string', description: 'Where customer returns after' },
-        createdAt: { type: 'string', format: 'date-time' },
+        returnUrl: {
+          type: "string",
+          description: "Where customer returns after",
+        },
+        createdAt: { type: "string", format: "date-time" },
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   @ApiResponse({
     status: 404,
-    description: 'Customer not found or has no Stripe customer record',
+    description: "Customer not found or has no Stripe customer record",
   })
   async createPortalSession(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() dto: CreatePortalSessionDto
   ) {
     const session = await this.customersService.createPortalSession(

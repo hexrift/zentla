@@ -470,6 +470,312 @@ GET /checkout/sessions/:id
 
 ---
 
+## Headless Checkout (Checkout Intents)
+
+For custom checkout experiences, use Checkout Intents to create payment flows with your own UI.
+
+### Get Quote
+
+Get a price quote for an offer before creating a checkout intent.
+
+```
+POST /checkout/quotes
+```
+
+**Request Body:**
+
+```json
+{
+  "offerId": "offer_abc",
+  "promotionCode": "SAVE20"
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "offerId": "offer_abc",
+    "offerVersionId": "ov_123",
+    "currency": "USD",
+    "subtotal": 2900,
+    "discount": 580,
+    "tax": 0,
+    "total": 2320,
+    "interval": "month",
+    "intervalCount": 1,
+    "trial": {
+      "days": 14,
+      "requirePaymentMethod": true
+    },
+    "promotion": {
+      "code": "SAVE20",
+      "discountType": "percent",
+      "discountValue": 20
+    },
+    "validationErrors": []
+  }
+}
+```
+
+### Create Checkout Intent
+
+Creates a checkout intent and returns a client secret for Stripe.js payment confirmation.
+
+```
+POST /checkout/intents
+```
+
+**Headers:**
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Idempotency-Key | Yes | Unique key to prevent duplicate charges |
+
+**Request Body:**
+
+```json
+{
+  "offerId": "offer_abc",
+  "offerVersionId": "ov_123",
+  "customerId": "cust_123",
+  "customerEmail": "customer@example.com",
+  "promotionCode": "SAVE20",
+  "metadata": {
+    "source": "mobile_app"
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| offerId | string (UUID) | Yes | The offer to purchase |
+| offerVersionId | string (UUID) | No | Specific version (defaults to published) |
+| customerId | string (UUID) | No | Existing customer ID |
+| customerEmail | string | No | Email for new customer (required if no customerId) |
+| promotionCode | string | No | Promo code to apply |
+| metadata | object | No | Custom key-value data |
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "ci_789",
+    "status": "pending",
+    "clientSecret": "pi_xxx_secret_yyy",
+    "offerId": "offer_abc",
+    "offerVersionId": "ov_123",
+    "customerId": null,
+    "currency": "USD",
+    "subtotal": 2900,
+    "discount": 580,
+    "tax": 0,
+    "total": 2320,
+    "trialDays": 14,
+    "promotionCode": "SAVE20",
+    "subscriptionId": null,
+    "expiresAt": "2024-01-16T10:30:00Z",
+    "completedAt": null,
+    "metadata": {},
+    "createdAt": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+**Client-Side Integration:**
+
+Use the `clientSecret` with Stripe.js to confirm the payment:
+
+```javascript
+// For immediate payment (no trial)
+const { error } = await stripe.confirmPayment({
+  clientSecret: checkoutIntent.clientSecret,
+  confirmParams: {
+    return_url: 'https://yourapp.com/checkout/complete',
+  },
+});
+
+// For trial with payment method setup
+const { error } = await stripe.confirmSetup({
+  clientSecret: checkoutIntent.clientSecret,
+  confirmParams: {
+    return_url: 'https://yourapp.com/checkout/complete',
+  },
+});
+```
+
+### Get Checkout Intent
+
+Poll the checkout intent status to check completion.
+
+```
+GET /checkout/intents/:id
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "ci_789",
+    "status": "succeeded",
+    "clientSecret": "pi_xxx_secret_yyy",
+    "offerId": "offer_abc",
+    "offerVersionId": "ov_123",
+    "customerId": "cust_123",
+    "currency": "USD",
+    "subtotal": 2900,
+    "discount": 580,
+    "tax": 0,
+    "total": 2320,
+    "trialDays": 14,
+    "promotionCode": "SAVE20",
+    "subscriptionId": "sub_456",
+    "expiresAt": "2024-01-16T10:30:00Z",
+    "completedAt": "2024-01-15T10:35:00Z",
+    "metadata": {},
+    "createdAt": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+**Checkout Intent Statuses:**
+
+| Status | Description |
+|--------|-------------|
+| `pending` | Awaiting payment confirmation |
+| `processing` | Payment being processed |
+| `requires_action` | Additional authentication required (3DS) |
+| `succeeded` | Payment complete, subscription created |
+| `failed` | Payment failed |
+| `expired` | Intent expired (24 hours) |
+
+---
+
+## Events
+
+### List Events
+
+```
+GET /events
+```
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| limit | number | Max items to return (default: 50) |
+| cursor | string | Pagination cursor |
+| status | string | Filter by status: `pending`, `processed`, `failed` |
+| eventType | string | Filter by event type |
+| aggregateType | string | Filter by aggregate type |
+| aggregateId | string | Filter by aggregate ID |
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "evt_123",
+      "eventType": "subscription.created",
+      "aggregateType": "subscription",
+      "aggregateId": "sub_456",
+      "status": "processed",
+      "payload": {
+        "subscription": { ... }
+      },
+      "processedAt": "2024-01-15T10:30:05Z",
+      "createdAt": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "hasMore": false
+}
+```
+
+### List Dead Letter Events
+
+```
+GET /events/dead-letter
+```
+
+Returns events that failed to deliver after all retry attempts.
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "dle_123",
+      "originalEventId": "evt_456",
+      "endpointId": "we_789",
+      "endpointUrl": "https://example.com/webhooks",
+      "eventType": "subscription.created",
+      "payload": { ... },
+      "failureReason": "Connection timeout",
+      "attempts": 7,
+      "lastAttemptAt": "2024-01-15T18:30:00Z",
+      "createdAt": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "hasMore": false
+}
+```
+
+---
+
+## Audit Logs
+
+### List Audit Logs
+
+```
+GET /audit-logs
+```
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| limit | number | Max items to return (default: 50) |
+| cursor | string | Pagination cursor |
+| actorType | string | Filter by actor: `api_key`, `user`, `system`, `webhook` |
+| actorId | string | Filter by actor ID |
+| action | string | Filter by action (e.g., `create`, `update`, `delete`) |
+| resourceType | string | Filter by resource type |
+| resourceId | string | Filter by resource ID |
+| startDate | string | ISO 8601 start date |
+| endDate | string | ISO 8601 end date |
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "log_123",
+      "actorType": "api_key",
+      "actorId": "key_456",
+      "action": "create",
+      "resourceType": "subscription",
+      "resourceId": "sub_789",
+      "changes": {
+        "status": { "from": null, "to": "active" }
+      },
+      "metadata": {},
+      "ipAddress": "192.168.1.1",
+      "userAgent": "curl/7.64.1",
+      "createdAt": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "hasMore": false
+}
+```
+
+---
+
 ## Webhook Endpoints
 
 ### List Webhook Endpoints

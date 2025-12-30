@@ -11,17 +11,17 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiSecurity,
   ApiParam,
-} from '@nestjs/swagger';
-import { WebhooksService } from './webhooks.service';
-import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
-import { WebhookEndpointSchema, PaginationSchema } from '../common/schemas';
+} from "@nestjs/swagger";
+import { WebhooksService } from "./webhooks.service";
+import { WorkspaceId, AdminOnly, MemberOnly } from "../common/decorators";
+import { WebhookEndpointSchema, PaginationSchema } from "../common/schemas";
 import {
   IsString,
   IsOptional,
@@ -33,9 +33,9 @@ import {
   Max,
   IsUrl,
   IsObject,
-} from 'class-validator';
-import { Transform } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+} from "class-validator";
+import { Transform } from "class-transformer";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 // ============================================================================
 // REQUEST DTOs
@@ -54,7 +54,7 @@ class CreateWebhookEndpointDto {
 1. Verify the webhook signature using the secret
 2. Process the event idempotently (we may retry)
 3. Return 200 quickly (do heavy processing async)`,
-    example: 'https://api.example.com/webhooks/relay',
+    example: "https://api.example.com/webhooks/relay",
   })
   @IsUrl()
   url!: string;
@@ -75,7 +75,11 @@ class CreateWebhookEndpointDto {
 
 **Tip:** Subscribe only to events you need to minimize traffic.`,
     type: [String],
-    example: ['subscription.created', 'subscription.updated', 'subscription.canceled'],
+    example: [
+      "subscription.created",
+      "subscription.updated",
+      "subscription.canceled",
+    ],
     minItems: 1,
   })
   @IsArray()
@@ -84,8 +88,9 @@ class CreateWebhookEndpointDto {
   events!: string[];
 
   @ApiPropertyOptional({
-    description: 'Human-readable description to identify this endpoint in your dashboard.',
-    example: 'Production - User provisioning service',
+    description:
+      "Human-readable description to identify this endpoint in your dashboard.",
+    example: "Production - User provisioning service",
     maxLength: 500,
   })
   @IsOptional()
@@ -93,8 +98,9 @@ class CreateWebhookEndpointDto {
   description?: string;
 
   @ApiPropertyOptional({
-    description: 'Custom metadata for this endpoint. Useful for tagging or categorization.',
-    example: { environment: 'production', team: 'platform' },
+    description:
+      "Custom metadata for this endpoint. Useful for tagging or categorization.",
+    example: { environment: "production", team: "platform" },
   })
   @IsOptional()
   @IsObject()
@@ -103,17 +109,19 @@ class CreateWebhookEndpointDto {
 
 class UpdateWebhookEndpointDto {
   @ApiPropertyOptional({
-    description: 'Updated webhook URL. Must meet same requirements as during creation.',
-    example: 'https://api.example.com/webhooks/relay/v2',
+    description:
+      "Updated webhook URL. Must meet same requirements as during creation.",
+    example: "https://api.example.com/webhooks/relay/v2",
   })
   @IsOptional()
   @IsUrl()
   url?: string;
 
   @ApiPropertyOptional({
-    description: 'Updated list of events to subscribe to. This replaces the entire list.',
+    description:
+      "Updated list of events to subscribe to. This replaces the entire list.",
     type: [String],
-    example: ['subscription.created', 'subscription.canceled'],
+    example: ["subscription.created", "subscription.canceled"],
   })
   @IsOptional()
   @IsArray()
@@ -124,16 +132,16 @@ class UpdateWebhookEndpointDto {
     description: `Endpoint status:
 - **active**: Receives webhook events normally
 - **disabled**: Events are not sent (useful for temporary maintenance)`,
-    enum: ['active', 'disabled'],
-    example: 'active',
+    enum: ["active", "disabled"],
+    example: "active",
   })
   @IsOptional()
-  @IsEnum(['active', 'disabled'])
-  status?: 'active' | 'disabled';
+  @IsEnum(["active", "disabled"])
+  status?: "active" | "disabled";
 
   @ApiPropertyOptional({
-    description: 'Updated description.',
-    example: 'Production - User provisioning service (updated)',
+    description: "Updated description.",
+    example: "Production - User provisioning service (updated)",
     maxLength: 500,
   })
   @IsOptional()
@@ -141,8 +149,8 @@ class UpdateWebhookEndpointDto {
   description?: string;
 
   @ApiPropertyOptional({
-    description: 'Updated metadata. Replaces the entire metadata object.',
-    example: { environment: 'production', team: 'platform', version: 2 },
+    description: "Updated metadata. Replaces the entire metadata object.",
+    example: { environment: "production", team: "platform", version: 2 },
   })
   @IsOptional()
   @IsObject()
@@ -151,7 +159,7 @@ class UpdateWebhookEndpointDto {
 
 class QueryEndpointsDto {
   @ApiPropertyOptional({
-    description: 'Maximum number of endpoints to return per page.',
+    description: "Maximum number of endpoints to return per page.",
     example: 20,
     default: 20,
     minimum: 1,
@@ -165,8 +173,8 @@ class QueryEndpointsDto {
   limit?: number;
 
   @ApiPropertyOptional({
-    description: 'Pagination cursor from a previous response.',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: "Pagination cursor from a previous response.",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @IsOptional()
   @IsString()
@@ -177,16 +185,16 @@ class QueryEndpointsDto {
 // CONTROLLER
 // ============================================================================
 
-@ApiTags('webhooks')
-@ApiSecurity('api-key')
-@Controller('webhook-endpoints')
+@ApiTags("webhooks")
+@ApiSecurity("api-key")
+@Controller("webhook-endpoints")
 export class WebhookEndpointsController {
   constructor(private readonly webhooksService: WebhooksService) {}
 
   @Get()
   @MemberOnly()
   @ApiOperation({
-    summary: 'List webhook endpoints',
+    summary: "List webhook endpoints",
     description: `Retrieves all webhook endpoints configured for your workspace.
 
 **Use this to:**
@@ -198,20 +206,26 @@ export class WebhookEndpointsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Paginated list of webhook endpoints',
+    description: "Paginated list of webhook endpoints",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         data: {
-          type: 'array',
+          type: "array",
           items: WebhookEndpointSchema,
         },
         ...PaginationSchema.properties,
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   async findAll(
     @WorkspaceId() workspaceId: string,
     @Query() query: QueryEndpointsDto
@@ -222,10 +236,10 @@ export class WebhookEndpointsController {
     });
   }
 
-  @Get(':id')
+  @Get(":id")
   @MemberOnly()
   @ApiOperation({
-    summary: 'Get webhook endpoint',
+    summary: "Get webhook endpoint",
     description: `Retrieves details for a single webhook endpoint.
 
 **Response includes:**
@@ -236,23 +250,32 @@ export class WebhookEndpointsController {
 **Note:** The webhook secret is not returned here. Use \`POST /webhook-endpoints/{id}/rotate-secret\` if you need a new secret.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Webhook endpoint ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Webhook endpoint ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Webhook endpoint details',
+    description: "Webhook endpoint details",
     schema: WebhookEndpointSchema,
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
-  @ApiResponse({ status: 404, description: 'Endpoint not found' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
+  @ApiResponse({ status: 404, description: "Endpoint not found" })
   async findOne(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string
   ) {
-    const endpoint = await this.webhooksService.findEndpointById(workspaceId, id);
+    const endpoint = await this.webhooksService.findEndpointById(
+      workspaceId,
+      id
+    );
     if (!endpoint) {
       throw new NotFoundException(`Webhook endpoint ${id} not found`);
     }
@@ -262,7 +285,7 @@ export class WebhookEndpointsController {
   @Post()
   @AdminOnly()
   @ApiOperation({
-    summary: 'Create webhook endpoint',
+    summary: "Create webhook endpoint",
     description: `Creates a new webhook endpoint to receive event notifications.
 
 **Setup workflow:**
@@ -285,31 +308,38 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
   })
   @ApiResponse({
     status: 201,
-    description: 'Webhook endpoint created with signing secret',
+    description: "Webhook endpoint created with signing secret",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        id: { type: 'string', format: 'uuid' },
-        url: { type: 'string', format: 'uri' },
-        events: { type: 'array', items: { type: 'string' } },
-        status: { type: 'string', enum: ['active'] },
+        id: { type: "string", format: "uuid" },
+        url: { type: "string", format: "uri" },
+        events: { type: "array", items: { type: "string" } },
+        status: { type: "string", enum: ["active"] },
         secret: {
-          type: 'string',
-          description: 'Signing secret for verifying webhooks. Store securely - shown only once!',
-          example: 'whsec_abc123...',
+          type: "string",
+          description:
+            "Signing secret for verifying webhooks. Store securely - shown only once!",
+          example: "whsec_abc123...",
         },
-        description: { type: 'string', nullable: true },
-        metadata: { type: 'object' },
-        createdAt: { type: 'string', format: 'date-time' },
+        description: { type: "string", nullable: true },
+        metadata: { type: "object" },
+        createdAt: { type: "string", format: "date-time" },
       },
     },
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid URL or events list',
+    description: "Invalid URL or events list",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
   async create(
     @WorkspaceId() workspaceId: string,
     @Body() dto: CreateWebhookEndpointDto
@@ -317,10 +347,10 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
     return this.webhooksService.createEndpoint(workspaceId, dto);
   }
 
-  @Patch(':id')
+  @Patch(":id")
   @AdminOnly()
   @ApiOperation({
-    summary: 'Update webhook endpoint',
+    summary: "Update webhook endpoint",
     description: `Updates an existing webhook endpoint configuration.
 
 **Updatable fields:**
@@ -335,31 +365,37 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
 **Disabling vs Deleting:** Use \`status: disabled\` for temporary maintenance. Events will queue and can be replayed later. Delete if you permanently don't need the endpoint.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Webhook endpoint ID to update',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Webhook endpoint ID to update",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Webhook endpoint updated',
+    description: "Webhook endpoint updated",
     schema: WebhookEndpointSchema,
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
-  @ApiResponse({ status: 404, description: 'Endpoint not found' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
+  @ApiResponse({ status: 404, description: "Endpoint not found" })
   async update(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() dto: UpdateWebhookEndpointDto
   ) {
     return this.webhooksService.updateEndpoint(workspaceId, id, dto);
   }
 
-  @Delete(':id')
+  @Delete(":id")
   @AdminOnly()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
-    summary: 'Delete webhook endpoint',
+    summary: "Delete webhook endpoint",
     description: `Permanently deletes a webhook endpoint.
 
 **Warning:** This is immediate and irreversible.
@@ -372,29 +408,35 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
 **Before deleting:** Consider disabling the endpoint first if you might need it again. You can always re-enable it, but deleted endpoints and their secrets cannot be recovered.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Webhook endpoint ID to delete',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Webhook endpoint ID to delete",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 204,
-    description: 'Webhook endpoint deleted (no content)',
+    description: "Webhook endpoint deleted (no content)",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
-  @ApiResponse({ status: 404, description: 'Endpoint not found' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
+  @ApiResponse({ status: 404, description: "Endpoint not found" })
   async delete(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string
   ) {
     await this.webhooksService.deleteEndpoint(workspaceId, id);
   }
 
-  @Post(':id/rotate-secret')
+  @Post(":id/rotate-secret")
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Rotate webhook secret',
+    summary: "Rotate webhook secret",
     description: `Generates a new signing secret for a webhook endpoint.
 
 **Use this when:**
@@ -414,30 +456,36 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
 **Important:** Store the new secret securely before leaving this response. It will not be shown again.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Webhook endpoint ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Webhook endpoint ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'New secret generated',
+    description: "New secret generated",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         secret: {
-          type: 'string',
-          description: 'New signing secret. Store securely - shown only once!',
-          example: 'whsec_new123...',
+          type: "string",
+          description: "New signing secret. Store securely - shown only once!",
+          example: "whsec_new123...",
         },
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
-  @ApiResponse({ status: 404, description: 'Endpoint not found' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
+  @ApiResponse({ status: 404, description: "Endpoint not found" })
   async rotateSecret(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string
   ) {
     const newSecret = await this.webhooksService.rotateSecret(workspaceId, id);
     return { secret: newSecret };

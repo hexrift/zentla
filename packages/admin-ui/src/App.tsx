@@ -10,6 +10,8 @@ import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { SubscriptionDetailPage } from './pages/SubscriptionDetailPage';
 import { CustomersPage } from './pages/CustomersPage';
 import { WebhooksPage } from './pages/WebhooksPage';
+import { EventsPage } from './pages/EventsPage';
+import { AuditLogsPage } from './pages/AuditLogsPage';
 import { ApiKeysPage } from './pages/ApiKeysPage';
 import { SettingsPage } from './pages/SettingsPage';
 
@@ -28,6 +30,8 @@ export default function App() {
         <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="webhooks" element={<WebhooksPage />} />
+        <Route path="events" element={<EventsPage />} />
+        <Route path="audit-logs" element={<AuditLogsPage />} />
         <Route path="api-keys" element={<ApiKeysPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>

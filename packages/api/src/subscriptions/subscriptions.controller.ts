@@ -9,17 +9,17 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiSecurity,
   ApiParam,
-} from '@nestjs/swagger';
-import { SubscriptionsService } from './subscriptions.service';
-import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
-import { SubscriptionSchema, PaginationSchema } from '../common/schemas';
+} from "@nestjs/swagger";
+import { SubscriptionsService } from "./subscriptions.service";
+import { WorkspaceId, AdminOnly, MemberOnly } from "../common/decorators";
+import { SubscriptionSchema, PaginationSchema } from "../common/schemas";
 import {
   IsString,
   IsOptional,
@@ -29,11 +29,12 @@ import {
   IsEnum,
   IsBoolean,
   Matches,
-} from 'class-validator';
-import { Transform } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+} from "class-validator";
+import { Transform } from "class-transformer";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // ============================================================================
 // QUERY DTOs
@@ -41,7 +42,7 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 
 class QuerySubscriptionsDto {
   @ApiPropertyOptional({
-    description: 'Maximum number of subscriptions to return per page.',
+    description: "Maximum number of subscriptions to return per page.",
     example: 20,
     default: 20,
     minimum: 1,
@@ -55,29 +56,32 @@ class QuerySubscriptionsDto {
   limit?: number;
 
   @ApiPropertyOptional({
-    description: 'Pagination cursor from a previous response. Pass `nextCursor` from the last response to fetch the next page.',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description:
+      "Pagination cursor from a previous response. Pass `nextCursor` from the last response to fetch the next page.",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @IsOptional()
   @IsString()
   cursor?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter subscriptions by customer ID. Returns only subscriptions belonging to this customer.',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
+    description:
+      "Filter subscriptions by customer ID. Returns only subscriptions belonging to this customer.",
+    example: "123e4567-e89b-12d3-a456-426614174000",
+    format: "uuid",
   })
   @IsOptional()
-  @Matches(UUID_REGEX, { message: 'customerId must be a valid UUID' })
+  @Matches(UUID_REGEX, { message: "customerId must be a valid UUID" })
   customerId?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter subscriptions by offer ID. Returns only subscriptions using this offer.',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
+    description:
+      "Filter subscriptions by offer ID. Returns only subscriptions using this offer.",
+    example: "123e4567-e89b-12d3-a456-426614174000",
+    format: "uuid",
   })
   @IsOptional()
-  @Matches(UUID_REGEX, { message: 'offerId must be a valid UUID' })
+  @Matches(UUID_REGEX, { message: "offerId must be a valid UUID" })
   offerId?: string;
 
   @ApiPropertyOptional({
@@ -87,12 +91,12 @@ class QuerySubscriptionsDto {
 - **canceled**: Subscription has been canceled (may still be active until period end)
 - **past_due**: Payment failed, subscription at risk
 - **paused**: Subscription is temporarily paused`,
-    enum: ['active', 'trialing', 'canceled', 'past_due', 'paused'],
-    example: 'active',
+    enum: ["active", "trialing", "canceled", "past_due", "paused"],
+    example: "active",
   })
   @IsOptional()
   @IsString()
-  status?: 'active' | 'trialing' | 'canceled' | 'past_due' | 'paused';
+  status?: "active" | "trialing" | "canceled" | "past_due" | "paused";
 }
 
 // ============================================================================
@@ -126,7 +130,7 @@ class CancelSubscriptionDto {
 - "Too expensive"
 - "Missing features"
 - "Account violation"`,
-    example: 'Customer requested - switching to annual plan',
+    example: "Customer requested - switching to annual plan",
     maxLength: 500,
   })
   @IsOptional()
@@ -142,19 +146,20 @@ class ChangeSubscriptionDto {
 - Customer's subscription moves to the new offer's pricing and entitlements
 - Entitlements are updated immediately (old revoked, new granted)
 - Billing adjusts based on \`prorationBehavior\``,
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
+    example: "123e4567-e89b-12d3-a456-426614174000",
+    format: "uuid",
   })
-  @Matches(UUID_REGEX, { message: 'newOfferId must be a valid UUID' })
+  @Matches(UUID_REGEX, { message: "newOfferId must be a valid UUID" })
   newOfferId!: string;
 
   @ApiPropertyOptional({
-    description: 'Specific version of the new offer to use. If omitted, uses the currently published version of the new offer.',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
+    description:
+      "Specific version of the new offer to use. If omitted, uses the currently published version of the new offer.",
+    example: "123e4567-e89b-12d3-a456-426614174000",
+    format: "uuid",
   })
   @IsOptional()
-  @Matches(UUID_REGEX, { message: 'newOfferVersionId must be a valid UUID' })
+  @Matches(UUID_REGEX, { message: "newOfferVersionId must be a valid UUID" })
   newOfferVersionId?: string;
 
   @ApiPropertyOptional({
@@ -167,28 +172,28 @@ class ChangeSubscriptionDto {
 **Examples:**
 - Upgrade mid-cycle with \`create_prorations\`: Customer pays difference immediately
 - Downgrade with \`none\`: New lower price takes effect at next renewal`,
-    enum: ['create_prorations', 'none', 'always_invoice'],
-    default: 'create_prorations',
+    enum: ["create_prorations", "none", "always_invoice"],
+    default: "create_prorations",
   })
   @IsOptional()
-  @IsEnum(['create_prorations', 'none', 'always_invoice'])
-  prorationBehavior?: 'create_prorations' | 'none' | 'always_invoice';
+  @IsEnum(["create_prorations", "none", "always_invoice"])
+  prorationBehavior?: "create_prorations" | "none" | "always_invoice";
 }
 
 // ============================================================================
 // CONTROLLER
 // ============================================================================
 
-@ApiTags('subscriptions')
-@ApiSecurity('api-key')
-@Controller('subscriptions')
+@ApiTags("subscriptions")
+@ApiSecurity("api-key")
+@Controller("subscriptions")
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   @Get()
   @MemberOnly()
   @ApiOperation({
-    summary: 'List subscriptions',
+    summary: "List subscriptions",
     description: `Retrieves a paginated list of subscriptions in your workspace.
 
 **Use this to:**
@@ -204,20 +209,26 @@ export class SubscriptionsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Paginated list of subscriptions',
+    description: "Paginated list of subscriptions",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         data: {
-          type: 'array',
+          type: "array",
           items: SubscriptionSchema,
         },
         ...PaginationSchema.properties,
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   async findAll(
     @WorkspaceId() workspaceId: string,
     @Query() query: QuerySubscriptionsDto
@@ -231,10 +242,10 @@ export class SubscriptionsController {
     });
   }
 
-  @Get(':id')
+  @Get(":id")
   @MemberOnly()
   @ApiOperation({
-    summary: 'Get subscription details',
+    summary: "Get subscription details",
     description: `Retrieves complete details for a single subscription.
 
 **Use this to:**
@@ -251,37 +262,46 @@ export class SubscriptionsController {
 - Cancellation details if scheduled or completed`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Subscription ID (UUID)',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Subscription ID (UUID)",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Subscription details',
+    description: "Subscription details",
     schema: SubscriptionSchema,
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   @ApiResponse({
     status: 404,
-    description: 'Subscription not found in this workspace',
+    description: "Subscription not found in this workspace",
   })
   async findOne(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string
   ) {
-    const subscription = await this.subscriptionsService.findById(workspaceId, id);
+    const subscription = await this.subscriptionsService.findById(
+      workspaceId,
+      id
+    );
     if (!subscription) {
       throw new NotFoundException(`Subscription ${id} not found`);
     }
     return subscription;
   }
 
-  @Post(':id/cancel')
+  @Post(":id/cancel")
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Cancel subscription',
+    summary: "Cancel subscription",
     description: `Cancels a subscription, either immediately or at the end of the current billing period.
 
 **Cancellation modes:**
@@ -307,38 +327,44 @@ export class SubscriptionsController {
 **Note:** Canceled subscriptions cannot be reactivated. To resume service, create a new subscription.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Subscription ID to cancel',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Subscription ID to cancel",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Subscription canceled (or scheduled for cancellation)',
+    description: "Subscription canceled (or scheduled for cancellation)",
     schema: SubscriptionSchema,
   })
   @ApiResponse({
     status: 400,
-    description: 'Subscription already canceled or in invalid state',
+    description: "Subscription already canceled or in invalid state",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
   @ApiResponse({
     status: 404,
-    description: 'Subscription not found',
+    description: "Subscription not found",
   })
   async cancel(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() dto: CancelSubscriptionDto
   ) {
     return this.subscriptionsService.cancel(workspaceId, id, dto);
   }
 
-  @Post(':id/change')
+  @Post(":id/change")
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Change subscription plan',
+    summary: "Change subscription plan",
     description: `Changes a subscription to a different offer (upgrade, downgrade, or lateral move).
 
 **Use this to:**
@@ -372,13 +398,13 @@ With \`none\`: They keep $99 plan until renewal, then switch to $29.
 - Sends \`subscription.updated\` webhook event`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Subscription ID to change',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Subscription ID to change",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Subscription plan changed successfully',
+    description: "Subscription plan changed successfully",
     schema: SubscriptionSchema,
   })
   @ApiResponse({
@@ -388,15 +414,21 @@ With \`none\`: They keep $99 plan until renewal, then switch to $29.
 - New offer has no published version
 - Proration calculation failed`,
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
   @ApiResponse({
     status: 404,
-    description: 'Subscription or new offer not found',
+    description: "Subscription or new offer not found",
   })
   async change(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() dto: ChangeSubscriptionDto
   ) {
     return this.subscriptionsService.change(workspaceId, id, dto);

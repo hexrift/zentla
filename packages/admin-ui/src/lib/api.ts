@@ -196,4 +196,50 @@ export const api = {
       }),
     getUsage: (id: string) => fetchApi<Record<string, unknown>>(`/promotions/${id}/usage`),
   },
+  events: {
+    list: (params?: { status?: string; eventType?: string; limit?: number; cursor?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.status) searchParams.set('status', params.status);
+      if (params?.eventType) searchParams.set('eventType', params.eventType);
+      if (params?.limit) searchParams.set('limit', params.limit.toString());
+      if (params?.cursor) searchParams.set('cursor', params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+        `/events${query ? `?${query}` : ''}`
+      );
+    },
+    listDeadLetter: (params?: { limit?: number; cursor?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.limit) searchParams.set('limit', params.limit.toString());
+      if (params?.cursor) searchParams.set('cursor', params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+        `/events/dead-letter${query ? `?${query}` : ''}`
+      );
+    },
+  },
+  auditLogs: {
+    list: (params?: {
+      actorType?: string;
+      action?: string;
+      resourceType?: string;
+      limit?: number;
+      cursor?: string;
+      startDate?: string;
+      endDate?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.actorType) searchParams.set('actorType', params.actorType);
+      if (params?.action) searchParams.set('action', params.action);
+      if (params?.resourceType) searchParams.set('resourceType', params.resourceType);
+      if (params?.limit) searchParams.set('limit', params.limit.toString());
+      if (params?.cursor) searchParams.set('cursor', params.cursor);
+      if (params?.startDate) searchParams.set('startDate', params.startDate);
+      if (params?.endDate) searchParams.set('endDate', params.endDate);
+      const query = searchParams.toString();
+      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+        `/audit-logs${query ? `?${query}` : ''}`
+      );
+    },
+  },
 };

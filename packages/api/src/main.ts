@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggerService } from './common/logger/logger.service';
+import { ALL_MODELS } from './common/models';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap(): Promise<void> {
@@ -186,7 +187,26 @@ Use \`error.code\` for programmatic error handling.
       .addTag('api-keys', 'API key management')
       .build();
 
-    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    const document = SwaggerModule.createDocument(app, swaggerConfig, {
+      extraModels: ALL_MODELS,
+    });
+
+    // Remove DTO schemas from Models section - keep only domain models
+    // DTOs are still used inline for request/response validation
+    const domainModels = new Set([
+      'ApiKey', 'CheckoutSession', 'Customer', 'Entitlement',
+      'Offer', 'OfferVersion', 'Promotion', 'Subscription',
+      'WebhookEndpoint', 'WebhookEvent',
+    ]);
+
+    if (document.components?.schemas) {
+      const schemas = document.components.schemas as Record<string, unknown>;
+      for (const schemaName of Object.keys(schemas)) {
+        if (!domainModels.has(schemaName)) {
+          delete schemas[schemaName];
+        }
+      }
+    }
 
     // Serve raw OpenAPI JSON (useful for SDK generation)
     app.use('/openapi.json', (_req: unknown, res: { json: (doc: unknown) => void }) => {

@@ -232,6 +232,54 @@ export class StripeAdapter implements BillingProvider {
     };
   }
 
+  /**
+   * Create a PaymentIntent for immediate payment collection.
+   * Used in headless checkout flow when payment is required upfront.
+   */
+  async createPaymentIntent(params: {
+    amount: number;
+    currency: string;
+    customerId?: string;
+    metadata?: Record<string, string | undefined>;
+  }): Promise<{ id: string; clientSecret: string }> {
+    const paymentIntent = await this.stripe.paymentIntents.create({
+      amount: params.amount,
+      currency: params.currency,
+      customer: params.customerId,
+      automatic_payment_methods: { enabled: true },
+      metadata: Object.fromEntries(
+        Object.entries(params.metadata ?? {}).filter(([, v]) => v !== undefined)
+      ) as Record<string, string>,
+    });
+
+    return {
+      id: paymentIntent.id,
+      clientSecret: paymentIntent.client_secret ?? '',
+    };
+  }
+
+  /**
+   * Create a SetupIntent for collecting payment method for future use.
+   * Used in headless checkout flow for trials without upfront payment.
+   */
+  async createSetupIntent(params: {
+    customerId?: string;
+    metadata?: Record<string, string | undefined>;
+  }): Promise<{ id: string; clientSecret: string }> {
+    const setupIntent = await this.stripe.setupIntents.create({
+      customer: params.customerId,
+      automatic_payment_methods: { enabled: true },
+      metadata: Object.fromEntries(
+        Object.entries(params.metadata ?? {}).filter(([, v]) => v !== undefined)
+      ) as Record<string, string>,
+    });
+
+    return {
+      id: setupIntent.id,
+      clientSecret: setupIntent.client_secret ?? '',
+    };
+  }
+
   async getSubscription(ref: ProviderRef): Promise<SubscriptionData> {
     const subscription = await this.stripe.subscriptions.retrieve(ref.externalId);
 

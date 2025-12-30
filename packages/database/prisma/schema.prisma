@@ -27,6 +27,7 @@ model Workspace {
   subscriptions     Subscription[]
   entitlements      Entitlement[]
   checkouts         Checkout[]
+  checkoutIntents   CheckoutIntent[]
   appliedPromotions AppliedPromotion[]
   webhookEndpoints  WebhookEndpoint[]
   webhookEvents     WebhookEvent[]
@@ -66,6 +67,7 @@ model Customer {
   subscriptions     Subscription[]
   entitlements      Entitlement[]
   checkouts         Checkout[]
+  checkoutIntents   CheckoutIntent[]
   appliedPromotions AppliedPromotion[]
 
   @@unique([workspaceId, email])
@@ -91,11 +93,12 @@ model Offer {
   updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz
 
   // Relations
-  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  versions       OfferVersion[]
-  currentVersion OfferVersion?   @relation("CurrentVersion", fields: [currentVersionId], references: [id])
-  subscriptions  Subscription[]
-  checkouts      Checkout[]
+  workspace       Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  versions        OfferVersion[]
+  currentVersion  OfferVersion?    @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  subscriptions   Subscription[]
+  checkouts       Checkout[]
+  checkoutIntents CheckoutIntent[]
 
   @@index([workspaceId])
   @@index([workspaceId, status])
@@ -120,10 +123,11 @@ model OfferVersion {
   createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz
 
   // Relations
-  offer              Offer          @relation(fields: [offerId], references: [id], onDelete: Cascade)
-  currentForOffers   Offer[]        @relation("CurrentVersion")
+  offer              Offer            @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  currentForOffers   Offer[]          @relation("CurrentVersion")
   subscriptions      Subscription[]
   checkouts          Checkout[]
+  checkoutIntents    CheckoutIntent[]
 
   @@unique([offerId, version])
   @@index([offerId])
@@ -259,6 +263,7 @@ model Subscription {
   offerVersion      OfferVersion       @relation(fields: [offerVersionId], references: [id])
   entitlements      Entitlement[]
   appliedPromotions AppliedPromotion[]
+  checkoutIntents   CheckoutIntent[]
 
   @@index([workspaceId])
   @@index([customerId])
@@ -357,6 +362,71 @@ enum CheckoutStatus {
   expired
 
   @@map("checkout_status")
+}
+
+// Headless checkout flow - for custom checkout UIs
+model CheckoutIntent {
+  id                   String               @id @default(uuid()) @db.Uuid
+  workspaceId          String               @map("workspace_id") @db.Uuid
+  customerId           String?              @map("customer_id") @db.Uuid
+  offerId              String               @map("offer_id") @db.Uuid
+  offerVersionId       String               @map("offer_version_id") @db.Uuid
+  status               CheckoutIntentStatus @default(pending)
+
+  // Quote snapshot - locked at creation
+  currency             String               @db.VarChar(3)
+  subtotalAmount       Int                  @map("subtotal_amount")
+  discountAmount       Int                  @default(0) @map("discount_amount")
+  taxAmount            Int                  @default(0) @map("tax_amount")
+  totalAmount          Int                  @map("total_amount")
+
+  // Trial info
+  trialDays            Int?                 @map("trial_days")
+
+  // Promotion applied
+  promotionId          String?              @map("promotion_id") @db.Uuid
+  promotionVersionId   String?              @map("promotion_version_id") @db.Uuid
+  promotionCode        String?              @map("promotion_code") @db.VarChar(50)
+
+  // Provider payment reference (PaymentIntent/SetupIntent ID)
+  providerPaymentId    String?              @map("provider_payment_id") @db.VarChar(255)
+  clientSecret         String?              @map("client_secret") @db.VarChar(500)
+
+  // Idempotency
+  idempotencyKey       String?              @unique @map("idempotency_key") @db.VarChar(255)
+
+  // Result
+  subscriptionId       String?              @map("subscription_id") @db.Uuid
+  customerEmail        String?              @map("customer_email") @db.VarChar(255)
+  metadata             Json                 @default("{}")
+
+  expiresAt            DateTime             @map("expires_at") @db.Timestamptz
+  completedAt          DateTime?            @map("completed_at") @db.Timestamptz
+  createdAt            DateTime             @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime             @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  workspace            Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer             Customer?            @relation(fields: [customerId], references: [id])
+  offer                Offer                @relation(fields: [offerId], references: [id])
+  offerVersion         OfferVersion         @relation(fields: [offerVersionId], references: [id])
+  subscription         Subscription?        @relation(fields: [subscriptionId], references: [id])
+
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@index([idempotencyKey])
+  @@map("checkout_intent")
+}
+
+enum CheckoutIntentStatus {
+  pending              // Created, awaiting payment
+  processing           // Payment in progress
+  requires_action      // Needs 3DS or other action
+  succeeded            // Payment complete, subscription created
+  failed               // Payment failed
+  expired              // Timed out
+
+  @@map("checkout_intent_status")
 }
 
 // ============================================================================
