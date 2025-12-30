@@ -42,6 +42,18 @@ export class StripeAdapter implements BillingProvider {
     this.webhookSecret = validatedConfig.webhookSecret;
   }
 
+  /**
+   * Get Stripe account info for connection verification.
+   */
+  async getAccountInfo(): Promise<{ id: string; name: string | null; email: string | null }> {
+    const account = await this.stripe.accounts.retrieve();
+    return {
+      id: account.id,
+      name: account.business_profile?.name ?? null,
+      email: account.email ?? null,
+    };
+  }
+
   async syncOffer(
     offer: Offer,
     version: OfferVersion,
