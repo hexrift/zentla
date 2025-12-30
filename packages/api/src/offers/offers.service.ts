@@ -176,7 +176,7 @@ export class OffersService {
 
     return this.prisma.offer.update({
       where: { id },
-      data: dto,
+      data: { ...dto, version: { increment: 1 } },
     });
   }
 
@@ -191,7 +191,7 @@ export class OffersService {
 
     return this.prisma.offer.update({
       where: { id },
-      data: { status: 'archived' },
+      data: { status: 'archived', version: { increment: 1 } },
     });
   }
 

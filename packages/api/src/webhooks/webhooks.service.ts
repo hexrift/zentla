@@ -103,6 +103,7 @@ export class WebhooksService {
         ...(dto.status && { status: dto.status }),
         ...(dto.description !== undefined && { description: dto.description }),
         ...(dto.metadata && { metadata: dto.metadata as Prisma.InputJsonValue }),
+        version: { increment: 1 },
       },
     });
   }
@@ -128,7 +129,7 @@ export class WebhooksService {
 
     await this.prisma.webhookEndpoint.update({
       where: { id },
-      data: { secret: newSecret },
+      data: { secret: newSecret, version: { increment: 1 } },
     });
 
     return newSecret;

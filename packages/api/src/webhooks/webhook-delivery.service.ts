@@ -177,7 +177,7 @@ export class WebhookDeliveryService {
 
       if (response.ok) {
         // Success - mark as delivered
-        await this.markDelivered(event.id, response.status);
+        await this.markDelivered(event.id, response.status, endpoint.id);
         this.logger.debug(`Delivered webhook ${event.id} to ${endpoint.url}`);
       } else {
         // HTTP error - schedule retry
@@ -235,15 +235,27 @@ export class WebhookDeliveryService {
   /**
    * Mark a webhook event as successfully delivered
    */
-  private async markDelivered(eventId: string, statusCode: number): Promise<void> {
-    await this.prisma.webhookEvent.update({
-      where: { id: eventId },
-      data: {
-        status: 'delivered',
-        deliveredAt: new Date(),
-        response: { statusCode } as Prisma.InputJsonValue,
-      },
-    });
+  private async markDelivered(eventId: string, statusCode: number, endpointId: string): Promise<void> {
+    const now = new Date();
+    await this.prisma.$transaction([
+      this.prisma.webhookEvent.update({
+        where: { id: eventId },
+        data: {
+          status: 'delivered',
+          deliveredAt: now,
+          response: { statusCode } as Prisma.InputJsonValue,
+        },
+      }),
+      // Update endpoint delivery stats
+      this.prisma.webhookEndpoint.update({
+        where: { id: endpointId },
+        data: {
+          lastDeliveryAt: now,
+          lastDeliveryStatus: statusCode,
+          successCount: { increment: 1 },
+        },
+      }),
+    ]);
   }
 
   /**
@@ -255,13 +267,14 @@ export class WebhookDeliveryService {
     failureReason: string,
     attempts: number
   ): Promise<void> {
+    const now = new Date();
     await this.prisma.$transaction([
       // Update webhook event status
       this.prisma.webhookEvent.update({
         where: { id: event.id },
         data: {
           status: 'failed',
-          lastAttemptAt: new Date(),
+          lastAttemptAt: now,
           response: { error: failureReason } as Prisma.InputJsonValue,
         },
       }),
@@ -275,7 +288,16 @@ export class WebhookDeliveryService {
           payload: event.payload as Prisma.InputJsonValue,
           failureReason,
           attempts,
-          lastAttemptAt: new Date(),
+          lastAttemptAt: now,
+        },
+      }),
+      // Update endpoint error stats
+      this.prisma.webhookEndpoint.update({
+        where: { id: endpoint.id },
+        data: {
+          lastErrorAt: now,
+          lastError: failureReason.substring(0, 1000), // Truncate to fit field
+          failureCount: { increment: 1 },
         },
       }),
     ]);

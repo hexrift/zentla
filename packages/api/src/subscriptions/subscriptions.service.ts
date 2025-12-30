@@ -151,6 +151,7 @@ export class SubscriptionsService {
             ...(subscription.metadata as Record<string, unknown>),
             cancelReason: dto.reason,
           },
+          version: { increment: 1 },
         },
       });
     }
@@ -166,6 +167,7 @@ export class SubscriptionsService {
           ...(subscription.metadata as Record<string, unknown>),
           cancelReason: dto.reason,
         },
+        version: { increment: 1 },
       },
     });
 
@@ -191,7 +193,7 @@ export class SubscriptionsService {
 
     return this.prisma.subscription.update({
       where: { id },
-      data: { status },
+      data: { status, version: { increment: 1 } },
     });
   }
 
@@ -323,6 +325,7 @@ export class SubscriptionsService {
           changedAt: new Date().toISOString(),
           prorationBehavior: dto.prorationBehavior ?? 'create_prorations',
         },
+        version: { increment: 1 },
       },
     });
 

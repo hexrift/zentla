@@ -443,6 +443,15 @@ model WebhookEndpoint {
   description String?               @db.VarChar(500)
   metadata    Json                  @default("{}")
   version     Int                   @default(1)
+
+  // Delivery visibility
+  lastDeliveryAt    DateTime?       @map("last_delivery_at") @db.Timestamptz
+  lastDeliveryStatus Int?           @map("last_delivery_status")  // HTTP status code
+  lastErrorAt       DateTime?       @map("last_error_at") @db.Timestamptz
+  lastError         String?         @map("last_error") @db.VarChar(1000)
+  successCount      Int             @default(0) @map("success_count")
+  failureCount      Int             @default(0) @map("failure_count")
+
   createdAt   DateTime              @default(now()) @map("created_at") @db.Timestamptz
   updatedAt   DateTime              @updatedAt @map("updated_at") @db.Timestamptz
 

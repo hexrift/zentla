@@ -8,7 +8,9 @@ import type { Request, Response, NextFunction } from 'express';
 import { PrismaService } from '../../database/prisma.service';
 import { LoggerService } from '../logger/logger.service';
 
-const IDEMPOTENCY_HEADER = 'x-idempotency-key';
+// Standard header name (case-insensitive in HTTP)
+// Express lowercases all headers, so we check for 'idempotency-key'
+const IDEMPOTENCY_HEADER = 'idempotency-key';
 const IDEMPOTENCY_TTL_HOURS = 24;
 
 interface CachedResponse {
