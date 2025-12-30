@@ -1,5 +1,17 @@
 const API_BASE = '/api/v1';
 
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  meta?: {
+    timestamp: string;
+    pagination?: {
+      hasMore: boolean;
+      nextCursor?: string | null;
+    };
+  };
+}
+
 async function fetchApi<T>(
   endpoint: string,
   options: RequestInit = {}
@@ -20,8 +32,19 @@ async function fetchApi<T>(
     throw new Error(error.message ?? `HTTP ${response.status}`);
   }
 
-  const data = await response.json();
-  return data.data ?? data;
+  const json = await response.json() as ApiResponse<unknown>;
+
+  // If response has pagination metadata, reconstruct the expected format
+  if (json.meta?.pagination) {
+    return {
+      data: json.data,
+      hasMore: json.meta.pagination.hasMore,
+      nextCursor: json.meta.pagination.nextCursor ?? undefined,
+    } as T;
+  }
+
+  // For non-paginated responses, return the data directly
+  return json.data as T;
 }
 
 export const api = {
@@ -133,5 +156,44 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
+  },
+  promotions: {
+    list: (params?: { search?: string; status?: string; limit?: number; cursor?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.search) searchParams.set('search', params.search);
+      if (params?.status) searchParams.set('status', params.status);
+      if (params?.limit) searchParams.set('limit', params.limit.toString());
+      if (params?.cursor) searchParams.set('cursor', params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<{ data: unknown[]; hasMore: boolean; nextCursor?: string }>(
+        `/promotions${query ? `?${query}` : ''}`
+      );
+    },
+    get: (id: string) => fetchApi<Record<string, unknown>>(`/promotions/${id}`),
+    create: (data: Record<string, unknown>) =>
+      fetchApi<Record<string, unknown>>('/promotions', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: Record<string, unknown>) =>
+      fetchApi<Record<string, unknown>>(`/promotions/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    publish: (id: string, versionId?: string) =>
+      fetchApi<Record<string, unknown>>(`/promotions/${id}/publish`, {
+        method: 'POST',
+        body: JSON.stringify({ versionId }),
+      }),
+    createVersion: (id: string, config: Record<string, unknown>) =>
+      fetchApi<Record<string, unknown>>(`/promotions/${id}/versions`, {
+        method: 'POST',
+        body: JSON.stringify({ config }),
+      }),
+    archive: (id: string) =>
+      fetchApi<Record<string, unknown>>(`/promotions/${id}/archive`, {
+        method: 'POST',
+      }),
+    getUsage: (id: string) => fetchApi<Record<string, unknown>>(`/promotions/${id}/usage`),
   },
 };

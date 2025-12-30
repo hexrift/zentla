@@ -3,6 +3,9 @@ import { Layout } from './components/Layout';
 import { OffersPage } from './pages/OffersPage';
 import { OfferNewPage } from './pages/OfferNewPage';
 import { OfferDetailPage } from './pages/OfferDetailPage';
+import { PromotionsPage } from './pages/PromotionsPage';
+import { PromotionNewPage } from './pages/PromotionNewPage';
+import { PromotionDetailPage } from './pages/PromotionDetailPage';
 import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { SubscriptionDetailPage } from './pages/SubscriptionDetailPage';
 import { CustomersPage } from './pages/CustomersPage';
@@ -18,6 +21,9 @@ export default function App() {
         <Route path="offers" element={<OffersPage />} />
         <Route path="offers/new" element={<OfferNewPage />} />
         <Route path="offers/:id" element={<OfferDetailPage />} />
+        <Route path="promotions" element={<PromotionsPage />} />
+        <Route path="promotions/new" element={<PromotionNewPage />} />
+        <Route path="promotions/:id" element={<PromotionDetailPage />} />
         <Route path="subscriptions" element={<SubscriptionsPage />} />
         <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
         <Route path="customers" element={<CustomersPage />} />

@@ -3,6 +3,7 @@ import { clsx } from 'clsx';
 
 const navigation = [
   { name: 'Offers', href: '/offers' },
+  { name: 'Promotions', href: '/promotions' },
   { name: 'Subscriptions', href: '/subscriptions' },
   { name: 'Customers', href: '/customers' },
   { name: 'Webhooks', href: '/webhooks' },
