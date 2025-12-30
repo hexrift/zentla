@@ -13,6 +13,7 @@ import { BillingModule } from './billing/billing.module';
 // Feature modules
 import { WorkspacesModule } from './workspaces/workspaces.module';
 import { OffersModule } from './offers/offers.module';
+import { PromotionsModule } from './promotions/promotions.module';
 import { CheckoutModule } from './checkout/checkout.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { CustomersModule } from './customers/customers.module';
@@ -80,6 +81,7 @@ import { configuration, validationSchema } from './config/configuration';
     HealthModule,
     WorkspacesModule,
     OffersModule,
+    PromotionsModule,
     CheckoutModule,
     SubscriptionsModule,
     CustomersModule,

@@ -26,6 +26,7 @@ export interface CreateCheckoutParams {
   successUrl: string;
   cancelUrl: string;
   allowPromotionCodes?: boolean;
+  promotionCodeId?: string; // Stripe promotion code ID
   trialDays?: number;
   metadata?: Record<string, unknown>;
 }

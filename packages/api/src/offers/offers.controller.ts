@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,7 +17,6 @@ import {
   ApiResponse,
   ApiSecurity,
   ApiParam,
-  ApiQuery,
 } from '@nestjs/swagger';
 import { OffersService } from './offers.service';
 import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
@@ -30,12 +30,54 @@ export class OffersController {
 
   @Get()
   @MemberOnly()
-  @ApiOperation({ summary: 'List offers' })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'cursor', required: false, type: String })
-  @ApiQuery({ name: 'status', required: false, enum: ['active', 'archived'] })
-  @ApiQuery({ name: 'search', required: false, type: String })
-  @ApiResponse({ status: 200, description: 'List of offers' })
+  @ApiOperation({
+    summary: 'List offers',
+    description: `Retrieves a paginated list of offers in your workspace.
+
+**Use this to:**
+- Display available plans in your pricing page
+- Build offer selection UI in your admin dashboard
+- Search for specific offers by name
+
+**Pagination:** Results are returned in pages of up to 100 items. Use the \`nextCursor\` from the response to fetch subsequent pages.
+
+**Filtering:** Use \`status=active\` to only show offers available for new subscriptions. Archived offers are hidden from this list by default but can be retrieved explicitly.`,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of offers with their current published version (if any).',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', format: 'uuid', description: 'Unique offer identifier' },
+              name: { type: 'string', description: 'Offer display name' },
+              description: { type: 'string', nullable: true },
+              status: { type: 'string', enum: ['active', 'archived'] },
+              currentVersion: {
+                type: 'object',
+                nullable: true,
+                description: 'Currently published version, null if no version is published',
+                properties: {
+                  id: { type: 'string', format: 'uuid' },
+                  version: { type: 'integer', description: 'Version number (1, 2, 3...)' },
+                  status: { type: 'string', enum: ['published'] },
+                },
+              },
+              createdAt: { type: 'string', format: 'date-time' },
+              updatedAt: { type: 'string', format: 'date-time' },
+            },
+          },
+        },
+        hasMore: { type: 'boolean', description: 'True if more pages exist' },
+        nextCursor: { type: 'string', nullable: true, description: 'Pass to cursor param for next page' },
+      },
+    },
+  })
   async findAll(
     @WorkspaceId() workspaceId: string,
     @Query() query: QueryOffersDto
@@ -50,25 +92,77 @@ export class OffersController {
 
   @Get(':id')
   @MemberOnly()
-  @ApiOperation({ summary: 'Get offer by ID' })
-  @ApiParam({ name: 'id', type: String })
-  @ApiResponse({ status: 200, description: 'Offer details with versions' })
-  @ApiResponse({ status: 404, description: 'Offer not found' })
+  @ApiOperation({
+    summary: 'Get offer details',
+    description: `Retrieves complete details for a single offer, including all versions.
+
+**Use this to:**
+- Display offer configuration in your admin UI
+- Check current and historical versions before making changes
+- Verify offer setup before creating checkout sessions
+
+**Response includes:**
+- Offer metadata (name, description, status)
+- All versions with their full configuration
+- Currently published version reference
+
+**Version lifecycle:**
+- \`draft\`: Can be edited, not usable for checkouts
+- \`published\`: Active version used for new subscriptions
+- \`archived\`: Previously published, preserved for existing subscribers`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Unique offer identifier (UUID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Offer with all versions',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Offer not found in this workspace',
+  })
   async findOne(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string
   ) {
     const offer = await this.offersService.findById(workspaceId, id);
     if (!offer) {
-      throw new Error('Offer not found');
+      throw new NotFoundException('Offer not found');
     }
     return offer;
   }
 
   @Post()
   @AdminOnly()
-  @ApiOperation({ summary: 'Create a new offer' })
-  @ApiResponse({ status: 201, description: 'Offer created' })
+  @ApiOperation({
+    summary: 'Create offer',
+    description: `Creates a new offer with an initial draft version (v1).
+
+**Workflow:**
+1. Create offer with desired configuration → Returns offer with draft v1
+2. Review the draft configuration
+3. Call \`POST /offers/{id}/publish\` to make it available for checkouts
+
+**Side effects:**
+- Creates offer record in database
+- Creates version 1 in \`draft\` status
+- Does NOT sync to billing provider until published
+
+**The offer cannot be used for checkouts until published.** New subscribers always use the currently published version.
+
+**Entitlements:** Features defined in \`config.entitlements\` will be provisioned to customers when their subscription becomes active.`,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Offer created with draft version 1. Publish to make available for checkouts.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid configuration. Check that pricing model matches provided fields (e.g., tiers required for tiered pricing).',
+  })
   async create(
     @WorkspaceId() workspaceId: string,
     @Body() dto: CreateOfferRequestDto
@@ -78,9 +172,29 @@ export class OffersController {
 
   @Patch(':id')
   @AdminOnly()
-  @ApiOperation({ summary: 'Update offer metadata' })
-  @ApiParam({ name: 'id', type: String })
-  @ApiResponse({ status: 200, description: 'Offer updated' })
+  @ApiOperation({
+    summary: 'Update offer metadata',
+    description: `Updates offer-level metadata (name, description) without affecting versioned configuration.
+
+**Use this for:**
+- Correcting typos in offer names
+- Updating marketing descriptions
+- Changes that don't affect pricing or entitlements
+
+**This does NOT:**
+- Create a new version
+- Affect pricing, trials, or entitlements (use versions for that)
+- Require re-publishing
+
+Changes take effect immediately and are reflected in all API responses.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Offer ID to update',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({ status: 200, description: 'Offer metadata updated' })
+  @ApiResponse({ status: 404, description: 'Offer not found' })
   async update(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string,
@@ -92,9 +206,34 @@ export class OffersController {
   @Post(':id/archive')
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Archive an offer' })
-  @ApiParam({ name: 'id', type: String })
-  @ApiResponse({ status: 200, description: 'Offer archived' })
+  @ApiOperation({
+    summary: 'Archive offer',
+    description: `Archives an offer, hiding it from listings and preventing new subscriptions.
+
+**Use this when:**
+- Discontinuing a plan
+- Replacing an offer with a new one
+- Cleaning up test offers
+
+**Side effects:**
+- Sets offer status to \`archived\`
+- Offer no longer appears in default listings
+- Cannot be used for new checkout sessions
+
+**Does NOT affect:**
+- Existing subscriptions (they continue normally)
+- Historical data (offer remains queryable by ID)
+- Billing provider records
+
+**This is reversible** by updating the offer status, but prefer creating new offers for major changes.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Offer ID to archive',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({ status: 200, description: 'Offer archived successfully' })
+  @ApiResponse({ status: 404, description: 'Offer not found' })
   async archive(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string
@@ -104,9 +243,32 @@ export class OffersController {
 
   @Get(':id/versions')
   @MemberOnly()
-  @ApiOperation({ summary: 'List offer versions' })
-  @ApiParam({ name: 'id', type: String })
-  @ApiResponse({ status: 200, description: 'List of versions' })
+  @ApiOperation({
+    summary: 'List offer versions',
+    description: `Retrieves all versions of an offer, ordered by version number (newest first).
+
+**Use this to:**
+- View version history
+- Compare configurations across versions
+- Find a previous version for rollback
+
+**Version statuses:**
+- \`draft\`: Work in progress, editable, not synced to billing provider
+- \`published\`: Currently active version for new subscriptions
+- \`archived\`: Previously published version, preserved for existing subscribers
+
+Only one version can be \`published\` at a time.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Offer ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all versions with their configurations',
+  })
+  @ApiResponse({ status: 404, description: 'Offer not found' })
   async getVersions(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string
@@ -116,9 +278,43 @@ export class OffersController {
 
   @Post(':id/versions')
   @AdminOnly()
-  @ApiOperation({ summary: 'Create a new draft version' })
-  @ApiParam({ name: 'id', type: String })
-  @ApiResponse({ status: 201, description: 'Version created' })
+  @ApiOperation({
+    summary: 'Create draft version',
+    description: `Creates a new draft version for an offer with updated configuration.
+
+**Use this when:**
+- Changing pricing (amount, model, tiers)
+- Modifying trial settings
+- Adding or removing entitlements
+
+**Workflow:**
+1. Create new version with desired config → Returns draft version
+2. Review changes
+3. Publish when ready → New version becomes active
+
+**Constraints:**
+- Only one draft version can exist at a time
+- Must publish or delete existing draft before creating another
+- Existing subscribers are NOT affected until they change plans
+
+**Side effects:**
+- Creates new version record in database
+- Does NOT sync to billing provider until published`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Offer ID to create version for',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Draft version created. Call publish to make it active.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'A draft version already exists. Publish or delete it first.',
+  })
+  @ApiResponse({ status: 404, description: 'Offer not found' })
   async createVersion(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string,
@@ -130,23 +326,147 @@ export class OffersController {
   @Post(':id/publish')
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Publish a draft version' })
-  @ApiParam({ name: 'id', type: String })
-  @ApiResponse({ status: 200, description: 'Version published' })
+  @ApiOperation({
+    summary: 'Publish version',
+    description: `Publishes a draft version, making it active for new subscriptions (immediately or at a scheduled time).
+
+**Immediate publish (default):**
+1. Draft version status changes to \`published\`
+2. Previously published version (if any) changes to \`archived\`
+3. Configuration syncs to billing provider (creates/updates Stripe Product and Price)
+4. Offer becomes available for checkout sessions immediately
+
+**Scheduled publish (with effectiveFrom):**
+1. Draft version status changes to \`published\`
+2. Current version remains active until effectiveFrom date
+3. Configuration syncs to billing provider immediately
+4. Version automatically becomes effective at the scheduled time
+
+**Side effects:**
+- Syncs to Stripe: Creates Product (first publish) or reuses existing, creates new Price
+- For scheduled publishes, both old and new prices exist in Stripe
+- Existing subscriptions are NOT affected
+
+**Failures:**
+- Returns 404 if no draft version exists
+- Billing provider sync failures are logged but don't prevent publishing
+
+**Best practice:** Always test offers in a test environment before publishing to production.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Offer ID to publish',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Version published (immediately or scheduled) and synced to billing provider',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Only draft versions can be published',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Offer not found or no draft version exists',
+  })
   async publish(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: PublishOfferDto
   ) {
-    return this.offersService.publishVersion(workspaceId, id, dto.versionId);
+    const effectiveFrom = dto.effectiveFrom ? new Date(dto.effectiveFrom) : undefined;
+    return this.offersService.publishVersion(workspaceId, id, dto.versionId, effectiveFrom);
+  }
+
+  @Get(':id/scheduled')
+  @MemberOnly()
+  @ApiOperation({
+    summary: 'List scheduled versions',
+    description: `Retrieves all scheduled (future-dated) versions for an offer.
+
+**Use this to:**
+- View upcoming pricing changes
+- Check what versions are queued to become effective
+- Audit scheduled changes before they go live
+
+**Response includes:**
+- All published versions with a future effectiveFrom date
+- Ordered by effectiveFrom (soonest first)
+
+**Note:** Only published versions with a future effectiveFrom appear here.
+Immediately-effective versions are not included.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Offer ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of scheduled versions',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          version: { type: 'integer' },
+          status: { type: 'string', enum: ['published'] },
+          effectiveFrom: { type: 'string', format: 'date-time' },
+          config: { type: 'object' },
+          publishedAt: { type: 'string', format: 'date-time' },
+          createdAt: { type: 'string', format: 'date-time' },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Offer not found' })
+  async getScheduledVersions(
+    @WorkspaceId() workspaceId: string,
+    @Param('id', ParseUUIDPipe) id: string
+  ) {
+    return this.offersService.getScheduledVersions(workspaceId, id);
   }
 
   @Post(':id/rollback')
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Create new draft from a previous version' })
-  @ApiParam({ name: 'id', type: String })
-  @ApiResponse({ status: 200, description: 'Rollback version created' })
+  @ApiOperation({
+    summary: 'Rollback to previous version',
+    description: `Creates a new draft version by copying configuration from a previously published version.
+
+**Use this when:**
+- A published change caused issues
+- You want to revert to a known-good configuration
+- You need to undo pricing changes
+
+**Workflow:**
+1. Call rollback with target version ID → Creates new draft with copied config
+2. (Optional) Modify the draft if needed
+3. Publish the draft → Previous config is now active again
+
+**This is safe:** Does not modify any existing versions. Creates a new draft that you must explicitly publish.
+
+**Example:** If you published v3 and it had issues, rollback to v2 creates v4 (draft) with v2's config. Publishing v4 makes it active.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Offer ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'New draft version created with copied configuration',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'A draft version already exists. Publish or delete it first.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Offer or target version not found',
+  })
   async rollback(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string,

@@ -243,7 +243,8 @@ export class OffersService {
   async publishVersion(
     workspaceId: string,
     offerId: string,
-    versionId?: string
+    versionId?: string,
+    effectiveFrom?: Date
   ): Promise<OfferVersion> {
     const offer = await this.prisma.offer.findFirst({
       where: { id: offerId, workspaceId },
@@ -252,6 +253,10 @@ export class OffersService {
     if (!offer) {
       throw new NotFoundException(`Offer ${offerId} not found`);
     }
+
+    // Determine if this is an immediate publish or a scheduled one
+    const now = new Date();
+    const isScheduled = effectiveFrom && effectiveFrom > now;
 
     const publishedVersion = await this.prisma.executeInTransaction(async (tx) => {
       // Find the version to publish
@@ -277,8 +282,9 @@ export class OffersService {
         throw new BadRequestException('Only draft versions can be published');
       }
 
-      // Archive currently published version
-      if (offer.currentVersionId) {
+      // For immediate publish, archive currently published version
+      // For scheduled publish, leave current version alone
+      if (!isScheduled && offer.currentVersionId) {
         await tx.offerVersion.update({
           where: { id: offer.currentVersionId },
           data: { status: 'archived' },
@@ -291,19 +297,23 @@ export class OffersService {
         data: {
           status: 'published',
           publishedAt: new Date(),
+          effectiveFrom: effectiveFrom ?? null,
         },
       });
 
-      // Update offer's current version
-      await tx.offer.update({
-        where: { id: offerId },
-        data: { currentVersionId: published.id },
-      });
+      // Only update offer's current version for immediate publishes
+      if (!isScheduled) {
+        await tx.offer.update({
+          where: { id: offerId },
+          data: { currentVersionId: published.id },
+        });
+      }
 
       return published;
     });
 
     // Sync to Stripe (after transaction commits)
+    // We sync even for scheduled versions so the price exists in Stripe
     await this.syncToStripe(workspaceId, offer, publishedVersion);
 
     return publishedVersion;
@@ -452,5 +462,71 @@ export class OffersService {
     });
 
     return offer?.currentVersion ?? null;
+  }
+
+  /**
+   * Gets the currently effective published version for an offer.
+   *
+   * A version is effective if:
+   * - It has status 'published'
+   * - Its effectiveFrom is null (immediately effective) or in the past
+   *
+   * When multiple versions match, the one with the most recent effectiveFrom is used.
+   * If effectiveFrom is null, it's treated as less specific than a dated version.
+   */
+  async getEffectiveVersion(
+    workspaceId: string,
+    offerId: string,
+    asOfDate?: Date
+  ): Promise<OfferVersion | null> {
+    const now = asOfDate ?? new Date();
+
+    // Find all published versions that are currently effective
+    const effectiveVersions = await this.prisma.offerVersion.findMany({
+      where: {
+        offerId,
+        status: 'published',
+        offer: { workspaceId },
+        OR: [
+          { effectiveFrom: null },
+          { effectiveFrom: { lte: now } },
+        ],
+      },
+      orderBy: [
+        // Prefer versions with explicit effectiveFrom dates
+        { effectiveFrom: { sort: 'desc', nulls: 'last' } },
+        // Fall back to publishedAt for versions without effectiveFrom
+        { publishedAt: 'desc' },
+      ],
+      take: 1,
+    });
+
+    return effectiveVersions[0] ?? null;
+  }
+
+  /**
+   * Gets all scheduled (future-dated) versions for an offer.
+   *
+   * Returns published versions whose effectiveFrom is in the future,
+   * ordered by effectiveFrom ascending (soonest first).
+   */
+  async getScheduledVersions(workspaceId: string, offerId: string): Promise<OfferVersion[]> {
+    const offer = await this.prisma.offer.findFirst({
+      where: { id: offerId, workspaceId },
+    });
+
+    if (!offer) {
+      throw new NotFoundException(`Offer ${offerId} not found`);
+    }
+
+    return this.prisma.offerVersion.findMany({
+      where: {
+        offerId,
+        status: 'published',
+        effectiveFrom: { gt: new Date() },
+        offer: { workspaceId },
+      },
+      orderBy: { effectiveFrom: 'asc' },
+    });
   }
 }

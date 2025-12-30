@@ -18,6 +18,7 @@ export interface OfferVersion {
   status: OfferVersionStatus;
   config: OfferConfig;
   publishedAt?: Date;
+  effectiveFrom?: Date;
   createdAt: Date;
 }
 

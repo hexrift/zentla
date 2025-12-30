@@ -21,18 +21,20 @@ model Workspace {
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   // Relations
-  customers        Customer[]
-  offers           Offer[]
-  subscriptions    Subscription[]
-  entitlements     Entitlement[]
-  checkouts        Checkout[]
-  webhookEndpoints WebhookEndpoint[]
-  webhookEvents    WebhookEvent[]
-  apiKeys          ApiKey[]
-  auditLogs        AuditLog[]
-  providerRefs     ProviderRef[]
-  outboxEvents     OutboxEvent[]
-  deadLetterEvents DeadLetterEvent[]
+  customers         Customer[]
+  offers            Offer[]
+  promotions        Promotion[]
+  subscriptions     Subscription[]
+  entitlements      Entitlement[]
+  checkouts         Checkout[]
+  appliedPromotions AppliedPromotion[]
+  webhookEndpoints  WebhookEndpoint[]
+  webhookEvents     WebhookEvent[]
+  apiKeys           ApiKey[]
+  auditLogs         AuditLog[]
+  providerRefs      ProviderRef[]
+  outboxEvents      OutboxEvent[]
+  deadLetterEvents  DeadLetterEvent[]
 
   @@map("workspace")
 }
@@ -59,10 +61,11 @@ model Customer {
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   // Relations
-  workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  subscriptions Subscription[]
-  entitlements  Entitlement[]
-  checkouts     Checkout[]
+  workspace         Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  subscriptions     Subscription[]
+  entitlements      Entitlement[]
+  checkouts         Checkout[]
+  appliedPromotions AppliedPromotion[]
 
   @@unique([workspaceId, email])
   @@unique([workspaceId, externalId])
@@ -105,13 +108,14 @@ enum OfferStatus {
 }
 
 model OfferVersion {
-  id          String             @id @default(uuid()) @db.Uuid
-  offerId     String             @map("offer_id") @db.Uuid
-  version     Int
-  status      OfferVersionStatus @default(draft)
-  config      Json
-  publishedAt DateTime?          @map("published_at") @db.Timestamptz
-  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  id            String             @id @default(uuid()) @db.Uuid
+  offerId       String             @map("offer_id") @db.Uuid
+  version       Int
+  status        OfferVersionStatus @default(draft)
+  config        Json
+  publishedAt   DateTime?          @map("published_at") @db.Timestamptz
+  effectiveFrom DateTime?          @map("effective_from") @db.Timestamptz
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz
 
   // Relations
   offer              Offer          @relation(fields: [offerId], references: [id], onDelete: Cascade)
@@ -122,6 +126,7 @@ model OfferVersion {
   @@unique([offerId, version])
   @@index([offerId])
   @@index([offerId, status])
+  @@index([offerId, status, effectiveFrom])
   @@map("offer_version")
 }
 
@@ -131,6 +136,95 @@ enum OfferVersionStatus {
   archived
 
   @@map("offer_version_status")
+}
+
+// ============================================================================
+// PROMOTIONS & VERSIONING
+// ============================================================================
+
+model Promotion {
+  id               String          @id @default(uuid()) @db.Uuid
+  workspaceId      String          @map("workspace_id") @db.Uuid
+  code             String          @db.VarChar(50)
+  name             String          @db.VarChar(100)
+  description      String?         @db.VarChar(1000)
+  status           PromotionStatus @default(active)
+  currentVersionId String?         @unique @map("current_version_id") @db.Uuid
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime        @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  workspace         Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  versions          PromotionVersion[]
+  currentVersion    PromotionVersion?  @relation("CurrentPromotionVersion", fields: [currentVersionId], references: [id])
+  appliedPromotions AppliedPromotion[]
+
+  @@unique([workspaceId, code])
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@map("promotion")
+}
+
+enum PromotionStatus {
+  active
+  archived
+
+  @@map("promotion_status")
+}
+
+model PromotionVersion {
+  id          String                 @id @default(uuid()) @db.Uuid
+  promotionId String                 @map("promotion_id") @db.Uuid
+  version     Int
+  status      PromotionVersionStatus @default(draft)
+  config      Json
+  publishedAt DateTime?              @map("published_at") @db.Timestamptz
+  createdAt   DateTime               @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  promotion           Promotion          @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  currentForPromotion Promotion?         @relation("CurrentPromotionVersion")
+  appliedPromotions   AppliedPromotion[]
+
+  @@unique([promotionId, version])
+  @@index([promotionId])
+  @@index([promotionId, status])
+  @@map("promotion_version")
+}
+
+enum PromotionVersionStatus {
+  draft
+  published
+  archived
+
+  @@map("promotion_version_status")
+}
+
+model AppliedPromotion {
+  id                 String   @id @default(uuid()) @db.Uuid
+  workspaceId        String   @map("workspace_id") @db.Uuid
+  promotionId        String   @map("promotion_id") @db.Uuid
+  promotionVersionId String   @map("promotion_version_id") @db.Uuid
+  checkoutId         String?  @map("checkout_id") @db.Uuid
+  subscriptionId     String?  @map("subscription_id") @db.Uuid
+  customerId         String   @map("customer_id") @db.Uuid
+  discountAmount     Int      @map("discount_amount")
+  appliedAt          DateTime @default(now()) @map("applied_at") @db.Timestamptz
+
+  // Relations
+  workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  promotion        Promotion        @relation(fields: [promotionId], references: [id])
+  promotionVersion PromotionVersion @relation(fields: [promotionVersionId], references: [id])
+  checkout         Checkout?        @relation(fields: [checkoutId], references: [id])
+  subscription     Subscription?    @relation(fields: [subscriptionId], references: [id])
+  customer         Customer         @relation(fields: [customerId], references: [id])
+
+  @@index([workspaceId])
+  @@index([promotionId])
+  @@index([customerId])
+  @@index([checkoutId])
+  @@index([subscriptionId])
+  @@map("applied_promotion")
 }
 
 // ============================================================================
@@ -156,11 +250,12 @@ model Subscription {
   updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz
 
   // Relations
-  workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  customer     Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  offer        Offer          @relation(fields: [offerId], references: [id])
-  offerVersion OfferVersion   @relation(fields: [offerVersionId], references: [id])
-  entitlements Entitlement[]
+  workspace         Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer          Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  offer             Offer              @relation(fields: [offerId], references: [id])
+  offerVersion      OfferVersion       @relation(fields: [offerVersionId], references: [id])
+  entitlements      Entitlement[]
+  appliedPromotions AppliedPromotion[]
 
   @@index([workspaceId])
   @@index([customerId])
@@ -241,10 +336,11 @@ model Checkout {
   updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz
 
   // Relations
-  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  customer     Customer?     @relation(fields: [customerId], references: [id])
-  offer        Offer         @relation(fields: [offerId], references: [id])
-  offerVersion OfferVersion  @relation(fields: [offerVersionId], references: [id])
+  workspace         Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer          Customer?          @relation(fields: [customerId], references: [id])
+  offer             Offer              @relation(fields: [offerId], references: [id])
+  offerVersion      OfferVersion       @relation(fields: [offerVersionId], references: [id])
+  appliedPromotions AppliedPromotion[]
 
   @@index([workspaceId])
   @@index([workspaceId, status])
@@ -437,6 +533,8 @@ enum EntityType {
   checkout
   product
   price
+  coupon
+  promotion_code
 
   @@map("entity_type")
 }

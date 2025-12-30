@@ -12,58 +12,136 @@ import {
   HttpStatus,
   NotFoundException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiSecurity,
+  ApiParam,
+} from '@nestjs/swagger';
 import { CustomersService } from './customers.service';
 import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
-import { IsString, IsEmail, IsOptional, IsInt, Min, Max, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsObject,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+// ============================================================================
+// REQUEST DTOs
+// ============================================================================
+
 class CreateCustomerDto {
-  @ApiProperty({ description: 'Customer email' })
+  @ApiProperty({
+    description: `Customer's email address. Used for:
+- Billing communications from Stripe
+- Account identification
+- Pre-filling checkout forms
+
+**Uniqueness:** Email is unique per workspace. Creating a customer with an existing email will fail.`,
+    example: 'customer@example.com',
+    format: 'email',
+  })
   @IsEmail()
   email!: string;
 
-  @ApiPropertyOptional({ description: 'Customer name' })
+  @ApiPropertyOptional({
+    description: 'Customer display name. Shown in admin dashboards and may be used in billing communications.',
+    example: 'Acme Corporation',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiPropertyOptional({ description: 'External ID for integration' })
+  @ApiPropertyOptional({
+    description: `Your application's unique identifier for this customer. Use this to link Relay customers to users in your system.
+
+**Use cases:**
+- Store your database user ID
+- Link to CRM contact ID
+- Maintain sync with your authentication system
+
+**Uniqueness:** External ID is unique per workspace if provided.`,
+    example: 'user_12345',
+    maxLength: 255,
+  })
   @IsOptional()
   @IsString()
   externalId?: string;
 
-  @ApiPropertyOptional({ description: 'Additional metadata' })
+  @ApiPropertyOptional({
+    description: `Arbitrary key-value data stored with the customer. Useful for:
+- Custom attributes (company size, industry, plan tier)
+- Integration data
+- Feature flags specific to this customer
+
+**Example:**
+\`\`\`json
+{
+  "company_size": "50-100",
+  "industry": "saas",
+  "referral_source": "product_hunt"
+}
+\`\`\``,
+    example: { company_size: '50-100', source: 'website' },
+  })
   @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
 }
 
 class UpdateCustomerDto {
-  @ApiPropertyOptional({ description: 'Customer email' })
+  @ApiPropertyOptional({
+    description: 'Updated email address. Must be unique within the workspace.',
+    example: 'newemail@example.com',
+    format: 'email',
+  })
   @IsOptional()
   @IsEmail()
   email?: string;
 
-  @ApiPropertyOptional({ description: 'Customer name' })
+  @ApiPropertyOptional({
+    description: 'Updated customer name.',
+    example: 'Acme Corp (Enterprise)',
+    maxLength: 200,
+  })
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiPropertyOptional({ description: 'External ID for integration' })
+  @ApiPropertyOptional({
+    description: 'Updated external ID. Must be unique within the workspace if provided.',
+    example: 'user_67890',
+    maxLength: 255,
+  })
   @IsOptional()
   @IsString()
   externalId?: string;
 
-  @ApiPropertyOptional({ description: 'Additional metadata' })
+  @ApiPropertyOptional({
+    description: 'Updated metadata. This replaces the entire metadata object (not a partial merge). To keep existing values, include them in the update.',
+    example: { company_size: '100-500', upgraded: true },
+  })
   @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
 }
 
 class QueryCustomersDto {
-  @ApiPropertyOptional({ default: 20 })
+  @ApiPropertyOptional({
+    description: 'Maximum number of customers to return per page.',
+    example: 20,
+    default: 20,
+    minimum: 1,
+    maximum: 100,
+  })
   @IsOptional()
   @Transform(({ value }) => parseInt(value as string, 10))
   @IsInt()
@@ -71,27 +149,52 @@ class QueryCustomersDto {
   @Max(100)
   limit?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Pagination cursor from a previous response. Pass `nextCursor` from the last response to fetch the next page.',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @IsOptional()
   @IsString()
   cursor?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Filter by exact email match. Useful for finding a specific customer by their email address.',
+    example: 'customer@example.com',
+  })
   @IsOptional()
   @IsString()
   email?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Filter by exact external ID match. Useful for finding a customer by your system ID.',
+    example: 'user_12345',
+  })
   @IsOptional()
   @IsString()
   externalId?: string;
 }
 
 class CreatePortalSessionDto {
-  @ApiProperty({ description: 'URL to redirect after portal session' })
+  @ApiProperty({
+    description: `URL to redirect the customer to after they exit the billing portal.
+
+**The portal allows customers to:**
+- View and update payment methods
+- View invoice history
+- Manage subscription (if configured in Stripe)
+
+**Requirements:**
+- Must be a valid HTTPS URL (HTTP allowed for localhost)
+- Should be a page in your application`,
+    example: 'https://app.example.com/settings/billing',
+  })
   @IsString()
   returnUrl!: string;
 }
+
+// ============================================================================
+// CONTROLLER
+// ============================================================================
 
 @ApiTags('customers')
 @ApiSecurity('api-key')
@@ -101,8 +204,45 @@ export class CustomersController {
 
   @Get()
   @MemberOnly()
-  @ApiOperation({ summary: 'List customers' })
-  @ApiResponse({ status: 200, description: 'List of customers' })
+  @ApiOperation({
+    summary: 'List customers',
+    description: `Retrieves a paginated list of customers in your workspace.
+
+**Use this to:**
+- Display customers in your admin dashboard
+- Search for customers by email or external ID
+- Build customer management interfaces
+
+**Pagination:** Results are returned in pages of up to 100 items. Use the \`nextCursor\` from the response to fetch subsequent pages.
+
+**Filtering:** Use \`email\` for exact email match or \`externalId\` to find customers by your system's identifier.`,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of customers',
+    schema: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', format: 'uuid', description: 'Relay customer ID' },
+              email: { type: 'string', format: 'email' },
+              name: { type: 'string', nullable: true },
+              externalId: { type: 'string', nullable: true, description: 'Your system ID' },
+              metadata: { type: 'object' },
+              createdAt: { type: 'string', format: 'date-time' },
+              updatedAt: { type: 'string', format: 'date-time' },
+            },
+          },
+        },
+        hasMore: { type: 'boolean', description: 'True if more pages exist' },
+        nextCursor: { type: 'string', nullable: true },
+      },
+    },
+  })
   async findAll(
     @WorkspaceId() workspaceId: string,
     @Query() query: QueryCustomersDto
@@ -117,9 +257,45 @@ export class CustomersController {
 
   @Get(':id')
   @MemberOnly()
-  @ApiOperation({ summary: 'Get customer by ID' })
-  @ApiResponse({ status: 200, description: 'Customer details' })
-  @ApiResponse({ status: 404, description: 'Customer not found' })
+  @ApiOperation({
+    summary: 'Get customer details',
+    description: `Retrieves complete details for a single customer.
+
+**Use this to:**
+- Display customer profile in your admin UI
+- Get customer metadata
+- Check external ID mapping
+
+**Response includes:**
+- Customer profile (email, name, external ID)
+- Custom metadata
+- Timestamps`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Customer ID (UUID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer details',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', format: 'uuid' },
+        email: { type: 'string', format: 'email' },
+        name: { type: 'string', nullable: true },
+        externalId: { type: 'string', nullable: true },
+        metadata: { type: 'object' },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer not found in this workspace',
+  })
   async findOne(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string
@@ -133,8 +309,43 @@ export class CustomersController {
 
   @Post()
   @AdminOnly()
-  @ApiOperation({ summary: 'Create a new customer' })
-  @ApiResponse({ status: 201, description: 'Customer created' })
+  @ApiOperation({
+    summary: 'Create customer',
+    description: `Creates a new customer in your workspace.
+
+**When to create customers explicitly:**
+- Pre-provisioning accounts before they subscribe
+- Importing existing customers from another system
+- Creating customer records for manual billing
+
+**Note:** Customers are also created automatically when:
+- A checkout session completes for a new email
+- Webhooks sync a new Stripe customer
+
+**Side effects:**
+- Creates customer record in Relay database
+- Creates corresponding Stripe customer
+- Stores provider reference for future syncing`,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Customer created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', format: 'uuid', description: 'New customer ID' },
+        email: { type: 'string', format: 'email' },
+        name: { type: 'string', nullable: true },
+        externalId: { type: 'string', nullable: true },
+        metadata: { type: 'object' },
+        createdAt: { type: 'string', format: 'date-time' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request (e.g., duplicate email or external ID)',
+  })
   async create(
     @WorkspaceId() workspaceId: string,
     @Body() dto: CreateCustomerDto
@@ -144,8 +355,39 @@ export class CustomersController {
 
   @Patch(':id')
   @AdminOnly()
-  @ApiOperation({ summary: 'Update customer' })
-  @ApiResponse({ status: 200, description: 'Customer updated' })
+  @ApiOperation({
+    summary: 'Update customer',
+    description: `Updates an existing customer's information.
+
+**Updatable fields:**
+- \`email\`: Must remain unique within workspace
+- \`name\`: Display name
+- \`externalId\`: Your system identifier (must remain unique)
+- \`metadata\`: Custom key-value data (replaces entire object)
+
+**Side effects:**
+- Updates Relay customer record
+- Syncs changes to Stripe customer
+
+**Note on metadata:** The metadata update replaces the entire object. To preserve existing keys, include them in your update request.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Customer ID to update',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Customer updated successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer not found',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request (e.g., duplicate email or external ID)',
+  })
   async update(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string,
@@ -157,8 +399,42 @@ export class CustomersController {
   @Delete(':id')
   @AdminOnly()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete customer' })
-  @ApiResponse({ status: 204, description: 'Customer deleted' })
+  @ApiOperation({
+    summary: 'Delete customer',
+    description: `Permanently deletes a customer and all associated data.
+
+**Warning:** This is a destructive operation that cannot be undone.
+
+**What gets deleted:**
+- Customer record in Relay
+- Associated entitlements
+
+**What is NOT deleted:**
+- Stripe customer (preserved for billing records)
+- Historical subscription data (preserved for compliance)
+- Invoices and payment history (in Stripe)
+
+**Constraints:**
+- Cannot delete customers with active subscriptions
+- Cancel all subscriptions first before deleting`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Customer ID to delete',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Customer deleted successfully (no content)',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer not found',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Cannot delete customer with active subscriptions',
+  })
   async delete(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string
@@ -168,9 +444,55 @@ export class CustomersController {
 
   @Post(':id/portal')
   @MemberOnly()
-  @ApiOperation({ summary: 'Create customer portal session' })
-  @ApiResponse({ status: 201, description: 'Portal session created with redirect URL' })
-  @ApiResponse({ status: 404, description: 'Customer not found' })
+  @ApiOperation({
+    summary: 'Create billing portal session',
+    description: `Creates a Stripe Customer Portal session for self-service billing management.
+
+**Portal capabilities (configurable in Stripe Dashboard):**
+- View and download invoices
+- Update payment methods
+- Update billing information
+- Cancel or modify subscriptions (if enabled)
+
+**Workflow:**
+1. Call this endpoint with customer ID and return URL
+2. Redirect customer to the returned \`url\`
+3. Customer manages their billing
+4. Customer clicks "back" and is redirected to your \`returnUrl\`
+
+**Session lifecycle:**
+- Sessions expire after a short time if not used
+- Each session is single-use
+
+**Security:** Only authenticated customers should be able to access their own portal. Verify the customer ID belongs to the requesting user.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Customer ID to create portal session for',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Portal session created',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'Portal session ID' },
+        url: {
+          type: 'string',
+          format: 'uri',
+          description: 'URL to redirect customer to',
+          example: 'https://billing.stripe.com/session/...',
+        },
+        returnUrl: { type: 'string', description: 'Where customer returns after' },
+        createdAt: { type: 'string', format: 'date-time' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Customer not found or has no Stripe customer record',
+  })
   async createPortalSession(
     @WorkspaceId() workspaceId: string,
     @Param('id', ParseUUIDPipe) id: string,

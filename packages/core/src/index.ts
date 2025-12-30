@@ -2,6 +2,7 @@
 export * from './domain/workspace';
 export * from './domain/customer';
 export * from './domain/offer';
+export * from './domain/promotion';
 export * from './domain/subscription';
 export * from './domain/entitlement';
 export * from './domain/checkout';

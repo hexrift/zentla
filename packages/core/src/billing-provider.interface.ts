@@ -1,4 +1,5 @@
 import type { Offer, OfferVersion } from './domain/offer';
+import type { Promotion, PromotionVersion } from './domain/promotion';
 import type { ProviderRef } from './domain/provider-ref';
 import type {
   CheckoutSession,
@@ -62,13 +63,25 @@ export interface BillingProvider {
   verifyWebhook(payload: Buffer, signature: string): boolean;
   normalizeEvent(rawEvent: unknown): DomainEvent | null;
 
-  // Promo Codes
+  // Promotions
+  syncPromotion?(
+    promotion: Promotion,
+    version: PromotionVersion,
+    existingCouponRef?: ProviderRef
+  ): Promise<SyncPromotionResult>;
+
+  // Promo Codes (legacy - prefer syncPromotion)
   validatePromoCode?(code: string, offerId: string): Promise<PromoCodeValidation>;
 }
 
 export interface SyncOfferResult {
   productRef: ProviderRef;
   priceRef: ProviderRef;
+}
+
+export interface SyncPromotionResult {
+  couponRef: ProviderRef;
+  promotionCodeRef: ProviderRef;
 }
 
 export interface ChangeSubscriptionResult {

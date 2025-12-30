@@ -18,7 +18,9 @@ export type EntityType =
   | 'subscription'
   | 'checkout'
   | 'product'
-  | 'price';
+  | 'price'
+  | 'coupon'
+  | 'promotion_code';
 
 export interface CreateProviderRefInput {
   workspaceId: string;

@@ -2,10 +2,14 @@ import Stripe from 'stripe';
 import type {
   BillingProvider,
   SyncOfferResult,
+  SyncPromotionResult,
   ChangeSubscriptionResult,
   PromoCodeValidation,
   Offer,
   OfferVersion,
+  Promotion,
+  PromotionVersion,
+  PromotionConfig,
   ProviderRef,
   CheckoutSession,
   CreateCheckoutParams,
@@ -193,7 +197,11 @@ export class StripeAdapter implements BillingProvider {
       sessionParams.customer_email = params.customerEmail;
     }
 
-    if (params.allowPromotionCodes) {
+    if (params.promotionCodeId) {
+      // Apply a specific promotion code
+      sessionParams.discounts = [{ promotion_code: params.promotionCodeId }];
+    } else if (params.allowPromotionCodes) {
+      // Allow user to enter a code at checkout
       sessionParams.allow_promotion_codes = true;
     }
 
@@ -333,6 +341,147 @@ export class StripeAdapter implements BillingProvider {
     } catch {
       return { valid: false, code };
     }
+  }
+
+  async syncPromotion(
+    promotion: Promotion,
+    version: PromotionVersion,
+    existingCouponRef?: ProviderRef
+  ): Promise<SyncPromotionResult> {
+    const config = version.config as unknown as PromotionConfig;
+
+    let coupon: Stripe.Coupon;
+    let promotionCode: Stripe.PromotionCode;
+
+    // Build coupon params
+    const couponParams: Stripe.CouponCreateParams = {
+      name: promotion.name,
+      metadata: {
+        relay_promotion_id: promotion.id,
+        relay_promotion_version_id: version.id,
+        relay_workspace_id: promotion.workspaceId,
+      },
+    };
+
+    // Set discount type
+    if (config.discountType === 'percent') {
+      couponParams.percent_off = config.discountValue;
+    } else if (config.discountType === 'fixed_amount') {
+      couponParams.amount_off = config.discountValue;
+      couponParams.currency = config.currency?.toLowerCase() ?? 'usd';
+    }
+    // Note: free_trial_days is handled at checkout, not as a coupon
+
+    // Set duration
+    if (config.duration === 'once') {
+      couponParams.duration = 'once';
+    } else if (config.duration === 'repeating' && config.durationInMonths) {
+      couponParams.duration = 'repeating';
+      couponParams.duration_in_months = config.durationInMonths;
+    } else {
+      couponParams.duration = 'forever';
+    }
+
+    // Set redemption limits (on coupon level)
+    if (config.maxRedemptions) {
+      couponParams.max_redemptions = config.maxRedemptions;
+    }
+
+    // Set expiration
+    if (config.validUntil) {
+      couponParams.redeem_by = Math.floor(new Date(config.validUntil).getTime() / 1000);
+    }
+
+    if (existingCouponRef) {
+      // Update existing coupon metadata only (most coupon fields are immutable in Stripe)
+      coupon = await this.stripe.coupons.update(existingCouponRef.externalId, {
+        name: promotion.name,
+        metadata: couponParams.metadata,
+      });
+    } else {
+      // Create new coupon
+      coupon = await this.stripe.coupons.create(couponParams);
+    }
+
+    // Create promotion code (always create new one for the promotion code)
+    const promotionCodeParams: Stripe.PromotionCodeCreateParams = {
+      coupon: coupon.id,
+      code: promotion.code,
+      active: true,
+      metadata: {
+        relay_promotion_id: promotion.id,
+        relay_promotion_version_id: version.id,
+        relay_workspace_id: promotion.workspaceId,
+      },
+    };
+
+    // Set per-customer limits
+    if (config.maxRedemptionsPerCustomer) {
+      promotionCodeParams.restrictions = {
+        ...promotionCodeParams.restrictions,
+        first_time_transaction: config.maxRedemptionsPerCustomer === 1,
+      };
+    }
+
+    // Set minimum amount
+    if (config.minimumAmount) {
+      promotionCodeParams.restrictions = {
+        ...promotionCodeParams.restrictions,
+        minimum_amount: config.minimumAmount,
+        minimum_amount_currency: config.currency?.toLowerCase() ?? 'usd',
+      };
+    }
+
+    // Set max redemptions on promotion code
+    if (config.maxRedemptions) {
+      promotionCodeParams.max_redemptions = config.maxRedemptions;
+    }
+
+    // Set validity dates
+    if (config.validUntil) {
+      promotionCodeParams.expires_at = Math.floor(new Date(config.validUntil).getTime() / 1000);
+    }
+
+    try {
+      promotionCode = await this.stripe.promotionCodes.create(promotionCodeParams);
+    } catch (error) {
+      // If promotion code already exists, try to find and update it
+      const existingCodes = await this.stripe.promotionCodes.list({
+        code: promotion.code,
+        limit: 1,
+      });
+
+      if (existingCodes.data[0]) {
+        // Update the existing promotion code (limited fields can be updated)
+        promotionCode = await this.stripe.promotionCodes.update(existingCodes.data[0].id, {
+          active: true,
+          metadata: promotionCodeParams.metadata,
+        });
+      } else {
+        throw error;
+      }
+    }
+
+    return {
+      couponRef: {
+        id: crypto.randomUUID(),
+        workspaceId: promotion.workspaceId,
+        entityType: 'coupon',
+        entityId: promotion.id,
+        provider: 'stripe',
+        externalId: coupon.id,
+        createdAt: new Date(),
+      },
+      promotionCodeRef: {
+        id: crypto.randomUUID(),
+        workspaceId: promotion.workspaceId,
+        entityType: 'promotion_code',
+        entityId: version.id,
+        provider: 'stripe',
+        externalId: promotionCode.id,
+        createdAt: new Date(),
+      },
+    };
   }
 
   private mapSubscription(subscription: Stripe.Subscription): SubscriptionData {
