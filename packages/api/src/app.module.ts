@@ -32,6 +32,7 @@ import { WorkspaceGuard } from './auth/guards/workspace.guard';
 // Interceptors
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { AuditInterceptor } from './audit/audit.interceptor';
 
 // Middleware
 import { IdempotencyMiddleware } from './common/middleware/idempotency.middleware';
@@ -102,6 +103,10 @@ import { configuration, validationSchema } from './config/configuration';
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditInterceptor,
     },
     // Global guards (order matters)
     {
