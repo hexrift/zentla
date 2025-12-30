@@ -149,6 +149,16 @@ export class RelayClient {
       params?: { cancelAtPeriodEnd?: boolean; reason?: string }
     ): Promise<Subscription> =>
       this.request('POST', `/subscriptions/${id}/cancel`, params),
+
+    change: (
+      id: string,
+      params: {
+        newOfferId: string;
+        newOfferVersionId?: string;
+        prorationBehavior?: 'create_prorations' | 'none' | 'always_invoice';
+      }
+    ): Promise<Subscription> =>
+      this.request('POST', `/subscriptions/${id}/change`, params),
   };
 
   // Checkout

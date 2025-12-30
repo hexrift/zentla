@@ -13,7 +13,9 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { SubscriptionsService } from './subscriptions.service';
 import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
-import { IsString, IsOptional, IsInt, Min, Max, IsEnum, IsBoolean, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsInt, Min, Max, IsEnum, IsBoolean, Matches } from 'class-validator';
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -33,12 +35,12 @@ class QuerySubscriptionsDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsUUID()
+  @Matches(UUID_REGEX, { message: 'customerId must be a valid UUID' })
   customerId?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsUUID()
+  @Matches(UUID_REGEX, { message: 'offerId must be a valid UUID' })
   offerId?: string;
 
   @ApiPropertyOptional({ enum: ['active', 'trialing', 'canceled', 'past_due', 'paused'] })
@@ -61,12 +63,12 @@ class CancelSubscriptionDto {
 
 class ChangeSubscriptionDto {
   @ApiProperty({ description: 'New offer ID' })
-  @IsUUID()
+  @Matches(UUID_REGEX, { message: 'newOfferId must be a valid UUID' })
   newOfferId!: string;
 
   @ApiPropertyOptional({ description: 'New offer version ID' })
   @IsOptional()
-  @IsUUID()
+  @Matches(UUID_REGEX, { message: 'newOfferVersionId must be a valid UUID' })
   newOfferVersionId?: string;
 
   @ApiPropertyOptional({ enum: ['create_prorations', 'none', 'always_invoice'] })
@@ -130,15 +132,15 @@ export class SubscriptionsController {
   @Post(':id/change')
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Change subscription plan' })
-  @ApiResponse({ status: 200, description: 'Subscription changed' })
+  @ApiOperation({ summary: 'Change subscription plan (upgrade/downgrade)' })
+  @ApiResponse({ status: 200, description: 'Subscription plan changed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request or subscription not changeable' })
+  @ApiResponse({ status: 404, description: 'Subscription or offer not found' })
   async change(
-    @WorkspaceId() _workspaceId: string,
-    @Param('id', ParseUUIDPipe) _id: string,
-    @Body() _dto: ChangeSubscriptionDto
+    @WorkspaceId() workspaceId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ChangeSubscriptionDto
   ) {
-    // This would integrate with the billing provider
-    // For now, return a not implemented error
-    throw new Error('Subscription change requires billing provider integration');
+    return this.subscriptionsService.change(workspaceId, id, dto);
   }
 }

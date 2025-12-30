@@ -201,6 +201,22 @@ export class EntitlementsService {
     });
   }
 
+  async refreshExpirationForSubscription(
+    workspaceId: string,
+    subscriptionId: string,
+    newExpiresAt: Date
+  ): Promise<void> {
+    await this.prisma.entitlement.updateMany({
+      where: {
+        workspaceId,
+        subscriptionId,
+      },
+      data: {
+        expiresAt: newExpiresAt,
+      },
+    });
+  }
+
   private parseEntitlementValue(
     value: string,
     valueType: EntitlementValueType

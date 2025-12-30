@@ -4,6 +4,7 @@ import { OffersPage } from './pages/OffersPage';
 import { OfferNewPage } from './pages/OfferNewPage';
 import { OfferDetailPage } from './pages/OfferDetailPage';
 import { SubscriptionsPage } from './pages/SubscriptionsPage';
+import { SubscriptionDetailPage } from './pages/SubscriptionDetailPage';
 import { CustomersPage } from './pages/CustomersPage';
 import { WebhooksPage } from './pages/WebhooksPage';
 import { ApiKeysPage } from './pages/ApiKeysPage';
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="offers/new" element={<OfferNewPage />} />
         <Route path="offers/:id" element={<OfferDetailPage />} />
         <Route path="subscriptions" element={<SubscriptionsPage />} />
+        <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="webhooks" element={<WebhooksPage />} />
         <Route path="api-keys" element={<ApiKeysPage />} />

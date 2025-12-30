@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 
 interface Subscription {
@@ -11,6 +12,7 @@ interface Subscription {
 }
 
 export function SubscriptionsPage() {
+  const navigate = useNavigate();
   const { data, isLoading, error } = useQuery({
     queryKey: ['subscriptions'],
     queryFn: () => api.subscriptions.list(),
@@ -45,7 +47,11 @@ export function SubscriptionsPage() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {data?.data?.map((sub: Subscription) => (
-                <tr key={sub.id} className="hover:bg-gray-50">
+                <tr
+                  key={sub.id}
+                  onClick={() => navigate(`/subscriptions/${sub.id}`)}
+                  className="hover:bg-gray-50 cursor-pointer"
+                >
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-gray-900">
                       {sub.customer.email}

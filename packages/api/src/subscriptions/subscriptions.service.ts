@@ -1,5 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
+import { BillingService } from '../billing/billing.service';
+import { ProviderRefService } from '../billing/provider-ref.service';
+import { OffersService } from '../offers/offers.service';
+import { EntitlementsService } from '../entitlements/entitlements.service';
 import type { Subscription, SubscriptionStatus, Prisma } from '@prisma/client';
 import type { PaginatedResult } from '@relay/database';
 
@@ -42,7 +46,15 @@ export interface ChangeSubscriptionDto {
 
 @Injectable()
 export class SubscriptionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(SubscriptionsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly billingService: BillingService,
+    private readonly providerRefService: ProviderRefService,
+    private readonly offersService: OffersService,
+    private readonly entitlementsService: EntitlementsService,
+  ) {}
 
   async findById(
     workspaceId: string,
@@ -130,6 +142,7 @@ export class SubscriptionsService {
     const now = new Date();
 
     if (dto.cancelAtPeriodEnd) {
+      // Schedule cancellation at period end - entitlements remain until then
       return this.prisma.subscription.update({
         where: { id },
         data: {
@@ -142,7 +155,8 @@ export class SubscriptionsService {
       });
     }
 
-    return this.prisma.subscription.update({
+    // Immediate cancellation - revoke entitlements now
+    const canceledSubscription = await this.prisma.subscription.update({
       where: { id },
       data: {
         status: 'canceled',
@@ -154,6 +168,12 @@ export class SubscriptionsService {
         },
       },
     });
+
+    // Revoke all entitlements for immediate cancellation
+    await this.entitlementsService.revokeAllForSubscription(workspaceId, id);
+    this.logger.log(`Revoked entitlements for canceled subscription ${id}`);
+
+    return canceledSubscription;
   }
 
   async updateStatus(
@@ -190,5 +210,126 @@ export class SubscriptionsService {
         offerVersion: true,
       },
     });
+  }
+
+  async change(
+    workspaceId: string,
+    id: string,
+    dto: ChangeSubscriptionDto
+  ): Promise<Subscription> {
+    // 1. Verify subscription exists and is changeable
+    const subscription = await this.prisma.subscription.findFirst({
+      where: { id, workspaceId },
+      include: {
+        offer: true,
+        offerVersion: true,
+      },
+    });
+
+    if (!subscription) {
+      throw new NotFoundException(`Subscription ${id} not found`);
+    }
+
+    if (!['active', 'trialing'].includes(subscription.status)) {
+      throw new BadRequestException(
+        `Cannot change subscription in '${subscription.status}' status. Only active or trialing subscriptions can be changed.`
+      );
+    }
+
+    // 2. Validate the new offer exists and has a published version
+    const newOffer = await this.offersService.findById(workspaceId, dto.newOfferId);
+    if (!newOffer) {
+      throw new NotFoundException(`Offer ${dto.newOfferId} not found`);
+    }
+
+    // Get the target version (either specified or the current published version)
+    let newVersion = dto.newOfferVersionId
+      ? await this.offersService.getVersion(workspaceId, dto.newOfferVersionId)
+      : await this.offersService.getPublishedVersion(workspaceId, dto.newOfferId);
+
+    if (!newVersion) {
+      throw new BadRequestException(
+        dto.newOfferVersionId
+          ? `Version ${dto.newOfferVersionId} not found`
+          : `Offer ${dto.newOfferId} has no published version`
+      );
+    }
+
+    if (newVersion.status !== 'published') {
+      throw new BadRequestException(
+        `Cannot change to version ${newVersion.id} - only published versions can be used`
+      );
+    }
+
+    // 3. Check if Stripe is configured
+    if (!this.billingService.isConfigured('stripe')) {
+      throw new BadRequestException('Stripe billing provider is not configured');
+    }
+
+    // 4. Get the Stripe subscription ID
+    const stripeSubscriptionRef = await this.providerRefService.findByEntity(
+      workspaceId,
+      'subscription',
+      id,
+      'stripe'
+    );
+
+    if (!stripeSubscriptionRef) {
+      throw new BadRequestException(
+        `Subscription ${id} is not linked to Stripe. Cannot change plan.`
+      );
+    }
+
+    // 5. Get the new Stripe price ID
+    const newStripePriceId = await this.providerRefService.getStripePriceId(
+      workspaceId,
+      newVersion.id
+    );
+
+    if (!newStripePriceId) {
+      throw new BadRequestException(
+        `Offer version ${newVersion.id} is not synced to Stripe. Please sync the offer first.`
+      );
+    }
+
+    // 6. Change the subscription in Stripe
+    const stripeAdapter = this.billingService.getStripeAdapter();
+    const result = await stripeAdapter.changeSubscription(
+      {
+        ...stripeSubscriptionRef,
+        metadata: stripeSubscriptionRef.metadata as Record<string, unknown> | undefined,
+      },
+      {
+        newOfferId: dto.newOfferId,
+        newOfferVersionId: newStripePriceId, // Pass the Stripe price ID
+        prorationBehavior: dto.prorationBehavior,
+      }
+    );
+
+    this.logger.log(
+      `Changed subscription ${id} from offer ${subscription.offerId} to ${dto.newOfferId} (Stripe: ${stripeSubscriptionRef.externalId})`
+    );
+
+    // 7. Update the local subscription record
+    const updatedSubscription = await this.prisma.subscription.update({
+      where: { id },
+      data: {
+        offerId: dto.newOfferId,
+        offerVersionId: newVersion.id,
+        metadata: {
+          ...(subscription.metadata as Record<string, unknown>),
+          previousOfferId: subscription.offerId,
+          previousOfferVersionId: subscription.offerVersionId,
+          changedAt: new Date().toISOString(),
+          prorationBehavior: dto.prorationBehavior ?? 'create_prorations',
+        },
+      },
+    });
+
+    this.logger.log(
+      `Subscription ${id} plan changed. Effective date: ${result.effectiveDate.toISOString()}`
+    );
+
+    return updatedSubscription;
   }
 }

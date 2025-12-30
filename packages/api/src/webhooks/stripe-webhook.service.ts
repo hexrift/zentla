@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { BillingService } from '../billing/billing.service';
 import { ProviderRefService } from '../billing/provider-ref.service';
+import { OutboxService } from './outbox.service';
+import { EntitlementsService } from '../entitlements/entitlements.service';
 import type Stripe from 'stripe';
 import type { Prisma } from '@prisma/client';
 
@@ -13,6 +15,8 @@ export class StripeWebhookService {
     private readonly prisma: PrismaService,
     private readonly billingService: BillingService,
     private readonly providerRefService: ProviderRefService,
+    private readonly outboxService: OutboxService,
+    private readonly entitlementsService: EntitlementsService,
   ) {}
 
   async processWebhook(
@@ -28,20 +32,26 @@ export class StripeWebhookService {
 
     const event = stripeAdapter.parseWebhookEvent(rawBody, signature);
 
-    // Check if we've already processed this event
-    const existingEvent = await this.prisma.webhookEvent.findFirst({
-      where: {
-        eventType: event.id, // Using eventType field to store Stripe event ID
-      },
+    // Check if we've already processed this event (idempotency)
+    const existingEvent = await this.prisma.processedStripeEvent.findUnique({
+      where: { stripeEventId: event.id },
     });
 
     if (existingEvent) {
-      this.logger.log(`Skipping duplicate event: ${event.id}`);
+      this.logger.log(`Skipping duplicate Stripe event: ${event.id}`);
       return { received: true, eventId: event.id };
     }
 
     // Process the event based on type
     await this.handleEvent(event);
+
+    // Mark event as processed (for deduplication)
+    await this.prisma.processedStripeEvent.create({
+      data: {
+        stripeEventId: event.id,
+        eventType: event.type,
+      },
+    });
 
     return { received: true, eventId: event.id };
   }
@@ -279,6 +289,27 @@ export class StripeWebhookService {
     // Grant entitlements
     await this.grantEntitlements(workspaceId, subscription.id, customerRef.entityId, offerVersion);
 
+    // Create outbox event for webhook delivery
+    await this.outboxService.createEvent({
+      workspaceId,
+      eventType: 'subscription.created',
+      aggregateType: 'subscription',
+      aggregateId: subscription.id,
+      payload: {
+        subscription: {
+          id: subscription.id,
+          customerId: customerRef.entityId,
+          offerId: offerVersion.offerId,
+          offerVersionId: offerVersion.id,
+          status: subscription.status,
+          currentPeriodStart: subscription.currentPeriodStart,
+          currentPeriodEnd: subscription.currentPeriodEnd,
+          trialStart: subscription.trialStart,
+          trialEnd: subscription.trialEnd,
+        },
+      },
+    });
+
     this.logger.log(`Created subscription ${subscription.id} from Stripe ${stripeSubscription.id}`);
   }
 
@@ -341,7 +372,7 @@ export class StripeWebhookService {
     }
 
     // Update subscription
-    await this.prisma.subscription.update({
+    const updatedSubscription = await this.prisma.subscription.update({
       where: { id: subscriptionRef.entityId },
       data: {
         status: this.mapStripeStatus(stripeSubscription.status),
@@ -353,6 +384,24 @@ export class StripeWebhookService {
         canceledAt: stripeSubscription.canceled_at
           ? new Date(stripeSubscription.canceled_at * 1000)
           : null,
+      },
+    });
+
+    // Create outbox event for webhook delivery
+    await this.outboxService.createEvent({
+      workspaceId: subscriptionRef.workspaceId,
+      eventType: 'subscription.updated',
+      aggregateType: 'subscription',
+      aggregateId: subscriptionRef.entityId,
+      payload: {
+        subscription: {
+          id: updatedSubscription.id,
+          customerId: updatedSubscription.customerId,
+          status: updatedSubscription.status,
+          currentPeriodStart: updatedSubscription.currentPeriodStart,
+          currentPeriodEnd: updatedSubscription.currentPeriodEnd,
+          cancelAt: updatedSubscription.cancelAt,
+        },
       },
     });
 
@@ -377,12 +426,36 @@ export class StripeWebhookService {
     }
 
     // Update subscription status
-    await this.prisma.subscription.update({
+    const canceledSubscription = await this.prisma.subscription.update({
       where: { id: subscriptionRef.entityId },
       data: {
         status: 'canceled',
         canceledAt: new Date(),
         endedAt: new Date(),
+      },
+    });
+
+    // Revoke all entitlements for this subscription
+    await this.entitlementsService.revokeAllForSubscription(
+      subscriptionRef.workspaceId,
+      subscriptionRef.entityId
+    );
+    this.logger.log(`Revoked entitlements for subscription ${subscriptionRef.entityId}`);
+
+    // Create outbox event for webhook delivery
+    await this.outboxService.createEvent({
+      workspaceId: subscriptionRef.workspaceId,
+      eventType: 'subscription.canceled',
+      aggregateType: 'subscription',
+      aggregateId: subscriptionRef.entityId,
+      payload: {
+        subscription: {
+          id: canceledSubscription.id,
+          customerId: canceledSubscription.customerId,
+          status: canceledSubscription.status,
+          canceledAt: canceledSubscription.canceledAt,
+          endedAt: canceledSubscription.endedAt,
+        },
       },
     });
 
@@ -413,12 +486,41 @@ export class StripeWebhookService {
     // Update subscription period
     if (invoice.lines.data[0]) {
       const line = invoice.lines.data[0];
+      const newPeriodEnd = new Date(line.period.end * 1000);
+
       await this.prisma.subscription.update({
         where: { id: subscriptionRef.entityId },
         data: {
           status: 'active',
           currentPeriodStart: new Date(line.period.start * 1000),
-          currentPeriodEnd: new Date(line.period.end * 1000),
+          currentPeriodEnd: newPeriodEnd,
+        },
+      });
+
+      // Refresh entitlement expiration dates for the new billing period
+      await this.entitlementsService.refreshExpirationForSubscription(
+        subscriptionRef.workspaceId,
+        subscriptionRef.entityId,
+        newPeriodEnd
+      );
+      this.logger.log(`Refreshed entitlement expiration for subscription ${subscriptionRef.entityId}`);
+
+      // Create outbox event for webhook delivery
+      await this.outboxService.createEvent({
+        workspaceId: subscriptionRef.workspaceId,
+        eventType: 'invoice.paid',
+        aggregateType: 'invoice',
+        aggregateId: invoice.id ?? subscriptionRef.entityId,
+        payload: {
+          invoice: {
+            id: invoice.id,
+            subscriptionId: subscriptionRef.entityId,
+            amountPaid: invoice.amount_paid,
+            amountDue: invoice.amount_due,
+            currency: invoice.currency,
+            periodStart: new Date(line.period.start * 1000),
+            periodEnd: new Date(line.period.end * 1000),
+          },
         },
       });
     }
@@ -452,6 +554,26 @@ export class StripeWebhookService {
       where: { id: subscriptionRef.entityId },
       data: {
         status: 'past_due',
+      },
+    });
+
+    // Create outbox event for webhook delivery
+    await this.outboxService.createEvent({
+      workspaceId: subscriptionRef.workspaceId,
+      eventType: 'invoice.payment_failed',
+      aggregateType: 'invoice',
+      aggregateId: invoice.id ?? subscriptionRef.entityId,
+      payload: {
+        invoice: {
+          id: invoice.id,
+          subscriptionId: subscriptionRef.entityId,
+          amountDue: invoice.amount_due,
+          currency: invoice.currency,
+          attemptCount: invoice.attempt_count,
+          nextPaymentAttempt: invoice.next_payment_attempt
+            ? new Date(invoice.next_payment_attempt * 1000)
+            : null,
+        },
       },
     });
 

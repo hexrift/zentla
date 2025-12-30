@@ -95,6 +95,8 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(data),
       }),
+    getEntitlements: (customerId: string) =>
+      fetchApi<Record<string, unknown>>(`/customers/${customerId}/entitlements`),
   },
   webhooks: {
     list: (params?: { limit?: number; cursor?: string }) => {

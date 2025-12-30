@@ -362,6 +362,59 @@ POST /subscriptions/:id/cancel
 }
 ```
 
+**Behavior:**
+
+- `cancelAtPeriodEnd: true` - Subscription remains active until period end; entitlements preserved until then
+- `cancelAtPeriodEnd: false` - Immediate cancellation; entitlements revoked immediately
+
+### Change Subscription (Upgrade/Downgrade)
+
+```
+POST /subscriptions/:id/change
+```
+
+Changes the subscription to a different offer (plan upgrade or downgrade).
+
+**Request Body:**
+
+```json
+{
+  "newOfferId": "offer_xyz",
+  "newOfferVersionId": "ov_456",
+  "prorationBehavior": "create_prorations"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| newOfferId | string (UUID) | Yes | The offer to change to |
+| newOfferVersionId | string (UUID) | No | Specific version (defaults to published) |
+| prorationBehavior | string | No | `create_prorations`, `none`, or `always_invoice` |
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "sub_456",
+    "offerId": "offer_xyz",
+    "offerVersionId": "ov_456",
+    "status": "active",
+    "metadata": {
+      "previousOfferId": "offer_abc",
+      "previousOfferVersionId": "ov_123",
+      "changedAt": "2024-01-15T10:30:00Z"
+    }
+  }
+}
+```
+
+**Proration Behaviors:**
+
+- `create_prorations` (default) - Creates prorated charges/credits
+- `none` - No proration; new price applies at next billing cycle
+- `always_invoice` - Create prorations and immediately invoice
+
 ---
 
 ## Checkout

@@ -511,3 +511,18 @@ model IdempotencyKey {
   @@index([expiresAt])
   @@map("idempotency_key")
 }
+
+// ============================================================================
+// PROCESSED STRIPE EVENTS (for webhook deduplication)
+// ============================================================================
+
+model ProcessedStripeEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  stripeEventId String @unique @map("stripe_event_id") @db.VarChar(255)
+  eventType   String   @map("event_type") @db.VarChar(100)
+  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz
+
+  @@index([stripeEventId])
+  @@index([processedAt])
+  @@map("processed_stripe_event")
+}

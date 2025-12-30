@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { apiReference } from '@scalar/nestjs-api-reference';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
@@ -22,8 +23,23 @@ async function bootstrap(): Promise<void> {
   const port = configService.get<number>('PORT', 3000);
   const nodeEnv = configService.get<string>('NODE_ENV', 'development');
 
-  // Security
-  app.use(helmet());
+  // Security - configure CSP to allow Scalar docs in development
+  app.use(
+    helmet({
+      contentSecurityPolicy: nodeEnv === 'production'
+        ? undefined // Use default strict CSP in production
+        : {
+            directives: {
+              defaultSrc: ["'self'"],
+              scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+              styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://fonts.googleapis.com'],
+              fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+              imgSrc: ["'self'", 'data:', 'https:'],
+              connectSrc: ["'self'", 'https://cdn.jsdelivr.net'],
+            },
+          },
+    })
+  );
   app.enableCors({
     origin: nodeEnv === 'production'
       ? configService.get<string>('CORS_ORIGIN', 'https://app.relay.com')
@@ -56,7 +72,7 @@ async function bootstrap(): Promise<void> {
   // Global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // OpenAPI/Swagger
+  // OpenAPI/Swagger with Scalar UI
   if (nodeEnv !== 'production') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('Relay API')
@@ -82,7 +98,26 @@ async function bootstrap(): Promise<void> {
       .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);
-    SwaggerModule.setup('docs', app, document);
+
+    // Serve raw OpenAPI JSON (useful for SDK generation)
+    app.use('/openapi.json', (_req: unknown, res: { json: (doc: unknown) => void }) => {
+      res.json(document);
+    });
+
+    // Scalar API Reference - beautiful Stripe-like documentation
+    app.use(
+      '/docs',
+      apiReference({
+        content: document,
+        theme: 'purple',
+        layout: 'modern',
+        darkMode: true,
+        metaData: {
+          title: 'Relay API Documentation',
+          description: 'Provider-agnostic subscription commerce orchestration platform',
+        },
+      })
+    );
   }
 
   // Graceful shutdown
@@ -92,7 +127,8 @@ async function bootstrap(): Promise<void> {
   logger.log(`Relay API running on port ${port} in ${nodeEnv} mode`, 'Bootstrap');
 
   if (nodeEnv !== 'production') {
-    logger.log(`API docs available at http://localhost:${port}/docs`, 'Bootstrap');
+    logger.log(`API docs (Scalar) available at http://localhost:${port}/docs`, 'Bootstrap');
+    logger.log(`OpenAPI spec available at http://localhost:${port}/openapi.json`, 'Bootstrap');
   }
 }
 

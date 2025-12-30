@@ -98,6 +98,20 @@ function verifySignature(
 }
 ```
 
+## Entitlement Lifecycle
+
+Relay automatically manages entitlements based on subscription events:
+
+| Event | Entitlement Action |
+|-------|-------------------|
+| Subscription created | Entitlements granted based on offer config |
+| Invoice paid (renewal) | Entitlement expiration dates extended to new period end |
+| Subscription canceled (immediate) | All entitlements revoked immediately |
+| Subscription canceled (at period end) | Entitlements remain until period end, then revoked |
+| Subscription deleted | All entitlements revoked |
+
+This means your application can simply query the entitlements API to check access - Relay handles the lifecycle automatically.
+
 ## Event Types
 
 ### Subscription Events

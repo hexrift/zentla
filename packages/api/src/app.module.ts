@@ -1,6 +1,7 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
 // Infrastructure modules
@@ -46,6 +47,9 @@ import { configuration, validationSchema } from './config/configuration';
         abortEarly: true,
       },
     }),
+
+    // Task scheduling
+    ScheduleModule.forRoot(),
 
     // Rate limiting
     ThrottlerModule.forRoot([
