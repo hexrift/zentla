@@ -72,6 +72,9 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 relay
 
+# Install OpenSSL for Prisma runtime detection
+RUN apk add --no-cache openssl
+
 # Install production dependencies only
 ENV NODE_ENV=production
 
