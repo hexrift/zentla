@@ -41,14 +41,25 @@ RUN corepack enable
 # Copy dependencies from deps stage (Yarn 4 hoists all deps to root node_modules)
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy source code
-COPY . .
+# Copy only API-related source code (not admin-ui)
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY tsconfig.base.json ./
+COPY packages/core ./packages/core
+COPY packages/database ./packages/database
+COPY packages/sdk ./packages/sdk
+COPY packages/adapters ./packages/adapters
+COPY packages/api ./packages/api
 
 # Generate Prisma client
 RUN yarn db:generate
 
-# Build all packages
-RUN yarn build
+# Build API-related packages only (exclude admin-ui)
+RUN yarn workspace @relay/core build && \
+    yarn workspace @relay/database build && \
+    yarn workspace @relay/sdk build && \
+    yarn workspace @relay/stripe-adapter build && \
+    yarn workspace @relay/zuora-adapter build && \
+    yarn workspace @relay/api build
 
 # -----------------------------------------------------------------------------
 # Stage 3: Production
