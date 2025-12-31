@@ -13,9 +13,11 @@ WORKDIR /app
 # Install build dependencies for native modules
 RUN apk add --no-cache libc6-compat python3 make g++
 
+# Enable Corepack for Yarn 4
+RUN corepack enable
+
 # Copy package files
 COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn ./.yarn
 COPY packages/api/package.json ./packages/api/
 COPY packages/core/package.json ./packages/core/
 COPY packages/database/package.json ./packages/database/
@@ -35,7 +37,6 @@ WORKDIR /app
 
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/.yarn ./.yarn
 COPY --from=deps /app/packages/api/node_modules ./packages/api/node_modules
 COPY --from=deps /app/packages/core/node_modules ./packages/core/node_modules
 COPY --from=deps /app/packages/database/node_modules ./packages/database/node_modules
@@ -66,9 +67,11 @@ RUN addgroup --system --gid 1001 nodejs && \
 # Install production dependencies only
 ENV NODE_ENV=production
 
+# Enable Corepack for Yarn 4
+RUN corepack enable
+
 # Copy package files for production install
 COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn ./.yarn
 COPY packages/api/package.json ./packages/api/
 COPY packages/core/package.json ./packages/core/
 COPY packages/database/package.json ./packages/database/
