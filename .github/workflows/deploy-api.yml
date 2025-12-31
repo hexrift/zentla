@@ -43,7 +43,7 @@ jobs:
             --regions fra \
             --ports 3000:http \
             --routes /:3000 \
-            --checks 3000:http:/api/health \
+            --checks 3000:http:/api/v1/health/live \
             --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
             --env REDIS_URL="${{ secrets.REDIS_URL }}" \
             --env JWT_SECRET="${{ secrets.JWT_SECRET }}" \
@@ -63,7 +63,7 @@ jobs:
             --regions fra \
             --ports 3000:http \
             --routes /:3000 \
-            --checks 3000:http:/api/health \
+            --checks 3000:http:/api/v1/health/live \
             --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
             --env REDIS_URL="${{ secrets.REDIS_URL }}" \
             --env JWT_SECRET="${{ secrets.JWT_SECRET }}" \
