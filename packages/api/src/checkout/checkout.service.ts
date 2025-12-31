@@ -1,9 +1,17 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException, Logger, Inject, forwardRef } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import { BillingService } from '../billing/billing.service';
-import { ProviderRefService } from '../billing/provider-ref.service';
-import { OffersService } from '../offers/offers.service';
-import type { Checkout, CheckoutIntent, Prisma } from '@prisma/client';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+  Logger,
+  Inject,
+  forwardRef,
+} from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import { BillingService } from "../billing/billing.service";
+import { ProviderRefService } from "../billing/provider-ref.service";
+import { OffersService } from "../offers/offers.service";
+import type { Checkout, CheckoutIntent, Prisma } from "@prisma/client";
 
 export interface CreateCheckoutDto {
   offerId: string;
@@ -111,7 +119,7 @@ export class CheckoutService {
       status?: string;
       limit?: number;
       cursor?: string;
-    } = {}
+    } = {},
   ) {
     const { status, limit = 50, cursor } = params;
     const take = Math.min(limit, 100);
@@ -126,7 +134,7 @@ export class CheckoutService {
         offer: { select: { id: true, name: true } },
         customer: { select: { id: true, email: true, name: true } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: take + 1,
       ...(cursor && { cursor: { id: cursor }, skip: 1 }),
     });
@@ -147,7 +155,7 @@ export class CheckoutService {
       status?: string;
       limit?: number;
       cursor?: string;
-    } = {}
+    } = {},
   ) {
     const { status, limit = 50, cursor } = params;
     const take = Math.min(limit, 100);
@@ -164,7 +172,7 @@ export class CheckoutService {
         subscription: { select: { id: true, status: true } },
         promotion: { select: { id: true, name: true, code: true } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: take + 1,
       ...(cursor && { cursor: { id: cursor }, skip: 1 }),
     });
@@ -182,61 +190,77 @@ export class CheckoutService {
   async getCheckoutStats(workspaceId: string) {
     const [sessions, intents] = await Promise.all([
       this.prisma.checkout.groupBy({
-        by: ['status'],
+        by: ["status"],
         where: { workspaceId },
         _count: { id: true },
       }),
       this.prisma.checkoutIntent.groupBy({
-        by: ['status'],
+        by: ["status"],
         where: { workspaceId },
         _count: { id: true },
       }),
     ]);
 
-    const sessionStats = sessions.reduce((acc, s) => {
-      acc[s.status] = s._count.id;
-      return acc;
-    }, {} as Record<string, number>);
+    const sessionStats = sessions.reduce(
+      (acc, s) => {
+        acc[s.status] = s._count.id;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const intentStats = intents.reduce((acc, s) => {
-      acc[s.status] = s._count.id;
-      return acc;
-    }, {} as Record<string, number>);
+    const intentStats = intents.reduce(
+      (acc, s) => {
+        acc[s.status] = s._count.id;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const totalSessions = Object.values(sessionStats).reduce((a, b) => a + b, 0);
+    const totalSessions = Object.values(sessionStats).reduce(
+      (a, b) => a + b,
+      0,
+    );
     const totalIntents = Object.values(intentStats).reduce((a, b) => a + b, 0);
-    const completedSessions = sessionStats['complete'] || 0;
-    const succeededIntents = intentStats['succeeded'] || 0;
+    const completedSessions = sessionStats["complete"] || 0;
+    const succeededIntents = intentStats["succeeded"] || 0;
 
     return {
       sessions: {
         total: totalSessions,
-        pending: sessionStats['pending'] || 0,
+        pending: sessionStats["pending"] || 0,
         completed: completedSessions,
-        expired: sessionStats['expired'] || 0,
-        conversionRate: totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0,
+        expired: sessionStats["expired"] || 0,
+        conversionRate:
+          totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0,
       },
       intents: {
         total: totalIntents,
-        pending: intentStats['pending'] || 0,
-        processing: intentStats['processing'] || 0,
-        requiresAction: intentStats['requires_action'] || 0,
+        pending: intentStats["pending"] || 0,
+        processing: intentStats["processing"] || 0,
+        requiresAction: intentStats["requires_action"] || 0,
         succeeded: succeededIntents,
-        failed: intentStats['failed'] || 0,
-        expired: intentStats['expired'] || 0,
-        conversionRate: totalIntents > 0 ? (succeededIntents / totalIntents) * 100 : 0,
+        failed: intentStats["failed"] || 0,
+        expired: intentStats["expired"] || 0,
+        conversionRate:
+          totalIntents > 0 ? (succeededIntents / totalIntents) * 100 : 0,
       },
     };
   }
 
-  async create(workspaceId: string, dto: CreateCheckoutDto): Promise<CheckoutSessionResult> {
+  async create(
+    workspaceId: string,
+    dto: CreateCheckoutDto,
+  ): Promise<CheckoutSessionResult> {
     // Validate offer exists
     const offer = await this.prisma.offer.findFirst({
-      where: { id: dto.offerId, workspaceId, status: 'active' },
+      where: { id: dto.offerId, workspaceId, status: "active" },
     });
 
     if (!offer) {
-      throw new NotFoundException(`Offer ${dto.offerId} not found or not active`);
+      throw new NotFoundException(
+        `Offer ${dto.offerId} not found or not active`,
+      );
     }
 
     // Get the offer version to use
@@ -247,11 +271,19 @@ export class CheckoutService {
 
     if (dto.offerVersionId) {
       offerVersionId = dto.offerVersionId;
-      effectiveVersion = await this.offersService.getVersion(workspaceId, dto.offerVersionId);
+      effectiveVersion = await this.offersService.getVersion(
+        workspaceId,
+        dto.offerVersionId,
+      );
     } else {
-      effectiveVersion = await this.offersService.getEffectiveVersion(workspaceId, dto.offerId);
+      effectiveVersion = await this.offersService.getEffectiveVersion(
+        workspaceId,
+        dto.offerId,
+      );
       if (!effectiveVersion) {
-        throw new BadRequestException('Offer has no effective published version');
+        throw new BadRequestException(
+          "Offer has no effective published version",
+        );
       }
       offerVersionId = effectiveVersion.id;
     }
@@ -259,12 +291,12 @@ export class CheckoutService {
     // Get the Stripe price ID for this offer version
     const stripePriceId = await this.providerRefService.getStripePriceId(
       workspaceId,
-      offerVersionId
+      offerVersionId,
     );
 
     if (!stripePriceId) {
       throw new BadRequestException(
-        'Offer not synced to Stripe. Please publish the offer first.'
+        "Offer not synced to Stripe. Please publish the offer first.",
       );
     }
 
@@ -277,10 +309,11 @@ export class CheckoutService {
       if (!customer) {
         throw new NotFoundException(`Customer ${dto.customerId} not found`);
       }
-      stripeCustomerId = await this.providerRefService.getStripeCustomerId(
-        workspaceId,
-        dto.customerId
-      ) ?? undefined;
+      stripeCustomerId =
+        (await this.providerRefService.getStripeCustomerId(
+          workspaceId,
+          dto.customerId,
+        )) ?? undefined;
     }
 
     // Set expiration to 24 hours from now
@@ -297,7 +330,7 @@ export class CheckoutService {
         customerEmail: dto.customerEmail,
         successUrl: dto.successUrl,
         cancelUrl: dto.cancelUrl,
-        status: 'pending',
+        status: "pending",
         expiresAt,
         metadata: (dto.metadata ?? {}) as Prisma.InputJsonValue,
       },
@@ -321,17 +354,19 @@ export class CheckoutService {
         where: {
           workspaceId,
           code: dto.promotionCode.toUpperCase(),
-          status: 'active',
+          status: "active",
         },
         include: { currentVersion: true },
       });
 
       if (!promotion) {
-        throw new BadRequestException(`Promotion code "${dto.promotionCode}" not found`);
+        throw new BadRequestException(
+          `Promotion code "${dto.promotionCode}" not found`,
+        );
       }
 
       if (!promotion.currentVersion) {
-        throw new BadRequestException('Promotion is not published');
+        throw new BadRequestException("Promotion is not published");
       }
 
       promotionId = promotion.id;
@@ -340,23 +375,23 @@ export class CheckoutService {
       // Get the Stripe promotion code ID
       const promoCodeRef = await this.providerRefService.findByEntity(
         workspaceId,
-        'promotion_code',
+        "promotion_code",
         promotion.currentVersion.id,
-        'stripe'
+        "stripe",
       );
 
       if (promoCodeRef) {
         stripePromotionCodeId = promoCodeRef.externalId;
       } else {
         this.logger.warn(
-          `Promotion ${promotion.id} not synced to Stripe, falling back to allow_promotion_codes`
+          `Promotion ${promotion.id} not synced to Stripe, falling back to allow_promotion_codes`,
         );
       }
     }
 
     // Create Stripe Checkout Session
-    if (!this.billingService.isConfigured('stripe')) {
-      throw new BadRequestException('Stripe not configured');
+    if (!this.billingService.isConfigured("stripe")) {
+      throw new BadRequestException("Stripe not configured");
     }
 
     const stripeAdapter = this.billingService.getStripeAdapter();
@@ -385,20 +420,22 @@ export class CheckoutService {
       where: { id: checkout.id },
       data: {
         sessionUrl: stripeSession.url,
-        status: 'open',
+        status: "open",
       },
     });
 
     // Store provider ref for checkout session
     await this.providerRefService.create({
       workspaceId,
-      entityType: 'checkout',
+      entityType: "checkout",
       entityId: checkout.id,
-      provider: 'stripe',
+      provider: "stripe",
       externalId: stripeSession.id,
     });
 
-    this.logger.log(`Created checkout session ${checkout.id} with Stripe session ${stripeSession.id}`);
+    this.logger.log(
+      `Created checkout session ${checkout.id} with Stripe session ${stripeSession.id}`,
+    );
 
     return {
       id: checkout.id,
@@ -410,7 +447,7 @@ export class CheckoutService {
   async updateWithSession(
     workspaceId: string,
     id: string,
-    sessionUrl: string
+    sessionUrl: string,
   ): Promise<Checkout> {
     const checkout = await this.findById(workspaceId, id);
     if (!checkout) {
@@ -421,7 +458,7 @@ export class CheckoutService {
       where: { id },
       data: {
         sessionUrl,
-        status: 'open',
+        status: "open",
       },
     });
   }
@@ -435,7 +472,7 @@ export class CheckoutService {
     return this.prisma.checkout.update({
       where: { id },
       data: {
-        status: 'complete',
+        status: "complete",
         completedAt: new Date(),
       },
     });
@@ -450,7 +487,7 @@ export class CheckoutService {
     return this.prisma.checkout.update({
       where: { id },
       data: {
-        status: 'expired',
+        status: "expired",
       },
     });
   }
@@ -458,11 +495,11 @@ export class CheckoutService {
   async expireOldCheckouts(): Promise<number> {
     const result = await this.prisma.checkout.updateMany({
       where: {
-        status: { in: ['pending', 'open'] },
+        status: { in: ["pending", "open"] },
         expiresAt: { lt: new Date() },
       },
       data: {
-        status: 'expired',
+        status: "expired",
       },
     });
 
@@ -473,26 +510,37 @@ export class CheckoutService {
   // HEADLESS CHECKOUT METHODS
   // ==========================================================================
 
-  async createQuote(workspaceId: string, dto: CreateQuoteDto): Promise<QuoteResult> {
+  async createQuote(
+    workspaceId: string,
+    dto: CreateQuoteDto,
+  ): Promise<QuoteResult> {
     // Validate offer exists
     const offer = await this.prisma.offer.findFirst({
-      where: { id: dto.offerId, workspaceId, status: 'active' },
+      where: { id: dto.offerId, workspaceId, status: "active" },
     });
 
     if (!offer) {
-      throw new NotFoundException(`Offer ${dto.offerId} not found or not active`);
+      throw new NotFoundException(
+        `Offer ${dto.offerId} not found or not active`,
+      );
     }
 
     // Get the effective offer version
     let effectiveVersion;
     if (dto.offerVersionId) {
-      effectiveVersion = await this.offersService.getVersion(workspaceId, dto.offerVersionId);
+      effectiveVersion = await this.offersService.getVersion(
+        workspaceId,
+        dto.offerVersionId,
+      );
     } else {
-      effectiveVersion = await this.offersService.getEffectiveVersion(workspaceId, dto.offerId);
+      effectiveVersion = await this.offersService.getEffectiveVersion(
+        workspaceId,
+        dto.offerId,
+      );
     }
 
     if (!effectiveVersion) {
-      throw new BadRequestException('Offer has no effective published version');
+      throw new BadRequestException("Offer has no effective published version");
     }
 
     const config = effectiveVersion.config as {
@@ -509,7 +557,7 @@ export class CheckoutService {
     };
 
     const validationErrors: string[] = [];
-    let promotionInfo: QuoteResult['promotion'] = null;
+    let promotionInfo: QuoteResult["promotion"] = null;
     let discountAmount = 0;
 
     // Validate and calculate promotion discount
@@ -518,15 +566,17 @@ export class CheckoutService {
         where: {
           workspaceId,
           code: dto.promotionCode.toUpperCase(),
-          status: 'active',
+          status: "active",
         },
         include: { currentVersion: true },
       });
 
       if (!promotion) {
-        validationErrors.push(`Promotion code "${dto.promotionCode}" not found`);
+        validationErrors.push(
+          `Promotion code "${dto.promotionCode}" not found`,
+        );
       } else if (!promotion.currentVersion) {
-        validationErrors.push('Promotion is not published');
+        validationErrors.push("Promotion is not published");
       } else {
         const promoConfig = promotion.currentVersion.config as {
           discountType: string;
@@ -541,15 +591,23 @@ export class CheckoutService {
         // Check validity dates
         const now = new Date();
         if (promoConfig.validFrom && new Date(promoConfig.validFrom) > now) {
-          validationErrors.push('Promotion is not yet active');
-        } else if (promoConfig.validUntil && new Date(promoConfig.validUntil) < now) {
-          validationErrors.push('Promotion has expired');
-        } else if (promoConfig.applicableOfferIds?.length && !promoConfig.applicableOfferIds.includes(dto.offerId)) {
-          validationErrors.push('Promotion is not applicable to this offer');
+          validationErrors.push("Promotion is not yet active");
+        } else if (
+          promoConfig.validUntil &&
+          new Date(promoConfig.validUntil) < now
+        ) {
+          validationErrors.push("Promotion has expired");
+        } else if (
+          promoConfig.applicableOfferIds?.length &&
+          !promoConfig.applicableOfferIds.includes(dto.offerId)
+        ) {
+          validationErrors.push("Promotion is not applicable to this offer");
         } else {
           // Calculate discount
-          if (promoConfig.discountType === 'percent') {
-            discountAmount = Math.floor(config.pricing.amount * promoConfig.discountValue / 100);
+          if (promoConfig.discountType === "percent") {
+            discountAmount = Math.floor(
+              (config.pricing.amount * promoConfig.discountValue) / 100,
+            );
           } else {
             discountAmount = promoConfig.discountValue;
           }
@@ -559,7 +617,7 @@ export class CheckoutService {
             code: promotion.code,
             discountType: promoConfig.discountType,
             discountValue: promoConfig.discountValue,
-            duration: promoConfig.duration ?? 'once',
+            duration: promoConfig.duration ?? "once",
             durationInMonths: promoConfig.durationInMonths ?? null,
           };
         }
@@ -579,10 +637,12 @@ export class CheckoutService {
       total,
       interval: config.pricing.interval ?? null,
       intervalCount: config.pricing.intervalCount ?? 1,
-      trial: config.trial ? {
-        days: config.trial.days,
-        requiresPaymentMethod: config.trial.requirePaymentMethod,
-      } : null,
+      trial: config.trial
+        ? {
+            days: config.trial.days,
+            requiresPaymentMethod: config.trial.requirePaymentMethod,
+          }
+        : null,
       promotion: promotionInfo,
       validationErrors,
     };
@@ -591,7 +651,7 @@ export class CheckoutService {
   async createIntent(
     workspaceId: string,
     dto: CreateIntentDto,
-    idempotencyKey?: string
+    idempotencyKey?: string,
   ): Promise<IntentResult> {
     // Check idempotency
     if (idempotencyKey) {
@@ -604,7 +664,7 @@ export class CheckoutService {
         if (existing.workspaceId === workspaceId) {
           return this.formatIntentResult(existing);
         }
-        throw new ConflictException('Idempotency key already used');
+        throw new ConflictException("Idempotency key already used");
       }
     }
 
@@ -617,7 +677,7 @@ export class CheckoutService {
     });
 
     if (quote.validationErrors.length > 0) {
-      throw new BadRequestException(quote.validationErrors.join('; '));
+      throw new BadRequestException(quote.validationErrors.join("; "));
     }
 
     // Validate customer if provided
@@ -657,7 +717,7 @@ export class CheckoutService {
         offerVersionId: quote.offerVersionId,
         customerId: dto.customerId,
         customerEmail: dto.customerEmail,
-        status: 'pending',
+        status: "pending",
         currency: quote.currency,
         subtotalAmount: quote.subtotal,
         discountAmount: quote.discount,
@@ -676,20 +736,22 @@ export class CheckoutService {
     // Create Stripe PaymentIntent or SetupIntent
     let clientSecret: string | null = null;
 
-    if (this.billingService.isConfigured('stripe')) {
+    if (this.billingService.isConfigured("stripe")) {
       const stripeAdapter = this.billingService.getStripeAdapter();
 
       // Get or create Stripe customer
       let stripeCustomerId: string | undefined;
       if (dto.customerId) {
-        stripeCustomerId = await this.providerRefService.getStripeCustomerId(
-          workspaceId,
-          dto.customerId
-        ) ?? undefined;
+        stripeCustomerId =
+          (await this.providerRefService.getStripeCustomerId(
+            workspaceId,
+            dto.customerId,
+          )) ?? undefined;
       }
 
       // Determine if we need PaymentIntent or SetupIntent
-      const needsImmediatePayment = !trialDays || (quote.trial?.requiresPaymentMethod && quote.total > 0);
+      const needsImmediatePayment =
+        !trialDays || (quote.trial?.requiresPaymentMethod && quote.total > 0);
 
       if (needsImmediatePayment && quote.total > 0) {
         // Create PaymentIntent for immediate charge
@@ -762,7 +824,10 @@ export class CheckoutService {
     };
   }
 
-  async findIntentById(workspaceId: string, id: string): Promise<IntentResult | null> {
+  async findIntentById(
+    workspaceId: string,
+    id: string,
+  ): Promise<IntentResult | null> {
     const intent = await this.prisma.checkoutIntent.findFirst({
       where: { id, workspaceId },
     });

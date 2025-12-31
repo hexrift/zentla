@@ -121,6 +121,7 @@ cd infrastructure/environments/production
 ## Cost Estimates
 
 ### Staging (~$100-150/month)
+
 - ECS Fargate: 1 task (0.25 vCPU, 512MB) ~$10
 - Aurora Serverless v2: 0.5-2 ACU ~$40-60
 - ElastiCache: cache.t4g.micro (2 nodes) ~$25
@@ -129,6 +130,7 @@ cd infrastructure/environments/production
 - Other (S3, CloudFront, etc.): ~$10
 
 ### Production (~$300-500/month)
+
 - ECS Fargate: 2 tasks (0.5 vCPU, 1GB) ~$30
 - Aurora Serverless v2: 1-8 ACU ~$100-200
 - ElastiCache: cache.t4g.small (2 nodes) ~$50
@@ -139,32 +141,38 @@ cd infrastructure/environments/production
 ## Modules
 
 ### VPC
+
 - Public, private, and database subnets across 2-3 AZs
 - NAT Gateway for private subnet internet access
 - VPC Flow Logs enabled
 
 ### ECS
+
 - Fargate cluster with container insights
 - Auto-scaling based on CPU/memory
 - Health checks and deployment circuit breaker
 
 ### RDS (Aurora Serverless v2)
+
 - PostgreSQL 15
 - Automatic scaling
 - Encryption at rest
 - Automated backups
 
 ### ElastiCache (Redis)
+
 - Redis 7.0 cluster mode disabled
 - Multi-AZ with automatic failover
 - Encryption at rest
 
 ### ALB
+
 - HTTPS only (HTTP redirects to HTTPS)
 - Access logs to S3
 - Health checks
 
 ### S3 + CloudFront
+
 - S3 bucket with versioning
 - CloudFront with OAC (Origin Access Control)
 - SPA routing support (404 → index.html)

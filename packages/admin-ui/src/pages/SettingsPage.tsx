@@ -1,40 +1,41 @@
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '../lib/api';
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../lib/api";
 
-type BillingProvider = 'stripe' | 'zuora';
+type BillingProvider = "stripe" | "zuora";
 
 export function SettingsPage() {
   const queryClient = useQueryClient();
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState("");
   const [saved, setSaved] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<BillingProvider>('stripe');
+  const [selectedProvider, setSelectedProvider] =
+    useState<BillingProvider>("stripe");
 
   // Stripe config state
-  const [stripeSecretKey, setStripeSecretKey] = useState('');
-  const [stripeWebhookSecret, setStripeWebhookSecret] = useState('');
-  const [stripeWebhookEndpoint, setStripeWebhookEndpoint] = useState('');
+  const [stripeSecretKey, setStripeSecretKey] = useState("");
+  const [stripeWebhookSecret, setStripeWebhookSecret] = useState("");
+  const [stripeWebhookEndpoint, setStripeWebhookEndpoint] = useState("");
   const [showSecretKey, setShowSecretKey] = useState(false);
   const [showWebhookSecret, setShowWebhookSecret] = useState(false);
   const [stripeSaved, setStripeSaved] = useState(false);
   const [stripeError, setStripeError] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedKey = localStorage.getItem('relay_api_key') ?? '';
+    const storedKey = localStorage.getItem("relay_api_key") ?? "";
     setApiKey(storedKey);
   }, []);
 
   const handleSaveApiKey = () => {
-    localStorage.setItem('relay_api_key', apiKey);
+    localStorage.setItem("relay_api_key", apiKey);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
     window.location.reload();
   };
 
   const { data: workspace } = useQuery({
-    queryKey: ['workspace'],
+    queryKey: ["workspace"],
     queryFn: () => api.workspace.get(),
-    enabled: !!localStorage.getItem('relay_api_key'),
+    enabled: !!localStorage.getItem("relay_api_key"),
   });
 
   // Load Stripe config from workspace settings
@@ -63,7 +64,7 @@ export function SettingsPage() {
     mutationFn: (settings: Record<string, unknown>) =>
       api.workspace.update({ settings }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace'] });
+      queryClient.invalidateQueries({ queryKey: ["workspace"] });
       setStripeSaved(true);
       setStripeError(null);
       setTimeout(() => setStripeSaved(false), 3000);
@@ -109,7 +110,7 @@ export function SettingsPage() {
               onClick={handleSaveApiKey}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
             >
-              {saved ? 'Saved!' : 'Save API Key'}
+              {saved ? "Saved!" : "Save API Key"}
             </button>
           </div>
         </div>
@@ -119,10 +120,12 @@ export function SettingsPage() {
           <h2 className="text-lg font-medium text-gray-900 mb-4">Workspace</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Name</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Name
+              </label>
               <input
                 type="text"
-                defaultValue={(workspace?.name as string) ?? ''}
+                defaultValue={(workspace?.name as string) ?? ""}
                 className="mt-1 block w-full max-w-md px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
@@ -132,7 +135,9 @@ export function SettingsPage() {
               </label>
               <select
                 value={selectedProvider}
-                onChange={(e) => setSelectedProvider(e.target.value as BillingProvider)}
+                onChange={(e) =>
+                  setSelectedProvider(e.target.value as BillingProvider)
+                }
                 className="mt-1 block w-full max-w-md px-3 py-2 border border-gray-300 rounded-md"
               >
                 <option value="stripe">Stripe</option>
@@ -151,7 +156,7 @@ export function SettingsPage() {
             Provider Configuration
           </h2>
 
-          {selectedProvider === 'stripe' && (
+          {selectedProvider === "stripe" && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -159,14 +164,20 @@ export function SettingsPage() {
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">Stripe</h3>
-                  <p className="text-sm text-gray-500">Payment processing and subscriptions</p>
+                  <p className="text-sm text-gray-500">
+                    Payment processing and subscriptions
+                  </p>
                 </div>
-                <span className={`ml-auto px-2 py-1 text-xs font-medium rounded-full ${
-                  stripeSecretKey && stripeWebhookSecret
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}>
-                  {stripeSecretKey && stripeWebhookSecret ? 'Configured' : 'Not Configured'}
+                <span
+                  className={`ml-auto px-2 py-1 text-xs font-medium rounded-full ${
+                    stripeSecretKey && stripeWebhookSecret
+                      ? "bg-green-100 text-green-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
+                  {stripeSecretKey && stripeWebhookSecret
+                    ? "Configured"
+                    : "Not Configured"}
                 </span>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 space-y-4">
@@ -177,7 +188,7 @@ export function SettingsPage() {
                   <div className="flex items-center gap-2">
                     <div className="relative flex-1">
                       <input
-                        type={showSecretKey ? 'text' : 'password'}
+                        type={showSecretKey ? "text" : "password"}
                         value={stripeSecretKey}
                         onChange={(e) => setStripeSecretKey(e.target.value)}
                         placeholder="sk_test_..."
@@ -189,13 +200,38 @@ export function SettingsPage() {
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       >
                         {showSecretKey ? (
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                            />
                           </svg>
                         ) : (
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                            />
                           </svg>
                         )}
                       </button>
@@ -212,7 +248,7 @@ export function SettingsPage() {
                   <div className="flex items-center gap-2">
                     <div className="relative flex-1">
                       <input
-                        type={showWebhookSecret ? 'text' : 'password'}
+                        type={showWebhookSecret ? "text" : "password"}
                         value={stripeWebhookSecret}
                         onChange={(e) => setStripeWebhookSecret(e.target.value)}
                         placeholder="whsec_..."
@@ -224,20 +260,49 @@ export function SettingsPage() {
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       >
                         {showWebhookSecret ? (
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                            />
                           </svg>
                         ) : (
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                            />
                           </svg>
                         )}
                       </button>
                     </div>
                   </div>
                   <p className="mt-1 text-xs text-gray-500">
-                    From Stripe CLI: <code className="bg-gray-200 px-1 rounded">stripe listen --forward-to localhost:3000/api/v1/webhooks/stripe</code>
+                    From Stripe CLI:{" "}
+                    <code className="bg-gray-200 px-1 rounded">
+                      stripe listen --forward-to
+                      localhost:3000/api/v1/webhooks/stripe
+                    </code>
                   </p>
                 </div>
                 <div>
@@ -252,8 +317,9 @@ export function SettingsPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    For production: Add this URL in Stripe Dashboard → Developers → Webhooks.
-                    For local development, use Stripe CLI instead (no need to set this).
+                    For production: Add this URL in Stripe Dashboard →
+                    Developers → Webhooks. For local development, use Stripe CLI
+                    instead (no need to set this).
                   </p>
                 </div>
 
@@ -263,21 +329,24 @@ export function SettingsPage() {
                     disabled={updateWorkspaceMutation.isPending}
                     className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 disabled:opacity-50"
                   >
-                    {updateWorkspaceMutation.isPending ? 'Saving...' : 'Save Stripe Config'}
+                    {updateWorkspaceMutation.isPending
+                      ? "Saving..."
+                      : "Save Stripe Config"}
                   </button>
                   {stripeSaved && (
-                    <span className="text-sm text-green-600">Saved successfully!</span>
+                    <span className="text-sm text-green-600">
+                      Saved successfully!
+                    </span>
                   )}
                   {stripeError && (
                     <span className="text-sm text-red-600">{stripeError}</span>
                   )}
                 </div>
               </div>
-
             </div>
           )}
 
-          {selectedProvider === 'zuora' && (
+          {selectedProvider === "zuora" && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -285,7 +354,9 @@ export function SettingsPage() {
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">Zuora</h3>
-                  <p className="text-sm text-gray-500">Enterprise subscription management</p>
+                  <p className="text-sm text-gray-500">
+                    Enterprise subscription management
+                  </p>
                 </div>
                 <span className="ml-auto px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
                   Not Configured
@@ -293,35 +364,48 @@ export function SettingsPage() {
               </div>
               <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Client ID</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Client ID
+                  </label>
                   <div className="mt-1 flex items-center gap-2">
                     <code className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm font-mono text-gray-400 flex-1">
                       Not configured
                     </code>
-                    <span className="text-xs text-gray-500">Set via ZUORA_CLIENT_ID</span>
+                    <span className="text-xs text-gray-500">
+                      Set via ZUORA_CLIENT_ID
+                    </span>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Client Secret</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Client Secret
+                  </label>
                   <div className="mt-1 flex items-center gap-2">
                     <code className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm font-mono text-gray-400 flex-1">
                       Not configured
                     </code>
-                    <span className="text-xs text-gray-500">Set via ZUORA_CLIENT_SECRET</span>
+                    <span className="text-xs text-gray-500">
+                      Set via ZUORA_CLIENT_SECRET
+                    </span>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">API Base URL</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    API Base URL
+                  </label>
                   <div className="mt-1 flex items-center gap-2">
                     <code className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm font-mono text-gray-400 flex-1">
                       Not configured
                     </code>
-                    <span className="text-xs text-gray-500">Set via ZUORA_API_URL</span>
+                    <span className="text-xs text-gray-500">
+                      Set via ZUORA_API_URL
+                    </span>
                   </div>
                 </div>
               </div>
               <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
-                Configure Zuora credentials in your environment variables to enable this provider.
+                Configure Zuora credentials in your environment variables to
+                enable this provider.
               </p>
             </div>
           )}

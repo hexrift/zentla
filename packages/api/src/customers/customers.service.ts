@@ -1,9 +1,14 @@
-import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import { BillingService } from '../billing/billing.service';
-import { ProviderRefService } from '../billing/provider-ref.service';
-import type { Customer, Prisma } from '@prisma/client';
-import type { PaginatedResult } from '@relay/database';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  Logger,
+} from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import { BillingService } from "../billing/billing.service";
+import { ProviderRefService } from "../billing/provider-ref.service";
+import type { Customer, Prisma } from "@prisma/client";
+import type { PaginatedResult } from "@relay/database";
 
 export interface CreateCustomerDto {
   email: string;
@@ -42,13 +47,19 @@ export class CustomersService {
     });
   }
 
-  async findByEmail(workspaceId: string, email: string): Promise<Customer | null> {
+  async findByEmail(
+    workspaceId: string,
+    email: string,
+  ): Promise<Customer | null> {
     return this.prisma.customer.findFirst({
       where: { workspaceId, email },
     });
   }
 
-  async findByExternalId(workspaceId: string, externalId: string): Promise<Customer | null> {
+  async findByExternalId(
+    workspaceId: string,
+    externalId: string,
+  ): Promise<Customer | null> {
     return this.prisma.customer.findFirst({
       where: { workspaceId, externalId },
     });
@@ -56,13 +67,13 @@ export class CustomersService {
 
   async findMany(
     workspaceId: string,
-    params: CustomerQueryParams
+    params: CustomerQueryParams,
   ): Promise<PaginatedResult<Customer>> {
     const { limit, cursor, email, externalId } = params;
 
     const where: Prisma.CustomerWhereInput = {
       workspaceId,
-      ...(email && { email: { contains: email, mode: 'insensitive' } }),
+      ...(email && { email: { contains: email, mode: "insensitive" } }),
       ...(externalId && { externalId }),
     };
 
@@ -73,7 +84,7 @@ export class CustomersService {
         cursor: { id: cursor },
         skip: 1,
       }),
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     const hasMore = customers.length > limit;
@@ -91,14 +102,21 @@ export class CustomersService {
     // Check for duplicate email
     const existingByEmail = await this.findByEmail(workspaceId, dto.email);
     if (existingByEmail) {
-      throw new ConflictException(`Customer with email '${dto.email}' already exists`);
+      throw new ConflictException(
+        `Customer with email '${dto.email}' already exists`,
+      );
     }
 
     // Check for duplicate externalId
     if (dto.externalId) {
-      const existingByExternalId = await this.findByExternalId(workspaceId, dto.externalId);
+      const existingByExternalId = await this.findByExternalId(
+        workspaceId,
+        dto.externalId,
+      );
       if (existingByExternalId) {
-        throw new ConflictException(`Customer with externalId '${dto.externalId}' already exists`);
+        throw new ConflictException(
+          `Customer with externalId '${dto.externalId}' already exists`,
+        );
       }
     }
 
@@ -118,9 +136,12 @@ export class CustomersService {
     return customer;
   }
 
-  private async syncToStripe(workspaceId: string, customer: Customer): Promise<void> {
-    if (!this.billingService.isConfigured('stripe')) {
-      this.logger.warn('Stripe not configured, skipping customer sync');
+  private async syncToStripe(
+    workspaceId: string,
+    customer: Customer,
+  ): Promise<void> {
+    if (!this.billingService.isConfigured("stripe")) {
+      this.logger.warn("Stripe not configured, skipping customer sync");
       return;
     }
 
@@ -136,15 +157,19 @@ export class CustomersService {
       // Store provider ref
       await this.providerRefService.create({
         workspaceId,
-        entityType: 'customer',
+        entityType: "customer",
         entityId: customer.id,
-        provider: 'stripe',
+        provider: "stripe",
         externalId: result.externalId,
       });
 
-      this.logger.log(`Synced customer ${customer.id} to Stripe as ${result.externalId}`);
+      this.logger.log(
+        `Synced customer ${customer.id} to Stripe as ${result.externalId}`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to sync customer ${customer.id} to Stripe: ${error}`);
+      this.logger.error(
+        `Failed to sync customer ${customer.id} to Stripe: ${error}`,
+      );
       // Don't throw - customer is created locally, sync can be retried
     }
   }
@@ -162,7 +187,7 @@ export class CustomersService {
     workspaceId: string,
     id: string,
     dto: UpdateCustomerDto,
-    requiredVersion?: number
+    requiredVersion?: number,
   ): Promise<Customer> {
     const customer = await this.findById(workspaceId, id);
     if (!customer) {
@@ -172,7 +197,7 @@ export class CustomersService {
     // Optimistic concurrency check
     if (requiredVersion !== undefined && customer.version !== requiredVersion) {
       throw new ConflictException(
-        `Customer ${id} has been modified. Expected version ${requiredVersion}, current version ${customer.version}.`
+        `Customer ${id} has been modified. Expected version ${requiredVersion}, current version ${customer.version}.`,
       );
     }
 
@@ -180,15 +205,22 @@ export class CustomersService {
     if (dto.email && dto.email !== customer.email) {
       const existingByEmail = await this.findByEmail(workspaceId, dto.email);
       if (existingByEmail) {
-        throw new ConflictException(`Customer with email '${dto.email}' already exists`);
+        throw new ConflictException(
+          `Customer with email '${dto.email}' already exists`,
+        );
       }
     }
 
     // Check for duplicate externalId
     if (dto.externalId && dto.externalId !== customer.externalId) {
-      const existingByExternalId = await this.findByExternalId(workspaceId, dto.externalId);
+      const existingByExternalId = await this.findByExternalId(
+        workspaceId,
+        dto.externalId,
+      );
       if (existingByExternalId) {
-        throw new ConflictException(`Customer with externalId '${dto.externalId}' already exists`);
+        throw new ConflictException(
+          `Customer with externalId '${dto.externalId}' already exists`,
+        );
       }
     }
 
@@ -198,7 +230,9 @@ export class CustomersService {
         ...(dto.email && { email: dto.email }),
         ...(dto.name !== undefined && { name: dto.name }),
         ...(dto.externalId !== undefined && { externalId: dto.externalId }),
-        ...(dto.metadata && { metadata: dto.metadata as Prisma.InputJsonValue }),
+        ...(dto.metadata && {
+          metadata: dto.metadata as Prisma.InputJsonValue,
+        }),
         version: { increment: 1 },
       },
     });
@@ -212,20 +246,23 @@ export class CustomersService {
   private async updateInStripe(
     workspaceId: string,
     customerId: string,
-    dto: UpdateCustomerDto
+    dto: UpdateCustomerDto,
   ): Promise<void> {
-    if (!this.billingService.isConfigured('stripe')) {
+    if (!this.billingService.isConfigured("stripe")) {
       return;
     }
 
     try {
-      const stripeCustomerId = await this.providerRefService.getStripeCustomerId(
-        workspaceId,
-        customerId
-      );
+      const stripeCustomerId =
+        await this.providerRefService.getStripeCustomerId(
+          workspaceId,
+          customerId,
+        );
 
       if (!stripeCustomerId) {
-        this.logger.warn(`No Stripe customer ID found for customer ${customerId}`);
+        this.logger.warn(
+          `No Stripe customer ID found for customer ${customerId}`,
+        );
         return;
       }
 
@@ -237,7 +274,9 @@ export class CustomersService {
 
       this.logger.log(`Updated Stripe customer ${stripeCustomerId}`);
     } catch (error) {
-      this.logger.error(`Failed to update customer ${customerId} in Stripe: ${error}`);
+      this.logger.error(
+        `Failed to update customer ${customerId} in Stripe: ${error}`,
+      );
     }
   }
 
@@ -255,16 +294,20 @@ export class CustomersService {
     });
   }
 
-  private async deleteFromStripe(workspaceId: string, customerId: string): Promise<void> {
-    if (!this.billingService.isConfigured('stripe')) {
+  private async deleteFromStripe(
+    workspaceId: string,
+    customerId: string,
+  ): Promise<void> {
+    if (!this.billingService.isConfigured("stripe")) {
       return;
     }
 
     try {
-      const stripeCustomerId = await this.providerRefService.getStripeCustomerId(
-        workspaceId,
-        customerId
-      );
+      const stripeCustomerId =
+        await this.providerRefService.getStripeCustomerId(
+          workspaceId,
+          customerId,
+        );
 
       if (!stripeCustomerId) {
         return;
@@ -274,18 +317,25 @@ export class CustomersService {
       await stripeAdapter.deleteCustomer(stripeCustomerId);
 
       // Delete the provider ref
-      await this.providerRefService.delete(workspaceId, 'customer', customerId, 'stripe');
+      await this.providerRefService.delete(
+        workspaceId,
+        "customer",
+        customerId,
+        "stripe",
+      );
 
       this.logger.log(`Deleted Stripe customer ${stripeCustomerId}`);
     } catch (error) {
-      this.logger.error(`Failed to delete customer ${customerId} from Stripe: ${error}`);
+      this.logger.error(
+        `Failed to delete customer ${customerId} from Stripe: ${error}`,
+      );
     }
   }
 
   async getOrCreate(
     workspaceId: string,
     email: string,
-    name?: string
+    name?: string,
   ): Promise<Customer> {
     const existing = await this.findByEmail(workspaceId, email);
     if (existing) {
@@ -298,7 +348,7 @@ export class CustomersService {
   async createPortalSession(
     workspaceId: string,
     customerId: string,
-    returnUrl: string
+    returnUrl: string,
   ): Promise<{ id: string; url: string }> {
     // Verify customer exists
     const customer = await this.findById(workspaceId, customerId);
@@ -309,12 +359,12 @@ export class CustomersService {
     // Get Stripe customer ID
     const stripeCustomerId = await this.providerRefService.getStripeCustomerId(
       workspaceId,
-      customerId
+      customerId,
     );
 
     if (!stripeCustomerId) {
       throw new NotFoundException(
-        `Customer ${customerId} is not linked to Stripe. Customer must have an active subscription.`
+        `Customer ${customerId} is not linked to Stripe. Customer must have an active subscription.`,
       );
     }
 

@@ -1,6 +1,20 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import { api, getSessionToken, setSessionToken, clearSessionToken, setCurrentWorkspace, getCurrentWorkspace } from './api';
-import type { AuthUser, AuthWorkspace, InitialApiKey } from './types';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
+import {
+  api,
+  getSessionToken,
+  setSessionToken,
+  clearSessionToken,
+  setCurrentWorkspace,
+  getCurrentWorkspace,
+} from "./api";
+import type { AuthUser, AuthWorkspace, InitialApiKey } from "./types";
 
 interface AuthState {
   user: AuthUser | null;
@@ -12,7 +26,11 @@ interface AuthState {
 
 interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name?: string) => Promise<InitialApiKey | undefined>;
+  signup: (
+    email: string,
+    password: string,
+    name?: string,
+  ) => Promise<InitialApiKey | undefined>;
   logout: () => Promise<void>;
   switchWorkspace: (workspaceId: string) => void;
   refreshUser: () => Promise<void>;
@@ -33,7 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { user, workspaces } = await api.auth.me();
       const savedWorkspaceId = getCurrentWorkspace();
-      const currentWorkspace = workspaces.find((w) => w.id === savedWorkspaceId) || workspaces[0] || null;
+      const currentWorkspace =
+        workspaces.find((w) => w.id === savedWorkspaceId) ||
+        workspaces[0] ||
+        null;
 
       if (currentWorkspace && !savedWorkspaceId) {
         setCurrentWorkspace(currentWorkspace.id);
@@ -87,26 +108,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const signup = useCallback(async (email: string, password: string, name?: string): Promise<InitialApiKey | undefined> => {
-    const response = await api.auth.signup({ email, password, name });
+  const signup = useCallback(
+    async (
+      email: string,
+      password: string,
+      name?: string,
+    ): Promise<InitialApiKey | undefined> => {
+      const response = await api.auth.signup({ email, password, name });
 
-    setSessionToken(response.session.token);
+      setSessionToken(response.session.token);
 
-    const currentWorkspace = response.workspaces[0] || null;
-    if (currentWorkspace) {
-      setCurrentWorkspace(currentWorkspace.id);
-    }
+      const currentWorkspace = response.workspaces[0] || null;
+      if (currentWorkspace) {
+        setCurrentWorkspace(currentWorkspace.id);
+      }
 
-    setState({
-      user: response.user,
-      workspaces: response.workspaces,
-      currentWorkspace,
-      isLoading: false,
-      isAuthenticated: true,
-    });
+      setState({
+        user: response.user,
+        workspaces: response.workspaces,
+        currentWorkspace,
+        isLoading: false,
+        isAuthenticated: true,
+      });
 
-    return response.initialApiKey;
-  }, []);
+      return response.initialApiKey;
+    },
+    [],
+  );
 
   const logout = useCallback(async () => {
     try {
@@ -125,13 +153,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const switchWorkspace = useCallback((workspaceId: string) => {
-    const workspace = state.workspaces.find((w) => w.id === workspaceId);
-    if (workspace) {
-      setCurrentWorkspace(workspaceId);
-      setState((s) => ({ ...s, currentWorkspace: workspace }));
-    }
-  }, [state.workspaces]);
+  const switchWorkspace = useCallback(
+    (workspaceId: string) => {
+      const workspace = state.workspaces.find((w) => w.id === workspaceId);
+      if (workspace) {
+        setCurrentWorkspace(workspaceId);
+        setState((s) => ({ ...s, currentWorkspace: workspace }));
+      }
+    },
+    [state.workspaces],
+  );
 
   const refreshUser = useCallback(async () => {
     await loadUser();
@@ -157,7 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

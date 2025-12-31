@@ -9,7 +9,7 @@ export interface Offer {
   updatedAt: Date;
 }
 
-export type OfferStatus = 'active' | 'archived';
+export type OfferStatus = "active" | "archived";
 
 export interface OfferVersion {
   id: string;
@@ -22,7 +22,7 @@ export interface OfferVersion {
   createdAt: Date;
 }
 
-export type OfferVersionStatus = 'draft' | 'published' | 'archived';
+export type OfferVersionStatus = "draft" | "published" | "archived";
 
 export interface OfferConfig {
   pricing: PricingConfig;
@@ -38,13 +38,13 @@ export interface PricingConfig {
   amount: number;
   interval?: BillingInterval;
   intervalCount?: number;
-  usageType?: 'licensed' | 'metered';
+  usageType?: "licensed" | "metered";
   tiers?: PricingTier[];
 }
 
-export type PricingModel = 'flat' | 'per_unit' | 'tiered' | 'volume';
+export type PricingModel = "flat" | "per_unit" | "tiered" | "volume";
 
-export type BillingInterval = 'day' | 'week' | 'month' | 'year';
+export type BillingInterval = "day" | "week" | "month" | "year";
 
 export interface PricingTier {
   upTo: number | null;
@@ -60,5 +60,5 @@ export interface TrialConfig {
 export interface EntitlementConfig {
   featureKey: string;
   value: string | number | boolean;
-  valueType: 'boolean' | 'number' | 'string' | 'unlimited';
+  valueType: "boolean" | "number" | "string" | "unlimited";
 }

@@ -1,11 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 export class PrismaService extends PrismaClient {
   constructor() {
     super({
       log: [
-        { emit: 'stdout', level: 'error' },
-        { emit: 'stdout', level: 'warn' },
+        { emit: "stdout", level: "error" },
+        { emit: "stdout", level: "warn" },
       ],
     });
   }
@@ -28,8 +28,8 @@ export class PrismaService extends PrismaClient {
   }
 
   async cleanDatabase(): Promise<void> {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('Cannot clean database in production');
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("Cannot clean database in production");
     }
 
     const tablenames = await this.$queryRaw<Array<{ tablename: string }>>`
@@ -38,9 +38,9 @@ export class PrismaService extends PrismaClient {
 
     const tables = tablenames
       .map(({ tablename }) => tablename)
-      .filter((name) => name !== '_prisma_migrations')
+      .filter((name) => name !== "_prisma_migrations")
       .map((name) => `"public"."${name}"`)
-      .join(', ');
+      .join(", ");
 
     if (tables.length > 0) {
       await this.$executeRawUnsafe(`TRUNCATE TABLE ${tables} CASCADE;`);

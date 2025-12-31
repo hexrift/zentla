@@ -13,7 +13,7 @@ export interface AuditLog {
   createdAt: Date;
 }
 
-export type ActorType = 'api_key' | 'user' | 'system' | 'webhook';
+export type ActorType = "api_key" | "user" | "system" | "webhook";
 
 export interface AuditChanges {
   before?: Record<string, unknown>;
@@ -35,11 +35,11 @@ export interface CreateAuditLogInput {
 }
 
 export type AuditAction =
-  | 'create'
-  | 'update'
-  | 'delete'
-  | 'publish'
-  | 'archive'
-  | 'rollback'
-  | 'cancel'
-  | 'revoke';
+  | "create"
+  | "update"
+  | "delete"
+  | "publish"
+  | "archive"
+  | "rollback"
+  | "cancel"
+  | "revoke";

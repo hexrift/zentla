@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 
 export interface DomainEvent<T = unknown> {
   id: string;
@@ -20,22 +20,22 @@ export interface EventMetadata {
 }
 
 export type EventType =
-  | 'subscription.created'
-  | 'subscription.updated'
-  | 'subscription.canceled'
-  | 'subscription.renewed'
-  | 'subscription.trial_ended'
-  | 'subscription.past_due'
-  | 'checkout.completed'
-  | 'checkout.expired'
-  | 'customer.created'
-  | 'customer.updated'
-  | 'offer.published'
-  | 'offer.archived'
-  | 'entitlement.granted'
-  | 'entitlement.revoked'
-  | 'invoice.paid'
-  | 'invoice.payment_failed';
+  | "subscription.created"
+  | "subscription.updated"
+  | "subscription.canceled"
+  | "subscription.renewed"
+  | "subscription.trial_ended"
+  | "subscription.past_due"
+  | "checkout.completed"
+  | "checkout.expired"
+  | "customer.created"
+  | "customer.updated"
+  | "offer.published"
+  | "offer.archived"
+  | "entitlement.granted"
+  | "entitlement.revoked"
+  | "invoice.paid"
+  | "invoice.payment_failed";
 
 export function createDomainEvent<T>(
   type: EventType,
@@ -43,7 +43,7 @@ export function createDomainEvent<T>(
   aggregateType: string,
   aggregateId: string,
   data: T,
-  metadata?: Partial<EventMetadata>
+  metadata?: Partial<EventMetadata>,
 ): DomainEvent<T> {
   return {
     id: randomUUID(),
@@ -54,7 +54,7 @@ export function createDomainEvent<T>(
     data,
     metadata: {
       version: 1,
-      source: 'relay',
+      source: "relay",
       ...metadata,
     },
     occurredAt: new Date(),

@@ -1,17 +1,49 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '../lib/api';
-import type { WebhookEndpoint } from '../lib/types';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../lib/api";
+import type { WebhookEndpoint } from "../lib/types";
 
 const AVAILABLE_EVENTS = [
-  { value: 'subscription.created', label: 'Subscription Created', description: 'New subscription started' },
-  { value: 'subscription.updated', label: 'Subscription Updated', description: 'Plan change, status update' },
-  { value: 'subscription.canceled', label: 'Subscription Canceled', description: 'Subscription canceled' },
-  { value: 'checkout.completed', label: 'Checkout Completed', description: 'Checkout session completed' },
-  { value: 'invoice.paid', label: 'Invoice Paid', description: 'Payment succeeded' },
-  { value: 'invoice.payment_failed', label: 'Invoice Payment Failed', description: 'Payment failed' },
-  { value: 'customer.created', label: 'Customer Created', description: 'New customer' },
-  { value: 'customer.updated', label: 'Customer Updated', description: 'Customer details modified' },
+  {
+    value: "subscription.created",
+    label: "Subscription Created",
+    description: "New subscription started",
+  },
+  {
+    value: "subscription.updated",
+    label: "Subscription Updated",
+    description: "Plan change, status update",
+  },
+  {
+    value: "subscription.canceled",
+    label: "Subscription Canceled",
+    description: "Subscription canceled",
+  },
+  {
+    value: "checkout.completed",
+    label: "Checkout Completed",
+    description: "Checkout session completed",
+  },
+  {
+    value: "invoice.paid",
+    label: "Invoice Paid",
+    description: "Payment succeeded",
+  },
+  {
+    value: "invoice.payment_failed",
+    label: "Invoice Payment Failed",
+    description: "Payment failed",
+  },
+  {
+    value: "customer.created",
+    label: "Customer Created",
+    description: "New customer",
+  },
+  {
+    value: "customer.updated",
+    label: "Customer Updated",
+    description: "Customer details modified",
+  },
 ];
 
 interface CreateFormData {
@@ -25,25 +57,30 @@ export function WebhooksPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createdSecret, setCreatedSecret] = useState<string | null>(null);
   const [formData, setFormData] = useState<CreateFormData>({
-    url: '',
+    url: "",
     events: [],
-    description: '',
+    description: "",
   });
   const [formError, setFormError] = useState<string | null>(null);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['webhooks'],
+    queryKey: ["webhooks"],
     queryFn: () => api.webhooks.list(),
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: { url: string; events: string[]; description?: string }) =>
-      api.webhooks.create(data),
+    mutationFn: (data: {
+      url: string;
+      events: string[];
+      description?: string;
+    }) => api.webhooks.create(data),
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['webhooks'] });
+      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
       // Show the secret (it's only shown once!)
-      setCreatedSecret((result as WebhookEndpoint & { secret?: string }).secret ?? null);
-      setFormData({ url: '', events: [], description: '' });
+      setCreatedSecret(
+        (result as WebhookEndpoint & { secret?: string }).secret ?? null,
+      );
+      setFormData({ url: "", events: [], description: "" });
       setFormError(null);
     },
     onError: (err: Error) => {
@@ -54,7 +91,7 @@ export function WebhooksPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.webhooks.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['webhooks'] });
+      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
     },
   });
 
@@ -63,12 +100,12 @@ export function WebhooksPage() {
     setFormError(null);
 
     if (!formData.url) {
-      setFormError('URL is required');
+      setFormError("URL is required");
       return;
     }
 
     if (formData.events.length === 0) {
-      setFormError('Select at least one event');
+      setFormError("Select at least one event");
       return;
     }
 
@@ -91,7 +128,7 @@ export function WebhooksPage() {
   const closeModal = () => {
     setShowCreateModal(false);
     setCreatedSecret(null);
-    setFormData({ url: '', events: [], description: '' });
+    setFormData({ url: "", events: [], description: "" });
     setFormError(null);
   };
 
@@ -99,7 +136,9 @@ export function WebhooksPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Webhook Endpoints</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Webhook Endpoints
+          </h1>
           <p className="mt-1 text-sm text-gray-500">
             Receive real-time notifications when events happen in your workspace
           </p>
@@ -131,7 +170,9 @@ export function WebhooksPage() {
               d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
             />
           </svg>
-          <h3 className="mt-4 text-sm font-medium text-gray-900">No webhook endpoints</h3>
+          <h3 className="mt-4 text-sm font-medium text-gray-900">
+            No webhook endpoints
+          </h3>
           <p className="mt-1 text-sm text-gray-500">
             Create an endpoint to receive event notifications
           </p>
@@ -148,16 +189,18 @@ export function WebhooksPage() {
                     </span>
                     <span
                       className={`px-2 text-xs font-semibold rounded-full ${
-                        endpoint.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
+                        endpoint.status === "active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {endpoint.status}
                     </span>
                   </div>
                   {endpoint.description && (
-                    <p className="mt-1 text-sm text-gray-500">{endpoint.description}</p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {endpoint.description}
+                    </p>
                   )}
                   <div className="mt-2 flex flex-wrap gap-1">
                     {endpoint.events.map((event) => (
@@ -172,7 +215,9 @@ export function WebhooksPage() {
                 </div>
                 <button
                   onClick={() => {
-                    if (confirm('Are you sure you want to delete this endpoint?')) {
+                    if (
+                      confirm("Are you sure you want to delete this endpoint?")
+                    ) {
                       deleteMutation.mutate(endpoint.id);
                     }
                   }}
@@ -232,7 +277,12 @@ export function WebhooksPage() {
                         className="ml-2 p-1 text-gray-400 hover:text-white"
                         title="Copy to clipboard"
                       >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -244,7 +294,8 @@ export function WebhooksPage() {
                     </div>
                   </div>
                   <p className="mt-3 text-xs text-gray-500">
-                    Use this secret to verify webhook signatures in your application.
+                    Use this secret to verify webhook signatures in your
+                    application.
                   </p>
                   <button
                     onClick={closeModal}
@@ -256,7 +307,9 @@ export function WebhooksPage() {
               ) : (
                 // Form
                 <form onSubmit={handleSubmit}>
-                  <h3 className="text-lg font-medium text-gray-900">Add Webhook Endpoint</h3>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Add Webhook Endpoint
+                  </h3>
                   <p className="mt-1 text-sm text-gray-500">
                     Configure a URL to receive event notifications
                   </p>
@@ -276,7 +329,9 @@ export function WebhooksPage() {
                       <input
                         type="url"
                         value={formData.url}
-                        onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, url: e.target.value })
+                        }
                         placeholder="https://api.example.com/webhooks/relay"
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
                         required
@@ -294,7 +349,12 @@ export function WebhooksPage() {
                       <input
                         type="text"
                         value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            description: e.target.value,
+                          })
+                        }
                         placeholder="e.g., Production - User provisioning"
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
                       />
@@ -321,13 +381,16 @@ export function WebhooksPage() {
                               <span className="text-sm font-medium text-gray-900">
                                 {event.label}
                               </span>
-                              <p className="text-xs text-gray-500">{event.description}</p>
+                              <p className="text-xs text-gray-500">
+                                {event.description}
+                              </p>
                             </div>
                           </label>
                         ))}
                       </div>
                       <p className="mt-1 text-xs text-gray-500">
-                        {formData.events.length} event{formData.events.length !== 1 ? 's' : ''} selected
+                        {formData.events.length} event
+                        {formData.events.length !== 1 ? "s" : ""} selected
                       </p>
                     </div>
                   </div>
@@ -345,7 +408,9 @@ export function WebhooksPage() {
                       disabled={createMutation.isPending}
                       className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
                     >
-                      {createMutation.isPending ? 'Creating...' : 'Create Endpoint'}
+                      {createMutation.isPending
+                        ? "Creating..."
+                        : "Create Endpoint"}
                     </button>
                   </div>
                 </form>

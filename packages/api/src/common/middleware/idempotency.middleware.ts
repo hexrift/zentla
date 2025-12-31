@@ -3,14 +3,14 @@ import {
   NestMiddleware,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';
-import type { Request, Response, NextFunction } from 'express';
-import { PrismaService } from '../../database/prisma.service';
-import { LoggerService } from '../logger/logger.service';
+} from "@nestjs/common";
+import type { Request, Response, NextFunction } from "express";
+import { PrismaService } from "../../database/prisma.service";
+import { LoggerService } from "../logger/logger.service";
 
 // Standard header name (case-insensitive in HTTP)
 // Express lowercases all headers, so we check for 'idempotency-key'
-const IDEMPOTENCY_HEADER = 'idempotency-key';
+const IDEMPOTENCY_HEADER = "idempotency-key";
 const IDEMPOTENCY_TTL_HOURS = 24;
 
 interface CachedResponse {
@@ -23,16 +23,18 @@ interface CachedResponse {
 export class IdempotencyMiddleware implements NestMiddleware {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly logger: LoggerService
+    private readonly logger: LoggerService,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction): Promise<void> {
     // Only apply to mutating requests
-    if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+    if (!["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
       return next();
     }
 
-    const idempotencyKey = req.headers[IDEMPOTENCY_HEADER] as string | undefined;
+    const idempotencyKey = req.headers[IDEMPOTENCY_HEADER] as
+      | string
+      | undefined;
     if (!idempotencyKey) {
       return next();
     }
@@ -42,11 +44,11 @@ export class IdempotencyMiddleware implements NestMiddleware {
       throw new HttpException(
         {
           error: {
-            code: 'INVALID_IDEMPOTENCY_KEY',
-            message: 'Idempotency key must be between 1 and 255 characters',
+            code: "INVALID_IDEMPOTENCY_KEY",
+            message: "Idempotency key must be between 1 and 255 characters",
           },
         },
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -71,11 +73,12 @@ export class IdempotencyMiddleware implements NestMiddleware {
           throw new HttpException(
             {
               error: {
-                code: 'REQUEST_IN_PROGRESS',
-                message: 'A request with this idempotency key is already in progress',
+                code: "REQUEST_IN_PROGRESS",
+                message:
+                  "A request with this idempotency key is already in progress",
               },
             },
-            HttpStatus.CONFLICT
+            HttpStatus.CONFLICT,
           );
         }
 
@@ -83,11 +86,11 @@ export class IdempotencyMiddleware implements NestMiddleware {
         const cached = existing.response as unknown as CachedResponse;
         this.logger.log(
           `Returning cached idempotent response: ${idempotencyKey}`,
-          'IdempotencyMiddleware'
+          "IdempotencyMiddleware",
         );
 
         res.set(cached.headers);
-        res.set('X-Idempotent-Replayed', 'true');
+        res.set("X-Idempotent-Replayed", "true");
         res.status(cached.statusCode).json(cached.body);
         return;
       }
@@ -115,7 +118,7 @@ export class IdempotencyMiddleware implements NestMiddleware {
         const cachedResponse: CachedResponse = {
           statusCode: res.statusCode,
           headers: {
-            'content-type': res.get('content-type') ?? 'application/json',
+            "content-type": res.get("content-type") ?? "application/json",
           },
           body,
         };
@@ -126,11 +129,12 @@ export class IdempotencyMiddleware implements NestMiddleware {
             data: { response: JSON.parse(JSON.stringify(cachedResponse)) },
           });
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage =
+            error instanceof Error ? error.message : "Unknown error";
           this.logger.error(
             `Failed to cache idempotent response: ${errorMessage}`,
             undefined,
-            'IdempotencyMiddleware'
+            "IdempotencyMiddleware",
           );
         }
       };
@@ -142,7 +146,7 @@ export class IdempotencyMiddleware implements NestMiddleware {
       };
 
       res.send = function (body: unknown): Response {
-        if (typeof body === 'object') {
+        if (typeof body === "object") {
           void captureResponse(body);
         }
         return originalSend(body);
@@ -154,11 +158,12 @@ export class IdempotencyMiddleware implements NestMiddleware {
         throw error;
       }
 
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       this.logger.error(
         `Idempotency middleware error: ${errorMessage}`,
         undefined,
-        'IdempotencyMiddleware'
+        "IdempotencyMiddleware",
       );
 
       // Continue without idempotency on error

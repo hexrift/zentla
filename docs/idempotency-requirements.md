@@ -5,6 +5,7 @@ This document outlines where idempotency is required in Relay, how retries shoul
 ## What is Idempotency?
 
 An operation is idempotent if performing it multiple times has the same effect as performing it once. This is critical for:
+
 - Webhook processing (Stripe retries failed deliveries)
 - API requests with network failures (client retries)
 - Distributed systems with message queues
@@ -15,35 +16,35 @@ An operation is idempotent if performing it multiple times has the same effect a
 
 ### 1. API Endpoints (Client-Provided Keys)
 
-| Endpoint | Requires Key? | Key Source | Behavior |
-|----------|---------------|------------|----------|
-| `POST /offers` | Recommended | `X-Idempotency-Key` header | Return cached response if key exists |
-| `POST /offers/:id/publish` | Required | `X-Idempotency-Key` header | Prevent double-publish |
-| `POST /checkout/sessions` | Required | `X-Idempotency-Key` header | Prevent duplicate checkouts |
-| `POST /subscriptions/:id/cancel` | Required | `X-Idempotency-Key` header | Prevent double-cancel |
-| `POST /customers` | Recommended | `X-Idempotency-Key` header | Prevent duplicate customers |
-| `POST /webhook-endpoints` | Optional | `X-Idempotency-Key` header | Low risk of duplicates |
-| `GET /*` | Not needed | N/A | Reads are naturally idempotent |
-| `PATCH /*` | Not needed | N/A | Updates are idempotent by design |
-| `DELETE /*` | Not needed | N/A | Deletes are idempotent |
+| Endpoint                         | Requires Key? | Key Source                 | Behavior                             |
+| -------------------------------- | ------------- | -------------------------- | ------------------------------------ |
+| `POST /offers`                   | Recommended   | `X-Idempotency-Key` header | Return cached response if key exists |
+| `POST /offers/:id/publish`       | Required      | `X-Idempotency-Key` header | Prevent double-publish               |
+| `POST /checkout/sessions`        | Required      | `X-Idempotency-Key` header | Prevent duplicate checkouts          |
+| `POST /subscriptions/:id/cancel` | Required      | `X-Idempotency-Key` header | Prevent double-cancel                |
+| `POST /customers`                | Recommended   | `X-Idempotency-Key` header | Prevent duplicate customers          |
+| `POST /webhook-endpoints`        | Optional      | `X-Idempotency-Key` header | Low risk of duplicates               |
+| `GET /*`                         | Not needed    | N/A                        | Reads are naturally idempotent       |
+| `PATCH /*`                       | Not needed    | N/A                        | Updates are idempotent by design     |
+| `DELETE /*`                      | Not needed    | N/A                        | Deletes are idempotent               |
 
 ### 2. Webhook Processing (System-Generated Keys)
 
-| Webhook Event | Idempotency Key | Deduplication Method |
-|---------------|-----------------|---------------------|
-| `checkout.session.completed` | `stripe_event_id` | Check `webhook_event` table |
-| `customer.subscription.created` | `stripe_subscription_id` | Check `provider_ref` exists |
-| `customer.subscription.updated` | `stripe_event_id` | Store event ID after processing |
-| `customer.subscription.deleted` | `stripe_event_id` | Terminal state, safe to replay |
-| `invoice.paid` | `stripe_invoice_id` | Check if period already updated |
+| Webhook Event                   | Idempotency Key          | Deduplication Method            |
+| ------------------------------- | ------------------------ | ------------------------------- |
+| `checkout.session.completed`    | `stripe_event_id`        | Check `webhook_event` table     |
+| `customer.subscription.created` | `stripe_subscription_id` | Check `provider_ref` exists     |
+| `customer.subscription.updated` | `stripe_event_id`        | Store event ID after processing |
+| `customer.subscription.deleted` | `stripe_event_id`        | Terminal state, safe to replay  |
+| `invoice.paid`                  | `stripe_invoice_id`      | Check if period already updated |
 
 ### 3. Internal Operations
 
-| Operation | Key | Location |
-|-----------|-----|----------|
-| Outbox event processing | `outbox_event.id` | Mark as `processed` |
-| Webhook delivery | `webhook_event.id` + `attempt` | Track in `webhook_event.attempts` |
-| Entitlement granting | `subscription_id` + `feature_key` | Unique constraint |
+| Operation               | Key                               | Location                          |
+| ----------------------- | --------------------------------- | --------------------------------- |
+| Outbox event processing | `outbox_event.id`                 | Mark as `processed`               |
+| Webhook delivery        | `webhook_event.id` + `attempt`    | Track in `webhook_event.attempts` |
+| Entitlement granting    | `subscription_id` + `feature_key` | Unique constraint                 |
 
 ---
 
@@ -51,20 +52,20 @@ An operation is idempotent if performing it multiple times has the same effect a
 
 ### Implemented
 
-| Component | File | Status |
-|-----------|------|--------|
+| Component              | File                        | Status                 |
+| ---------------------- | --------------------------- | ---------------------- |
 | Idempotency Middleware | `idempotency.middleware.ts` | Exists but needs fixes |
-| IdempotencyKey Model | `schema.prisma` | Table exists |
-| Webhook Event Table | `schema.prisma` | Table exists |
+| IdempotencyKey Model   | `schema.prisma`             | Table exists           |
+| Webhook Event Table    | `schema.prisma`             | Table exists           |
 
 ### Missing
 
-| Component | Required For | Priority |
-|-----------|--------------|----------|
-| Webhook event ID deduplication | Stripe webhooks | High |
-| Provider ref checks before create | Subscription creation | High |
-| Checkout completion check | Checkout webhook | High |
-| Outbox processing lock | Event fan-out | Medium |
+| Component                         | Required For          | Priority |
+| --------------------------------- | --------------------- | -------- |
+| Webhook event ID deduplication    | Stripe webhooks       | High     |
+| Provider ref checks before create | Subscription creation | High     |
+| Checkout completion check         | Checkout webhook      | High     |
+| Outbox processing lock            | Event fan-out         | Medium   |
 
 ---
 
@@ -90,6 +91,7 @@ Request 1 (fails network) ──► Request 2 (same idempotency key)
 ```
 
 **Rules:**
+
 1. Same key within TTL (24 hours) → return cached response
 2. Same key after TTL → process as new request
 3. Different key → process as new request
@@ -115,6 +117,7 @@ Webhook 1 (returns 500) ──► Stripe waits ──► Webhook 2 (same event)
 ```
 
 **Rules:**
+
 1. Always return 200 for known events (even if already processed)
 2. Return 500 only for transient failures (DB down, etc.)
 3. Return 400 for invalid signatures (Stripe won't retry)
@@ -141,6 +144,7 @@ Worker picks event ──► Processing fails ──► Event stays "pending"
 ```
 
 **Rules:**
+
 1. Use optimistic locking (version field) to prevent double-processing
 2. Max retry attempts before moving to dead letter
 3. Exponential backoff between attempts
@@ -194,24 +198,26 @@ describe('Idempotency Middleware', () => {
 ### Integration Tests
 
 ```typescript
-describe('Webhook Idempotency', () => {
-  it('does not create duplicate subscription for replayed event', async () => {
-    const event = createMockStripeEvent('checkout.session.completed');
+describe("Webhook Idempotency", () => {
+  it("does not create duplicate subscription for replayed event", async () => {
+    const event = createMockStripeEvent("checkout.session.completed");
 
     // First delivery
     await request(app)
-      .post('/api/v1/webhooks/stripe')
-      .set('stripe-signature', signEvent(event))
+      .post("/api/v1/webhooks/stripe")
+      .set("stripe-signature", signEvent(event))
       .send(event);
 
     // Simulated retry
     await request(app)
-      .post('/api/v1/webhooks/stripe')
-      .set('stripe-signature', signEvent(event))
+      .post("/api/v1/webhooks/stripe")
+      .set("stripe-signature", signEvent(event))
       .send(event);
 
     const subscriptions = await db.subscription.findMany({
-      where: { /* matching criteria */ }
+      where: {
+        /* matching criteria */
+      },
     });
 
     expect(subscriptions).toHaveLength(1);
@@ -222,8 +228,8 @@ describe('Webhook Idempotency', () => {
 ### End-to-End Tests
 
 ```typescript
-describe('Checkout to Subscription (E2E)', () => {
-  it('handles network retry without duplicate subscription', async () => {
+describe("Checkout to Subscription (E2E)", () => {
+  it("handles network retry without duplicate subscription", async () => {
     // 1. Create checkout session
     // 2. Simulate Stripe sending webhook
     // 3. Simulate network failure (return 500)

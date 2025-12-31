@@ -22,4 +22,4 @@ export interface RetryPolicy {
   backoffMultiplier: number;
 }
 
-export type BillingProviderType = 'stripe' | 'zuora';
+export type BillingProviderType = "stripe" | "zuora";

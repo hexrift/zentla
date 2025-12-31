@@ -1,2 +1,2 @@
-export { RelayClient, RelayError, type RelayClientConfig } from './client';
-export * from './types';
+export { RelayClient, RelayError, type RelayClientConfig } from "./client";
+export * from "./types";

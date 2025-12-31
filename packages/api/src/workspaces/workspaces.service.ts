@@ -1,18 +1,24 @@
-import { Injectable, NotFoundException, ConflictException, Inject, forwardRef } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import { BillingService } from '../billing/billing.service';
-import type { Workspace, Prisma } from '@prisma/client';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  Inject,
+  forwardRef,
+} from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import { BillingService } from "../billing/billing.service";
+import type { Workspace, Prisma } from "@prisma/client";
 
 export interface CreateWorkspaceDto {
   name: string;
   slug: string;
-  defaultProvider?: 'stripe' | 'zuora';
+  defaultProvider?: "stripe" | "zuora";
   defaultCurrency?: string;
 }
 
 export interface UpdateWorkspaceDto {
   name?: string;
-  defaultProvider?: 'stripe' | 'zuora';
+  defaultProvider?: "stripe" | "zuora";
   settings?: Partial<WorkspaceSettings>;
 }
 
@@ -51,11 +57,13 @@ export class WorkspacesService {
   async create(dto: CreateWorkspaceDto): Promise<Workspace> {
     const existing = await this.findBySlug(dto.slug);
     if (existing) {
-      throw new ConflictException(`Workspace with slug '${dto.slug}' already exists`);
+      throw new ConflictException(
+        `Workspace with slug '${dto.slug}' already exists`,
+      );
     }
 
     const settings: WorkspaceSettings = {
-      defaultCurrency: dto.defaultCurrency ?? 'USD',
+      defaultCurrency: dto.defaultCurrency ?? "USD",
       webhookRetryPolicy: {
         maxRetries: 5,
         initialDelayMs: 1000,
@@ -68,7 +76,7 @@ export class WorkspacesService {
       data: {
         name: dto.name,
         slug: dto.slug,
-        defaultProvider: dto.defaultProvider ?? 'stripe',
+        defaultProvider: dto.defaultProvider ?? "stripe",
         settings: settings as Prisma.InputJsonValue,
       },
     });

@@ -110,11 +110,11 @@ export class EntitlementsController {
   })
   async getCustomerEntitlements(
     @WorkspaceId() workspaceId: string,
-    @Param("customerId", ParseUUIDPipe) customerId: string
+    @Param("customerId", ParseUUIDPipe) customerId: string,
   ) {
     return this.entitlementsService.getCustomerEntitlements(
       workspaceId,
-      customerId
+      customerId,
     );
   }
 
@@ -171,12 +171,12 @@ if (result.hasAccess) {
   async checkSingleEntitlement(
     @WorkspaceId() workspaceId: string,
     @Param("customerId", ParseUUIDPipe) customerId: string,
-    @Param("featureKey") featureKey: string
+    @Param("featureKey") featureKey: string,
   ) {
     return this.entitlementsService.checkEntitlement(
       workspaceId,
       customerId,
-      featureKey
+      featureKey,
     );
   }
 
@@ -243,12 +243,12 @@ const { api_calls, premium_features, seats } = await api.entitlements.checkMany(
   async checkMultipleEntitlements(
     @WorkspaceId() workspaceId: string,
     @Param("customerId", ParseUUIDPipe) customerId: string,
-    @Body() dto: CheckEntitlementsDto
+    @Body() dto: CheckEntitlementsDto,
   ) {
     return this.entitlementsService.checkMultipleEntitlements(
       workspaceId,
       customerId,
-      dto.featureKeys
+      dto.featureKeys,
     );
   }
 }

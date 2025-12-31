@@ -11,7 +11,11 @@ export interface Entitlement {
   updatedAt: Date;
 }
 
-export type EntitlementValueType = 'boolean' | 'number' | 'string' | 'unlimited';
+export type EntitlementValueType =
+  | "boolean"
+  | "number"
+  | "string"
+  | "unlimited";
 
 export interface EntitlementCheck {
   featureKey: string;

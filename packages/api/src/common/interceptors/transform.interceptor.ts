@@ -3,10 +3,10 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-} from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import type { Request } from 'express';
+} from "@nestjs/common";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import type { Request } from "express";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -27,22 +27,25 @@ export interface PaginationMeta {
 }
 
 @Injectable()
-export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  ApiResponse<T>
+> {
   intercept(
     context: ExecutionContext,
-    next: CallHandler<T>
+    next: CallHandler<T>,
   ): Observable<ApiResponse<T>> {
     const request = context.switchToHttp().getRequest<Request>();
-    const requestId = request.headers['x-request-id'] as string | undefined;
+    const requestId = request.headers["x-request-id"] as string | undefined;
 
     return next.handle().pipe(
       map((data: T) => {
         // Check if the data already has pagination info
         const hasPagination =
           data !== null &&
-          typeof data === 'object' &&
-          'data' in data &&
-          'hasMore' in data;
+          typeof data === "object" &&
+          "data" in data &&
+          "hasMore" in data;
 
         if (hasPagination) {
           const paginatedData = data as unknown as {
@@ -75,7 +78,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
             timestamp: new Date().toISOString(),
           },
         };
-      })
+      }),
     );
   }
 }

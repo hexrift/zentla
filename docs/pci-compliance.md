@@ -49,14 +49,14 @@ Relay is designed to maintain PCI DSS compliance by minimizing the PCI scope and
 
 Relay never stores, processes, or transmits cardholder data:
 
-| Data Type | Relay Storage | Provider Storage |
-|-----------|---------------|------------------|
-| Card Number (PAN) | Never | Tokenized |
-| CVV/CVC | Never | Never (per PCI) |
-| Expiration Date | Never | Tokenized |
-| Cardholder Name | Never | Tokenized |
-| Customer ID | Reference only | Full record |
-| Payment Method ID | Reference only | Full record |
+| Data Type         | Relay Storage  | Provider Storage |
+| ----------------- | -------------- | ---------------- |
+| Card Number (PAN) | Never          | Tokenized        |
+| CVV/CVC           | Never          | Never (per PCI)  |
+| Expiration Date   | Never          | Tokenized        |
+| Cardholder Name   | Never          | Tokenized        |
+| Customer ID       | Reference only | Full record      |
+| Payment Method ID | Reference only | Full record      |
 
 ### 2. Tokenization Pattern
 
@@ -102,12 +102,12 @@ All webhooks are verified to prevent tampering:
 const event = stripe.webhooks.constructEvent(
   rawBody,
   signature,
-  process.env.STRIPE_WEBHOOK_SECRET
+  process.env.STRIPE_WEBHOOK_SECRET,
 );
 
 // Outbound to your app
-const signature = hmac('sha256', secret, `${timestamp}.${payload}`);
-headers['Relay-Signature'] = `t=${timestamp},v1=${signature}`;
+const signature = hmac("sha256", secret, `${timestamp}.${payload}`);
+headers["Relay-Signature"] = `t=${timestamp},v1=${signature}`;
 ```
 
 ## SAQ-A Eligibility
@@ -124,42 +124,42 @@ Relay qualifies for SAQ-A (the simplest self-assessment questionnaire) because:
 
 ### Encryption
 
-| Layer | Implementation |
-|-------|---------------|
-| Transit | TLS 1.2+ (HTTPS enforced) |
-| At Rest | Database encryption (provider managed) |
-| Secrets | Environment variables (never in code) |
-| API Keys | SHA-256 hashed before storage |
+| Layer    | Implementation                         |
+| -------- | -------------------------------------- |
+| Transit  | TLS 1.2+ (HTTPS enforced)              |
+| At Rest  | Database encryption (provider managed) |
+| Secrets  | Environment variables (never in code)  |
+| API Keys | SHA-256 hashed before storage          |
 
 ### Access Control
 
-| Control | Implementation |
-|---------|---------------|
-| Authentication | API Key with Bearer token |
-| Authorization | RBAC (owner, admin, member, readonly) |
-| Tenant Isolation | Workspace-scoped queries |
-| Rate Limiting | Per IP/API key/workspace |
+| Control          | Implementation                        |
+| ---------------- | ------------------------------------- |
+| Authentication   | API Key with Bearer token             |
+| Authorization    | RBAC (owner, admin, member, readonly) |
+| Tenant Isolation | Workspace-scoped queries              |
+| Rate Limiting    | Per IP/API key/workspace              |
 
 ### Monitoring
 
-| Capability | Implementation |
-|------------|---------------|
-| Audit Logging | All mutations logged with actor |
-| Request Logging | Structured JSON (Pino) |
-| Webhook Events | Full event history with delivery status |
-| Health Checks | Liveness/readiness probes |
+| Capability      | Implementation                          |
+| --------------- | --------------------------------------- |
+| Audit Logging   | All mutations logged with actor         |
+| Request Logging | Structured JSON (Pino)                  |
+| Webhook Events  | Full event history with delivery status |
+| Health Checks   | Liveness/readiness probes               |
 
 ## Provider Responsibility Matrix
 
-| Responsibility | Relay | Stripe |
-|----------------|-------|--------|
-| Card collection UI | - | Stripe Checkout/Elements |
-| Card data encryption | - | Yes |
-| PCI DSS certification | SAQ-A | Level 1 |
-| Fraud detection | - | Radar |
-| 3D Secure | - | Native support |
-| Chargeback handling | Webhook processing | Full management |
-| Refund processing | API orchestration | Actual refund |
+| Responsibility        | Relay              | Stripe                   |
+| --------------------- | ------------------ | ------------------------ |
+| Card collection UI    | -                  | Stripe Checkout/Elements |
+| Card data encryption  | -                  | Yes                      |
+| PCI DSS certification | SAQ-A              | Level 1                  |
+| Fraud detection       | -                  | Radar                    |
+| 3D Secure             | -                  | Native support           |
+| Chargeback handling   | Webhook processing | Full management          |
+| Refund processing     | API orchestration  | Actual refund            |
 
 ## Deployment Checklist
 

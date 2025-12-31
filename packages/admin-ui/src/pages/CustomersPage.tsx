@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '../lib/api';
-import type { Customer } from '../lib/types';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../lib/api";
+import type { Customer } from "../lib/types";
 
 export function CustomersPage() {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['customers', search],
+    queryKey: ["customers", search],
     queryFn: () => api.customers.list({ email: search }),
   });
 
@@ -55,10 +55,10 @@ export function CustomersPage() {
                     {customer.email}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {customer.name ?? '-'}
+                    {customer.name ?? "-"}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 font-mono">
-                    {customer.externalId ?? '-'}
+                    {customer.externalId ?? "-"}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {new Date(customer.createdAt).toLocaleDateString()}

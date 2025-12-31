@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import type { Entitlement, EntitlementValueType } from '@prisma/client';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import type { Entitlement, EntitlementValueType } from "@prisma/client";
 
 export interface EntitlementCheck {
   featureKey: string;
@@ -22,7 +22,7 @@ export class EntitlementsService {
   async checkEntitlement(
     workspaceId: string,
     customerId: string,
-    featureKey: string
+    featureKey: string,
   ): Promise<EntitlementCheck> {
     const entitlement = await this.prisma.entitlement.findFirst({
       where: {
@@ -30,12 +30,9 @@ export class EntitlementsService {
         customerId,
         featureKey,
         subscription: {
-          status: { in: ['active', 'trialing'] },
+          status: { in: ["active", "trialing"] },
         },
-        OR: [
-          { expiresAt: null },
-          { expiresAt: { gt: new Date() } },
-        ],
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       },
     });
 
@@ -49,7 +46,10 @@ export class EntitlementsService {
     return {
       featureKey,
       hasAccess: true,
-      value: this.parseEntitlementValue(entitlement.value, entitlement.valueType),
+      value: this.parseEntitlementValue(
+        entitlement.value,
+        entitlement.valueType,
+      ),
       valueType: entitlement.valueType,
     };
   }
@@ -57,7 +57,7 @@ export class EntitlementsService {
   async checkMultipleEntitlements(
     workspaceId: string,
     customerId: string,
-    featureKeys: string[]
+    featureKeys: string[],
   ): Promise<EntitlementCheck[]> {
     const entitlements = await this.prisma.entitlement.findMany({
       where: {
@@ -65,18 +65,13 @@ export class EntitlementsService {
         customerId,
         featureKey: { in: featureKeys },
         subscription: {
-          status: { in: ['active', 'trialing'] },
+          status: { in: ["active", "trialing"] },
         },
-        OR: [
-          { expiresAt: null },
-          { expiresAt: { gt: new Date() } },
-        ],
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       },
     });
 
-    const entitlementMap = new Map(
-      entitlements.map((e) => [e.featureKey, e])
-    );
+    const entitlementMap = new Map(entitlements.map((e) => [e.featureKey, e]));
 
     return featureKeys.map((featureKey) => {
       const entitlement = entitlementMap.get(featureKey);
@@ -86,7 +81,10 @@ export class EntitlementsService {
       return {
         featureKey,
         hasAccess: true,
-        value: this.parseEntitlementValue(entitlement.value, entitlement.valueType),
+        value: this.parseEntitlementValue(
+          entitlement.value,
+          entitlement.valueType,
+        ),
         valueType: entitlement.valueType,
       };
     });
@@ -94,7 +92,7 @@ export class EntitlementsService {
 
   async getCustomerEntitlements(
     workspaceId: string,
-    customerId: string
+    customerId: string,
   ): Promise<CustomerEntitlements> {
     // Verify customer exists
     const customer = await this.prisma.customer.findFirst({
@@ -110,7 +108,7 @@ export class EntitlementsService {
       where: {
         workspaceId,
         customerId,
-        status: { in: ['active', 'trialing'] },
+        status: { in: ["active", "trialing"] },
       },
       select: { id: true },
     });
@@ -121,12 +119,9 @@ export class EntitlementsService {
         workspaceId,
         customerId,
         subscription: {
-          status: { in: ['active', 'trialing'] },
+          status: { in: ["active", "trialing"] },
         },
-        OR: [
-          { expiresAt: null },
-          { expiresAt: { gt: new Date() } },
-        ],
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       },
     });
 
@@ -149,7 +144,7 @@ export class EntitlementsService {
     featureKey: string,
     value: string,
     valueType: EntitlementValueType,
-    expiresAt?: Date
+    expiresAt?: Date,
   ): Promise<Entitlement> {
     return this.prisma.entitlement.upsert({
       where: {
@@ -178,7 +173,7 @@ export class EntitlementsService {
   async revokeEntitlement(
     workspaceId: string,
     subscriptionId: string,
-    featureKey: string
+    featureKey: string,
   ): Promise<void> {
     await this.prisma.entitlement.deleteMany({
       where: {
@@ -191,7 +186,7 @@ export class EntitlementsService {
 
   async revokeAllForSubscription(
     workspaceId: string,
-    subscriptionId: string
+    subscriptionId: string,
   ): Promise<void> {
     await this.prisma.entitlement.deleteMany({
       where: {
@@ -204,7 +199,7 @@ export class EntitlementsService {
   async refreshExpirationForSubscription(
     workspaceId: string,
     subscriptionId: string,
-    newExpiresAt: Date
+    newExpiresAt: Date,
   ): Promise<void> {
     await this.prisma.entitlement.updateMany({
       where: {
@@ -219,14 +214,14 @@ export class EntitlementsService {
 
   private parseEntitlementValue(
     value: string,
-    valueType: EntitlementValueType
+    valueType: EntitlementValueType,
   ): string | number | boolean {
     switch (valueType) {
-      case 'boolean':
-        return value === 'true';
-      case 'number':
+      case "boolean":
+        return value === "true";
+      case "number":
         return parseFloat(value);
-      case 'unlimited':
+      case "unlimited":
         return Infinity;
       default:
         return value;

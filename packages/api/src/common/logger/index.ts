@@ -1,2 +1,2 @@
-export { LoggerService, HttpLogData, AuditLogData } from './logger.service';
-export { LoggerModule } from './logger.module';
+export { LoggerService, HttpLogData, AuditLogData } from "./logger.service";
+export { LoggerModule } from "./logger.module";

@@ -1,27 +1,25 @@
-import { CodeBlock } from '../../components/CodeBlock';
+import { CodeBlock } from "../../components/CodeBlock";
 
-const API_BASE = 'http://localhost:3002/api/v1';
+const API_BASE = "http://localhost:3002/api/v1";
 
 export function ExamplePage() {
   return (
     <article className="prose-docs">
       <h1>End-to-End Example</h1>
       <p className="lead text-lg text-gray-600 mb-8">
-        A complete walkthrough of the Relay subscription lifecycle: from creating an offer
-        to handling webhooks when a customer subscribes.
+        A complete walkthrough of the Relay subscription lifecycle: from
+        creating an offer to handling webhooks when a customer subscribes.
       </p>
 
       <div className="not-prose mb-8 p-4 bg-primary-50 border border-primary-200 rounded-lg">
         <p className="text-sm text-primary-800">
-          <strong>Golden Path:</strong> This example demonstrates the most common flow.
-          Copy these snippets and adapt them to your application.
+          <strong>Golden Path:</strong> This example demonstrates the most
+          common flow. Copy these snippets and adapt them to your application.
         </p>
       </div>
 
       <h2 id="scenario">Scenario</h2>
-      <p>
-        We'll build a complete subscription flow for a SaaS app with:
-      </p>
+      <p>We'll build a complete subscription flow for a SaaS app with:</p>
       <ul>
         <li>A "Pro" plan at $29/month with a 14-day trial</li>
         <li>Access to 5 seats and API access</li>
@@ -33,7 +31,10 @@ export function ExamplePage() {
 
       <h3>Create Features</h3>
       <p>Define the features your plans will include:</p>
-      <CodeBlock title="Terminal" language="bash">{`# Create the "seats" feature (numeric limit)
+      <CodeBlock
+        title="Terminal"
+        language="bash"
+      >{`# Create the "seats" feature (numeric limit)
 curl -X POST ${API_BASE}/features \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: $API_KEY" \\
@@ -57,7 +58,10 @@ curl -X POST ${API_BASE}/features \\
 
       <h3>Create a Promotion</h3>
       <p>Set up the launch discount:</p>
-      <CodeBlock title="Terminal" language="bash">{`curl -X POST ${API_BASE}/promotions \\
+      <CodeBlock
+        title="Terminal"
+        language="bash"
+      >{`curl -X POST ${API_BASE}/promotions \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: $API_KEY" \\
   -d '{
@@ -107,7 +111,10 @@ curl -X POST ${API_BASE}/offers/$OFFER_ID/publish \\
 
       <h2 id="step-3-webhook">Step 3: Set Up Webhook Endpoint</h2>
       <p>Register your webhook endpoint to receive events:</p>
-      <CodeBlock title="Terminal" language="bash">{`curl -X POST ${API_BASE}/webhook-endpoints \\
+      <CodeBlock
+        title="Terminal"
+        language="bash"
+      >{`curl -X POST ${API_BASE}/webhook-endpoints \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: $API_KEY" \\
   -d '{
@@ -127,7 +134,9 @@ curl -X POST ${API_BASE}/offers/$OFFER_ID/publish \\
 WEBHOOK_SECRET="whsec_..."`}</CodeBlock>
 
       <h2 id="step-4-backend">Step 4: Backend Integration</h2>
-      <p>Here's a Node.js/Express backend that handles the subscription flow:</p>
+      <p>
+        Here's a Node.js/Express backend that handles the subscription flow:
+      </p>
       <CodeBlock title="server.js" language="javascript">{`// server.js
 import express from 'express';
 import crypto from 'crypto';
@@ -358,18 +367,26 @@ ngrok http 3000`}</CodeBlock>
             <li>Go to your pricing page</li>
             <li>Enter promo code "LAUNCH20"</li>
             <li>Click "Start Free Trial"</li>
-            <li>Complete checkout with test card <code>4242 4242 4242 4242</code></li>
+            <li>
+              Complete checkout with test card <code>4242 4242 4242 4242</code>
+            </li>
           </ul>
         </li>
         <li>
           <strong>Verify webhook received</strong>
-          <CodeBlock title="Server logs" language="text">{`# You should see in your server logs:
+          <CodeBlock
+            title="Server logs"
+            language="text"
+          >{`# You should see in your server logs:
 Received event: subscription.created evt_abc123
 New subscription for customer cust_xyz789`}</CodeBlock>
         </li>
         <li>
           <strong>Check entitlements</strong>
-          <CodeBlock title="Terminal" language="bash">{`curl http://localhost:3000/api/check-access/api_access
+          <CodeBlock
+            title="Terminal"
+            language="bash"
+          >{`curl http://localhost:3000/api/check-access/api_access
 # { "hasAccess": true, "value": true }`}</CodeBlock>
         </li>
       </ol>
@@ -405,16 +422,24 @@ New subscription for customer cust_xyz789`}</CodeBlock>
         <h3 className="font-semibold text-gray-900 mb-2">Related Guides</h3>
         <ul className="space-y-2 text-sm">
           <li>
-            <a href="/docs/headless-checkout" className="text-primary-600 hover:text-primary-700">
+            <a
+              href="/docs/headless-checkout"
+              className="text-primary-600 hover:text-primary-700"
+            >
               Headless Checkout →
             </a>
             <span className="text-gray-500 ml-2">Build custom checkout UI</span>
           </li>
           <li>
-            <a href="/docs/webhooks" className="text-primary-600 hover:text-primary-700">
+            <a
+              href="/docs/webhooks"
+              className="text-primary-600 hover:text-primary-700"
+            >
               Webhooks →
             </a>
-            <span className="text-gray-500 ml-2">Deep dive into event handling</span>
+            <span className="text-gray-500 ml-2">
+              Deep dive into event handling
+            </span>
           </li>
         </ul>
       </div>

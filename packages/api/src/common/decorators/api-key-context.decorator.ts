@@ -1,11 +1,11 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import type { Request } from 'express';
+import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+import type { Request } from "express";
 
 export interface ApiKeyContext {
   keyId: string;
   workspaceId: string;
-  role: 'owner' | 'admin' | 'member' | 'readonly';
-  environment: 'live' | 'test';
+  role: "owner" | "admin" | "member" | "readonly";
+  environment: "live" | "test";
 }
 
 export interface SessionContext {
@@ -20,11 +20,11 @@ export const CurrentApiKey = createParamDecorator(
     const apiKeyContext = request.apiKeyContext as ApiKeyContext | undefined;
 
     if (!apiKeyContext) {
-      throw new Error('API key context not found on request');
+      throw new Error("API key context not found on request");
     }
 
     return apiKeyContext;
-  }
+  },
 );
 
 export const WorkspaceId = createParamDecorator(
@@ -33,11 +33,11 @@ export const WorkspaceId = createParamDecorator(
     const apiKeyContext = request.apiKeyContext as ApiKeyContext | undefined;
 
     if (!apiKeyContext) {
-      throw new Error('API key context not found on request');
+      throw new Error("API key context not found on request");
     }
 
     return apiKeyContext.workspaceId;
-  }
+  },
 );
 
 export const CurrentSession = createParamDecorator(
@@ -46,11 +46,11 @@ export const CurrentSession = createParamDecorator(
     const sessionContext = request.sessionContext;
 
     if (!sessionContext) {
-      throw new Error('Session context not found on request');
+      throw new Error("Session context not found on request");
     }
 
     return sessionContext;
-  }
+  },
 );
 
 export const CurrentUserId = createParamDecorator(
@@ -59,11 +59,11 @@ export const CurrentUserId = createParamDecorator(
     const sessionContext = request.sessionContext;
 
     if (!sessionContext) {
-      throw new Error('Session context not found on request');
+      throw new Error("Session context not found on request");
     }
 
     return sessionContext.userId;
-  }
+  },
 );
 
 // Extend Express Request type

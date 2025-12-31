@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
 
 interface ListEventsParams {
   limit: number;
   cursor?: string;
-  status?: 'pending' | 'processed' | 'failed';
+  status?: "pending" | "processed" | "failed";
   eventType?: string;
   aggregateType?: string;
   aggregateId?: string;
@@ -22,9 +22,10 @@ export class EventsService {
 
   async listEvents(
     workspaceId: string,
-    params: ListEventsParams
+    params: ListEventsParams,
   ): Promise<PaginatedResult<Record<string, unknown>>> {
-    const { limit, cursor, status, eventType, aggregateType, aggregateId } = params;
+    const { limit, cursor, status, eventType, aggregateType, aggregateId } =
+      params;
 
     const where: Record<string, unknown> = { workspaceId };
     if (status) where.status = status;
@@ -37,7 +38,7 @@ export class EventsService {
         ...where,
         ...(cursor ? { id: { lt: cursor } } : {}),
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: limit + 1,
     });
 
@@ -63,7 +64,7 @@ export class EventsService {
 
   async listDeadLetterEvents(
     workspaceId: string,
-    params: { limit: number; cursor?: string }
+    params: { limit: number; cursor?: string },
   ): Promise<PaginatedResult<Record<string, unknown>>> {
     const { limit, cursor } = params;
 
@@ -72,7 +73,7 @@ export class EventsService {
         workspaceId,
         ...(cursor ? { id: { lt: cursor } } : {}),
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: limit + 1,
       include: {
         endpoint: {

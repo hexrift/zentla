@@ -4,11 +4,11 @@ import {
   ExecutionContext,
   CallHandler,
   HttpStatus,
-} from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import type { Request, Response } from 'express';
-import { PreconditionFailedException } from '../exceptions';
+} from "@nestjs/common";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import type { Request, Response } from "express";
+import { PreconditionFailedException } from "../exceptions";
 
 /**
  * Interface for resources that support ETag-based concurrency control.
@@ -73,30 +73,36 @@ export class ETagInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data: unknown) => {
         // Handle response data
-        if (data && typeof data === 'object') {
+        if (data && typeof data === "object") {
           const resource = data as Partial<VersionedResource>;
 
           // For single resources with id and version
-          if (resource.id && typeof resource.version === 'number') {
+          if (resource.id && typeof resource.version === "number") {
             const etag = generateETag(resource.id, resource.version);
-            response.setHeader('ETag', etag);
+            response.setHeader("ETag", etag);
           }
 
           // For responses wrapped in { data: resource } format
-          if ('data' in resource) {
+          if ("data" in resource) {
             const innerData = (resource as { data: unknown }).data;
-            if (innerData && typeof innerData === 'object') {
+            if (innerData && typeof innerData === "object") {
               const innerResource = innerData as Partial<VersionedResource>;
-              if (innerResource.id && typeof innerResource.version === 'number') {
-                const etag = generateETag(innerResource.id, innerResource.version);
-                response.setHeader('ETag', etag);
+              if (
+                innerResource.id &&
+                typeof innerResource.version === "number"
+              ) {
+                const etag = generateETag(
+                  innerResource.id,
+                  innerResource.version,
+                );
+                response.setHeader("ETag", etag);
               }
             }
           }
         }
 
         return data;
-      })
+      }),
     );
   }
 }
@@ -124,7 +130,7 @@ export class ETagInterceptor implements NestInterceptor {
 export function validateIfMatch(
   ifMatch: string | undefined,
   currentVersion: number,
-  resourceType: string
+  resourceType: string,
 ): void {
   if (!ifMatch) {
     // If-Match is optional; if not provided, proceed without check
@@ -153,15 +159,15 @@ export class RequireIfMatchInterceptor implements NestInterceptor {
     const method = request.method.toUpperCase();
 
     // Only check for mutation methods
-    if (['PUT', 'PATCH', 'DELETE'].includes(method)) {
-      const ifMatch = request.headers['if-match'];
+    if (["PUT", "PATCH", "DELETE"].includes(method)) {
+      const ifMatch = request.headers["if-match"];
       if (!ifMatch) {
         const response = context.switchToHttp().getResponse<Response>();
         response.status(HttpStatus.PRECONDITION_REQUIRED).json({
           success: false,
           error: {
-            code: 'PRECONDITION_REQUIRED',
-            message: 'If-Match header is required for this operation',
+            code: "PRECONDITION_REQUIRED",
+            message: "If-Match header is required for this operation",
           },
           meta: {
             timestamp: new Date().toISOString(),

@@ -1,5 +1,5 @@
-export { PrismaService } from './prisma.service';
-export { createPrismaClient, type PrismaClientOptions } from './prisma.client';
+export { PrismaService } from "./prisma.service";
+export { createPrismaClient, type PrismaClientOptions } from "./prisma.client";
 
 // Re-export Prisma types for strict typing
 export {
@@ -21,7 +21,7 @@ export {
   OutboxEventStatus,
   WorkspaceRole,
   WorkspaceMode,
-} from '@prisma/client';
+} from "@prisma/client";
 
 // Re-export model types
 export type {
@@ -43,10 +43,10 @@ export type {
   User,
   UserSession,
   WorkspaceMembership,
-} from '@prisma/client';
+} from "@prisma/client";
 
 // Pagination types
-export type { PaginatedResult, PaginationParams } from './types';
+export type { PaginatedResult, PaginationParams } from "./types";
 
 // Utility types for create/update operations
 export type {
@@ -72,11 +72,11 @@ export type {
   OutboxEventCreateInput,
   DeadLetterEventCreateInput,
   IdempotencyKeyCreateInput,
-} from './types';
+} from "./types";
 
 // Repository interfaces
-export type { WorkspaceRepository } from './repositories/workspace.repository';
-export type { CustomerRepository } from './repositories/customer.repository';
-export type { OfferRepository } from './repositories/offer.repository';
-export type { SubscriptionRepository } from './repositories/subscription.repository';
-export type { ProviderRefRepository } from './repositories/provider-ref.repository';
+export type { WorkspaceRepository } from "./repositories/workspace.repository";
+export type { CustomerRepository } from "./repositories/customer.repository";
+export type { OfferRepository } from "./repositories/offer.repository";
+export type { SubscriptionRepository } from "./repositories/subscription.repository";
+export type { ProviderRefRepository } from "./repositories/provider-ref.repository";

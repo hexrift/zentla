@@ -1,17 +1,19 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma } from "@prisma/client";
 
 export interface PrismaClientOptions {
   datasourceUrl?: string;
   log?: Prisma.LogLevel[];
 }
 
-export function createPrismaClient(options: PrismaClientOptions = {}): PrismaClient {
-  const { datasourceUrl, log = ['error', 'warn'] } = options;
+export function createPrismaClient(
+  options: PrismaClientOptions = {},
+): PrismaClient {
+  const { datasourceUrl, log = ["error", "warn"] } = options;
 
   return new PrismaClient({
     datasourceUrl,
     log: log.map((level) => ({
-      emit: 'stdout' as const,
+      emit: "stdout" as const,
       level,
     })),
   });

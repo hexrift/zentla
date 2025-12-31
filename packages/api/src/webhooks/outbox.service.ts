@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import type { OutboxEvent, Prisma } from '@prisma/client';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import type { OutboxEvent, Prisma } from "@prisma/client";
 
 export interface CreateOutboxEventDto {
   workspaceId: string;
@@ -22,15 +22,15 @@ export class OutboxService {
         aggregateType: dto.aggregateType,
         aggregateId: dto.aggregateId,
         payload: dto.payload as Prisma.InputJsonValue,
-        status: 'pending',
+        status: "pending",
       },
     });
   }
 
   async getPendingEvents(limit: number = 100): Promise<OutboxEvent[]> {
     return this.prisma.outboxEvent.findMany({
-      where: { status: 'pending' },
-      orderBy: { createdAt: 'asc' },
+      where: { status: "pending" },
+      orderBy: { createdAt: "asc" },
       take: limit,
     });
   }
@@ -39,7 +39,7 @@ export class OutboxService {
     await this.prisma.outboxEvent.update({
       where: { id },
       data: {
-        status: 'processed',
+        status: "processed",
         processedAt: new Date(),
       },
     });
@@ -48,7 +48,7 @@ export class OutboxService {
   async markAsFailed(id: string): Promise<void> {
     await this.prisma.outboxEvent.update({
       where: { id },
-      data: { status: 'failed' },
+      data: { status: "failed" },
     });
   }
 
@@ -59,7 +59,7 @@ export class OutboxService {
     eventType: string,
     payload: Record<string, unknown>,
     failureReason: string,
-    attempts: number
+    attempts: number,
   ): Promise<void> {
     await this.prisma.deadLetterEvent.create({
       data: {
@@ -77,11 +77,11 @@ export class OutboxService {
 
   async getDeadLetterEvents(
     workspaceId: string,
-    limit: number = 100
+    limit: number = 100,
   ): Promise<unknown[]> {
     return this.prisma.deadLetterEvent.findMany({
       where: { workspaceId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: limit,
     });
   }

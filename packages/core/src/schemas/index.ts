@@ -1,31 +1,37 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Common schemas
 export const uuidSchema = z.string().uuid();
 export const emailSchema = z.string().email();
 export const urlSchema = z.string().url();
-export const slugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Invalid slug format');
+export const slugSchema = z
+  .string()
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Invalid slug format");
 
 // Workspace schemas
 export const createWorkspaceSchema = z.object({
   name: z.string().min(1).max(100),
   slug: slugSchema,
-  defaultProvider: z.enum(['stripe', 'zuora']).optional(),
+  defaultProvider: z.enum(["stripe", "zuora"]).optional(),
   defaultCurrency: z.string().length(3).optional(),
 });
 
 export const updateWorkspaceSchema = z.object({
   name: z.string().min(1).max(100).optional(),
-  defaultProvider: z.enum(['stripe', 'zuora']).optional(),
-  settings: z.object({
-    defaultCurrency: z.string().length(3).optional(),
-    webhookRetryPolicy: z.object({
-      maxRetries: z.number().int().min(0).max(10).optional(),
-      initialDelayMs: z.number().int().min(100).max(60000).optional(),
-      maxDelayMs: z.number().int().min(1000).max(3600000).optional(),
-      backoffMultiplier: z.number().min(1).max(5).optional(),
-    }).optional(),
-  }).optional(),
+  defaultProvider: z.enum(["stripe", "zuora"]).optional(),
+  settings: z
+    .object({
+      defaultCurrency: z.string().length(3).optional(),
+      webhookRetryPolicy: z
+        .object({
+          maxRetries: z.number().int().min(0).max(10).optional(),
+          initialDelayMs: z.number().int().min(100).max(60000).optional(),
+          maxDelayMs: z.number().int().min(1000).max(3600000).optional(),
+          backoffMultiplier: z.number().min(1).max(5).optional(),
+        })
+        .optional(),
+    })
+    .optional(),
 });
 
 // Customer schemas
@@ -51,12 +57,12 @@ export const pricingTierSchema = z.object({
 });
 
 export const pricingConfigSchema = z.object({
-  model: z.enum(['flat', 'per_unit', 'tiered', 'volume']),
+  model: z.enum(["flat", "per_unit", "tiered", "volume"]),
   currency: z.string().length(3),
   amount: z.number().int().nonnegative(),
-  interval: z.enum(['day', 'week', 'month', 'year']).optional(),
+  interval: z.enum(["day", "week", "month", "year"]).optional(),
   intervalCount: z.number().int().min(1).max(12).optional(),
-  usageType: z.enum(['licensed', 'metered']).optional(),
+  usageType: z.enum(["licensed", "metered"]).optional(),
   tiers: z.array(pricingTierSchema).optional(),
 });
 
@@ -68,7 +74,7 @@ export const trialConfigSchema = z.object({
 export const entitlementConfigSchema = z.object({
   featureKey: z.string().min(1).max(100),
   value: z.union([z.string(), z.number(), z.boolean()]),
-  valueType: z.enum(['boolean', 'number', 'string', 'unlimited']),
+  valueType: z.enum(["boolean", "number", "string", "unlimited"]),
 });
 
 export const offerConfigSchema = z.object({
@@ -120,7 +126,9 @@ export const cancelSubscriptionSchema = z.object({
 export const changeSubscriptionSchema = z.object({
   newOfferId: uuidSchema,
   newOfferVersionId: uuidSchema.optional(),
-  prorationBehavior: z.enum(['create_prorations', 'none', 'always_invoice']).optional(),
+  prorationBehavior: z
+    .enum(["create_prorations", "none", "always_invoice"])
+    .optional(),
 });
 
 // Webhook endpoint schemas
@@ -134,7 +142,7 @@ export const createWebhookEndpointSchema = z.object({
 export const updateWebhookEndpointSchema = z.object({
   url: urlSchema.optional(),
   events: z.array(z.string()).min(1).optional(),
-  status: z.enum(['active', 'disabled']).optional(),
+  status: z.enum(["active", "disabled"]).optional(),
   description: z.string().max(500).optional(),
   metadata: z.record(z.unknown()).optional(),
 });
@@ -142,8 +150,8 @@ export const updateWebhookEndpointSchema = z.object({
 // API Key schemas
 export const createApiKeySchema = z.object({
   name: z.string().min(1).max(100),
-  role: z.enum(['owner', 'admin', 'member', 'readonly']),
-  environment: z.enum(['live', 'test']),
+  role: z.enum(["owner", "admin", "member", "readonly"]),
+  environment: z.enum(["live", "test"]),
   expiresAt: z.coerce.date().optional(),
 });
 
@@ -152,7 +160,7 @@ export const paginationSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
   cursor: z.string().optional(),
   sortBy: z.string().optional(),
-  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
 
 export type CreateWorkspaceInput = z.infer<typeof createWorkspaceSchema>;
@@ -161,10 +169,16 @@ export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
 export type UpdateCustomerInput = z.infer<typeof updateCustomerSchema>;
 export type CreateOfferInput = z.infer<typeof createOfferSchema>;
 export type CreateOfferVersionInput = z.infer<typeof createOfferVersionSchema>;
-export type CreateCheckoutSessionInput = z.infer<typeof createCheckoutSessionSchema>;
+export type CreateCheckoutSessionInput = z.infer<
+  typeof createCheckoutSessionSchema
+>;
 export type CancelSubscriptionInput = z.infer<typeof cancelSubscriptionSchema>;
 export type ChangeSubscriptionInput = z.infer<typeof changeSubscriptionSchema>;
-export type CreateWebhookEndpointInput = z.infer<typeof createWebhookEndpointSchema>;
-export type UpdateWebhookEndpointInput = z.infer<typeof updateWebhookEndpointSchema>;
+export type CreateWebhookEndpointInput = z.infer<
+  typeof createWebhookEndpointSchema
+>;
+export type UpdateWebhookEndpointInput = z.infer<
+  typeof updateWebhookEndpointSchema
+>;
 export type CreateApiKeyInput = z.infer<typeof createApiKeySchema>;
 export type PaginationInput = z.infer<typeof paginationSchema>;

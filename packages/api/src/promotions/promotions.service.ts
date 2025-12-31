@@ -1,18 +1,20 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import { BillingService } from '../billing/billing.service';
-import { ProviderRefService } from '../billing/provider-ref.service';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import { BillingService } from "../billing/billing.service";
+import { ProviderRefService } from "../billing/provider-ref.service";
 import type {
   Promotion,
   PromotionVersion,
   PromotionStatus,
   Prisma,
-} from '@prisma/client';
-import type { PaginatedResult } from '@relay/database';
-import type {
-  PromotionConfig,
-  PromotionValidationResult,
-} from '@relay/core';
+} from "@prisma/client";
+import type { PaginatedResult } from "@relay/database";
+import type { PromotionConfig, PromotionValidationResult } from "@relay/core";
 
 export interface PromotionWithVersions extends Promotion {
   versions: PromotionVersion[];
@@ -43,7 +45,10 @@ export class PromotionsService {
     private readonly providerRefService: ProviderRefService,
   ) {}
 
-  async findById(workspaceId: string, id: string): Promise<PromotionWithVersions | null> {
+  async findById(
+    workspaceId: string,
+    id: string,
+  ): Promise<PromotionWithVersions | null> {
     const promotion = await this.prisma.promotion.findFirst({
       where: {
         id,
@@ -51,7 +56,7 @@ export class PromotionsService {
       },
       include: {
         versions: {
-          orderBy: { version: 'desc' },
+          orderBy: { version: "desc" },
         },
         currentVersion: true,
       },
@@ -60,7 +65,10 @@ export class PromotionsService {
     return promotion;
   }
 
-  async findByCode(workspaceId: string, code: string): Promise<PromotionWithVersions | null> {
+  async findByCode(
+    workspaceId: string,
+    code: string,
+  ): Promise<PromotionWithVersions | null> {
     const promotion = await this.prisma.promotion.findFirst({
       where: {
         code: code.toUpperCase(),
@@ -68,7 +76,7 @@ export class PromotionsService {
       },
       include: {
         versions: {
-          orderBy: { version: 'desc' },
+          orderBy: { version: "desc" },
         },
         currentVersion: true,
       },
@@ -79,7 +87,7 @@ export class PromotionsService {
 
   async findMany(
     workspaceId: string,
-    params: PromotionQueryParams
+    params: PromotionQueryParams,
   ): Promise<PaginatedResult<Promotion>> {
     const { limit, cursor, status, search } = params;
 
@@ -88,9 +96,9 @@ export class PromotionsService {
       ...(status && { status }),
       ...(search && {
         OR: [
-          { code: { contains: search, mode: 'insensitive' } },
-          { name: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } },
+          { code: { contains: search, mode: "insensitive" } },
+          { name: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
         ],
       }),
     };
@@ -102,7 +110,7 @@ export class PromotionsService {
         cursor: { id: cursor },
         skip: 1,
       }),
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         currentVersion: true,
       },
@@ -119,7 +127,10 @@ export class PromotionsService {
     };
   }
 
-  async create(workspaceId: string, dto: CreatePromotionDto): Promise<PromotionWithVersions> {
+  async create(
+    workspaceId: string,
+    dto: CreatePromotionDto,
+  ): Promise<PromotionWithVersions> {
     const normalizedCode = dto.code.toUpperCase();
 
     // Check for duplicate code
@@ -128,7 +139,9 @@ export class PromotionsService {
     });
 
     if (existing) {
-      throw new BadRequestException(`Promotion with code "${normalizedCode}" already exists`);
+      throw new BadRequestException(
+        `Promotion with code "${normalizedCode}" already exists`,
+      );
     }
 
     return this.prisma.executeInTransaction(async (tx) => {
@@ -139,7 +152,7 @@ export class PromotionsService {
           code: normalizedCode,
           name: dto.name,
           description: dto.description,
-          status: 'draft',
+          status: "draft",
         },
       });
 
@@ -148,7 +161,7 @@ export class PromotionsService {
         data: {
           promotionId: promotion.id,
           version: 1,
-          status: 'draft',
+          status: "draft",
           config: JSON.parse(JSON.stringify(dto.config)),
         },
       });
@@ -164,7 +177,7 @@ export class PromotionsService {
   async update(
     workspaceId: string,
     id: string,
-    dto: Partial<Pick<Promotion, 'name' | 'description'>>
+    dto: Partial<Pick<Promotion, "name" | "description">>,
   ): Promise<Promotion> {
     const promotion = await this.prisma.promotion.findFirst({
       where: { id, workspaceId },
@@ -191,20 +204,20 @@ export class PromotionsService {
 
     return this.prisma.promotion.update({
       where: { id },
-      data: { status: 'archived' },
+      data: { status: "archived" },
     });
   }
 
   async createVersion(
     workspaceId: string,
     promotionId: string,
-    config: PromotionConfig
+    config: PromotionConfig,
   ): Promise<PromotionVersion> {
     const promotion = await this.prisma.promotion.findFirst({
       where: { id: promotionId, workspaceId },
       include: {
         versions: {
-          orderBy: { version: 'desc' },
+          orderBy: { version: "desc" },
           take: 1,
         },
       },
@@ -218,13 +231,13 @@ export class PromotionsService {
     const existingDraft = await this.prisma.promotionVersion.findFirst({
       where: {
         promotionId,
-        status: 'draft',
+        status: "draft",
       },
     });
 
     if (existingDraft) {
       throw new BadRequestException(
-        'A draft version already exists. Publish or delete it before creating a new version.'
+        "A draft version already exists. Publish or delete it before creating a new version.",
       );
     }
 
@@ -234,7 +247,7 @@ export class PromotionsService {
       data: {
         promotionId,
         version: nextVersion,
-        status: 'draft',
+        status: "draft",
         config: JSON.parse(JSON.stringify(config)),
       },
     });
@@ -243,7 +256,7 @@ export class PromotionsService {
   async publishVersion(
     workspaceId: string,
     promotionId: string,
-    versionId?: string
+    versionId?: string,
   ): Promise<PromotionVersion> {
     const promotion = await this.prisma.promotion.findFirst({
       where: { id: promotionId, workspaceId },
@@ -263,37 +276,37 @@ export class PromotionsService {
     } else {
       // Find the latest draft
       versionToPublish = await this.prisma.promotionVersion.findFirst({
-        where: { promotionId, status: 'draft' },
-        orderBy: { version: 'desc' },
+        where: { promotionId, status: "draft" },
+        orderBy: { version: "desc" },
       });
     }
 
     if (!versionToPublish) {
-      throw new NotFoundException('No draft version found to publish');
+      throw new NotFoundException("No draft version found to publish");
     }
 
-    if (versionToPublish.status !== 'draft') {
-      throw new BadRequestException('Only draft versions can be published');
+    if (versionToPublish.status !== "draft") {
+      throw new BadRequestException("Only draft versions can be published");
     }
 
     // Validate config BEFORE any changes
     const config = versionToPublish.config as Record<string, unknown>;
     if (!config?.discountType) {
       throw new BadRequestException(
-        'Cannot publish: Promotion has no discount type configured.'
+        "Cannot publish: Promotion has no discount type configured.",
       );
     }
 
     if (config.discountValue === undefined || config.discountValue === null) {
       throw new BadRequestException(
-        'Cannot publish: Promotion has no discount value configured.'
+        "Cannot publish: Promotion has no discount value configured.",
       );
     }
 
     // Validate Stripe is configured
-    if (!this.billingService.isConfigured('stripe')) {
+    if (!this.billingService.isConfigured("stripe")) {
       throw new BadRequestException(
-        'Cannot publish: Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in Settings.'
+        "Cannot publish: Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in Settings.",
       );
     }
 
@@ -301,42 +314,47 @@ export class PromotionsService {
     const previousVersionId = promotion.currentVersionId;
     const previousPromotionStatus = promotion.status;
 
-    const publishedVersion = await this.prisma.executeInTransaction(async (tx) => {
-      // Archive currently published version
-      if (promotion.currentVersionId) {
-        await tx.promotionVersion.update({
-          where: { id: promotion.currentVersionId },
-          data: { status: 'archived' },
+    const publishedVersion = await this.prisma.executeInTransaction(
+      async (tx) => {
+        // Archive currently published version
+        if (promotion.currentVersionId) {
+          await tx.promotionVersion.update({
+            where: { id: promotion.currentVersionId },
+            data: { status: "archived" },
+          });
+        }
+
+        // Publish the new version
+        const published = await tx.promotionVersion.update({
+          where: { id: versionToPublish!.id },
+          data: {
+            status: "published",
+            publishedAt: new Date(),
+          },
         });
-      }
 
-      // Publish the new version
-      const published = await tx.promotionVersion.update({
-        where: { id: versionToPublish!.id },
-        data: {
-          status: 'published',
-          publishedAt: new Date(),
-        },
-      });
+        // Update promotion's current version and activate if first publish
+        await tx.promotion.update({
+          where: { id: promotionId },
+          data: {
+            currentVersionId: published.id,
+            // Activate promotion when first version is published
+            status: "active",
+          },
+        });
 
-      // Update promotion's current version and activate if first publish
-      await tx.promotion.update({
-        where: { id: promotionId },
-        data: {
-          currentVersionId: published.id,
-          // Activate promotion when first version is published
-          status: 'active',
-        },
-      });
-
-      return published;
-    });
+        return published;
+      },
+    );
 
     // Sync to Stripe - if this fails, rollback database changes
     try {
       await this.syncToStripe(workspaceId, promotion, publishedVersion);
     } catch (error) {
-      this.logger.error(`Stripe sync failed, rolling back publish for promotion ${promotionId}:`, error);
+      this.logger.error(
+        `Stripe sync failed, rolling back publish for promotion ${promotionId}:`,
+        error,
+      );
 
       // Rollback: revert the database changes
       await this.prisma.executeInTransaction(async (tx) => {
@@ -344,7 +362,7 @@ export class PromotionsService {
         await tx.promotionVersion.update({
           where: { id: publishedVersion.id },
           data: {
-            status: 'draft',
+            status: "draft",
             publishedAt: null,
           },
         });
@@ -353,7 +371,7 @@ export class PromotionsService {
         if (previousVersionId) {
           await tx.promotionVersion.update({
             where: { id: previousVersionId },
-            data: { status: 'published' },
+            data: { status: "published" },
           });
         }
 
@@ -368,9 +386,10 @@ export class PromotionsService {
       });
 
       // Re-throw with a clear message
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       throw new BadRequestException(
-        `Failed to sync to Stripe: ${errorMessage}. Changes have been rolled back.`
+        `Failed to sync to Stripe: ${errorMessage}. Changes have been rolled back.`,
       );
     }
 
@@ -380,10 +399,10 @@ export class PromotionsService {
   private async syncToStripe(
     workspaceId: string,
     promotion: Promotion,
-    version: PromotionVersion
+    version: PromotionVersion,
   ): Promise<void> {
-    if (!this.billingService.isConfigured('stripe')) {
-      this.logger.warn('Stripe not configured, skipping promotion sync');
+    if (!this.billingService.isConfigured("stripe")) {
+      this.logger.warn("Stripe not configured, skipping promotion sync");
       return;
     }
 
@@ -391,16 +410,16 @@ export class PromotionsService {
       const stripeAdapter = this.billingService.getStripeAdapter();
 
       if (!stripeAdapter.syncPromotion) {
-        this.logger.warn('Stripe adapter does not support syncPromotion');
+        this.logger.warn("Stripe adapter does not support syncPromotion");
         return;
       }
 
       // Check if we have an existing coupon ref
       const existingCouponRef = await this.providerRefService.findByEntity(
         workspaceId,
-        'coupon',
+        "coupon",
         promotion.id,
-        'stripe'
+        "stripe",
       );
 
       // Sync to Stripe
@@ -425,16 +444,16 @@ export class PromotionsService {
           publishedAt: version.publishedAt ?? undefined,
           createdAt: version.createdAt,
         },
-        existingCouponRef as never
+        existingCouponRef as never,
       );
 
       // Store coupon ref if new
       if (!existingCouponRef) {
         await this.providerRefService.create({
           workspaceId,
-          entityType: 'coupon',
+          entityType: "coupon",
           entityId: promotion.id,
-          provider: 'stripe',
+          provider: "stripe",
           externalId: result.couponRef.externalId,
         });
       }
@@ -442,14 +461,14 @@ export class PromotionsService {
       // Store promotion code ref for this version
       await this.providerRefService.create({
         workspaceId,
-        entityType: 'promotion_code',
+        entityType: "promotion_code",
         entityId: version.id,
-        provider: 'stripe',
+        provider: "stripe",
         externalId: result.promotionCodeRef.externalId,
       });
 
       this.logger.log(
-        `Synced promotion ${promotion.id} version ${version.id} to Stripe: coupon=${result.couponRef.externalId}, promo_code=${result.promotionCodeRef.externalId}`
+        `Synced promotion ${promotion.id} version ${version.id} to Stripe: coupon=${result.couponRef.externalId}, promo_code=${result.promotionCodeRef.externalId}`,
       );
     } catch (error) {
       this.logger.error(`Failed to sync promotion to Stripe: ${error}`);
@@ -457,7 +476,10 @@ export class PromotionsService {
     }
   }
 
-  async getVersions(workspaceId: string, promotionId: string): Promise<PromotionVersion[]> {
+  async getVersions(
+    workspaceId: string,
+    promotionId: string,
+  ): Promise<PromotionVersion[]> {
     const promotion = await this.prisma.promotion.findFirst({
       where: { id: promotionId, workspaceId },
     });
@@ -468,7 +490,7 @@ export class PromotionsService {
 
     return this.prisma.promotionVersion.findMany({
       where: { promotionId },
-      orderBy: { version: 'desc' },
+      orderBy: { version: "desc" },
     });
   }
 
@@ -477,59 +499,60 @@ export class PromotionsService {
     code: string,
     offerId: string,
     customerId?: string,
-    orderAmount?: number
+    orderAmount?: number,
   ): Promise<PromotionValidationResult> {
     const promotion = await this.findByCode(workspaceId, code);
 
     if (!promotion) {
       return {
         isValid: false,
-        errorCode: 'not_found',
-        errorMessage: 'Promotion code not found',
+        errorCode: "not_found",
+        errorMessage: "Promotion code not found",
       };
     }
 
-    if (promotion.status === 'archived') {
+    if (promotion.status === "archived") {
       return {
         isValid: false,
-        errorCode: 'not_found',
-        errorMessage: 'Promotion is no longer available',
+        errorCode: "not_found",
+        errorMessage: "Promotion is no longer available",
       };
     }
 
-    if (promotion.status === 'draft') {
+    if (promotion.status === "draft") {
       return {
         isValid: false,
-        errorCode: 'not_published',
-        errorMessage: 'Promotion is not yet active',
+        errorCode: "not_published",
+        errorMessage: "Promotion is not yet active",
       };
     }
 
     if (!promotion.currentVersion) {
       return {
         isValid: false,
-        errorCode: 'not_published',
-        errorMessage: 'Promotion is not yet active',
+        errorCode: "not_published",
+        errorMessage: "Promotion is not yet active",
       };
     }
 
-    const config = promotion.currentVersion.config as unknown as PromotionConfig;
+    const config = promotion.currentVersion
+      .config as unknown as PromotionConfig;
     const now = new Date();
 
     // Check validity dates
     if (config.validFrom && new Date(config.validFrom) > now) {
       return {
         isValid: false,
-        errorCode: 'not_yet_valid',
-        errorMessage: 'Promotion is not yet valid',
+        errorCode: "not_yet_valid",
+        errorMessage: "Promotion is not yet valid",
       };
     }
 
     if (config.validUntil && new Date(config.validUntil) < now) {
       return {
         isValid: false,
-        errorCode: 'expired',
-        errorMessage: 'Promotion has expired',
+        errorCode: "expired",
+        errorMessage: "Promotion has expired",
       };
     }
 
@@ -538,18 +561,22 @@ export class PromotionsService {
       if (!config.applicableOfferIds.includes(offerId)) {
         return {
           isValid: false,
-          errorCode: 'offer_not_applicable',
-          errorMessage: 'Promotion does not apply to this offer',
+          errorCode: "offer_not_applicable",
+          errorMessage: "Promotion does not apply to this offer",
         };
       }
     }
 
     // Check minimum amount
-    if (config.minimumAmount && orderAmount !== undefined && orderAmount < config.minimumAmount) {
+    if (
+      config.minimumAmount &&
+      orderAmount !== undefined &&
+      orderAmount < config.minimumAmount
+    ) {
       return {
         isValid: false,
-        errorCode: 'minimum_not_met',
-        errorMessage: `Minimum order of ${config.minimumAmount / 100} ${config.currency || 'USD'} required`,
+        errorCode: "minimum_not_met",
+        errorMessage: `Minimum order of ${config.minimumAmount / 100} ${config.currency || "USD"} required`,
       };
     }
 
@@ -562,8 +589,8 @@ export class PromotionsService {
       if (totalRedemptions >= config.maxRedemptions) {
         return {
           isValid: false,
-          errorCode: 'max_redemptions_reached',
-          errorMessage: 'Promotion has reached its maximum redemptions',
+          errorCode: "max_redemptions_reached",
+          errorMessage: "Promotion has reached its maximum redemptions",
         };
       }
     }
@@ -580,8 +607,8 @@ export class PromotionsService {
       if (customerRedemptions >= config.maxRedemptionsPerCustomer) {
         return {
           isValid: false,
-          errorCode: 'customer_limit_reached',
-          errorMessage: 'You have already used this promotion',
+          errorCode: "customer_limit_reached",
+          errorMessage: "You have already used this promotion",
         };
       }
     }
@@ -635,7 +662,7 @@ export class PromotionsService {
 
   async getAppliedPromotions(
     workspaceId: string,
-    promotionId: string
+    promotionId: string,
   ): Promise<{ count: number; totalDiscount: number }> {
     const [count, aggregate] = await Promise.all([
       this.prisma.appliedPromotion.count({

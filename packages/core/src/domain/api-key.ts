@@ -13,9 +13,9 @@ export interface ApiKey {
   updatedAt: Date;
 }
 
-export type ApiKeyRole = 'owner' | 'admin' | 'member' | 'readonly';
+export type ApiKeyRole = "owner" | "admin" | "member" | "readonly";
 
-export type ApiKeyEnvironment = 'live' | 'test';
+export type ApiKeyEnvironment = "live" | "test";
 
 export interface ApiKeyWithSecret extends ApiKey {
   secret: string;
@@ -29,6 +29,6 @@ export interface ApiKeyContext {
 }
 
 export const API_KEY_PREFIXES = {
-  live: 'relay_live_',
-  test: 'relay_test_',
+  live: "relay_live_",
+  test: "relay_test_",
 } as const;

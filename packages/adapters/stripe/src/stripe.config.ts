@@ -5,18 +5,20 @@ export interface StripeConfig {
   apiVersion?: string;
 }
 
-export function validateStripeConfig(config: Partial<StripeConfig>): StripeConfig {
+export function validateStripeConfig(
+  config: Partial<StripeConfig>,
+): StripeConfig {
   if (!config.secretKey) {
-    throw new Error('Stripe secret key is required');
+    throw new Error("Stripe secret key is required");
   }
   if (!config.webhookSecret) {
-    throw new Error('Stripe webhook secret is required');
+    throw new Error("Stripe webhook secret is required");
   }
 
   return {
     secretKey: config.secretKey,
     webhookSecret: config.webhookSecret,
     publishableKey: config.publishableKey,
-    apiVersion: config.apiVersion ?? '2023-10-16',
+    apiVersion: config.apiVersion ?? "2023-10-16",
   };
 }

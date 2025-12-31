@@ -18,16 +18,16 @@ export interface Subscription {
 }
 
 export type SubscriptionStatus =
-  | 'trialing'
-  | 'active'
-  | 'past_due'
-  | 'canceled'
-  | 'unpaid'
-  | 'incomplete'
-  | 'incomplete_expired'
-  | 'paused';
+  | "trialing"
+  | "active"
+  | "past_due"
+  | "canceled"
+  | "unpaid"
+  | "incomplete"
+  | "incomplete_expired"
+  | "paused";
 
-export type ProrationBehavior = 'create_prorations' | 'none' | 'always_invoice';
+export type ProrationBehavior = "create_prorations" | "none" | "always_invoice";
 
 export interface SubscriptionData {
   id: string;

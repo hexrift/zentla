@@ -1,15 +1,15 @@
-import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { Public } from '../common/decorators';
-import { PrismaService } from '../database/prisma.service';
+import { Controller, Get, HttpException, HttpStatus } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { Public } from "../common/decorators";
+import { PrismaService } from "../database/prisma.service";
 
 interface HealthResponse {
-  status: 'healthy' | 'unhealthy';
+  status: "healthy" | "unhealthy";
   timestamp: string;
   version: string;
   uptime: number;
   services: {
-    database: 'up' | 'down';
+    database: "up" | "down";
   };
   memory?: {
     heapUsed: number;
@@ -19,8 +19,8 @@ interface HealthResponse {
   };
 }
 
-@ApiTags('health')
-@Controller('health')
+@ApiTags("health")
+@Controller("health")
 export class HealthController {
   private readonly startTime = Date.now();
 
@@ -29,22 +29,23 @@ export class HealthController {
   @Get()
   @Public()
   @ApiOperation({
-    summary: 'Health check',
-    description: 'Full health check including database connectivity and memory usage.',
+    summary: "Health check",
+    description:
+      "Full health check including database connectivity and memory usage.",
   })
-  @ApiResponse({ status: 200, description: 'Service is healthy' })
-  @ApiResponse({ status: 503, description: 'Service is unhealthy' })
+  @ApiResponse({ status: 200, description: "Service is healthy" })
+  @ApiResponse({ status: 503, description: "Service is unhealthy" })
   async check(): Promise<HealthResponse> {
     const dbHealthy = await this.prisma.healthCheck();
     const memory = this.getMemoryUsage();
 
     const response: HealthResponse = {
-      status: dbHealthy ? 'healthy' : 'unhealthy',
+      status: dbHealthy ? "healthy" : "unhealthy",
       timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version ?? '0.1.0',
+      version: process.env.npm_package_version ?? "0.1.0",
       uptime: this.getUptime(),
       services: {
-        database: dbHealthy ? 'up' : 'down',
+        database: dbHealthy ? "up" : "down",
       },
       memory,
     };
@@ -56,45 +57,47 @@ export class HealthController {
     return response;
   }
 
-  @Get('live')
+  @Get("live")
   @Public()
   @ApiOperation({
-    summary: 'Liveness probe',
-    description: 'Simple check that the process is running. Use for Kubernetes/ECS liveness probes.',
+    summary: "Liveness probe",
+    description:
+      "Simple check that the process is running. Use for Kubernetes/ECS liveness probes.",
   })
-  @ApiResponse({ status: 200, description: 'Service is alive' })
+  @ApiResponse({ status: 200, description: "Service is alive" })
   live(): { status: string; uptime: number } {
     return {
-      status: 'ok',
+      status: "ok",
       uptime: this.getUptime(),
     };
   }
 
-  @Get('ready')
+  @Get("ready")
   @Public()
   @ApiOperation({
-    summary: 'Readiness probe',
-    description: 'Check if the service can handle requests. Verifies database connectivity. Use for load balancer health checks.',
+    summary: "Readiness probe",
+    description:
+      "Check if the service can handle requests. Verifies database connectivity. Use for load balancer health checks.",
   })
-  @ApiResponse({ status: 200, description: 'Service is ready' })
-  @ApiResponse({ status: 503, description: 'Service is not ready' })
+  @ApiResponse({ status: 200, description: "Service is ready" })
+  @ApiResponse({ status: 503, description: "Service is not ready" })
   async ready(): Promise<{ status: string; database: string }> {
     const dbHealthy = await this.prisma.healthCheck();
 
     if (!dbHealthy) {
       throw new HttpException(
         {
-          status: 'not_ready',
-          database: 'down',
-          message: 'Database connection failed',
+          status: "not_ready",
+          database: "down",
+          message: "Database connection failed",
         },
         HttpStatus.SERVICE_UNAVAILABLE,
       );
     }
 
     return {
-      status: 'ready',
-      database: 'up',
+      status: "ready",
+      database: "up",
     };
   }
 

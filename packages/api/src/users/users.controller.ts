@@ -7,19 +7,18 @@ import {
   Req,
   HttpCode,
   HttpStatus,
-} from '@nestjs/common';
+} from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from "@nestjs/swagger";
+import { IsEmail, IsString, MinLength, IsOptional } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import type { Request } from "express";
+import { UsersService } from "./users.service";
+import { UserSessionService } from "./user-session.service";
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiHeader,
-} from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import type { Request } from 'express';
-import { UsersService } from './users.service';
-import { UserSessionService } from './user-session.service';
-import { Public, CurrentSession, type SessionContext } from '../common/decorators';
+  Public,
+  CurrentSession,
+  type SessionContext,
+} from "../common/decorators";
 
 // ============================================================================
 // REQUEST DTOs
@@ -27,14 +26,14 @@ import { Public, CurrentSession, type SessionContext } from '../common/decorator
 
 class SignupRequestDto {
   @ApiProperty({
-    description: 'Email address for the new account',
-    example: 'developer@example.com',
+    description: "Email address for the new account",
+    example: "developer@example.com",
   })
   @IsEmail()
   email!: string;
 
   @ApiProperty({
-    description: 'Password (minimum 8 characters)',
+    description: "Password (minimum 8 characters)",
     minLength: 8,
   })
   @IsString()
@@ -42,8 +41,8 @@ class SignupRequestDto {
   password!: string;
 
   @ApiPropertyOptional({
-    description: 'Display name',
-    example: 'Jane Developer',
+    description: "Display name",
+    example: "Jane Developer",
   })
   @IsOptional()
   @IsString()
@@ -52,14 +51,14 @@ class SignupRequestDto {
 
 class LoginRequestDto {
   @ApiProperty({
-    description: 'Email address',
-    example: 'developer@example.com',
+    description: "Email address",
+    example: "developer@example.com",
   })
   @IsEmail()
   email!: string;
 
   @ApiProperty({
-    description: 'Password',
+    description: "Password",
   })
   @IsString()
   password!: string;
@@ -67,7 +66,7 @@ class LoginRequestDto {
 
 class GitHubCallbackDto {
   @ApiProperty({
-    description: 'GitHub OAuth code from callback',
+    description: "GitHub OAuth code from callback",
   })
   @IsString()
   code!: string;
@@ -107,18 +106,18 @@ interface AuthResponse {
 // CONTROLLER
 // ============================================================================
 
-@ApiTags('auth')
-@Controller('auth')
+@ApiTags("auth")
+@Controller("auth")
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly sessionService: UserSessionService
+    private readonly sessionService: UserSessionService,
   ) {}
 
-  @Post('signup')
+  @Post("signup")
   @Public()
   @ApiOperation({
-    summary: 'Create a new account',
+    summary: "Create a new account",
     description: `Creates a new user account with email and password.
 
 **What happens on signup:**
@@ -134,37 +133,37 @@ export class UsersController {
   })
   @ApiResponse({
     status: 201,
-    description: 'Account created successfully',
+    description: "Account created successfully",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         user: {
-          type: 'object',
+          type: "object",
           properties: {
-            id: { type: 'string', format: 'uuid' },
-            email: { type: 'string', format: 'email' },
-            name: { type: 'string', nullable: true },
-            avatarUrl: { type: 'string', nullable: true },
+            id: { type: "string", format: "uuid" },
+            email: { type: "string", format: "email" },
+            name: { type: "string", nullable: true },
+            avatarUrl: { type: "string", nullable: true },
           },
         },
         workspaces: {
-          type: 'array',
+          type: "array",
           items: {
-            type: 'object',
+            type: "object",
             properties: {
-              id: { type: 'string', format: 'uuid' },
-              name: { type: 'string' },
-              slug: { type: 'string' },
-              role: { type: 'string', enum: ['owner', 'admin'] },
-              mode: { type: 'string', enum: ['test', 'live'] },
+              id: { type: "string", format: "uuid" },
+              name: { type: "string" },
+              slug: { type: "string" },
+              role: { type: "string", enum: ["owner", "admin"] },
+              mode: { type: "string", enum: ["test", "live"] },
             },
           },
         },
         session: {
-          type: 'object',
+          type: "object",
           properties: {
-            token: { type: 'string' },
-            expiresAt: { type: 'string', format: 'date-time' },
+            token: { type: "string" },
+            expiresAt: { type: "string", format: "date-time" },
           },
         },
       },
@@ -172,15 +171,16 @@ export class UsersController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid request (e.g., invalid email format, password too short)',
+    description:
+      "Invalid request (e.g., invalid email format, password too short)",
   })
   @ApiResponse({
     status: 409,
-    description: 'Email already registered',
+    description: "Email already registered",
   })
   async signup(
     @Body() dto: SignupRequestDto,
-    @Req() req: Request
+    @Req() req: Request,
   ): Promise<AuthResponse> {
     const { user, initialApiKey } = await this.usersService.signup({
       email: dto.email,
@@ -191,7 +191,7 @@ export class UsersController {
     const { token, session } = await this.sessionService.createSession({
       userId: user.id,
       ipAddress: req.ip,
-      userAgent: req.get('user-agent'),
+      userAgent: req.get("user-agent"),
     });
 
     const response: AuthResponse = {
@@ -219,18 +219,18 @@ export class UsersController {
         id: initialApiKey.id,
         secret: initialApiKey.secret,
         prefix: initialApiKey.prefix,
-        message: 'Store this API key securely. It will not be shown again.',
+        message: "Store this API key securely. It will not be shown again.",
       };
     }
 
     return response;
   }
 
-  @Post('login')
+  @Post("login")
   @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Log in with email and password',
+    summary: "Log in with email and password",
     description: `Authenticates a user and returns a session token.
 
 **Session token usage:**
@@ -244,15 +244,15 @@ Sessions are valid for 30 days by default.`,
   })
   @ApiResponse({
     status: 200,
-    description: 'Login successful',
+    description: "Login successful",
   })
   @ApiResponse({
     status: 401,
-    description: 'Invalid email or password',
+    description: "Invalid email or password",
   })
   async login(
     @Body() dto: LoginRequestDto,
-    @Req() req: Request
+    @Req() req: Request,
   ): Promise<AuthResponse> {
     const user = await this.usersService.login({
       email: dto.email,
@@ -262,7 +262,7 @@ Sessions are valid for 30 days by default.`,
     const { token, session } = await this.sessionService.createSession({
       userId: user.id,
       ipAddress: req.ip,
-      userAgent: req.get('user-agent'),
+      userAgent: req.get("user-agent"),
     });
 
     return {
@@ -286,93 +286,103 @@ Sessions are valid for 30 days by default.`,
     };
   }
 
-  @Get('github')
+  @Get("github")
   @Public()
   @ApiOperation({
-    summary: 'Get GitHub OAuth URL',
-    description: 'Returns the URL to redirect users to for GitHub OAuth authentication.',
+    summary: "Get GitHub OAuth URL",
+    description:
+      "Returns the URL to redirect users to for GitHub OAuth authentication.",
   })
   @ApiResponse({
     status: 200,
-    description: 'GitHub OAuth URL',
+    description: "GitHub OAuth URL",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        url: { type: 'string', format: 'uri' },
+        url: { type: "string", format: "uri" },
       },
     },
   })
   getGitHubAuthUrl(): { url: string } {
     const clientId = process.env.GITHUB_CLIENT_ID;
-    const redirectUri = process.env.GITHUB_REDIRECT_URI || 'http://localhost:3002/api/v1/auth/github/callback';
+    const redirectUri =
+      process.env.GITHUB_REDIRECT_URI ||
+      "http://localhost:3002/api/v1/auth/github/callback";
 
     if (!clientId) {
-      throw new Error('GitHub OAuth is not configured');
+      throw new Error("GitHub OAuth is not configured");
     }
 
-    const url = new URL('https://github.com/login/oauth/authorize');
-    url.searchParams.set('client_id', clientId);
-    url.searchParams.set('redirect_uri', redirectUri);
-    url.searchParams.set('scope', 'user:email');
-    url.searchParams.set('allow_signup', 'true');
+    const url = new URL("https://github.com/login/oauth/authorize");
+    url.searchParams.set("client_id", clientId);
+    url.searchParams.set("redirect_uri", redirectUri);
+    url.searchParams.set("scope", "user:email");
+    url.searchParams.set("allow_signup", "true");
 
     return { url: url.toString() };
   }
 
-  @Post('github/callback')
+  @Post("github/callback")
   @Public()
   @ApiOperation({
-    summary: 'GitHub OAuth callback',
-    description: 'Handles the GitHub OAuth callback and creates/links an account.',
+    summary: "GitHub OAuth callback",
+    description:
+      "Handles the GitHub OAuth callback and creates/links an account.",
   })
   @ApiResponse({
     status: 200,
-    description: 'GitHub authentication successful',
+    description: "GitHub authentication successful",
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid OAuth code',
+    description: "Invalid OAuth code",
   })
   async handleGitHubCallback(
     @Body() dto: GitHubCallbackDto,
-    @Req() req: Request
+    @Req() req: Request,
   ): Promise<AuthResponse> {
     const clientId = process.env.GITHUB_CLIENT_ID;
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
-      throw new Error('GitHub OAuth is not configured');
+      throw new Error("GitHub OAuth is not configured");
     }
 
     // Exchange code for access token
-    const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
+    const tokenResponse = await fetch(
+      "https://github.com/login/oauth/access_token",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code: dto.code,
+        }),
       },
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code: dto.code,
-      }),
-    });
+    );
 
-    const tokenData = await tokenResponse.json() as { access_token?: string; error?: string };
+    const tokenData = (await tokenResponse.json()) as {
+      access_token?: string;
+      error?: string;
+    };
 
     if (!tokenData.access_token) {
-      throw new Error('Failed to exchange GitHub code for token');
+      throw new Error("Failed to exchange GitHub code for token");
     }
 
     // Get user info from GitHub
-    const userResponse = await fetch('https://api.github.com/user', {
+    const userResponse = await fetch("https://api.github.com/user", {
       headers: {
         Authorization: `Bearer ${tokenData.access_token}`,
-        Accept: 'application/vnd.github.v3+json',
+        Accept: "application/vnd.github.v3+json",
       },
     });
 
-    const githubUser = await userResponse.json() as {
+    const githubUser = (await userResponse.json()) as {
       id: number;
       email: string | null;
       name: string | null;
@@ -382,14 +392,14 @@ Sessions are valid for 30 days by default.`,
     // Get email if not public
     let email = githubUser.email;
     if (!email) {
-      const emailsResponse = await fetch('https://api.github.com/user/emails', {
+      const emailsResponse = await fetch("https://api.github.com/user/emails", {
         headers: {
           Authorization: `Bearer ${tokenData.access_token}`,
-          Accept: 'application/vnd.github.v3+json',
+          Accept: "application/vnd.github.v3+json",
         },
       });
 
-      const emails = await emailsResponse.json() as Array<{
+      const emails = (await emailsResponse.json()) as Array<{
         email: string;
         primary: boolean;
         verified: boolean;
@@ -400,7 +410,7 @@ Sessions are valid for 30 days by default.`,
     }
 
     if (!email) {
-      throw new Error('Could not get email from GitHub');
+      throw new Error("Could not get email from GitHub");
     }
 
     // Create or link user
@@ -414,7 +424,7 @@ Sessions are valid for 30 days by default.`,
     const { token, session } = await this.sessionService.createSession({
       userId: user.id,
       ipAddress: req.ip,
-      userAgent: req.get('user-agent'),
+      userAgent: req.get("user-agent"),
     });
 
     const response: AuthResponse = {
@@ -442,34 +452,35 @@ Sessions are valid for 30 days by default.`,
         id: initialApiKey.id,
         secret: initialApiKey.secret,
         prefix: initialApiKey.prefix,
-        message: 'Store this API key securely. It will not be shown again.',
+        message: "Store this API key securely. It will not be shown again.",
       };
     }
 
     return response;
   }
 
-  @Get('me')
+  @Get("me")
   @ApiOperation({
-    summary: 'Get current user',
-    description: 'Returns the currently authenticated user and their workspaces.',
+    summary: "Get current user",
+    description:
+      "Returns the currently authenticated user and their workspaces.",
   })
   @ApiHeader({
-    name: 'Authorization',
-    description: 'Session token: Bearer relay_session_...',
+    name: "Authorization",
+    description: "Session token: Bearer relay_session_...",
   })
   @ApiResponse({
     status: 200,
-    description: 'Current user information',
+    description: "Current user information",
   })
   @ApiResponse({
     status: 401,
-    description: 'Not authenticated',
+    description: "Not authenticated",
   })
   async getCurrentUser(@CurrentSession() session: SessionContext) {
     const user = await this.usersService.findById(session.userId);
     if (!user) {
-      return { error: 'User not found' };
+      return { error: "User not found" };
     }
 
     return {
@@ -489,15 +500,15 @@ Sessions are valid for 30 days by default.`,
     };
   }
 
-  @Delete('session')
+  @Delete("session")
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
-    summary: 'Log out',
-    description: 'Invalidates the current session token.',
+    summary: "Log out",
+    description: "Invalidates the current session token.",
   })
   @ApiResponse({
     status: 204,
-    description: 'Logged out successfully',
+    description: "Logged out successfully",
   })
   async logout(@CurrentSession() session: SessionContext): Promise<void> {
     await this.sessionService.revokeSession(session.sessionId);

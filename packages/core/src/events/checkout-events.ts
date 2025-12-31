@@ -1,5 +1,5 @@
-import type { DomainEvent } from './domain-event';
-import type { Checkout } from '../domain/checkout';
+import type { DomainEvent } from "./domain-event";
+import type { Checkout } from "../domain/checkout";
 
 export interface CheckoutCompletedData {
   checkout: Checkout;

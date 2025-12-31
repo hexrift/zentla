@@ -3,7 +3,7 @@ export interface Offer {
   workspaceId: string;
   name: string;
   description?: string;
-  status: 'active' | 'archived';
+  status: "active" | "archived";
   currentVersionId?: string;
   createdAt: string;
   updatedAt: string;
@@ -13,7 +13,7 @@ export interface OfferVersion {
   id: string;
   offerId: string;
   version: number;
-  status: 'draft' | 'published' | 'archived';
+  status: "draft" | "published" | "archived";
   config: OfferConfig;
   publishedAt?: string;
   createdAt: string;
@@ -28,12 +28,12 @@ export interface OfferConfig {
 }
 
 export interface PricingConfig {
-  model: 'flat' | 'per_unit' | 'tiered' | 'volume';
+  model: "flat" | "per_unit" | "tiered" | "volume";
   currency: string;
   amount: number;
-  interval?: 'day' | 'week' | 'month' | 'year';
+  interval?: "day" | "week" | "month" | "year";
   intervalCount?: number;
-  usageType?: 'licensed' | 'metered';
+  usageType?: "licensed" | "metered";
   tiers?: PricingTier[];
 }
 
@@ -51,7 +51,7 @@ export interface TrialConfig {
 export interface EntitlementConfig {
   featureKey: string;
   value: string | number | boolean;
-  valueType: 'boolean' | 'number' | 'string' | 'unlimited';
+  valueType: "boolean" | "number" | "string" | "unlimited";
 }
 
 export interface Customer {
@@ -72,14 +72,14 @@ export interface Subscription {
   offerId: string;
   offerVersionId: string;
   status:
-    | 'trialing'
-    | 'active'
-    | 'past_due'
-    | 'canceled'
-    | 'unpaid'
-    | 'incomplete'
-    | 'incomplete_expired'
-    | 'paused';
+    | "trialing"
+    | "active"
+    | "past_due"
+    | "canceled"
+    | "unpaid"
+    | "incomplete"
+    | "incomplete_expired"
+    | "paused";
   currentPeriodStart: string;
   currentPeriodEnd: string;
   cancelAt?: string;
@@ -98,7 +98,7 @@ export interface Checkout {
   customerId?: string;
   offerId: string;
   offerVersionId: string;
-  status: 'pending' | 'open' | 'complete' | 'expired';
+  status: "pending" | "open" | "complete" | "expired";
   sessionUrl?: string;
   successUrl: string;
   cancelUrl: string;
@@ -114,7 +114,7 @@ export interface WebhookEndpoint {
   workspaceId: string;
   url: string;
   events: string[];
-  status: 'active' | 'disabled';
+  status: "active" | "disabled";
   description?: string;
   metadata: Record<string, unknown>;
   createdAt: string;
@@ -125,7 +125,7 @@ export interface EntitlementCheck {
   featureKey: string;
   hasAccess: boolean;
   value?: string | number | boolean;
-  valueType?: 'boolean' | 'number' | 'string' | 'unlimited';
+  valueType?: "boolean" | "number" | "string" | "unlimited";
 }
 
 export interface PaginatedResponse<T> {

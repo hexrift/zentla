@@ -1,12 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { api } from '../lib/api';
-import type { Subscription } from '../lib/types';
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { api } from "../lib/api";
+import type { Subscription } from "../lib/types";
 
 export function SubscriptionsPage() {
   const navigate = useNavigate();
   const { data, isLoading, error } = useQuery({
-    queryKey: ['subscriptions'],
+    queryKey: ["subscriptions"],
     queryFn: () => api.subscriptions.list(),
   });
 
@@ -49,7 +49,9 @@ export function SubscriptionsPage() {
                       {sub.customer.email}
                     </div>
                     {sub.customer.name && (
-                      <div className="text-sm text-gray-500">{sub.customer.name}</div>
+                      <div className="text-sm text-gray-500">
+                        {sub.customer.name}
+                      </div>
                     )}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
@@ -58,13 +60,13 @@ export function SubscriptionsPage() {
                   <td className="px-6 py-4">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        sub.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : sub.status === 'trialing'
-                          ? 'bg-blue-100 text-blue-800'
-                          : sub.status === 'canceled'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-gray-100 text-gray-800'
+                        sub.status === "active"
+                          ? "bg-green-100 text-green-800"
+                          : sub.status === "trialing"
+                            ? "bg-blue-100 text-blue-800"
+                            : sub.status === "canceled"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {sub.status}

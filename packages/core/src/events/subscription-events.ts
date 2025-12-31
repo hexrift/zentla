@@ -1,5 +1,5 @@
-import type { DomainEvent } from './domain-event';
-import type { Subscription, SubscriptionStatus } from '../domain/subscription';
+import type { DomainEvent } from "./domain-event";
+import type { Subscription, SubscriptionStatus } from "../domain/subscription";
 
 export interface SubscriptionCreatedData {
   subscription: Subscription;
@@ -40,4 +40,5 @@ export type SubscriptionCreatedEvent = DomainEvent<SubscriptionCreatedData>;
 export type SubscriptionUpdatedEvent = DomainEvent<SubscriptionUpdatedData>;
 export type SubscriptionCanceledEvent = DomainEvent<SubscriptionCanceledData>;
 export type SubscriptionRenewedEvent = DomainEvent<SubscriptionRenewedData>;
-export type SubscriptionTrialEndedEvent = DomainEvent<SubscriptionTrialEndedData>;
+export type SubscriptionTrialEndedEvent =
+  DomainEvent<SubscriptionTrialEndedData>;

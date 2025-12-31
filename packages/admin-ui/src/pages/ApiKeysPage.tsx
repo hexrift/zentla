@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '../lib/api';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "../lib/api";
 
 interface ApiKey {
   id: string;
@@ -17,7 +17,7 @@ export function ApiKeysPage() {
   const [newKeySecret, setNewKeySecret] = useState<string | null>(null);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['apiKeys'],
+    queryKey: ["apiKeys"],
     queryFn: () => api.apiKeys.list(),
   });
 
@@ -26,14 +26,14 @@ export function ApiKeysPage() {
       api.apiKeys.create(data),
     onSuccess: (result) => {
       setNewKeySecret(result.secret);
-      queryClient.invalidateQueries({ queryKey: ['apiKeys'] });
+      queryClient.invalidateQueries({ queryKey: ["apiKeys"] });
     },
   });
 
   const revokeMutation = useMutation({
     mutationFn: (id: string) => api.apiKeys.revoke(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apiKeys'] });
+      queryClient.invalidateQueries({ queryKey: ["apiKeys"] });
     },
   });
 
@@ -44,9 +44,9 @@ export function ApiKeysPage() {
         <button
           onClick={() =>
             createMutation.mutate({
-              name: 'New Key',
-              role: 'admin',
-              environment: 'test',
+              name: "New Key",
+              role: "admin",
+              environment: "test",
             })
           }
           className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
@@ -119,13 +119,15 @@ export function ApiKeysPage() {
                   <td className="px-6 py-4 text-sm font-mono text-gray-500">
                     {key.keyPrefix}...
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{key.role}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {key.role}
+                  </td>
                   <td className="px-6 py-4">
                     <span
                       className={`px-2 text-xs font-semibold rounded-full ${
-                        key.environment === 'live'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
+                        key.environment === "live"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
                       }`}
                     >
                       {key.environment}
@@ -134,7 +136,7 @@ export function ApiKeysPage() {
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {key.lastUsedAt
                       ? new Date(key.lastUsedAt).toLocaleDateString()
-                      : 'Never'}
+                      : "Never"}
                   </td>
                   <td className="px-6 py-4 text-right text-sm">
                     <button

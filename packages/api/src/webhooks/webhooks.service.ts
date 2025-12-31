@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { createHmac, randomBytes } from 'crypto';
-import { PrismaService } from '../database/prisma.service';
-import type { WebhookEndpoint, Prisma } from '@prisma/client';
-import type { PaginatedResult } from '@relay/database';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { createHmac, randomBytes } from "crypto";
+import { PrismaService } from "../database/prisma.service";
+import type { WebhookEndpoint, Prisma } from "@prisma/client";
+import type { PaginatedResult } from "@relay/database";
 
 export interface CreateWebhookEndpointDto {
   url: string;
@@ -14,7 +14,7 @@ export interface CreateWebhookEndpointDto {
 export interface UpdateWebhookEndpointDto {
   url?: string;
   events?: string[];
-  status?: 'active' | 'disabled';
+  status?: "active" | "disabled";
   description?: string;
   metadata?: Record<string, unknown>;
 }
@@ -32,7 +32,7 @@ export class WebhooksService {
 
   async findEndpointById(
     workspaceId: string,
-    id: string
+    id: string,
   ): Promise<WebhookEndpoint | null> {
     return this.prisma.webhookEndpoint.findFirst({
       where: { id, workspaceId },
@@ -41,7 +41,7 @@ export class WebhooksService {
 
   async findEndpoints(
     workspaceId: string,
-    params: { limit: number; cursor?: string }
+    params: { limit: number; cursor?: string },
   ): Promise<PaginatedResult<WebhookEndpoint>> {
     const { limit, cursor } = params;
 
@@ -52,7 +52,7 @@ export class WebhooksService {
         cursor: { id: cursor },
         skip: 1,
       }),
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     const hasMore = endpoints.length > limit;
@@ -68,7 +68,7 @@ export class WebhooksService {
 
   async createEndpoint(
     workspaceId: string,
-    dto: CreateWebhookEndpointDto
+    dto: CreateWebhookEndpointDto,
   ): Promise<WebhookEndpoint> {
     const secret = this.generateSecret();
 
@@ -78,7 +78,7 @@ export class WebhooksService {
         url: dto.url,
         secret,
         events: dto.events,
-        status: 'active',
+        status: "active",
         description: dto.description,
         metadata: (dto.metadata ?? {}) as Prisma.InputJsonValue,
       },
@@ -88,7 +88,7 @@ export class WebhooksService {
   async updateEndpoint(
     workspaceId: string,
     id: string,
-    dto: UpdateWebhookEndpointDto
+    dto: UpdateWebhookEndpointDto,
   ): Promise<WebhookEndpoint> {
     const endpoint = await this.findEndpointById(workspaceId, id);
     if (!endpoint) {
@@ -102,7 +102,9 @@ export class WebhooksService {
         ...(dto.events && { events: dto.events }),
         ...(dto.status && { status: dto.status }),
         ...(dto.description !== undefined && { description: dto.description }),
-        ...(dto.metadata && { metadata: dto.metadata as Prisma.InputJsonValue }),
+        ...(dto.metadata && {
+          metadata: dto.metadata as Prisma.InputJsonValue,
+        }),
         version: { increment: 1 },
       },
     });
@@ -140,9 +142,9 @@ export class WebhooksService {
     const payloadString = JSON.stringify(payload);
     const signedPayload = `${timestamp}.${payloadString}`;
 
-    const signature = createHmac('sha256', secret)
+    const signature = createHmac("sha256", secret)
       .update(signedPayload)
-      .digest('hex');
+      .digest("hex");
 
     return `t=${timestamp},v1=${signature}`;
   }
@@ -151,11 +153,11 @@ export class WebhooksService {
     payload: string,
     signature: string,
     secret: string,
-    tolerance: number = 300
+    tolerance: number = 300,
   ): boolean {
-    const parts = signature.split(',');
-    const timestampPart = parts.find((p) => p.startsWith('t='));
-    const signaturePart = parts.find((p) => p.startsWith('v1='));
+    const parts = signature.split(",");
+    const timestampPart = parts.find((p) => p.startsWith("t="));
+    const signaturePart = parts.find((p) => p.startsWith("v1="));
 
     if (!timestampPart || !signaturePart) {
       return false;
@@ -172,9 +174,9 @@ export class WebhooksService {
 
     // Compute expected signature
     const signedPayload = `${timestamp}.${payload}`;
-    const computedSignature = createHmac('sha256', secret)
+    const computedSignature = createHmac("sha256", secret)
       .update(signedPayload)
-      .digest('hex');
+      .digest("hex");
 
     // Timing-safe comparison
     if (computedSignature.length !== expectedSignature.length) {
@@ -183,13 +185,14 @@ export class WebhooksService {
 
     let result = 0;
     for (let i = 0; i < computedSignature.length; i++) {
-      result |= computedSignature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+      result |=
+        computedSignature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
     }
 
     return result === 0;
   }
 
   private generateSecret(): string {
-    return `whsec_${randomBytes(32).toString('hex')}`;
+    return `whsec_${randomBytes(32).toString("hex")}`;
   }
 }

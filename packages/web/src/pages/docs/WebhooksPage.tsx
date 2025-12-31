@@ -1,18 +1,18 @@
-import { CodeBlock } from '../../components/CodeBlock';
+import { CodeBlock } from "../../components/CodeBlock";
 
 export function WebhooksPage() {
   return (
     <article className="prose-docs">
       <h1>Webhooks</h1>
       <p className="lead text-lg text-gray-600 mb-8">
-        Receive real-time notifications when subscriptions change, payments succeed or fail,
-        and entitlements are granted or revoked.
+        Receive real-time notifications when subscriptions change, payments
+        succeed or fail, and entitlements are granted or revoked.
       </p>
 
       <h2 id="overview">Overview</h2>
       <p>
-        Relay sends webhook events to your application when important changes occur.
-        Use webhooks to:
+        Relay sends webhook events to your application when important changes
+        occur. Use webhooks to:
       </p>
       <ul>
         <li>Provision or deprovision user access</li>
@@ -23,10 +23,11 @@ export function WebhooksPage() {
 
       <h2 id="setup">Setting Up Webhooks</h2>
       <h3>1. Create an Endpoint</h3>
-      <p>
-        Register a webhook endpoint via the API or Dashboard:
-      </p>
-      <CodeBlock title="Terminal" language="bash">{`curl -X POST http://localhost:3002/api/v1/webhook-endpoints \\
+      <p>Register a webhook endpoint via the API or Dashboard:</p>
+      <CodeBlock
+        title="Terminal"
+        language="bash"
+      >{`curl -X POST http://localhost:3002/api/v1/webhook-endpoints \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_API_KEY" \\
   -d '{
@@ -49,13 +50,12 @@ export function WebhooksPage() {
   "status": "active"
 }`}</CodeBlock>
       <p>
-        Save the <code>secret</code> securely—you'll need it to verify signatures.
+        Save the <code>secret</code> securely—you'll need it to verify
+        signatures.
       </p>
 
       <h3>2. Handle Events</h3>
-      <p>
-        Webhook payloads are JSON with a consistent structure:
-      </p>
+      <p>Webhook payloads are JSON with a consistent structure:</p>
       <CodeBlock title="Payload structure" language="json">{`{
   "id": "evt_...",
   "type": "subscription.created",
@@ -76,10 +76,11 @@ export function WebhooksPage() {
 }`}</CodeBlock>
 
       <h3>3. Verify Signatures</h3>
-      <p>
-        Always verify webhook signatures to ensure events are from Relay:
-      </p>
-      <CodeBlock title="webhook-handler.ts" language="typescript">{`import crypto from 'crypto';
+      <p>Always verify webhook signatures to ensure events are from Relay:</p>
+      <CodeBlock
+        title="webhook-handler.ts"
+        language="typescript"
+      >{`import crypto from 'crypto';
 
 function verifyWebhookSignature(payload, signature, secret) {
   const [timestamp, hash] = signature.split(',');
@@ -110,39 +111,57 @@ app.post('/webhooks/relay', express.raw({ type: 'application/json' }), (req, res
 });`}</CodeBlock>
 
       <h2 id="events">Event Types</h2>
-      <p>
-        Relay sends the following event types:
-      </p>
+      <p>Relay sends the following event types:</p>
 
       <h3>Subscription Events</h3>
       <div className="not-prose my-6 overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="text-left py-2 pr-4 font-medium text-gray-900">Event</th>
-              <th className="text-left py-2 font-medium text-gray-900">Description</th>
+              <th className="text-left py-2 pr-4 font-medium text-gray-900">
+                Event
+              </th>
+              <th className="text-left py-2 font-medium text-gray-900">
+                Description
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             <tr>
-              <td className="py-2 pr-4"><code>subscription.created</code></td>
+              <td className="py-2 pr-4">
+                <code>subscription.created</code>
+              </td>
               <td className="py-2 text-gray-600">New subscription started</td>
             </tr>
             <tr>
-              <td className="py-2 pr-4"><code>subscription.updated</code></td>
-              <td className="py-2 text-gray-600">Subscription modified (plan change, etc.)</td>
+              <td className="py-2 pr-4">
+                <code>subscription.updated</code>
+              </td>
+              <td className="py-2 text-gray-600">
+                Subscription modified (plan change, etc.)
+              </td>
             </tr>
             <tr>
-              <td className="py-2 pr-4"><code>subscription.canceled</code></td>
+              <td className="py-2 pr-4">
+                <code>subscription.canceled</code>
+              </td>
               <td className="py-2 text-gray-600">Subscription canceled</td>
             </tr>
             <tr>
-              <td className="py-2 pr-4"><code>subscription.renewed</code></td>
-              <td className="py-2 text-gray-600">Subscription renewed for new period</td>
+              <td className="py-2 pr-4">
+                <code>subscription.renewed</code>
+              </td>
+              <td className="py-2 text-gray-600">
+                Subscription renewed for new period
+              </td>
             </tr>
             <tr>
-              <td className="py-2 pr-4"><code>subscription.past_due</code></td>
-              <td className="py-2 text-gray-600">Payment failed, subscription at risk</td>
+              <td className="py-2 pr-4">
+                <code>subscription.past_due</code>
+              </td>
+              <td className="py-2 text-gray-600">
+                Payment failed, subscription at risk
+              </td>
             </tr>
           </tbody>
         </table>
@@ -153,21 +172,31 @@ app.post('/webhooks/relay', express.raw({ type: 'application/json' }), (req, res
         <table className="min-w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="text-left py-2 pr-4 font-medium text-gray-900">Event</th>
-              <th className="text-left py-2 font-medium text-gray-900">Description</th>
+              <th className="text-left py-2 pr-4 font-medium text-gray-900">
+                Event
+              </th>
+              <th className="text-left py-2 font-medium text-gray-900">
+                Description
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             <tr>
-              <td className="py-2 pr-4"><code>invoice.created</code></td>
+              <td className="py-2 pr-4">
+                <code>invoice.created</code>
+              </td>
               <td className="py-2 text-gray-600">New invoice generated</td>
             </tr>
             <tr>
-              <td className="py-2 pr-4"><code>invoice.paid</code></td>
+              <td className="py-2 pr-4">
+                <code>invoice.paid</code>
+              </td>
               <td className="py-2 text-gray-600">Payment succeeded</td>
             </tr>
             <tr>
-              <td className="py-2 pr-4"><code>invoice.payment_failed</code></td>
+              <td className="py-2 pr-4">
+                <code>invoice.payment_failed</code>
+              </td>
               <td className="py-2 text-gray-600">Payment attempt failed</td>
             </tr>
           </tbody>
@@ -179,18 +208,30 @@ app.post('/webhooks/relay', express.raw({ type: 'application/json' }), (req, res
         <table className="min-w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="text-left py-2 pr-4 font-medium text-gray-900">Event</th>
-              <th className="text-left py-2 font-medium text-gray-900">Description</th>
+              <th className="text-left py-2 pr-4 font-medium text-gray-900">
+                Event
+              </th>
+              <th className="text-left py-2 font-medium text-gray-900">
+                Description
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             <tr>
-              <td className="py-2 pr-4"><code>entitlement.granted</code></td>
-              <td className="py-2 text-gray-600">Customer gained access to a feature</td>
+              <td className="py-2 pr-4">
+                <code>entitlement.granted</code>
+              </td>
+              <td className="py-2 text-gray-600">
+                Customer gained access to a feature
+              </td>
             </tr>
             <tr>
-              <td className="py-2 pr-4"><code>entitlement.revoked</code></td>
-              <td className="py-2 text-gray-600">Customer lost access to a feature</td>
+              <td className="py-2 pr-4">
+                <code>entitlement.revoked</code>
+              </td>
+              <td className="py-2 text-gray-600">
+                Customer lost access to a feature
+              </td>
             </tr>
           </tbody>
         </table>
@@ -252,15 +293,19 @@ app.post('/webhooks/relay', express.raw({ type: 'application/json' }), (req, res
 
       <h3>Respond Quickly</h3>
       <p>
-        Return a <code>2xx</code> response within 5 seconds. Process events asynchronously
-        using a queue if needed.
+        Return a <code>2xx</code> response within 5 seconds. Process events
+        asynchronously using a queue if needed.
       </p>
 
       <h3>Handle Idempotency</h3>
       <p>
-        Events may be delivered more than once. Use the <code>id</code> field to deduplicate:
+        Events may be delivered more than once. Use the <code>id</code> field to
+        deduplicate:
       </p>
-      <CodeBlock title="Idempotency check" language="typescript">{`// Store processed event IDs
+      <CodeBlock
+        title="Idempotency check"
+        language="typescript"
+      >{`// Store processed event IDs
 const processed = await db.processedEvents.findUnique({
   where: { eventId: event.id }
 });
@@ -274,9 +319,7 @@ await handleEvent(event);
 await db.processedEvents.create({ data: { eventId: event.id } });`}</CodeBlock>
 
       <h3>Retry Logic</h3>
-      <p>
-        Relay retries failed deliveries with exponential backoff:
-      </p>
+      <p>Relay retries failed deliveries with exponential backoff:</p>
       <ul>
         <li>Attempt 1: Immediate</li>
         <li>Attempt 2: After 1 minute</li>
@@ -285,8 +328,8 @@ await db.processedEvents.create({ data: { eventId: event.id } });`}</CodeBlock>
         <li>Attempt 5: After 2 hours</li>
       </ul>
       <p>
-        After 5 failed attempts, the endpoint is marked as failing and no further
-        deliveries are attempted until manually re-enabled.
+        After 5 failed attempts, the endpoint is marked as failing and no
+        further deliveries are attempted until manually re-enabled.
       </p>
 
       <h3>Use Metadata</h3>
@@ -294,7 +337,10 @@ await db.processedEvents.create({ data: { eventId: event.id } });`}</CodeBlock>
         Metadata from offers and checkout flows propagates to webhook events.
         Use it to correlate events with your internal systems:
       </p>
-      <CodeBlock title="Using metadata" language="typescript">{`// In your webhook handler
+      <CodeBlock
+        title="Using metadata"
+        language="typescript"
+      >{`// In your webhook handler
 const { campaign, utm_source } = event.data.subscription.metadata;
 
 await analytics.track({
@@ -308,8 +354,11 @@ await analytics.track({
 
       <h2 id="testing">Testing Webhooks</h2>
       <p>
-        Use tools like <a href="https://ngrok.com" target="_blank" rel="noopener">ngrok</a> to
-        expose your local server for webhook testing:
+        Use tools like{" "}
+        <a href="https://ngrok.com" target="_blank" rel="noopener">
+          ngrok
+        </a>{" "}
+        to expose your local server for webhook testing:
       </p>
       <CodeBlock title="Terminal" language="bash">{`# Start ngrok
 ngrok http 3000
@@ -327,16 +376,26 @@ curl -X POST http://localhost:3002/api/v1/webhook-endpoints \\
         <h3 className="font-semibold text-gray-900 mb-2">Related Guides</h3>
         <ul className="space-y-2 text-sm">
           <li>
-            <a href="/docs/quickstart" className="text-primary-600 hover:text-primary-700">
+            <a
+              href="/docs/quickstart"
+              className="text-primary-600 hover:text-primary-700"
+            >
               Quickstart →
             </a>
-            <span className="text-gray-500 ml-2">Set up your first subscription</span>
+            <span className="text-gray-500 ml-2">
+              Set up your first subscription
+            </span>
           </li>
           <li>
-            <a href="/docs/headless-checkout" className="text-primary-600 hover:text-primary-700">
+            <a
+              href="/docs/headless-checkout"
+              className="text-primary-600 hover:text-primary-700"
+            >
               Headless Checkout →
             </a>
-            <span className="text-gray-500 ml-2">Build custom checkout flows</span>
+            <span className="text-gray-500 ml-2">
+              Build custom checkout flows
+            </span>
           </li>
         </ul>
       </div>

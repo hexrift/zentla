@@ -1,15 +1,19 @@
-import { Injectable, Scope, LoggerService as NestLoggerService } from '@nestjs/common';
-import pino, { Logger } from 'pino';
+import {
+  Injectable,
+  Scope,
+  LoggerService as NestLoggerService,
+} from "@nestjs/common";
+import pino, { Logger } from "pino";
 
 @Injectable({ scope: Scope.DEFAULT })
 export class LoggerService implements NestLoggerService {
   private readonly logger: Logger;
 
   constructor() {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === "production";
 
     this.logger = pino({
-      level: process.env.LOG_LEVEL ?? (isProduction ? 'info' : 'debug'),
+      level: process.env.LOG_LEVEL ?? (isProduction ? "info" : "debug"),
       formatters: {
         level: (label) => ({ level: label }),
       },
@@ -18,11 +22,11 @@ export class LoggerService implements NestLoggerService {
         ? {}
         : {
             transport: {
-              target: 'pino-pretty',
+              target: "pino-pretty",
               options: {
                 colorize: true,
-                translateTime: 'SYS:standard',
-                ignore: 'pid,hostname',
+                translateTime: "SYS:standard",
+                ignore: "pid,hostname",
               },
             },
           }),
@@ -55,11 +59,11 @@ export class LoggerService implements NestLoggerService {
   }
 
   http(obj: HttpLogData): void {
-    this.logger.info({ type: 'http', ...obj });
+    this.logger.info({ type: "http", ...obj });
   }
 
   audit(obj: AuditLogData): void {
-    this.logger.info({ type: 'audit', ...obj });
+    this.logger.info({ type: "audit", ...obj });
   }
 
   child(bindings: pino.Bindings): pino.Logger {
@@ -87,7 +91,7 @@ export interface HttpLogData {
 
 export interface AuditLogData {
   workspaceId: string;
-  actorType: 'api_key' | 'system';
+  actorType: "api_key" | "system";
   actorId: string;
   action: string;
   resourceType: string;

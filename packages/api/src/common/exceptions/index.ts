@@ -1,5 +1,5 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { ErrorCode, ErrorCodeHttpStatus } from '@relay/core';
+import { HttpException, HttpStatus } from "@nestjs/common";
+import { ErrorCode, ErrorCodeHttpStatus } from "@relay/core";
 
 /**
  * Base exception class for Relay API errors.
@@ -10,16 +10,17 @@ export class RelayException extends HttpException {
     public readonly code: ErrorCode,
     message: string,
     status?: HttpStatus,
-    public readonly details?: Record<string, unknown>
+    public readonly details?: Record<string, unknown>,
   ) {
-    const httpStatus = status ?? ErrorCodeHttpStatus[code] ?? HttpStatus.INTERNAL_SERVER_ERROR;
+    const httpStatus =
+      status ?? ErrorCodeHttpStatus[code] ?? HttpStatus.INTERNAL_SERVER_ERROR;
     super(
       {
         code,
         message,
         details,
       },
-      httpStatus
+      httpStatus,
     );
   }
 }
@@ -32,13 +33,17 @@ export class RelayException extends HttpException {
  * Thrown when a requested resource is not found.
  */
 export class ResourceNotFoundException extends RelayException {
-  constructor(resourceType: string, identifier: string | Record<string, string>) {
-    const id = typeof identifier === 'string' ? identifier : JSON.stringify(identifier);
+  constructor(
+    resourceType: string,
+    identifier: string | Record<string, string>,
+  ) {
+    const id =
+      typeof identifier === "string" ? identifier : JSON.stringify(identifier);
     super(
       ErrorCode.RESOURCE_NOT_FOUND,
       `${resourceType} not found`,
       HttpStatus.NOT_FOUND,
-      { resourceType, identifier: id }
+      { resourceType, identifier: id },
     );
   }
 }
@@ -61,7 +66,7 @@ export class ResourceExpiredException extends RelayException {
       ErrorCode.RESOURCE_EXPIRED,
       `${resourceType} has expired`,
       HttpStatus.GONE,
-      { resourceType, identifier }
+      { resourceType, identifier },
     );
   }
 }
@@ -74,12 +79,16 @@ export class ResourceExpiredException extends RelayException {
  * Thrown when a subscription is not in a valid state for the requested operation.
  */
 export class SubscriptionInvalidStateException extends RelayException {
-  constructor(subscriptionId: string, currentState: string, requiredStates: string[]) {
+  constructor(
+    subscriptionId: string,
+    currentState: string,
+    requiredStates: string[],
+  ) {
     super(
       ErrorCode.SUBSCRIPTION_INVALID_STATE,
-      `Subscription is ${currentState}, but must be one of: ${requiredStates.join(', ')}`,
+      `Subscription is ${currentState}, but must be one of: ${requiredStates.join(", ")}`,
       HttpStatus.UNPROCESSABLE_ENTITY,
-      { subscriptionId, currentState, requiredStates }
+      { subscriptionId, currentState, requiredStates },
     );
   }
 }
@@ -91,9 +100,9 @@ export class OfferNotPublishedException extends RelayException {
   constructor(offerId: string) {
     super(
       ErrorCode.OFFER_NOT_PUBLISHED,
-      'Offer has no published version available',
+      "Offer has no published version available",
       HttpStatus.UNPROCESSABLE_ENTITY,
-      { offerId }
+      { offerId },
     );
   }
 }
@@ -107,7 +116,7 @@ export class DraftExistsException extends RelayException {
       ErrorCode.OFFER_DRAFT_EXISTS,
       `A draft version already exists for this ${resourceType}`,
       HttpStatus.CONFLICT,
-      { resourceType, resourceId }
+      { resourceType, resourceId },
     );
   }
 }
@@ -121,7 +130,7 @@ export class PromotionInvalidException extends RelayException {
       ErrorCode.PROMOTION_INVALID,
       `Promotion code "${code}" is invalid: ${reason}`,
       HttpStatus.BAD_REQUEST,
-      { code, reason }
+      { code, reason },
     );
   }
 }
@@ -135,7 +144,7 @@ export class PromotionNotYetValidException extends RelayException {
       ErrorCode.PROMOTION_NOT_YET_VALID,
       `Promotion code "${code}" is not yet valid`,
       HttpStatus.UNPROCESSABLE_ENTITY,
-      { code, validFrom: validFrom.toISOString() }
+      { code, validFrom: validFrom.toISOString() },
     );
   }
 }
@@ -149,7 +158,7 @@ export class PromotionExpiredException extends RelayException {
       ErrorCode.PROMOTION_EXPIRED,
       `Promotion code "${code}" has expired`,
       HttpStatus.UNPROCESSABLE_ENTITY,
-      { code, validUntil: validUntil.toISOString() }
+      { code, validUntil: validUntil.toISOString() },
     );
   }
 }
@@ -167,7 +176,7 @@ export class ProviderNotConfiguredException extends RelayException {
       ErrorCode.PROVIDER_NOT_CONFIGURED,
       `Billing provider "${provider}" is not configured for this workspace`,
       HttpStatus.UNPROCESSABLE_ENTITY,
-      { provider }
+      { provider },
     );
   }
 }
@@ -181,7 +190,7 @@ export class ProviderErrorException extends RelayException {
       ErrorCode.PROVIDER_ERROR,
       `Error communicating with ${provider}: ${operation}`,
       HttpStatus.BAD_GATEWAY,
-      { provider, operation, originalError }
+      { provider, operation, originalError },
     );
   }
 }
@@ -195,7 +204,7 @@ export class WebhookInvalidSignatureException extends RelayException {
       ErrorCode.WEBHOOK_INVALID_SIGNATURE,
       `Invalid webhook signature from ${provider}`,
       HttpStatus.BAD_REQUEST,
-      { provider }
+      { provider },
     );
   }
 }
@@ -211,9 +220,9 @@ export class PreconditionFailedException extends RelayException {
   constructor(resourceType: string, currentVersion: number) {
     super(
       ErrorCode.PRECONDITION_FAILED,
-      'Resource has been modified. Fetch the latest version and retry.',
+      "Resource has been modified. Fetch the latest version and retry.",
       HttpStatus.PRECONDITION_FAILED,
-      { resourceType, currentVersion }
+      { resourceType, currentVersion },
     );
   }
 }
@@ -225,9 +234,9 @@ export class RequestInProgressException extends RelayException {
   constructor(idempotencyKey: string) {
     super(
       ErrorCode.REQUEST_IN_PROGRESS,
-      'Another request with the same idempotency key is currently being processed',
+      "Another request with the same idempotency key is currently being processed",
       HttpStatus.CONFLICT,
-      { idempotencyKey }
+      { idempotencyKey },
     );
   }
 }
@@ -243,8 +252,8 @@ export class ApiKeyInvalidException extends RelayException {
   constructor() {
     super(
       ErrorCode.API_KEY_INVALID,
-      'Invalid API key',
-      HttpStatus.UNAUTHORIZED
+      "Invalid API key",
+      HttpStatus.UNAUTHORIZED,
     );
   }
 }
@@ -258,7 +267,7 @@ export class InsufficientPermissionsException extends RelayException {
       ErrorCode.API_KEY_INSUFFICIENT_ROLE,
       `This operation requires ${requiredRole} role, but current key has ${currentRole} role`,
       HttpStatus.FORBIDDEN,
-      { requiredRole, currentRole }
+      { requiredRole, currentRole },
     );
   }
 }

@@ -46,7 +46,7 @@ export interface Customer {
 export interface OfferVersion {
   id: string;
   version: number;
-  status: 'draft' | 'published' | 'archived';
+  status: "draft" | "published" | "archived";
   config: OfferConfig;
   publishedAt?: string;
   createdAt: string;
@@ -54,10 +54,10 @@ export interface OfferVersion {
 
 export interface OfferConfig {
   pricing: {
-    model: 'flat' | 'per_unit' | 'tiered' | 'volume';
+    model: "flat" | "per_unit" | "tiered" | "volume";
     amount: number;
     currency: string;
-    interval: 'day' | 'week' | 'month' | 'year';
+    interval: "day" | "week" | "month" | "year";
   };
   trial?: {
     days: number;
@@ -66,7 +66,7 @@ export interface OfferConfig {
   entitlements?: Array<{
     featureKey: string;
     value: unknown;
-    valueType: 'boolean' | 'number' | 'string';
+    valueType: "boolean" | "number" | "string";
   }>;
 }
 
@@ -74,7 +74,7 @@ export interface Offer {
   id: string;
   name: string;
   description?: string;
-  status: 'draft' | 'active' | 'archived';
+  status: "draft" | "active" | "archived";
   currentVersion?: OfferVersion;
   versions?: OfferVersion[];
   metadata?: Record<string, unknown>;
@@ -98,7 +98,7 @@ export interface WebhookEndpoint {
   id: string;
   url: string;
   events: string[];
-  status: 'active' | 'disabled';
+  status: "active" | "disabled";
   description?: string;
   secret?: string;
   createdAt: string;
@@ -107,9 +107,9 @@ export interface WebhookEndpoint {
 export interface PromotionVersion {
   id: string;
   version: number;
-  status: 'draft' | 'published' | 'archived';
+  status: "draft" | "published" | "archived";
   config: {
-    discountType: 'percent' | 'fixed_amount' | 'free_trial_days';
+    discountType: "percent" | "fixed_amount" | "free_trial_days";
     discountValue: number;
     currency?: string;
     maxRedemptions?: number;
@@ -117,7 +117,7 @@ export interface PromotionVersion {
     minimumAmount?: number;
     validFrom?: string;
     validUntil?: string;
-    duration?: 'once' | 'repeating' | 'forever';
+    duration?: "once" | "repeating" | "forever";
     durationInMonths?: number;
     applicableOfferIds?: string[];
   };
@@ -130,7 +130,7 @@ export interface Promotion {
   code: string;
   name: string;
   description?: string;
-  status: 'draft' | 'active' | 'archived';
+  status: "draft" | "active" | "archived";
   currentVersion?: PromotionVersion;
   versions: PromotionVersion[];
   createdAt: string;
@@ -172,7 +172,7 @@ export interface Event {
   eventType: string;
   aggregateType: string;
   aggregateId: string;
-  status: 'pending' | 'processed' | 'failed';
+  status: "pending" | "processed" | "failed";
   payload: Record<string, unknown>;
   processedAt: string | null;
   createdAt: string;
