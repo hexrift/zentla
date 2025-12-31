@@ -67,9 +67,10 @@ export class StripeAdapter implements BillingProvider {
 
     if (existingRef) {
       // Update existing product
+      // Note: Stripe doesn't accept empty string for description, only omit or non-empty
       product = await this.stripe.products.update(existingRef.externalId, {
         name: offer.name,
-        description: offer.description ?? undefined,
+        ...(offer.description && { description: offer.description }),
         metadata: {
           relay_offer_id: offer.id,
           relay_version_id: version.id,
@@ -81,9 +82,10 @@ export class StripeAdapter implements BillingProvider {
       price = await this.createPrice(product.id, pricing, offer.id, version.id);
     } else {
       // Create new product
+      // Note: Stripe doesn't accept empty string for description, only omit or non-empty
       product = await this.stripe.products.create({
         name: offer.name,
-        description: offer.description ?? undefined,
+        ...(offer.description && { description: offer.description }),
         metadata: {
           relay_offer_id: offer.id,
           relay_version_id: version.id,
@@ -115,6 +117,25 @@ export class StripeAdapter implements BillingProvider {
         createdAt: new Date(),
       },
     };
+  }
+
+  /**
+   * Archive a product in Stripe by setting active=false.
+   * This prevents new subscriptions but doesn't affect existing ones.
+   */
+  async archiveProduct(productId: string): Promise<void> {
+    await this.stripe.products.update(productId, {
+      active: false,
+    });
+  }
+
+  /**
+   * Reactivate an archived product in Stripe.
+   */
+  async reactivateProduct(productId: string): Promise<void> {
+    await this.stripe.products.update(productId, {
+      active: true,
+    });
   }
 
   async createCustomer(params: CreateCustomerParams): Promise<CustomerResult> {

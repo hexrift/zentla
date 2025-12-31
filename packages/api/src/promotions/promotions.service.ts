@@ -132,14 +132,14 @@ export class PromotionsService {
     }
 
     return this.prisma.executeInTransaction(async (tx) => {
-      // Create promotion
+      // Create promotion with draft status (becomes active when first version is published)
       const promotion = await tx.promotion.create({
         data: {
           workspaceId,
           code: normalizedCode,
           name: dto.name,
           description: dto.description,
-          status: 'active',
+          status: 'draft',
         },
       });
 
@@ -253,30 +253,55 @@ export class PromotionsService {
       throw new NotFoundException(`Promotion ${promotionId} not found`);
     }
 
+    // Find the version to publish BEFORE starting transaction
+    let versionToPublish: PromotionVersion | null;
+
+    if (versionId) {
+      versionToPublish = await this.prisma.promotionVersion.findFirst({
+        where: { id: versionId, promotionId },
+      });
+    } else {
+      // Find the latest draft
+      versionToPublish = await this.prisma.promotionVersion.findFirst({
+        where: { promotionId, status: 'draft' },
+        orderBy: { version: 'desc' },
+      });
+    }
+
+    if (!versionToPublish) {
+      throw new NotFoundException('No draft version found to publish');
+    }
+
+    if (versionToPublish.status !== 'draft') {
+      throw new BadRequestException('Only draft versions can be published');
+    }
+
+    // Validate config BEFORE any changes
+    const config = versionToPublish.config as Record<string, unknown>;
+    if (!config?.discountType) {
+      throw new BadRequestException(
+        'Cannot publish: Promotion has no discount type configured.'
+      );
+    }
+
+    if (config.discountValue === undefined || config.discountValue === null) {
+      throw new BadRequestException(
+        'Cannot publish: Promotion has no discount value configured.'
+      );
+    }
+
+    // Validate Stripe is configured
+    if (!this.billingService.isConfigured('stripe')) {
+      throw new BadRequestException(
+        'Cannot publish: Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in Settings.'
+      );
+    }
+
+    // Store previous state for potential rollback
+    const previousVersionId = promotion.currentVersionId;
+    const previousPromotionStatus = promotion.status;
+
     const publishedVersion = await this.prisma.executeInTransaction(async (tx) => {
-      // Find the version to publish
-      let versionToPublish: PromotionVersion | null;
-
-      if (versionId) {
-        versionToPublish = await tx.promotionVersion.findFirst({
-          where: { id: versionId, promotionId },
-        });
-      } else {
-        // Find the latest draft
-        versionToPublish = await tx.promotionVersion.findFirst({
-          where: { promotionId, status: 'draft' },
-          orderBy: { version: 'desc' },
-        });
-      }
-
-      if (!versionToPublish) {
-        throw new NotFoundException('No draft version found to publish');
-      }
-
-      if (versionToPublish.status !== 'draft') {
-        throw new BadRequestException('Only draft versions can be published');
-      }
-
       // Archive currently published version
       if (promotion.currentVersionId) {
         await tx.promotionVersion.update({
@@ -287,24 +312,67 @@ export class PromotionsService {
 
       // Publish the new version
       const published = await tx.promotionVersion.update({
-        where: { id: versionToPublish.id },
+        where: { id: versionToPublish!.id },
         data: {
           status: 'published',
           publishedAt: new Date(),
         },
       });
 
-      // Update promotion's current version
+      // Update promotion's current version and activate if first publish
       await tx.promotion.update({
         where: { id: promotionId },
-        data: { currentVersionId: published.id },
+        data: {
+          currentVersionId: published.id,
+          // Activate promotion when first version is published
+          status: 'active',
+        },
       });
 
       return published;
     });
 
-    // Sync to Stripe (after transaction commits)
-    await this.syncToStripe(workspaceId, promotion, publishedVersion);
+    // Sync to Stripe - if this fails, rollback database changes
+    try {
+      await this.syncToStripe(workspaceId, promotion, publishedVersion);
+    } catch (error) {
+      this.logger.error(`Stripe sync failed, rolling back publish for promotion ${promotionId}:`, error);
+
+      // Rollback: revert the database changes
+      await this.prisma.executeInTransaction(async (tx) => {
+        // Revert version status back to draft
+        await tx.promotionVersion.update({
+          where: { id: publishedVersion.id },
+          data: {
+            status: 'draft',
+            publishedAt: null,
+          },
+        });
+
+        // If we archived a previous version, restore it
+        if (previousVersionId) {
+          await tx.promotionVersion.update({
+            where: { id: previousVersionId },
+            data: { status: 'published' },
+          });
+        }
+
+        // Restore promotion to previous state
+        await tx.promotion.update({
+          where: { id: promotionId },
+          data: {
+            currentVersionId: previousVersionId,
+            status: previousPromotionStatus,
+          },
+        });
+      });
+
+      // Re-throw with a clear message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(
+        `Failed to sync to Stripe: ${errorMessage}. Changes have been rolled back.`
+      );
+    }
 
     return publishedVersion;
   }
@@ -426,6 +494,14 @@ export class PromotionsService {
         isValid: false,
         errorCode: 'not_found',
         errorMessage: 'Promotion is no longer available',
+      };
+    }
+
+    if (promotion.status === 'draft') {
+      return {
+        isValid: false,
+        errorCode: 'not_published',
+        errorMessage: 'Promotion is not yet active',
       };
     }
 

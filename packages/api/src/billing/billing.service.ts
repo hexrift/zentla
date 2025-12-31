@@ -1,10 +1,11 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { StripeAdapter } from '@relay/stripe-adapter';
 import type { BillingProvider } from '@relay/core';
 
 @Injectable()
 export class BillingService implements OnModuleInit {
+  private readonly logger = new Logger(BillingService.name);
   private stripeAdapter: StripeAdapter | null = null;
 
   constructor(private readonly config: ConfigService) {}
@@ -18,6 +19,21 @@ export class BillingService implements OnModuleInit {
         secretKey: stripeSecretKey,
         webhookSecret: stripeWebhookSecret,
       });
+      this.logger.log('Stripe adapter initialized from environment variables');
+    }
+  }
+
+  /**
+   * Configure Stripe adapter with credentials from workspace settings.
+   * Called when workspace settings are updated.
+   */
+  configureStripe(secretKey: string, webhookSecret: string): void {
+    if (secretKey && webhookSecret) {
+      this.stripeAdapter = new StripeAdapter({
+        secretKey,
+        webhookSecret,
+      });
+      this.logger.log('Stripe adapter reconfigured from workspace settings');
     }
   }
 

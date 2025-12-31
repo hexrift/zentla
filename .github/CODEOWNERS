@@ -1,0 +1,40 @@
+# =============================================================================
+# CODEOWNERS - Defines who reviews PRs for different parts of the codebase
+# =============================================================================
+# These owners will be requested for review when someone opens a PR
+# that modifies code that they own.
+#
+# Order matters - later matches take precedence
+# =============================================================================
+
+# Default owners for everything
+*                                   @your-org/relay-team
+
+# API and backend
+/packages/api/                      @your-org/backend-team
+/packages/core/                     @your-org/backend-team
+/packages/database/                 @your-org/backend-team
+
+# Billing adapters
+/packages/adapters/                 @your-org/backend-team @your-org/billing-team
+
+# Frontend
+/packages/admin-ui/                 @your-org/frontend-team
+/packages/web/                      @your-org/frontend-team
+
+# SDK
+/packages/sdk/                      @your-org/sdk-team
+
+# Infrastructure and DevOps
+/.github/                           @your-org/devops-team
+/Dockerfile*                        @your-org/devops-team
+/docker-compose*.yml                @your-org/devops-team
+/infrastructure/                    @your-org/devops-team
+
+# Database migrations require extra review
+/packages/database/prisma/migrations/ @your-org/backend-team @your-org/dba-team
+
+# Security-sensitive files
+/.env*                              @your-org/security-team
+/packages/api/src/auth/             @your-org/security-team
+/packages/api/src/common/guards/    @your-org/security-team

@@ -7,7 +7,7 @@ import type { CheckoutSession, CheckoutIntent, Offer } from '../lib/types';
 
 type Tab = 'sessions' | 'intents';
 
-const sessionStatuses = ['pending', 'completed', 'expired'];
+const sessionStatuses = ['pending', 'open', 'complete', 'expired'];
 const intentStatuses = ['pending', 'processing', 'requires_action', 'succeeded', 'failed', 'expired'];
 
 function formatCurrency(amount: number, currency: string) {
@@ -41,7 +41,7 @@ function getRelativeTime(date: string): string {
 }
 
 function isStale(date: string, status: string): boolean {
-  if (status !== 'pending' && status !== 'processing') return false;
+  if (status !== 'pending' && status !== 'open' && status !== 'processing') return false;
   const created = new Date(date);
   const diffMs = Date.now() - created.getTime();
   const diffMins = diffMs / 60000;
@@ -105,9 +105,10 @@ function StatusBadge({
   const getStatusStyle = () => {
     if (type === 'session') {
       switch (status) {
-        case 'completed':
+        case 'complete':
           return 'bg-emerald-100 text-emerald-700 ring-emerald-600/20';
         case 'pending':
+        case 'open':
           return 'bg-amber-100 text-amber-700 ring-amber-600/20';
         case 'expired':
           return 'bg-gray-100 text-gray-600 ring-gray-500/20';
@@ -134,7 +135,7 @@ function StatusBadge({
   };
 
   const stale = createdAt && isStale(createdAt, status);
-  const relativeTime = createdAt && showRelativeTime && (status === 'pending' || status === 'processing')
+  const relativeTime = createdAt && showRelativeTime && (status === 'pending' || status === 'open' || status === 'processing')
     ? getRelativeTime(createdAt)
     : null;
 

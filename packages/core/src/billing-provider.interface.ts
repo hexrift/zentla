@@ -43,6 +43,9 @@ export interface BillingProvider {
     existingRef?: ProviderRef
   ): Promise<SyncOfferResult>;
 
+  // Archive/deactivate a product (optional)
+  archiveProduct?(productId: string): Promise<void>;
+
   // Customers
   createCustomer(params: CreateCustomerParams): Promise<CustomerResult>;
   updateCustomer(externalId: string, params: UpdateCustomerParams): Promise<CustomerResult>;

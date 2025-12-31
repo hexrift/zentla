@@ -10,7 +10,7 @@ export interface Promotion {
   updatedAt: Date;
 }
 
-export type PromotionStatus = 'active' | 'archived';
+export type PromotionStatus = 'draft' | 'active' | 'archived';
 
 export interface PromotionVersion {
   id: string;

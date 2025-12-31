@@ -194,6 +194,7 @@ model Offer {
 }
 
 enum OfferStatus {
+  draft
   active
   archived
 
@@ -242,7 +243,7 @@ model Promotion {
   code             String          @db.VarChar(50)
   name             String          @db.VarChar(100)
   description      String?         @db.VarChar(1000)
-  status           PromotionStatus @default(active)
+  status           PromotionStatus @default(draft)
   currentVersionId String?         @unique @map("current_version_id") @db.Uuid
   createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime        @updatedAt @map("updated_at") @db.Timestamptz
@@ -261,6 +262,7 @@ model Promotion {
 }
 
 enum PromotionStatus {
+  draft
   active
   archived
 

@@ -1,0 +1,21 @@
+# =============================================================================
+# Production Environment - Example Variables
+# =============================================================================
+# Copy this file to terraform.tfvars and fill in your values
+# DO NOT commit terraform.tfvars to version control!
+# =============================================================================
+
+aws_region          = "us-east-1"
+container_image_tag = "v1.0.0"
+
+# SSL Certificates (create these in ACM first)
+acm_certificate_arn      = "arn:aws:acm:us-east-1:123456789012:certificate/xxx"
+admin_ui_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/xxx"
+admin_ui_domain          = "admin.relay.example.com"
+
+# Secrets - use environment variables or a secrets file
+# export TF_VAR_database_password="..."
+# export TF_VAR_api_key_secret="..."
+# export TF_VAR_webhook_secret="..."
+# export TF_VAR_stripe_secret_key="..."
+# export TF_VAR_stripe_webhook_secret="..."

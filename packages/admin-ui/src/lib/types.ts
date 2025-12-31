@@ -74,7 +74,7 @@ export interface Offer {
   id: string;
   name: string;
   description?: string;
-  status: 'active' | 'archived';
+  status: 'draft' | 'active' | 'archived';
   currentVersion?: OfferVersion;
   versions?: OfferVersion[];
   metadata?: Record<string, unknown>;
@@ -125,7 +125,7 @@ export interface Promotion {
   code: string;
   name: string;
   description?: string;
-  status: 'active' | 'archived';
+  status: 'draft' | 'active' | 'archived';
   currentVersion?: PromotionVersion;
   versions: PromotionVersion[];
   createdAt: string;

@@ -203,6 +203,19 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ config }),
       }),
+    updateDraft: (id: string, config: Record<string, unknown>) =>
+      fetchApi<Offer>(`/offers/${id}/versions/draft`, {
+        method: 'PATCH',
+        body: JSON.stringify({ config }),
+      }),
+    archive: (id: string) =>
+      fetchApi<Offer>(`/offers/${id}/archive`, {
+        method: 'POST',
+      }),
+    sync: (id: string) =>
+      fetchApi<{ success: boolean; message: string }>(`/offers/${id}/sync`, {
+        method: 'POST',
+      }),
   },
   subscriptions: {
     list: (params?: { customerId?: string; status?: string; limit?: number; cursor?: string }) => {

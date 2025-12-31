@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api';
+import type { Offer, PaginatedResponse } from '../lib/types';
 
 type DiscountType = 'percent' | 'fixed_amount' | 'free_trial_days';
 
@@ -18,6 +19,15 @@ export function PromotionNewPage() {
     validFrom: '',
     validUntil: '',
   });
+  const [selectedOfferIds, setSelectedOfferIds] = useState<string[]>([]);
+
+  // Fetch active offers for the multi-select
+  const { data: offersData, isLoading: offersLoading } = useQuery({
+    queryKey: ['offers', 'active'],
+    queryFn: () => api.offers.list({ status: 'active', limit: 100 }),
+  });
+
+  const offers = (offersData as PaginatedResponse<Offer>)?.data ?? [];
 
   const createMutation = useMutation({
     mutationFn: (data: typeof formData) => {
@@ -43,6 +53,11 @@ export function PromotionNewPage() {
 
       if (data.validUntil) {
         config.validUntil = new Date(data.validUntil).toISOString();
+      }
+
+      // Add applicable offers (empty array means all offers)
+      if (selectedOfferIds.length > 0) {
+        config.applicableOfferIds = selectedOfferIds;
       }
 
       return api.promotions.create({
@@ -253,6 +268,64 @@ export function PromotionNewPage() {
               />
             </div>
           </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+          <h2 className="text-lg font-medium text-gray-900">Applicable Offers</h2>
+          <p className="text-sm text-gray-500">
+            Select which offers this promotion can be used with. Leave empty to apply to all offers.
+          </p>
+
+          {offersLoading ? (
+            <div className="text-gray-500">Loading offers...</div>
+          ) : offers.length === 0 ? (
+            <div className="text-gray-500 text-sm">
+              No active offers found. Create and publish an offer first.
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-md p-3">
+              {offers.map((offer) => (
+                <label
+                  key={offer.id}
+                  className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedOfferIds.includes(offer.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedOfferIds([...selectedOfferIds, offer.id]);
+                      } else {
+                        setSelectedOfferIds(selectedOfferIds.filter((id) => id !== offer.id));
+                      }
+                    }}
+                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900">{offer.name}</div>
+                    {offer.description && (
+                      <div className="text-xs text-gray-500 truncate">{offer.description}</div>
+                    )}
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
+
+          {selectedOfferIds.length > 0 && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">
+                {selectedOfferIds.length} offer{selectedOfferIds.length === 1 ? '' : 's'} selected
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedOfferIds([])}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                Clear selection
+              </button>
+            </div>
+          )}
         </div>
 
         {createMutation.error && (

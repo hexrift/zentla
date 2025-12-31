@@ -18,7 +18,7 @@ export interface OfferWithVersions extends Offer {
 export interface CreateOfferDto {
   name: string;
   description?: string;
-  config: OfferConfigDto;
+  config?: OfferConfigDto;
   metadata?: Record<string, unknown>;
 }
 
@@ -134,30 +134,33 @@ export class OffersService {
 
   async create(workspaceId: string, dto: CreateOfferDto): Promise<OfferWithVersions> {
     return this.prisma.executeInTransaction(async (tx) => {
-      // Create offer
+      // Create offer with draft status (becomes active when first version is published)
       const offer = await tx.offer.create({
         data: {
           workspaceId,
           name: dto.name,
           description: dto.description,
-          status: 'active',
+          status: 'draft',
           metadata: (dto.metadata ?? {}) as Prisma.InputJsonValue,
         },
       });
 
-      // Create initial draft version
-      const version = await tx.offerVersion.create({
-        data: {
-          offerId: offer.id,
-          version: 1,
-          status: 'draft',
-          config: JSON.parse(JSON.stringify(dto.config)),
-        },
-      });
+      // Create initial draft version only if config is provided
+      let version: OfferVersion | null = null;
+      if (dto.config) {
+        version = await tx.offerVersion.create({
+          data: {
+            offerId: offer.id,
+            version: 1,
+            status: 'draft',
+            config: JSON.parse(JSON.stringify(dto.config)),
+          },
+        });
+      }
 
       return {
         ...offer,
-        versions: [version],
+        versions: version ? [version] : [],
         currentVersion: null,
       };
     });
@@ -202,6 +205,27 @@ export class OffersService {
 
     if (!offer) {
       throw new NotFoundException(`Offer ${id} not found`);
+    }
+
+    // Archive in Stripe if product exists
+    try {
+      if (this.billingService.isConfigured('stripe')) {
+        const productRef = await this.providerRefService.findByEntity(
+          workspaceId,
+          'product',
+          id,
+          'stripe'
+        );
+
+        if (productRef) {
+          const stripeAdapter = this.billingService.getStripeAdapter();
+          await stripeAdapter.archiveProduct(productRef.externalId);
+          this.logger.log(`Archived offer ${id} in Stripe: product=${productRef.externalId}`);
+        }
+      }
+    } catch (error) {
+      this.logger.warn(`Failed to archive offer ${id} in Stripe:`, error);
+      // Continue with local archive even if Stripe fails
     }
 
     return this.prisma.offer.update({
@@ -255,6 +279,89 @@ export class OffersService {
     });
   }
 
+  async updateDraftVersion(
+    workspaceId: string,
+    offerId: string,
+    config: OfferConfigDto
+  ): Promise<OfferVersion> {
+    const offer = await this.prisma.offer.findFirst({
+      where: { id: offerId, workspaceId },
+    });
+
+    if (!offer) {
+      throw new NotFoundException(`Offer ${offerId} not found`);
+    }
+
+    // Find the existing draft version
+    const existingDraft = await this.prisma.offerVersion.findFirst({
+      where: {
+        offerId,
+        status: 'draft',
+      },
+    });
+
+    if (!existingDraft) {
+      throw new NotFoundException('No draft version found to update');
+    }
+
+    return this.prisma.offerVersion.update({
+      where: { id: existingDraft.id },
+      data: {
+        config: JSON.parse(JSON.stringify(config)),
+      },
+    });
+  }
+
+  async createOrUpdateDraftVersion(
+    workspaceId: string,
+    offerId: string,
+    config: OfferConfigDto
+  ): Promise<OfferVersion> {
+    const offer = await this.prisma.offer.findFirst({
+      where: { id: offerId, workspaceId },
+      include: {
+        versions: {
+          orderBy: { version: 'desc' },
+          take: 1,
+        },
+      },
+    });
+
+    if (!offer) {
+      throw new NotFoundException(`Offer ${offerId} not found`);
+    }
+
+    // Check if there's already a draft version
+    const existingDraft = await this.prisma.offerVersion.findFirst({
+      where: {
+        offerId,
+        status: 'draft',
+      },
+    });
+
+    if (existingDraft) {
+      // Update existing draft
+      return this.prisma.offerVersion.update({
+        where: { id: existingDraft.id },
+        data: {
+          config: JSON.parse(JSON.stringify(config)),
+        },
+      });
+    }
+
+    // Create new draft version
+    const nextVersion = (offer.versions[0]?.version ?? 0) + 1;
+
+    return this.prisma.offerVersion.create({
+      data: {
+        offerId,
+        version: nextVersion,
+        status: 'draft',
+        config: JSON.parse(JSON.stringify(config)),
+      },
+    });
+  }
+
   async publishVersion(
     workspaceId: string,
     offerId: string,
@@ -269,34 +376,66 @@ export class OffersService {
       throw new NotFoundException(`Offer ${offerId} not found`);
     }
 
+    // Find the version to publish BEFORE starting transaction
+    let versionToPublish: OfferVersion | null;
+
+    if (versionId) {
+      versionToPublish = await this.prisma.offerVersion.findFirst({
+        where: { id: versionId, offerId },
+      });
+    } else {
+      // Find the latest draft
+      versionToPublish = await this.prisma.offerVersion.findFirst({
+        where: { offerId, status: 'draft' },
+        orderBy: { version: 'desc' },
+      });
+    }
+
+    if (!versionToPublish) {
+      throw new NotFoundException('No draft version found to publish');
+    }
+
+    if (versionToPublish.status !== 'draft') {
+      throw new BadRequestException('Only draft versions can be published');
+    }
+
+    // Validate pricing configuration BEFORE any changes
+    const config = versionToPublish.config as Record<string, unknown>;
+    if (!config?.pricing) {
+      throw new BadRequestException(
+        'Cannot publish: Offer version has no pricing configuration. Configure pricing in the Pricing tab first.'
+      );
+    }
+
+    const pricing = config.pricing as Record<string, unknown>;
+    if (!pricing.currency) {
+      throw new BadRequestException(
+        'Cannot publish: Pricing is missing currency. Configure pricing in the Pricing tab first.'
+      );
+    }
+
+    if (pricing.amount === undefined || pricing.amount === null) {
+      throw new BadRequestException(
+        'Cannot publish: Pricing is missing amount. Configure pricing in the Pricing tab first.'
+      );
+    }
+
+    // Validate Stripe is configured
+    if (!this.billingService.isConfigured('stripe')) {
+      throw new BadRequestException(
+        'Cannot publish: Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in Settings.'
+      );
+    }
+
     // Determine if this is an immediate publish or a scheduled one
     const now = new Date();
     const isScheduled = effectiveFrom && effectiveFrom > now;
 
+    // Store previous state for potential rollback
+    const previousVersionId = offer.currentVersionId;
+    const previousOfferStatus = offer.status;
+
     const publishedVersion = await this.prisma.executeInTransaction(async (tx) => {
-      // Find the version to publish
-      let versionToPublish: OfferVersion | null;
-
-      if (versionId) {
-        versionToPublish = await tx.offerVersion.findFirst({
-          where: { id: versionId, offerId },
-        });
-      } else {
-        // Find the latest draft
-        versionToPublish = await tx.offerVersion.findFirst({
-          where: { offerId, status: 'draft' },
-          orderBy: { version: 'desc' },
-        });
-      }
-
-      if (!versionToPublish) {
-        throw new NotFoundException('No draft version found to publish');
-      }
-
-      if (versionToPublish.status !== 'draft') {
-        throw new BadRequestException('Only draft versions can be published');
-      }
-
       // For immediate publish, archive currently published version
       // For scheduled publish, leave current version alone
       if (!isScheduled && offer.currentVersionId) {
@@ -308,7 +447,7 @@ export class OffersService {
 
       // Publish the new version
       const published = await tx.offerVersion.update({
-        where: { id: versionToPublish.id },
+        where: { id: versionToPublish!.id },
         data: {
           status: 'published',
           publishedAt: new Date(),
@@ -320,16 +459,61 @@ export class OffersService {
       if (!isScheduled) {
         await tx.offer.update({
           where: { id: offerId },
-          data: { currentVersionId: published.id },
+          data: {
+            currentVersionId: published.id,
+            // Activate offer when first version is published
+            status: 'active',
+          },
         });
       }
 
       return published;
     });
 
-    // Sync to Stripe (after transaction commits)
-    // We sync even for scheduled versions so the price exists in Stripe
-    await this.syncToStripe(workspaceId, offer, publishedVersion);
+    // Sync to Stripe - if this fails, rollback database changes
+    try {
+      await this.syncToStripe(workspaceId, offer, publishedVersion);
+    } catch (error) {
+      this.logger.error(`Stripe sync failed, rolling back publish for offer ${offerId}:`, error);
+
+      // Rollback: revert the database changes
+      await this.prisma.executeInTransaction(async (tx) => {
+        // Revert version status back to draft
+        await tx.offerVersion.update({
+          where: { id: publishedVersion.id },
+          data: {
+            status: 'draft',
+            publishedAt: null,
+            effectiveFrom: null,
+          },
+        });
+
+        // If we archived a previous version, restore it
+        if (!isScheduled && previousVersionId) {
+          await tx.offerVersion.update({
+            where: { id: previousVersionId },
+            data: { status: 'published' },
+          });
+        }
+
+        // Restore offer to previous state
+        if (!isScheduled) {
+          await tx.offer.update({
+            where: { id: offerId },
+            data: {
+              currentVersionId: previousVersionId,
+              status: previousOfferStatus,
+            },
+          });
+        }
+      });
+
+      // Re-throw with a clear message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(
+        `Failed to sync to Stripe: ${errorMessage}. Changes have been rolled back.`
+      );
+    }
 
     return publishedVersion;
   }
@@ -340,55 +524,110 @@ export class OffersService {
     version: OfferVersion
   ): Promise<void> {
     if (!this.billingService.isConfigured('stripe')) {
-      this.logger.warn('Stripe not configured, skipping sync');
-      return;
+      throw new BadRequestException(
+        'Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET environment variables.'
+      );
+    }
+
+    // Validate that pricing config exists
+    const config = version.config as Record<string, unknown>;
+    if (!config?.pricing) {
+      throw new BadRequestException(
+        'Cannot sync to Stripe: Offer version has no pricing configuration. Configure pricing in the Pricing tab first.'
+      );
+    }
+
+    const pricing = config.pricing as Record<string, unknown>;
+    if (!pricing.currency) {
+      throw new BadRequestException(
+        'Cannot sync to Stripe: Pricing is missing currency. Configure pricing in the Pricing tab first.'
+      );
+    }
+
+    if (pricing.amount === undefined || pricing.amount === null) {
+      throw new BadRequestException(
+        'Cannot sync to Stripe: Pricing is missing amount. Configure pricing in the Pricing tab first.'
+      );
+    }
+
+    const stripeAdapter = this.billingService.getStripeAdapter();
+
+    // Check if we have an existing product ref
+    const existingProductRef = await this.providerRefService.findByEntity(
+      workspaceId,
+      'product',
+      offer.id,
+      'stripe'
+    );
+
+    // Sync to Stripe
+    const result = await stripeAdapter.syncOffer(
+      offer as never, // Type cast for interface compatibility
+      version as never,
+      existingProductRef as never
+    );
+
+    // Store product ref if new
+    if (!existingProductRef) {
+      await this.providerRefService.create({
+        workspaceId,
+        entityType: 'product',
+        entityId: offer.id,
+        provider: 'stripe',
+        externalId: result.productRef.externalId,
+      });
+    }
+
+    // Store price ref for this version
+    await this.providerRefService.create({
+      workspaceId,
+      entityType: 'price',
+      entityId: version.id,
+      provider: 'stripe',
+      externalId: result.priceRef.externalId,
+    });
+
+    this.logger.log(
+      `Synced offer ${offer.id} version ${version.id} to Stripe: product=${result.productRef.externalId}, price=${result.priceRef.externalId}`
+    );
+  }
+
+  async syncOfferToStripe(workspaceId: string, offerId: string): Promise<{ success: boolean; message: string }> {
+    const offer = await this.prisma.offer.findFirst({
+      where: { id: offerId, workspaceId },
+      include: { currentVersion: true },
+    });
+
+    if (!offer) {
+      throw new NotFoundException(`Offer ${offerId} not found`);
+    }
+
+    if (!offer.currentVersion) {
+      throw new BadRequestException('No published version to sync. Publish the offer first.');
+    }
+
+    // Validate config has pricing
+    const config = offer.currentVersion.config as Record<string, unknown>;
+    if (!config?.pricing) {
+      throw new BadRequestException('Offer version has no pricing configuration. Edit the pricing tab and save.');
+    }
+
+    const pricing = config.pricing as Record<string, unknown>;
+    if (!pricing.currency) {
+      throw new BadRequestException('Offer pricing is missing currency. Edit the pricing tab and save.');
     }
 
     try {
-      const stripeAdapter = this.billingService.getStripeAdapter();
-
-      // Check if we have an existing product ref
-      const existingProductRef = await this.providerRefService.findByEntity(
-        workspaceId,
-        'product',
-        offer.id,
-        'stripe'
-      );
-
-      // Sync to Stripe
-      const result = await stripeAdapter.syncOffer(
-        offer as never, // Type cast for interface compatibility
-        version as never,
-        existingProductRef as never
-      );
-
-      // Store product ref if new
-      if (!existingProductRef) {
-        await this.providerRefService.create({
-          workspaceId,
-          entityType: 'product',
-          entityId: offer.id,
-          provider: 'stripe',
-          externalId: result.productRef.externalId,
-        });
-      }
-
-      // Store price ref for this version
-      await this.providerRefService.create({
-        workspaceId,
-        entityType: 'price',
-        entityId: version.id,
-        provider: 'stripe',
-        externalId: result.priceRef.externalId,
-      });
-
-      this.logger.log(
-        `Synced offer ${offer.id} version ${version.id} to Stripe: product=${result.productRef.externalId}, price=${result.priceRef.externalId}`
-      );
+      await this.syncToStripe(workspaceId, offer, offer.currentVersion);
+      return { success: true, message: 'Offer synced to Stripe successfully' };
     } catch (error) {
-      this.logger.error(`Failed to sync offer to Stripe: ${error}`);
-      // Don't throw - offer is published in our DB even if Stripe sync fails
-      // In production, you might want to queue a retry or alert
+      this.logger.error(`Failed to sync offer ${offerId} to Stripe:`, error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        `Failed to sync to Stripe: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 

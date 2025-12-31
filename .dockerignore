@@ -1,0 +1,67 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Build outputs (we rebuild in Docker)
+**/dist
+**/.next
+**/build
+
+# Development files
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+**/test
+**/tests
+**/__tests__
+**/coverage
+.nyc_output
+
+# Documentation
+*.md
+!README.md
+docs
+
+# Docker files (don't need to copy into image)
+Dockerfile*
+docker-compose*.yml
+.docker
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Misc
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+.pretterignore
+.editorconfig
+
+# Terraform
+infrastructure
+*.tf
+*.tfstate
+*.tfvars
+
+# Local development
+tmp
+temp
+*.tmp

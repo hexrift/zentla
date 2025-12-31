@@ -66,9 +66,12 @@ export function OffersPage() {
               {data?.data?.map((offer: Offer) => (
                 <tr key={offer.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
+                    <Link
+                      to={`/offers/${offer.id}`}
+                      className="text-sm font-medium text-gray-900 hover:text-purple-600"
+                    >
                       {offer.name}
-                    </div>
+                    </Link>
                     {offer.description && (
                       <div className="text-sm text-gray-500">
                         {offer.description}
@@ -80,6 +83,8 @@ export function OffersPage() {
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         offer.status === 'active'
                           ? 'bg-green-100 text-green-800'
+                          : offer.status === 'draft'
+                          ? 'bg-yellow-100 text-yellow-800'
                           : 'bg-gray-100 text-gray-800'
                       }`}
                     >
@@ -94,12 +99,18 @@ export function OffersPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(offer.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
                     <Link
                       to={`/offers/${offer.id}`}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-gray-600 hover:text-gray-900"
                     >
                       Edit
+                    </Link>
+                    <Link
+                      to={`/offers/${offer.id}?tab=checkout`}
+                      className="text-purple-600 hover:text-purple-900"
+                    >
+                      Preview
                     </Link>
                   </td>
                 </tr>

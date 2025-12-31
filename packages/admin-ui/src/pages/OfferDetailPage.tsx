@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import { api } from '../lib/api';
@@ -9,7 +9,19 @@ type Tab = 'details' | 'pricing' | 'trials' | 'entitlements' | 'checkout' | 'jso
 
 export function OfferDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [activeTab, setActiveTab] = useState<Tab>('details');
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialTab = (searchParams.get('tab') as Tab) || 'details';
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
+
+  // Update tab if URL changes
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab') as Tab;
+    if (tabFromUrl && ['details', 'pricing', 'trials', 'entitlements', 'checkout', 'json'].includes(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: offer, isLoading } = useQuery({
@@ -22,6 +34,14 @@ export function OfferDetailPage() {
     mutationFn: () => api.offers.publish(id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['offer', id] });
+    },
+  });
+
+  const archiveMutation = useMutation({
+    mutationFn: () => api.offers.archive(id!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['offers'] });
+      navigate('/offers');
     },
   });
 
@@ -62,18 +82,68 @@ export function OfferDetailPage() {
               disabled={publishMutation.isPending}
               className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 disabled:opacity-50"
             >
-              {publishMutation.isPending ? 'Publishing...' : 'Publish Draft'}
+              {publishMutation.isPending ? 'Publishing...' : 'Publish'}
             </button>
           )}
-          <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-            Create Version
-          </button>
+          {offer.status !== 'archived' && (
+            <button
+              onClick={() => setShowArchiveConfirm(true)}
+              className="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-md hover:bg-red-50"
+            >
+              Archive
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Version info */}
+      {/* Archive Confirmation Modal */}
+      {showArchiveConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Archive Offer</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Are you sure you want to archive "{offer.name}"? This will hide it from listings and prevent new subscriptions. Existing subscriptions will not be affected.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowArchiveConfirm(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  archiveMutation.mutate();
+                  setShowArchiveConfirm(false);
+                }}
+                disabled={archiveMutation.isPending}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50"
+              >
+                {archiveMutation.isPending ? 'Archiving...' : 'Archive'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Status & Version info */}
       <div className="p-4 mb-6 bg-white rounded-lg shadow">
         <div className="flex items-center space-x-6">
+          <div>
+            <span className="text-sm text-gray-500">Status:</span>
+            <span
+              className={clsx(
+                'ml-2 px-2 py-0.5 text-xs font-medium rounded-full',
+                offer.status === 'active'
+                  ? 'bg-green-100 text-green-800'
+                  : offer.status === 'draft'
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : 'bg-gray-100 text-gray-800'
+              )}
+            >
+              {offer.status}
+            </span>
+          </div>
           <div>
             <span className="text-sm text-gray-500">Published Version:</span>
             <span className="ml-2 font-medium">
@@ -89,6 +159,16 @@ export function OfferDetailPage() {
             </div>
           )}
         </div>
+        {offer.status === 'draft' && !draftVersion && (
+          <p className="mt-3 text-sm text-amber-600">
+            Configure pricing or entitlements, then publish to activate this offer.
+          </p>
+        )}
+        {offer.status === 'draft' && draftVersion && (
+          <p className="mt-3 text-sm text-amber-600">
+            Click "Publish" above to activate this offer.
+          </p>
+        )}
       </div>
 
       {/* Tabs */}
@@ -148,8 +228,40 @@ function DetailsTab({ offer }: { offer: Offer }) {
 }
 
 function PricingTab({ offer }: { offer: Offer }) {
-  const config = offer.currentVersion?.config;
-  const pricing = config?.pricing;
+  const queryClient = useQueryClient();
+  // Use draft version if available, otherwise current version
+  const draftVersion = offer.versions?.find((v) => v.status === 'draft');
+  const activeVersion = draftVersion ?? offer.currentVersion;
+  const config = activeVersion?.config;
+  const existingPricing = config?.pricing;
+
+  const [pricing, setPricing] = useState({
+    model: existingPricing?.model ?? 'flat',
+    currency: existingPricing?.currency ?? 'USD',
+    amount: existingPricing?.amount ?? 0,
+    interval: existingPricing?.interval ?? 'month',
+    intervalCount: existingPricing?.intervalCount ?? 1,
+  });
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const updateDraftMutation = useMutation({
+    mutationFn: (newConfig: Record<string, unknown>) =>
+      api.offers.updateDraft(offer.id, newConfig),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['offer', offer.id] });
+      setSuccessMessage('Pricing saved to draft');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    },
+  });
+
+  const handleSavePricing = () => {
+    const newConfig = {
+      ...config,
+      pricing,
+      entitlements: config?.entitlements ?? [],
+    };
+    updateDraftMutation.mutate(newConfig);
+  };
 
   return (
     <div className="space-y-4">
@@ -157,7 +269,8 @@ function PricingTab({ offer }: { offer: Offer }) {
         <div>
           <label className="block text-sm font-medium text-gray-700">Pricing Model</label>
           <select
-            defaultValue={pricing?.model ?? 'flat'}
+            value={pricing.model}
+            onChange={(e) => setPricing({ ...pricing, model: e.target.value })}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
           >
             <option value="flat">Flat</option>
@@ -170,7 +283,8 @@ function PricingTab({ offer }: { offer: Offer }) {
           <label className="block text-sm font-medium text-gray-700">Currency</label>
           <input
             type="text"
-            defaultValue={pricing?.currency ?? 'USD'}
+            value={pricing.currency}
+            onChange={(e) => setPricing({ ...pricing, currency: e.target.value.toUpperCase() })}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
           />
         </div>
@@ -178,14 +292,17 @@ function PricingTab({ offer }: { offer: Offer }) {
           <label className="block text-sm font-medium text-gray-700">Amount (cents)</label>
           <input
             type="number"
-            defaultValue={pricing?.amount ?? 0}
+            value={pricing.amount}
+            onChange={(e) => setPricing({ ...pricing, amount: parseInt(e.target.value) || 0 })}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
           />
+          <p className="mt-1 text-xs text-gray-500">e.g., 1999 = $19.99</p>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Billing Interval</label>
           <select
-            defaultValue={pricing?.interval ?? 'month'}
+            value={pricing.interval}
+            onChange={(e) => setPricing({ ...pricing, interval: e.target.value })}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
           >
             <option value="day">Daily</option>
@@ -195,6 +312,28 @@ function PricingTab({ offer }: { offer: Offer }) {
           </select>
         </div>
       </div>
+
+      {successMessage && (
+        <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+          <p className="text-sm text-green-700">{successMessage}</p>
+        </div>
+      )}
+
+      {updateDraftMutation.isError && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-700">
+            Error: {(updateDraftMutation.error as Error).message}
+          </p>
+        </div>
+      )}
+
+      <button
+        onClick={handleSavePricing}
+        disabled={updateDraftMutation.isPending}
+        className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 disabled:opacity-50"
+      >
+        {updateDraftMutation.isPending ? 'Saving...' : 'Save Pricing'}
+      </button>
     </div>
   );
 }
@@ -236,8 +375,80 @@ function TrialsTab({ offer }: { offer: Offer }) {
 }
 
 function EntitlementsTab({ offer }: { offer: Offer }) {
-  const config = offer.currentVersion?.config;
+  const queryClient = useQueryClient();
+  // Use draft version if available, otherwise current version
+  const draftVersion = offer.versions?.find((v) => v.status === 'draft');
+  const activeVersion = draftVersion ?? offer.currentVersion;
+  const config = activeVersion?.config;
   const entitlements = config?.entitlements ?? [];
+  const [isAdding, setIsAdding] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [newEntitlement, setNewEntitlement] = useState({
+    featureKey: '',
+    value: '' as string | number | boolean,
+    valueType: 'boolean' as 'boolean' | 'number' | 'string',
+  });
+
+  const updateDraftMutation = useMutation({
+    mutationFn: (newConfig: Record<string, unknown>) =>
+      api.offers.updateDraft(offer.id, newConfig),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['offer', offer.id] });
+      setIsAdding(false);
+      setNewEntitlement({ featureKey: '', value: '', valueType: 'boolean' });
+      setSuccessMessage('Entitlement saved to draft');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    },
+  });
+
+  const handleAddEntitlement = () => {
+    if (!newEntitlement.featureKey) return;
+
+    let parsedValue: string | number | boolean = newEntitlement.value;
+    if (newEntitlement.valueType === 'boolean') {
+      parsedValue = newEntitlement.value === 'true' || newEntitlement.value === true;
+    } else if (newEntitlement.valueType === 'number') {
+      parsedValue = Number(newEntitlement.value) || 0;
+    }
+
+    const updatedEntitlements = [
+      ...entitlements,
+      {
+        featureKey: newEntitlement.featureKey,
+        value: parsedValue,
+        valueType: newEntitlement.valueType,
+      },
+    ];
+
+    // Build config with required pricing field
+    const newConfig = {
+      pricing: config?.pricing ?? {
+        model: 'flat',
+        currency: 'USD',
+        amount: 0,
+        interval: 'month',
+      },
+      ...config,
+      entitlements: updatedEntitlements,
+    };
+
+    updateDraftMutation.mutate(newConfig);
+  };
+
+  const handleRemoveEntitlement = (index: number) => {
+    const updatedEntitlements = entitlements.filter((_, i) => i !== index);
+    const newConfig = {
+      pricing: config?.pricing ?? {
+        model: 'flat',
+        currency: 'USD',
+        amount: 0,
+        interval: 'month',
+      },
+      ...config,
+      entitlements: updatedEntitlements,
+    };
+    updateDraftMutation.mutate(newConfig);
+  };
 
   return (
     <div className="space-y-4">
@@ -253,6 +464,9 @@ function EntitlementsTab({ offer }: { offer: Offer }) {
             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
               Type
             </th>
+            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
@@ -261,21 +475,163 @@ function EntitlementsTab({ offer }: { offer: Offer }) {
               <td className="px-4 py-2 text-sm text-gray-900">{e.featureKey}</td>
               <td className="px-4 py-2 text-sm text-gray-500">{String(e.value)}</td>
               <td className="px-4 py-2 text-sm text-gray-500">{e.valueType}</td>
+              <td className="px-4 py-2 text-sm">
+                <button
+                  onClick={() => handleRemoveEntitlement(i)}
+                  className="text-red-600 hover:text-red-800"
+                  disabled={updateDraftMutation.isPending}
+                >
+                  Remove
+                </button>
+              </td>
             </tr>
           ))}
+          {entitlements.length === 0 && !isAdding && (
+            <tr>
+              <td colSpan={4} className="px-4 py-4 text-sm text-gray-500 text-center">
+                No entitlements configured
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
-      <button className="text-sm text-purple-600 hover:text-purple-800">
-        + Add Entitlement
-      </button>
+
+      {successMessage && (
+        <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+          <p className="text-sm text-green-700">{successMessage}</p>
+        </div>
+      )}
+
+      {isAdding ? (
+        <div className="p-4 border border-gray-200 rounded-md space-y-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Feature Key</label>
+              <input
+                type="text"
+                value={newEntitlement.featureKey}
+                onChange={(e) => setNewEntitlement({ ...newEntitlement, featureKey: e.target.value })}
+                placeholder="e.g., api_requests"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Type</label>
+              <select
+                value={newEntitlement.valueType}
+                onChange={(e) => setNewEntitlement({
+                  ...newEntitlement,
+                  valueType: e.target.value as 'boolean' | 'number' | 'string',
+                  value: e.target.value === 'boolean' ? 'true' : ''
+                })}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 text-sm"
+              >
+                <option value="boolean">Boolean</option>
+                <option value="number">Number</option>
+                <option value="string">String</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Value</label>
+              {newEntitlement.valueType === 'boolean' ? (
+                <select
+                  value={String(newEntitlement.value)}
+                  onChange={(e) => setNewEntitlement({ ...newEntitlement, value: e.target.value })}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 text-sm"
+                >
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </select>
+              ) : (
+                <input
+                  type={newEntitlement.valueType === 'number' ? 'number' : 'text'}
+                  value={String(newEntitlement.value)}
+                  onChange={(e) => setNewEntitlement({ ...newEntitlement, value: e.target.value })}
+                  placeholder={newEntitlement.valueType === 'number' ? '100' : 'value'}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 text-sm"
+                />
+              )}
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <button
+              onClick={() => {
+                setIsAdding(false);
+                setNewEntitlement({ featureKey: '', value: '', valueType: 'boolean' });
+              }}
+              className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAddEntitlement}
+              disabled={!newEntitlement.featureKey || updateDraftMutation.isPending}
+              className="px-3 py-1.5 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 disabled:opacity-50"
+            >
+              {updateDraftMutation.isPending ? 'Saving...' : 'Add'}
+            </button>
+          </div>
+          {updateDraftMutation.isError && (
+            <p className="text-red-500 text-sm">
+              Error: {(updateDraftMutation.error as Error).message}
+            </p>
+          )}
+        </div>
+      ) : (
+        <button
+          onClick={() => setIsAdding(true)}
+          className="text-sm text-purple-600 hover:text-purple-800"
+        >
+          + Add Entitlement
+        </button>
+      )}
     </div>
   );
+}
+
+interface PromotionConfig {
+  discountType: string;
+  discountValue: number;
+  applicableOfferIds?: string[];
+}
+
+interface PromotionWithConfig {
+  id: string;
+  code: string;
+  name: string;
+  status: string;
+  currentVersion?: {
+    config: PromotionConfig;
+  };
 }
 
 function CheckoutTab({ offer }: { offer: Offer }) {
   const [copied, setCopied] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [needsSync, setNeedsSync] = useState(false);
+  const [selectedPromoId, setSelectedPromoId] = useState<string>('');
+
+  // Fetch promotions that apply to this offer
+  const { data: promotionsData } = useQuery({
+    queryKey: ['promotions', 'for-offer', offer.id],
+    queryFn: () => api.promotions.list({ status: 'active', limit: 100 }),
+  });
+
+  // Filter to promotions applicable to this offer
+  const applicablePromotions = (promotionsData?.data as PromotionWithConfig[] ?? []).filter((promo) => {
+    if (promo.status !== 'active' || !promo.currentVersion) return false;
+    const config = promo.currentVersion.config;
+    // If no applicableOfferIds, applies to all offers
+    if (!config.applicableOfferIds || config.applicableOfferIds.length === 0) return true;
+    // Check if this offer is in the list
+    return config.applicableOfferIds.includes(offer.id);
+  });
+
+  const selectedPromo = applicablePromotions.find((p) => p.id === selectedPromoId);
+  const promoCode = selectedPromo?.code ?? '';
 
   const currentVersion = offer.currentVersion;
   const hasPublishedVersion = !!currentVersion;
@@ -290,7 +646,8 @@ function CheckoutTab({ offer }: { offer: Offer }) {
   -d '{
     "offerId": "${offer.id}",
     "successUrl": "https://example.com/success",
-    "cancelUrl": "https://example.com/cancel"
+    "cancelUrl": "https://example.com/cancel"${promoCode ? `,
+    "promotionCode": "${promoCode.toUpperCase()}"` : ''}
   }'`;
 
   const handleCopy = (text: string) => {
@@ -299,8 +656,23 @@ function CheckoutTab({ offer }: { offer: Offer }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleSyncToStripe = async () => {
+    setIsSyncing(true);
+    setSyncError(null);
+    try {
+      await api.offers.sync(offer.id);
+      setNeedsSync(false);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setSyncError(errorMessage);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handlePreviewCheckout = async () => {
     setIsCreating(true);
+    setSyncError(null);
     try {
       // Use http://localhost URLs for local dev, which IsUrl() accepts
       const baseUrl = window.location.origin;
@@ -308,16 +680,24 @@ function CheckoutTab({ offer }: { offer: Offer }) {
         offerId: offer.id,
         successUrl: `${baseUrl}/checkouts`,
         cancelUrl: `${baseUrl}/checkouts`,
+        ...(promoCode.trim() && { promotionCode: promoCode.trim().toUpperCase() }),
       });
       if (response.url) {
         setSessionUrl(response.url);
+        setNeedsSync(false);
         // Open in new tab
         window.open(response.url, '_blank');
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Failed to create checkout session:', errorMessage);
-      alert(`Failed to create checkout session: ${errorMessage}`);
+      // Check if it's a sync issue
+      if (errorMessage.includes('not synced') || errorMessage.includes('Stripe')) {
+        setNeedsSync(true);
+        setSyncError(errorMessage);
+      } else {
+        setSyncError(errorMessage);
+      }
     } finally {
       setIsCreating(false);
     }
@@ -344,29 +724,87 @@ function CheckoutTab({ offer }: { offer: Offer }) {
           </div>
         ) : (
           <div className="space-y-4">
-            <button
-              onClick={handlePreviewCheckout}
-              disabled={isCreating}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
-            >
-              {isCreating ? (
-                <>
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  Preview Checkout
-                </>
+            {/* Promotion Dropdown */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 max-w-sm">
+                <label htmlFor="promotion" className="block text-sm font-medium text-gray-700 mb-1">
+                  Apply Promotion (optional)
+                </label>
+                <select
+                  id="promotion"
+                  value={selectedPromoId}
+                  onChange={(e) => setSelectedPromoId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                >
+                  <option value="">No promotion</option>
+                  {applicablePromotions.map((promo) => {
+                    const config = promo.currentVersion?.config;
+                    const discountText = config?.discountType === 'percent'
+                      ? `${config.discountValue}% off`
+                      : config?.discountType === 'fixed_amount'
+                      ? `${(config.discountValue / 100).toFixed(2)} off`
+                      : `${config?.discountValue} days trial`;
+                    return (
+                      <option key={promo.id} value={promo.id}>
+                        {promo.code} - {promo.name} ({discountText})
+                      </option>
+                    );
+                  })}
+                </select>
+                {applicablePromotions.length === 0 && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    No active promotions available for this offer
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handlePreviewCheckout}
+                disabled={isCreating || isSyncing}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
+              >
+                {isCreating ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Preview Checkout
+                  </>
+                )}
+              </button>
+
+              {needsSync && (
+                <button
+                  onClick={handleSyncToStripe}
+                  disabled={isSyncing}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                >
+                  {isSyncing ? 'Syncing...' : 'Sync to Stripe'}
+                </button>
               )}
-            </button>
+            </div>
+
+            {syncError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-700">{syncError}</p>
+                {needsSync && (
+                  <p className="text-sm text-red-600 mt-1">
+                    Click "Sync to Stripe" to sync this offer, then try again.
+                  </p>
+                )}
+              </div>
+            )}
 
             {sessionUrl && (
               <div className="p-3 bg-gray-50 rounded-lg">

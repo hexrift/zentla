@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
+import { BillingService } from '../billing/billing.service';
 import type { Workspace, Prisma } from '@prisma/client';
 
 export interface CreateWorkspaceDto {
@@ -17,6 +18,8 @@ export interface UpdateWorkspaceDto {
 
 export interface WorkspaceSettings {
   defaultCurrency?: string;
+  stripeSecretKey?: string;
+  stripeWebhookSecret?: string;
   webhookRetryPolicy?: {
     maxRetries: number;
     initialDelayMs: number;
@@ -27,7 +30,11 @@ export interface WorkspaceSettings {
 
 @Injectable()
 export class WorkspacesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(forwardRef(() => BillingService))
+    private readonly billingService: BillingService,
+  ) {}
 
   async findById(id: string): Promise<Workspace | null> {
     return this.prisma.workspace.findUnique({
@@ -78,7 +85,7 @@ export class WorkspacesService {
       ? { ...currentSettings, ...dto.settings }
       : currentSettings;
 
-    return this.prisma.workspace.update({
+    const updated = await this.prisma.workspace.update({
       where: { id },
       data: {
         ...(dto.name && { name: dto.name }),
@@ -86,6 +93,19 @@ export class WorkspacesService {
         settings: newSettings as Prisma.InputJsonValue,
       },
     });
+
+    // Reconfigure billing service if Stripe credentials were updated
+    if (dto.settings?.stripeSecretKey || dto.settings?.stripeWebhookSecret) {
+      const settings = updated.settings as WorkspaceSettings;
+      if (settings.stripeSecretKey && settings.stripeWebhookSecret) {
+        this.billingService.configureStripe(
+          settings.stripeSecretKey,
+          settings.stripeWebhookSecret,
+        );
+      }
+    }
+
+    return updated;
   }
 
   async delete(id: string): Promise<void> {

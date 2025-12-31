@@ -203,7 +203,7 @@ export class CheckoutService {
 
     const totalSessions = Object.values(sessionStats).reduce((a, b) => a + b, 0);
     const totalIntents = Object.values(intentStats).reduce((a, b) => a + b, 0);
-    const completedSessions = sessionStats['completed'] || 0;
+    const completedSessions = sessionStats['complete'] || 0;
     const succeededIntents = intentStats['succeeded'] || 0;
 
     return {

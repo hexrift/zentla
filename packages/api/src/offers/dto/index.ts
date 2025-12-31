@@ -239,13 +239,14 @@ export class CreateOfferRequestDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({
-    description: 'Complete offer configuration including pricing, trial, and entitlements. This becomes version 1 (draft) of the offer.',
+  @ApiPropertyOptional({
+    description: 'Optional offer configuration including pricing, trial, and entitlements. If provided, this becomes version 1 (draft) of the offer. If omitted, create the configuration later via POST /offers/{id}/versions.',
     type: OfferConfigDto,
   })
+  @IsOptional()
   @ValidateNested()
   @Type(() => OfferConfigDto)
-  config!: OfferConfigDto;
+  config?: OfferConfigDto;
 
   @ApiPropertyOptional({
     description: 'Campaign and context metadata for attribution tracking. Flows through to subscriptions and webhook events.',
@@ -370,13 +371,13 @@ export class QueryOffersDto {
   cursor?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter by offer status. Active offers can be used for new subscriptions; archived offers are hidden but preserve historical data.',
-    enum: ['active', 'archived'],
+    description: 'Filter by offer status. Draft offers are being configured; active offers can be used for new subscriptions; archived offers are hidden but preserve historical data.',
+    enum: ['draft', 'active', 'archived'],
     example: 'active',
   })
   @IsOptional()
-  @IsEnum(['active', 'archived'])
-  status?: 'active' | 'archived';
+  @IsEnum(['draft', 'active', 'archived'])
+  status?: 'draft' | 'active' | 'archived';
 
   @ApiPropertyOptional({
     description: 'Case-insensitive search across offer name and description.',

@@ -184,6 +184,23 @@ Changes take effect immediately and are reflected in all API responses.`,
     return this.offersService.update(workspaceId, id, dto);
   }
 
+  @Post(':id/sync')
+  @AdminOnly()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Sync offer to Stripe',
+    description: 'Manually sync a published offer to Stripe. Use this to retry if the initial sync failed.',
+  })
+  @ApiResponse({ status: 200, description: 'Offer synced successfully' })
+  @ApiResponse({ status: 400, description: 'No published version or Stripe not configured' })
+  @ApiResponse({ status: 404, description: 'Offer not found' })
+  async syncToStripe(
+    @WorkspaceId() workspaceId: string,
+    @Param('id', ParseUUIDPipe) id: string
+  ) {
+    return this.offersService.syncOfferToStripe(workspaceId, id);
+  }
+
   @Post(':id/archive')
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
@@ -313,6 +330,39 @@ Only one version can be \`published\` at a time.`,
     @Body() dto: CreateVersionRequestDto
   ) {
     return this.offersService.createVersion(workspaceId, id, dto.config);
+  }
+
+  @Patch(':id/versions/draft')
+  @AdminOnly()
+  @ApiOperation({
+    summary: 'Update draft version',
+    description: `Updates the existing draft version with new configuration, or creates one if none exists.
+
+**Use this when:**
+- Iterating on pricing or entitlements before publishing
+- Making incremental changes to a draft
+
+**This is idempotent:** Call it multiple times with different configs; only the latest config is saved.`,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Offer ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Draft version updated or created',
+    schema: OfferVersionSchema,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({ status: 404, description: 'Offer not found' })
+  async updateDraftVersion(
+    @WorkspaceId() workspaceId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreateVersionRequestDto
+  ) {
+    return this.offersService.createOrUpdateDraftVersion(workspaceId, id, dto.config);
   }
 
   @Post(':id/publish')
