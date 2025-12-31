@@ -207,7 +207,10 @@ export function DashboardPage() {
     },
   });
 
-  const isStripeConfigured = providerStatus?.stripe?.status === "connected";
+  const stripeProvider = providerStatus?.providers?.find(
+    (p: { provider: string }) => p.provider === "stripe",
+  );
+  const isStripeConfigured = stripeProvider?.status === "connected";
   const hasOffers = (offers?.data?.length ?? 0) > 0;
   const hasWebhooks = (webhooks?.data?.length ?? 0) > 0;
   const hasCustomers = (customers?.data?.length ?? 0) > 0;

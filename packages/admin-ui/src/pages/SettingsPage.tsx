@@ -14,7 +14,6 @@ export function SettingsPage() {
   // Stripe config state
   const [stripeSecretKey, setStripeSecretKey] = useState("");
   const [stripeWebhookSecret, setStripeWebhookSecret] = useState("");
-  const [stripeWebhookEndpoint, setStripeWebhookEndpoint] = useState("");
   const [showSecretKey, setShowSecretKey] = useState(false);
   const [showWebhookSecret, setShowWebhookSecret] = useState(false);
   const [stripeSaved, setStripeSaved] = useState(false);
@@ -48,9 +47,6 @@ export function SettingsPage() {
       if (settings.stripeWebhookSecret) {
         setStripeWebhookSecret(settings.stripeWebhookSecret as string);
       }
-      if (settings.stripeWebhookEndpoint) {
-        setStripeWebhookEndpoint(settings.stripeWebhookEndpoint as string);
-      }
     }
   }, [workspace]);
 
@@ -78,7 +74,6 @@ export function SettingsPage() {
     updateWorkspaceMutation.mutate({
       stripeSecretKey,
       stripeWebhookSecret,
-      stripeWebhookEndpoint: stripeWebhookEndpoint || undefined,
     });
   };
 
@@ -305,24 +300,6 @@ export function SettingsPage() {
                     </code>
                   </p>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Webhook Endpoint (optional)
-                  </label>
-                  <input
-                    type="url"
-                    value={stripeWebhookEndpoint}
-                    onChange={(e) => setStripeWebhookEndpoint(e.target.value)}
-                    placeholder={`${import.meta.env.VITE_API_URL || window.location.origin}/api/v1/webhooks/stripe`}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                  <p className="mt-1 text-xs text-gray-500">
-                    For production: Add this URL in Stripe Dashboard →
-                    Developers → Webhooks. For local development, use Stripe CLI
-                    instead (no need to set this).
-                  </p>
-                </div>
-
                 <div className="pt-2 flex items-center gap-3">
                   <button
                     onClick={handleSaveStripeConfig}

@@ -329,16 +329,12 @@ export const api = {
     getProviderStatus: () =>
       fetchApi<{
         defaultProvider: string;
-        stripe: {
-          configured: boolean;
-          status: string;
-          error?: string;
-        };
-        zuora: {
-          configured: boolean;
-          status: string;
-          error?: string;
-        };
+        providers: Array<{
+          provider: "stripe" | "zuora";
+          status: "connected" | "disconnected" | "error" | "not_configured";
+          mode: "live" | "test" | null;
+          errors: string[];
+        }>;
       }>("/workspaces/current/providers"),
     syncFromStripe: () =>
       fetchApi<{
