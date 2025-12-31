@@ -85,7 +85,7 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // OpenAPI/Swagger with Scalar UI
-  if (nodeEnv !== "production") {
+  {
     const swaggerConfig = new DocumentBuilder()
       .setTitle("Relay API")
       .setDescription(

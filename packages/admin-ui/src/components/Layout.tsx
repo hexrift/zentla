@@ -3,9 +3,9 @@ import { Outlet, NavLink } from "react-router-dom";
 import { clsx } from "clsx";
 import { useAuth } from "../lib/auth-context";
 
-const DOCS_URL = "http://localhost:3000/docs";
-const API_DOCS_URL = "http://localhost:3002/docs";
-const FEEDBACK_URL = "https://github.com/your-org/relay/issues";
+const DOCS_URL = `${import.meta.env.VITE_DASHBOARD_URL || ""}/docs`;
+const API_DOCS_URL = `${import.meta.env.VITE_API_URL || ""}/docs`;
+const FEEDBACK_URL = "https://github.com/PrimeCodeLabs/relay/issues";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },

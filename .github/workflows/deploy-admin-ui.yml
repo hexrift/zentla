@@ -38,6 +38,7 @@ jobs:
         run: yarn workspace @relay/admin-ui build
         env:
           VITE_API_URL: ${{ vars.API_URL }}
+          VITE_DASHBOARD_URL: ${{ vars.DASHBOARD_URL }}
 
       # Deploy to Cloudflare Pages
       - name: Deploy to Cloudflare Pages
