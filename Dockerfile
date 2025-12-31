@@ -26,7 +26,7 @@ COPY packages/adapters/stripe/package.json ./packages/adapters/stripe/
 COPY packages/adapters/zuora/package.json ./packages/adapters/zuora/
 
 # Install all dependencies (including devDependencies for build)
-RUN yarn install --immutable
+RUN yarn install
 
 # -----------------------------------------------------------------------------
 # Stage 2: Builder
