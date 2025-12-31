@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
   Delete,
   Body,
@@ -14,6 +15,7 @@ import {
   ApiSecurity,
 } from "@nestjs/swagger";
 import { WorkspacesService } from "./workspaces.service";
+import { StripeSyncService } from "./stripe-sync.service";
 import { BillingService } from "../billing/billing.service";
 import { WorkspaceId, OwnerOnly, MemberOnly } from "../common/decorators";
 import { IsString, IsOptional, IsEnum, IsObject } from "class-validator";
@@ -43,6 +45,7 @@ class UpdateWorkspaceDto {
 export class WorkspacesController {
   constructor(
     private readonly workspacesService: WorkspacesService,
+    private readonly stripeSyncService: StripeSyncService,
     private readonly billingService: BillingService,
   ) {}
 
@@ -146,5 +149,41 @@ export class WorkspacesController {
   @ApiResponse({ status: 204, description: "Workspace deleted" })
   async deleteCurrent(@WorkspaceId() workspaceId: string) {
     await this.workspacesService.delete(workspaceId);
+  }
+
+  @Post("current/sync-stripe")
+  @OwnerOnly()
+  @ApiOperation({
+    summary: "Sync from Stripe",
+    description: `Import existing customers and subscriptions from Stripe.
+
+Use this to recover from:
+- Checkouts created before webhook was configured
+- Missing subscriptions due to webhook failures
+
+**What gets synced:**
+- Customers: Created in Relay and linked to Stripe customer ID
+- Subscriptions: Matched to Relay offers via Stripe price IDs
+
+**Prerequisites:**
+- Offers must be synced to Stripe first (prices must exist)
+- Webhook should be configured to prevent future sync issues`,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Sync completed",
+    schema: {
+      type: "object",
+      properties: {
+        customersImported: { type: "number" },
+        customersSkipped: { type: "number" },
+        subscriptionsImported: { type: "number" },
+        subscriptionsSkipped: { type: "number" },
+        errors: { type: "array", items: { type: "string" } },
+      },
+    },
+  })
+  async syncFromStripe(@WorkspaceId() workspaceId: string) {
+    return this.stripeSyncService.syncFromStripe(workspaceId);
   }
 }

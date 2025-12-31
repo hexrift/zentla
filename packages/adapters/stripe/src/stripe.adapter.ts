@@ -760,4 +760,70 @@ export class StripeAdapter implements BillingProvider {
       occurredAt: new Date(event.created * 1000),
     };
   }
+
+  /**
+   * Check if a webhook endpoint is configured for the given URL pattern.
+   * Used to validate that webhooks are set up before allowing checkouts.
+   */
+  async hasWebhookConfigured(urlPattern: string): Promise<boolean> {
+    const webhooks = await this.stripe.webhookEndpoints.list({ limit: 100 });
+    return webhooks.data.some(
+      (w) => w.url.includes(urlPattern) && w.status === "enabled",
+    );
+  }
+
+  /**
+   * List all customers from Stripe for sync purposes.
+   */
+  async listCustomers(
+    limit = 100,
+    startingAfter?: string,
+  ): Promise<{ customers: Stripe.Customer[]; hasMore: boolean }> {
+    const result = await this.stripe.customers.list({
+      limit,
+      ...(startingAfter && { starting_after: startingAfter }),
+    });
+    return {
+      customers: result.data,
+      hasMore: result.has_more,
+    };
+  }
+
+  /**
+   * List all subscriptions from Stripe for sync purposes.
+   */
+  async listSubscriptions(
+    limit = 100,
+    startingAfter?: string,
+  ): Promise<{ subscriptions: Stripe.Subscription[]; hasMore: boolean }> {
+    const result = await this.stripe.subscriptions.list({
+      limit,
+      status: "all",
+      ...(startingAfter && { starting_after: startingAfter }),
+    });
+    return {
+      subscriptions: result.data,
+      hasMore: result.has_more,
+    };
+  }
+
+  /**
+   * Get a raw Stripe subscription by ID.
+   */
+  async getStripeSubscription(
+    subscriptionId: string,
+  ): Promise<Stripe.Subscription> {
+    return this.stripe.subscriptions.retrieve(subscriptionId);
+  }
+
+  /**
+   * Get a raw Stripe customer by ID.
+   */
+  async getStripeCustomer(customerId: string): Promise<Stripe.Customer> {
+    const customer = await this.stripe.customers.retrieve(customerId);
+    if (customer.deleted) {
+      throw new Error(`Customer ${customerId} has been deleted`);
+    }
+    return customer as Stripe.Customer;
+  }
 }

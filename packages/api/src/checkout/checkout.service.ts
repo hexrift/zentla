@@ -396,6 +396,14 @@ export class CheckoutService {
 
     const stripeAdapter = this.billingService.getStripeAdapter();
 
+    // Validate webhook is configured before allowing checkout
+    const hasWebhook = await stripeAdapter.hasWebhookConfigured("webhook");
+    if (!hasWebhook) {
+      throw new BadRequestException(
+        "Stripe webhook not configured. Please configure a webhook endpoint in Stripe Dashboard pointing to your API before creating checkouts.",
+      );
+    }
+
     const stripeSession = await stripeAdapter.createCheckoutSession({
       workspaceId,
       offerId: dto.offerId,

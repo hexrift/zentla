@@ -326,6 +326,30 @@ export const api = {
         method: "PATCH",
         body: JSON.stringify(data),
       }),
+    getProviderStatus: () =>
+      fetchApi<{
+        defaultProvider: string;
+        stripe: {
+          configured: boolean;
+          status: string;
+          error?: string;
+        };
+        zuora: {
+          configured: boolean;
+          status: string;
+          error?: string;
+        };
+      }>("/workspaces/current/providers"),
+    syncFromStripe: () =>
+      fetchApi<{
+        customersImported: number;
+        customersSkipped: number;
+        subscriptionsImported: number;
+        subscriptionsSkipped: number;
+        errors: string[];
+      }>("/workspaces/current/sync-stripe", {
+        method: "POST",
+      }),
   },
   promotions: {
     list: (params?: {

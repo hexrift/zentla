@@ -4,6 +4,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import { DashboardPage } from "./pages/DashboardPage";
 import { CheckoutsPage } from "./pages/CheckoutsPage";
 import { OffersPage } from "./pages/OffersPage";
 import { OfferNewPage } from "./pages/OfferNewPage";
@@ -37,7 +38,8 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/checkouts" replace />} />
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="checkouts" element={<CheckoutsPage />} />
           <Route path="offers" element={<OffersPage />} />
           <Route path="offers/new" element={<OfferNewPage />} />

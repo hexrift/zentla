@@ -187,10 +187,9 @@ export class StripeWebhookService {
       });
 
       if (!customerRef) {
-        this.logger.warn(
-          `No workspace found for subscription ${stripeSubscription.id}`,
+        throw new Error(
+          `No workspace found for subscription ${stripeSubscription.id} - customer ${stripeCustomerId} not linked to Relay. Ensure webhook is configured before first checkout.`,
         );
-        return;
       }
 
       await this.createSubscriptionFromStripe(
@@ -229,17 +228,17 @@ export class StripeWebhookService {
     );
 
     if (!customerRef) {
-      this.logger.warn(
-        `Customer not found for Stripe customer ${stripeCustomerId}`,
+      throw new Error(
+        `Customer not found for Stripe customer ${stripeCustomerId}. Ensure checkout webhook was processed first.`,
       );
-      return;
     }
 
     // Get offer from price
     const priceId = stripeSubscription.items.data[0]?.price.id;
     if (!priceId) {
-      this.logger.warn("No price found in subscription");
-      return;
+      throw new Error(
+        `No price found in subscription ${stripeSubscription.id}`,
+      );
     }
 
     const priceRef = await this.providerRefService.findByExternalId(
@@ -250,8 +249,9 @@ export class StripeWebhookService {
     );
 
     if (!priceRef) {
-      this.logger.warn(`Price ref not found for Stripe price ${priceId}`);
-      return;
+      throw new Error(
+        `Price ref not found for Stripe price ${priceId}. This price may not have been synced from Relay.`,
+      );
     }
 
     // Get the offer version and offer
@@ -261,8 +261,9 @@ export class StripeWebhookService {
     });
 
     if (!offerVersion) {
-      this.logger.warn(`Offer version not found: ${priceRef.entityId}`);
-      return;
+      throw new Error(
+        `Offer version not found: ${priceRef.entityId}. The offer may have been deleted.`,
+      );
     }
 
     // Create subscription
