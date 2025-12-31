@@ -37,15 +37,13 @@ jobs:
           koyeb service update ${{ env.KOYEB_APP }}/${{ env.KOYEB_SERVICE }} \
             --git github.com/${{ github.repository }} \
             --git-branch main \
-            --git-build-command "" \
-            --git-run-command "node packages/api/dist/main.js" \
-            --git-docker true \
+            --git-builder docker \
             --git-docker-dockerfile Dockerfile \
             --instance-type free \
             --regions fra \
-            --port 3000:http \
-            --route /:3000 \
-            --health-check path=/:3000 \
+            --ports 3000:http \
+            --routes /:3000 \
+            --checks 3000:http:/ \
             --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
             --env REDIS_URL="${{ secrets.REDIS_URL }}" \
             --env JWT_SECRET="${{ secrets.JWT_SECRET }}" \
@@ -59,13 +57,13 @@ jobs:
             --app ${{ env.KOYEB_APP }} \
             --git github.com/${{ github.repository }} \
             --git-branch main \
-            --git-docker true \
+            --git-builder docker \
             --git-docker-dockerfile Dockerfile \
             --instance-type free \
             --regions fra \
-            --port 3000:http \
-            --route /:3000 \
-            --health-check path=/:3000 \
+            --ports 3000:http \
+            --routes /:3000 \
+            --checks 3000:http:/ \
             --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
             --env REDIS_URL="${{ secrets.REDIS_URL }}" \
             --env JWT_SECRET="${{ secrets.JWT_SECRET }}" \
