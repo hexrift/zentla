@@ -35,14 +35,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy dependencies from deps stage
+# Enable Corepack for Yarn 4
+RUN corepack enable
+
+# Copy dependencies from deps stage (Yarn 4 hoists all deps to root node_modules)
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/api/node_modules ./packages/api/node_modules
-COPY --from=deps /app/packages/core/node_modules ./packages/core/node_modules
-COPY --from=deps /app/packages/database/node_modules ./packages/database/node_modules
-COPY --from=deps /app/packages/sdk/node_modules ./packages/sdk/node_modules
-COPY --from=deps /app/packages/adapters/stripe/node_modules ./packages/adapters/stripe/node_modules
-COPY --from=deps /app/packages/adapters/zuora/node_modules ./packages/adapters/zuora/node_modules
 
 # Copy source code
 COPY . .
