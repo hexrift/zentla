@@ -1,19 +1,19 @@
-import type { Offer, OfferVersion } from './domain/offer';
-import type { Promotion, PromotionVersion } from './domain/promotion';
-import type { ProviderRef } from './domain/provider-ref';
+import type { Offer, OfferVersion } from "./domain/offer";
+import type { Promotion, PromotionVersion } from "./domain/promotion";
+import type { ProviderRef } from "./domain/provider-ref";
 import type {
   CheckoutSession,
   CreateCheckoutParams,
   PortalSession,
   CreatePortalSessionParams,
-} from './domain/checkout';
-import type { SubscriptionData } from './domain/subscription';
+} from "./domain/checkout";
+import type { SubscriptionData } from "./domain/subscription";
 import type {
   CancelSubscriptionInput,
   ChangeSubscriptionInput,
-} from './schemas';
-import type { DomainEvent } from './events/domain-event';
-import type { BillingProviderType } from './domain/workspace';
+} from "./schemas";
+import type { DomainEvent } from "./events/domain-event";
+import type { BillingProviderType } from "./domain/workspace";
 
 export interface CreateCustomerParams {
   workspaceId: string;
@@ -40,7 +40,7 @@ export interface BillingProvider {
   syncOffer(
     offer: Offer,
     version: OfferVersion,
-    existingRef?: ProviderRef
+    existingRef?: ProviderRef,
   ): Promise<SyncOfferResult>;
 
   // Archive/deactivate a product (optional)
@@ -48,7 +48,10 @@ export interface BillingProvider {
 
   // Customers
   createCustomer(params: CreateCustomerParams): Promise<CustomerResult>;
-  updateCustomer(externalId: string, params: UpdateCustomerParams): Promise<CustomerResult>;
+  updateCustomer(
+    externalId: string,
+    params: UpdateCustomerParams,
+  ): Promise<CustomerResult>;
   deleteCustomer(externalId: string): Promise<void>;
 
   // Checkout
@@ -56,11 +59,19 @@ export interface BillingProvider {
 
   // Subscriptions
   getSubscription(ref: ProviderRef): Promise<SubscriptionData>;
-  cancelSubscription(ref: ProviderRef, params: CancelSubscriptionInput): Promise<void>;
-  changeSubscription(ref: ProviderRef, params: ChangeSubscriptionInput): Promise<ChangeSubscriptionResult>;
+  cancelSubscription(
+    ref: ProviderRef,
+    params: CancelSubscriptionInput,
+  ): Promise<void>;
+  changeSubscription(
+    ref: ProviderRef,
+    params: ChangeSubscriptionInput,
+  ): Promise<ChangeSubscriptionResult>;
 
   // Customer Portal
-  createPortalSession(params: CreatePortalSessionParams): Promise<PortalSession>;
+  createPortalSession(
+    params: CreatePortalSessionParams,
+  ): Promise<PortalSession>;
 
   // Webhooks
   verifyWebhook(payload: Buffer, signature: string): boolean;
@@ -70,11 +81,14 @@ export interface BillingProvider {
   syncPromotion?(
     promotion: Promotion,
     version: PromotionVersion,
-    existingCouponRef?: ProviderRef
+    existingCouponRef?: ProviderRef,
   ): Promise<SyncPromotionResult>;
 
   // Promo Codes (legacy - prefer syncPromotion)
-  validatePromoCode?(code: string, offerId: string): Promise<PromoCodeValidation>;
+  validatePromoCode?(
+    code: string,
+    offerId: string,
+  ): Promise<PromoCodeValidation>;
 }
 
 export interface SyncOfferResult {
@@ -96,7 +110,7 @@ export interface ChangeSubscriptionResult {
 export interface PromoCodeValidation {
   valid: boolean;
   code: string;
-  discountType?: 'percent' | 'amount';
+  discountType?: "percent" | "amount";
   discountValue?: number;
   applicableOffers?: string[];
   expiresAt?: Date;
@@ -109,10 +123,10 @@ export class BillingProviderError extends Error {
     message: string,
     public readonly provider: BillingProviderType,
     public readonly code: string,
-    public readonly cause?: unknown
+    public readonly cause?: unknown,
   ) {
     super(message);
-    this.name = 'BillingProviderError';
+    this.name = "BillingProviderError";
   }
 }
 
@@ -121,8 +135,8 @@ export class ProviderNotImplementedError extends BillingProviderError {
     super(
       `Method '${method}' is not implemented for provider '${provider}'`,
       provider,
-      'NOT_IMPLEMENTED'
+      "NOT_IMPLEMENTED",
     );
-    this.name = 'ProviderNotImplementedError';
+    this.name = "ProviderNotImplementedError";
   }
 }

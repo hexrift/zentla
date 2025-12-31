@@ -11,7 +11,7 @@ import type {
   CreateCustomerInput,
   CreateCheckoutInput,
   CreateWebhookEndpointInput,
-} from './types';
+} from "./types";
 
 export interface RelayClientConfig {
   apiKey: string;
@@ -24,33 +24,36 @@ export class RelayClient {
 
   constructor(config: RelayClientConfig) {
     this.apiKey = config.apiKey;
-    this.baseUrl = config.baseUrl ?? 'https://api.relay.com/api/v1';
+    this.baseUrl = config.baseUrl ?? "https://api.relay.com/api/v1";
   }
 
   private async request<T>(
     method: string,
     path: string,
-    body?: unknown
+    body?: unknown,
   ): Promise<T> {
     const response = await fetch(`${this.baseUrl}${path}`, {
       method,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${this.apiKey}`,
       },
       body: body ? JSON.stringify(body) : undefined,
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({})) as { message?: string; code?: string };
+      const error = (await response.json().catch(() => ({}))) as {
+        message?: string;
+        code?: string;
+      };
       throw new RelayError(
         error.message ?? `HTTP ${response.status}`,
         response.status,
-        error.code
+        error.code,
       );
     }
 
-    const data = await response.json() as { data?: T } | T;
+    const data = (await response.json()) as { data?: T } | T;
     return (data as { data?: T }).data ?? (data as T);
   }
 
@@ -59,32 +62,32 @@ export class RelayClient {
     list: (params?: {
       limit?: number;
       cursor?: string;
-      status?: 'active' | 'archived';
+      status?: "active" | "archived";
     }): Promise<PaginatedResponse<Offer>> => {
       const query = new URLSearchParams();
-      if (params?.limit) query.set('limit', params.limit.toString());
-      if (params?.cursor) query.set('cursor', params.cursor);
-      if (params?.status) query.set('status', params.status);
-      return this.request('GET', `/offers?${query}`);
+      if (params?.limit) query.set("limit", params.limit.toString());
+      if (params?.cursor) query.set("cursor", params.cursor);
+      if (params?.status) query.set("status", params.status);
+      return this.request("GET", `/offers?${query}`);
     },
 
     get: (id: string): Promise<Offer & { versions: OfferVersion[] }> =>
-      this.request('GET', `/offers/${id}`),
+      this.request("GET", `/offers/${id}`),
 
     create: (input: CreateOfferInput): Promise<Offer> =>
-      this.request('POST', '/offers', input),
+      this.request("POST", "/offers", input),
 
     publish: (id: string, versionId?: string): Promise<OfferVersion> =>
-      this.request('POST', `/offers/${id}/publish`, { versionId }),
+      this.request("POST", `/offers/${id}/publish`, { versionId }),
 
     createVersion: (
       id: string,
-      config: CreateOfferInput['config']
+      config: CreateOfferInput["config"],
     ): Promise<OfferVersion> =>
-      this.request('POST', `/offers/${id}/versions`, { config }),
+      this.request("POST", `/offers/${id}/versions`, { config }),
 
     archive: (id: string): Promise<Offer> =>
-      this.request('POST', `/offers/${id}/archive`),
+      this.request("POST", `/offers/${id}/archive`),
   };
 
   // Customers
@@ -95,34 +98,36 @@ export class RelayClient {
       email?: string;
     }): Promise<PaginatedResponse<Customer>> => {
       const query = new URLSearchParams();
-      if (params?.limit) query.set('limit', params.limit.toString());
-      if (params?.cursor) query.set('cursor', params.cursor);
-      if (params?.email) query.set('email', params.email);
-      return this.request('GET', `/customers?${query}`);
+      if (params?.limit) query.set("limit", params.limit.toString());
+      if (params?.cursor) query.set("cursor", params.cursor);
+      if (params?.email) query.set("email", params.email);
+      return this.request("GET", `/customers?${query}`);
     },
 
     get: (id: string): Promise<Customer> =>
-      this.request('GET', `/customers/${id}`),
+      this.request("GET", `/customers/${id}`),
 
     create: (input: CreateCustomerInput): Promise<Customer> =>
-      this.request('POST', '/customers', input),
+      this.request("POST", "/customers", input),
 
     update: (
       id: string,
-      input: Partial<CreateCustomerInput>
-    ): Promise<Customer> => this.request('PATCH', `/customers/${id}`, input),
+      input: Partial<CreateCustomerInput>,
+    ): Promise<Customer> => this.request("PATCH", `/customers/${id}`, input),
 
-    getEntitlements: (id: string): Promise<{
+    getEntitlements: (
+      id: string,
+    ): Promise<{
       customerId: string;
       entitlements: EntitlementCheck[];
       activeSubscriptionIds: string[];
-    }> => this.request('GET', `/customers/${id}/entitlements`),
+    }> => this.request("GET", `/customers/${id}/entitlements`),
 
     checkEntitlement: (
       id: string,
-      featureKey: string
+      featureKey: string,
     ): Promise<EntitlementCheck> =>
-      this.request('GET', `/customers/${id}/entitlements/check/${featureKey}`),
+      this.request("GET", `/customers/${id}/entitlements/check/${featureKey}`),
   };
 
   // Subscriptions
@@ -134,40 +139,40 @@ export class RelayClient {
       status?: string;
     }): Promise<PaginatedResponse<Subscription>> => {
       const query = new URLSearchParams();
-      if (params?.limit) query.set('limit', params.limit.toString());
-      if (params?.cursor) query.set('cursor', params.cursor);
-      if (params?.customerId) query.set('customerId', params.customerId);
-      if (params?.status) query.set('status', params.status);
-      return this.request('GET', `/subscriptions?${query}`);
+      if (params?.limit) query.set("limit", params.limit.toString());
+      if (params?.cursor) query.set("cursor", params.cursor);
+      if (params?.customerId) query.set("customerId", params.customerId);
+      if (params?.status) query.set("status", params.status);
+      return this.request("GET", `/subscriptions?${query}`);
     },
 
     get: (id: string): Promise<Subscription> =>
-      this.request('GET', `/subscriptions/${id}`),
+      this.request("GET", `/subscriptions/${id}`),
 
     cancel: (
       id: string,
-      params?: { cancelAtPeriodEnd?: boolean; reason?: string }
+      params?: { cancelAtPeriodEnd?: boolean; reason?: string },
     ): Promise<Subscription> =>
-      this.request('POST', `/subscriptions/${id}/cancel`, params),
+      this.request("POST", `/subscriptions/${id}/cancel`, params),
 
     change: (
       id: string,
       params: {
         newOfferId: string;
         newOfferVersionId?: string;
-        prorationBehavior?: 'create_prorations' | 'none' | 'always_invoice';
-      }
+        prorationBehavior?: "create_prorations" | "none" | "always_invoice";
+      },
     ): Promise<Subscription> =>
-      this.request('POST', `/subscriptions/${id}/change`, params),
+      this.request("POST", `/subscriptions/${id}/change`, params),
   };
 
   // Checkout
   readonly checkout = {
     createSession: (input: CreateCheckoutInput): Promise<Checkout> =>
-      this.request('POST', '/checkout/sessions', input),
+      this.request("POST", "/checkout/sessions", input),
 
     getSession: (id: string): Promise<Checkout> =>
-      this.request('GET', `/checkout/sessions/${id}`),
+      this.request("GET", `/checkout/sessions/${id}`),
   };
 
   // Webhook Endpoints
@@ -177,25 +182,25 @@ export class RelayClient {
       cursor?: string;
     }): Promise<PaginatedResponse<WebhookEndpoint>> => {
       const query = new URLSearchParams();
-      if (params?.limit) query.set('limit', params.limit.toString());
-      if (params?.cursor) query.set('cursor', params.cursor);
-      return this.request('GET', `/webhook-endpoints?${query}`);
+      if (params?.limit) query.set("limit", params.limit.toString());
+      if (params?.cursor) query.set("cursor", params.cursor);
+      return this.request("GET", `/webhook-endpoints?${query}`);
     },
 
     create: (input: CreateWebhookEndpointInput): Promise<WebhookEndpoint> =>
-      this.request('POST', '/webhook-endpoints', input),
+      this.request("POST", "/webhook-endpoints", input),
 
     update: (
       id: string,
-      input: Partial<CreateWebhookEndpointInput>
+      input: Partial<CreateWebhookEndpointInput>,
     ): Promise<WebhookEndpoint> =>
-      this.request('PATCH', `/webhook-endpoints/${id}`, input),
+      this.request("PATCH", `/webhook-endpoints/${id}`, input),
 
     delete: (id: string): Promise<void> =>
-      this.request('DELETE', `/webhook-endpoints/${id}`),
+      this.request("DELETE", `/webhook-endpoints/${id}`),
 
     rotateSecret: (id: string): Promise<{ secret: string }> =>
-      this.request('POST', `/webhook-endpoints/${id}/rotate-secret`),
+      this.request("POST", `/webhook-endpoints/${id}/rotate-secret`),
   };
 }
 
@@ -203,9 +208,9 @@ export class RelayError extends Error {
   constructor(
     message: string,
     public readonly status: number,
-    public readonly code?: string
+    public readonly code?: string,
   ) {
     super(message);
-    this.name = 'RelayError';
+    this.name = "RelayError";
   }
 }

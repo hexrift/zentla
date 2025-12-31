@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from "@prisma/client";
 
 // Workspace types
 export type WorkspaceCreateInput = Prisma.WorkspaceCreateInput;
@@ -32,7 +32,8 @@ export type SubscriptionCreateInput = Prisma.SubscriptionCreateInput;
 export type SubscriptionUpdateInput = Prisma.SubscriptionUpdateInput;
 export type SubscriptionWhereInput = Prisma.SubscriptionWhereInput;
 export type SubscriptionWhereUniqueInput = Prisma.SubscriptionWhereUniqueInput;
-export type SubscriptionOrderByInput = Prisma.SubscriptionOrderByWithRelationInput;
+export type SubscriptionOrderByInput =
+  Prisma.SubscriptionOrderByWithRelationInput;
 
 // Entitlement types
 export type EntitlementCreateInput = Prisma.EntitlementCreateInput;
@@ -50,7 +51,8 @@ export type CheckoutWhereUniqueInput = Prisma.CheckoutWhereUniqueInput;
 export type WebhookEndpointCreateInput = Prisma.WebhookEndpointCreateInput;
 export type WebhookEndpointUpdateInput = Prisma.WebhookEndpointUpdateInput;
 export type WebhookEndpointWhereInput = Prisma.WebhookEndpointWhereInput;
-export type WebhookEndpointWhereUniqueInput = Prisma.WebhookEndpointWhereUniqueInput;
+export type WebhookEndpointWhereUniqueInput =
+  Prisma.WebhookEndpointWhereUniqueInput;
 
 // WebhookEvent types
 export type WebhookEventCreateInput = Prisma.WebhookEventCreateInput;
@@ -84,14 +86,15 @@ export type DeadLetterEventWhereInput = Prisma.DeadLetterEventWhereInput;
 // IdempotencyKey types
 export type IdempotencyKeyCreateInput = Prisma.IdempotencyKeyCreateInput;
 export type IdempotencyKeyWhereInput = Prisma.IdempotencyKeyWhereInput;
-export type IdempotencyKeyWhereUniqueInput = Prisma.IdempotencyKeyWhereUniqueInput;
+export type IdempotencyKeyWhereUniqueInput =
+  Prisma.IdempotencyKeyWhereUniqueInput;
 
 // Pagination types
 export interface PaginationParams {
   limit: number;
   cursor?: string;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface PaginatedResult<T> {

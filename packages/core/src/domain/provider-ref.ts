@@ -1,4 +1,4 @@
-import type { BillingProviderType } from './workspace';
+import type { BillingProviderType } from "./workspace";
 
 export interface ProviderRef {
   id: string;
@@ -12,15 +12,15 @@ export interface ProviderRef {
 }
 
 export type EntityType =
-  | 'customer'
-  | 'offer'
-  | 'offer_version'
-  | 'subscription'
-  | 'checkout'
-  | 'product'
-  | 'price'
-  | 'coupon'
-  | 'promotion_code';
+  | "customer"
+  | "offer"
+  | "offer_version"
+  | "subscription"
+  | "checkout"
+  | "product"
+  | "price"
+  | "coupon"
+  | "promotion_code";
 
 export interface CreateProviderRefInput {
   workspaceId: string;

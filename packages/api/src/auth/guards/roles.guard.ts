@@ -3,10 +3,14 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import type { Request } from 'express';
-import { ROLES_KEY, type ApiKeyRole, IS_PUBLIC_KEY } from '../../common/decorators';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import type { Request } from "express";
+import {
+  ROLES_KEY,
+  type ApiKeyRole,
+  IS_PUBLIC_KEY,
+} from "../../common/decorators";
 
 const ROLE_HIERARCHY: Record<ApiKeyRole, number> = {
   owner: 4,
@@ -32,7 +36,7 @@ export class RolesGuard implements CanActivate {
 
     const requiredRoles = this.reflector.getAllAndOverride<ApiKeyRole[]>(
       ROLES_KEY,
-      [context.getHandler(), context.getClass()]
+      [context.getHandler(), context.getClass()],
     );
 
     // If no roles specified, allow access (auth already verified by ApiKeyGuard)
@@ -44,7 +48,7 @@ export class RolesGuard implements CanActivate {
     const apiKeyContext = request.apiKeyContext;
 
     if (!apiKeyContext) {
-      throw new ForbiddenException('API key context not found');
+      throw new ForbiddenException("API key context not found");
     }
 
     const userRole = apiKeyContext.role;
@@ -58,7 +62,7 @@ export class RolesGuard implements CanActivate {
 
     if (!hasRole) {
       throw new ForbiddenException(
-        `Insufficient permissions. Required role: ${requiredRoles.join(' or ')}`
+        `Insufficient permissions. Required role: ${requiredRoles.join(" or ")}`,
       );
     }
 

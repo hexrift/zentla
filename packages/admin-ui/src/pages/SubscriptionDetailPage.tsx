@@ -1,17 +1,21 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { clsx } from 'clsx';
-import { api } from '../lib/api';
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { clsx } from "clsx";
+import { api } from "../lib/api";
 
-type Tab = 'details' | 'entitlements';
+type Tab = "details" | "entitlements";
 
 interface Subscription {
   id: string;
   status: string;
   customer: { id: string; email: string; name?: string };
   offer: { id: string; name: string };
-  offerVersion: { id: string; version: number; config: Record<string, unknown> };
+  offerVersion: {
+    id: string;
+    version: number;
+    config: Record<string, unknown>;
+  };
   currentPeriodStart: string;
   currentPeriodEnd: string;
   trialStart?: string;
@@ -37,14 +41,14 @@ interface CustomerEntitlements {
 export function SubscriptionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<Tab>('details');
+  const [activeTab, setActiveTab] = useState<Tab>("details");
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(true);
-  const [cancelReason, setCancelReason] = useState('');
+  const [cancelReason, setCancelReason] = useState("");
   const queryClient = useQueryClient();
 
   const { data: subscription, isLoading } = useQuery({
-    queryKey: ['subscription', id],
+    queryKey: ["subscription", id],
     queryFn: async () => {
       const data = await api.subscriptions.get(id!);
       return data as unknown as Subscription;
@@ -53,9 +57,11 @@ export function SubscriptionDetailPage() {
   });
 
   const { data: entitlements } = useQuery({
-    queryKey: ['entitlements', subscription?.customer?.id],
+    queryKey: ["entitlements", subscription?.customer?.id],
     queryFn: async () => {
-      const data = await api.customers.getEntitlements(subscription!.customer.id);
+      const data = await api.customers.getEntitlements(
+        subscription!.customer.id,
+      );
       return data as unknown as CustomerEntitlements;
     },
     enabled: !!subscription?.customer?.id,
@@ -68,15 +74,15 @@ export function SubscriptionDetailPage() {
         reason: cancelReason || undefined,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription', id] });
-      queryClient.invalidateQueries({ queryKey: ['entitlements'] });
+      queryClient.invalidateQueries({ queryKey: ["subscription", id] });
+      queryClient.invalidateQueries({ queryKey: ["entitlements"] });
       setShowCancelModal(false);
     },
   });
 
   const tabs: { id: Tab; name: string }[] = [
-    { id: 'details', name: 'Details' },
-    { id: 'entitlements', name: 'Entitlements' },
+    { id: "details", name: "Details" },
+    { id: "entitlements", name: "Entitlements" },
   ];
 
   if (isLoading) {
@@ -87,7 +93,7 @@ export function SubscriptionDetailPage() {
     return <div className="text-red-500">Subscription not found</div>;
   }
 
-  const isActive = ['active', 'trialing'].includes(subscription.status);
+  const isActive = ["active", "trialing"].includes(subscription.status);
   const isPendingCancel = !!subscription.cancelAt && !subscription.canceledAt;
 
   return (
@@ -96,7 +102,7 @@ export function SubscriptionDetailPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <button
-            onClick={() => navigate('/subscriptions')}
+            onClick={() => navigate("/subscriptions")}
             className="text-sm text-gray-500 hover:text-gray-700 mb-2"
           >
             &larr; Back to Subscriptions
@@ -105,23 +111,25 @@ export function SubscriptionDetailPage() {
             Subscription for {subscription.customer.email}
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            {subscription.offer.name} &middot; Created{' '}
+            {subscription.offer.name} &middot; Created{" "}
             {new Date(subscription.createdAt).toLocaleDateString()}
           </p>
         </div>
         <div className="flex items-center space-x-4">
           <span
             className={clsx(
-              'px-3 py-1 text-sm font-semibold rounded-full',
-              subscription.status === 'active' && 'bg-green-100 text-green-800',
-              subscription.status === 'trialing' && 'bg-blue-100 text-blue-800',
-              subscription.status === 'canceled' && 'bg-red-100 text-red-800',
-              subscription.status === 'past_due' && 'bg-yellow-100 text-yellow-800',
-              !['active', 'trialing', 'canceled', 'past_due'].includes(subscription.status) &&
-                'bg-gray-100 text-gray-800'
+              "px-3 py-1 text-sm font-semibold rounded-full",
+              subscription.status === "active" && "bg-green-100 text-green-800",
+              subscription.status === "trialing" && "bg-blue-100 text-blue-800",
+              subscription.status === "canceled" && "bg-red-100 text-red-800",
+              subscription.status === "past_due" &&
+                "bg-yellow-100 text-yellow-800",
+              !["active", "trialing", "canceled", "past_due"].includes(
+                subscription.status,
+              ) && "bg-gray-100 text-gray-800",
             )}
           >
-            {isPendingCancel ? 'Canceling' : subscription.status}
+            {isPendingCancel ? "Canceling" : subscription.status}
           </span>
           {isActive && !isPendingCancel && (
             <button
@@ -138,9 +146,11 @@ export function SubscriptionDetailPage() {
       {isPendingCancel && (
         <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-sm text-yellow-800">
-            This subscription will be canceled on{' '}
-            <strong>{new Date(subscription.cancelAt!).toLocaleDateString()}</strong> at the end of
-            the current billing period.
+            This subscription will be canceled on{" "}
+            <strong>
+              {new Date(subscription.cancelAt!).toLocaleDateString()}
+            </strong>{" "}
+            at the end of the current billing period.
           </p>
         </div>
       )}
@@ -153,10 +163,10 @@ export function SubscriptionDetailPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={clsx(
-                'py-4 px-1 text-sm font-medium border-b-2',
+                "py-4 px-1 text-sm font-medium border-b-2",
                 activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
               )}
             >
               {tab.name}
@@ -167,8 +177,8 @@ export function SubscriptionDetailPage() {
 
       {/* Tab content */}
       <div className="p-6 bg-white rounded-lg shadow">
-        {activeTab === 'details' && <DetailsTab subscription={subscription} />}
-        {activeTab === 'entitlements' && (
+        {activeTab === "details" && <DetailsTab subscription={subscription} />}
+        {activeTab === "entitlements" && (
           <EntitlementsTab entitlements={entitlements?.entitlements ?? []} />
         )}
       </div>
@@ -177,7 +187,9 @@ export function SubscriptionDetailPage() {
       {showCancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Cancel Subscription</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Cancel Subscription
+            </h2>
             <div className="space-y-4">
               <div>
                 <label className="flex items-center space-x-3">
@@ -189,7 +201,10 @@ export function SubscriptionDetailPage() {
                   />
                   <span className="text-sm text-gray-700">
                     Cancel at end of billing period (
-                    {new Date(subscription.currentPeriodEnd).toLocaleDateString()})
+                    {new Date(
+                      subscription.currentPeriodEnd,
+                    ).toLocaleDateString()}
+                    )
                   </span>
                 </label>
               </div>
@@ -201,7 +216,9 @@ export function SubscriptionDetailPage() {
                     onChange={() => setCancelAtPeriodEnd(false)}
                     className="h-4 w-4 text-blue-600"
                   />
-                  <span className="text-sm text-gray-700">Cancel immediately</span>
+                  <span className="text-sm text-gray-700">
+                    Cancel immediately
+                  </span>
                 </label>
                 {!cancelAtPeriodEnd && (
                   <p className="ml-7 mt-1 text-xs text-red-600">
@@ -234,7 +251,9 @@ export function SubscriptionDetailPage() {
                 disabled={cancelMutation.isPending}
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 disabled:opacity-50"
               >
-                {cancelMutation.isPending ? 'Canceling...' : 'Confirm Cancellation'}
+                {cancelMutation.isPending
+                  ? "Canceling..."
+                  : "Confirm Cancellation"}
               </button>
             </div>
           </div>
@@ -248,11 +267,15 @@ function DetailsTab({ subscription }: { subscription: Subscription }) {
   return (
     <div className="grid grid-cols-2 gap-6">
       <div>
-        <h3 className="text-sm font-medium text-gray-500 mb-4">Subscription Info</h3>
+        <h3 className="text-sm font-medium text-gray-500 mb-4">
+          Subscription Info
+        </h3>
         <dl className="space-y-3">
           <div>
             <dt className="text-xs text-gray-500">Subscription ID</dt>
-            <dd className="text-sm font-mono text-gray-900">{subscription.id}</dd>
+            <dd className="text-sm font-mono text-gray-900">
+              {subscription.id}
+            </dd>
           </div>
           <div>
             <dt className="text-xs text-gray-500">Status</dt>
@@ -271,22 +294,30 @@ function DetailsTab({ subscription }: { subscription: Subscription }) {
         <dl className="space-y-3">
           <div>
             <dt className="text-xs text-gray-500">Email</dt>
-            <dd className="text-sm text-gray-900">{subscription.customer.email}</dd>
+            <dd className="text-sm text-gray-900">
+              {subscription.customer.email}
+            </dd>
           </div>
           {subscription.customer.name && (
             <div>
               <dt className="text-xs text-gray-500">Name</dt>
-              <dd className="text-sm text-gray-900">{subscription.customer.name}</dd>
+              <dd className="text-sm text-gray-900">
+                {subscription.customer.name}
+              </dd>
             </div>
           )}
           <div>
             <dt className="text-xs text-gray-500">Customer ID</dt>
-            <dd className="text-sm font-mono text-gray-900">{subscription.customer.id}</dd>
+            <dd className="text-sm font-mono text-gray-900">
+              {subscription.customer.id}
+            </dd>
           </div>
         </dl>
       </div>
       <div>
-        <h3 className="text-sm font-medium text-gray-500 mb-4">Billing Period</h3>
+        <h3 className="text-sm font-medium text-gray-500 mb-4">
+          Billing Period
+        </h3>
         <dl className="space-y-3">
           <div>
             <dt className="text-xs text-gray-500">Current Period Start</dt>
@@ -327,7 +358,9 @@ function DetailsTab({ subscription }: { subscription: Subscription }) {
       )}
       {subscription.canceledAt && (
         <div>
-          <h3 className="text-sm font-medium text-gray-500 mb-4">Cancellation</h3>
+          <h3 className="text-sm font-medium text-gray-500 mb-4">
+            Cancellation
+          </h3>
           <dl className="space-y-3">
             <div>
               <dt className="text-xs text-gray-500">Canceled At</dt>
@@ -361,28 +394,38 @@ function EntitlementsTab({ entitlements }: { entitlements: Entitlement[] }) {
           <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
             Access
           </th>
-          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Value</th>
-          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+            Value
+          </th>
+          <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+            Type
+          </th>
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-200">
         {entitlements.map((e) => (
           <tr key={e.featureKey}>
-            <td className="px-4 py-3 text-sm font-medium text-gray-900">{e.featureKey}</td>
+            <td className="px-4 py-3 text-sm font-medium text-gray-900">
+              {e.featureKey}
+            </td>
             <td className="px-4 py-3">
               <span
                 className={clsx(
-                  'px-2 py-1 text-xs font-semibold rounded-full',
-                  e.hasAccess ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  "px-2 py-1 text-xs font-semibold rounded-full",
+                  e.hasAccess
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800",
                 )}
               >
-                {e.hasAccess ? 'Yes' : 'No'}
+                {e.hasAccess ? "Yes" : "No"}
               </span>
             </td>
             <td className="px-4 py-3 text-sm text-gray-500">
-              {e.value !== undefined ? String(e.value) : '-'}
+              {e.value !== undefined ? String(e.value) : "-"}
             </td>
-            <td className="px-4 py-3 text-sm text-gray-500">{e.valueType ?? '-'}</td>
+            <td className="px-4 py-3 text-sm text-gray-500">
+              {e.valueType ?? "-"}
+            </td>
           </tr>
         ))}
       </tbody>

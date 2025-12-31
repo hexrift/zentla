@@ -10,16 +10,16 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiSecurity,
   ApiParam,
-} from '@nestjs/swagger';
-import { PromotionsService } from './promotions.service';
-import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
+} from "@nestjs/swagger";
+import { PromotionsService } from "./promotions.service";
+import { WorkspaceId, AdminOnly, MemberOnly } from "../common/decorators";
 import {
   CreatePromotionRequestDto,
   CreatePromotionVersionRequestDto,
@@ -27,19 +27,19 @@ import {
   PublishPromotionDto,
   UpdatePromotionDto,
   ValidatePromotionDto,
-} from './dto';
-import { PromotionSchema, PaginationSchema } from '../common/schemas';
+} from "./dto";
+import { PromotionSchema, PaginationSchema } from "../common/schemas";
 
-@ApiTags('promotions')
-@ApiSecurity('api-key')
-@Controller('promotions')
+@ApiTags("promotions")
+@ApiSecurity("api-key")
+@Controller("promotions")
 export class PromotionsController {
   constructor(private readonly promotionsService: PromotionsService) {}
 
   @Get()
   @MemberOnly()
   @ApiOperation({
-    summary: 'List promotions',
+    summary: "List promotions",
     description: `Retrieves a paginated list of promotions in your workspace.
 
 **Use this to:**
@@ -53,23 +53,30 @@ export class PromotionsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Paginated list of promotions with their current published version (if any).',
+    description:
+      "Paginated list of promotions with their current published version (if any).",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         data: {
-          type: 'array',
+          type: "array",
           items: PromotionSchema,
         },
         ...PaginationSchema.properties,
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   async findAll(
     @WorkspaceId() workspaceId: string,
-    @Query() query: QueryPromotionsDto
+    @Query() query: QueryPromotionsDto,
   ) {
     return this.promotionsService.findMany(workspaceId, {
       limit: query.limit ?? 20,
@@ -79,10 +86,10 @@ export class PromotionsController {
     });
   }
 
-  @Get(':id')
+  @Get(":id")
   @MemberOnly()
   @ApiOperation({
-    summary: 'Get promotion details',
+    summary: "Get promotion details",
     description: `Retrieves complete details for a single promotion, including all versions.
 
 **Use this to:**
@@ -101,28 +108,34 @@ export class PromotionsController {
 - \`archived\`: Previously published, preserved for audit trail`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Unique promotion identifier (UUID)',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Unique promotion identifier (UUID)",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Promotion with all versions',
+    description: "Promotion with all versions",
     schema: PromotionSchema,
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   @ApiResponse({
     status: 404,
-    description: 'Promotion not found in this workspace',
+    description: "Promotion not found in this workspace",
   })
   async findOne(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     const promotion = await this.promotionsService.findById(workspaceId, id);
     if (!promotion) {
-      throw new NotFoundException('Promotion not found');
+      throw new NotFoundException("Promotion not found");
     }
     return promotion;
   }
@@ -130,7 +143,7 @@ export class PromotionsController {
   @Post()
   @AdminOnly()
   @ApiOperation({
-    summary: 'Create promotion',
+    summary: "Create promotion",
     description: `Creates a new promotion with an initial draft version (v1).
 
 **Workflow:**
@@ -155,26 +168,33 @@ export class PromotionsController {
   })
   @ApiResponse({
     status: 201,
-    description: 'Promotion created with draft version 1. Publish to make available for checkouts.',
+    description:
+      "Promotion created with draft version 1. Publish to make available for checkouts.",
     schema: PromotionSchema,
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid configuration or duplicate promotion code.',
+    description: "Invalid configuration or duplicate promotion code.",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
   async create(
     @WorkspaceId() workspaceId: string,
-    @Body() dto: CreatePromotionRequestDto
+    @Body() dto: CreatePromotionRequestDto,
   ) {
     return this.promotionsService.create(workspaceId, dto);
   }
 
-  @Patch(':id')
+  @Patch(":id")
   @AdminOnly()
   @ApiOperation({
-    summary: 'Update promotion metadata',
+    summary: "Update promotion metadata",
     description: `Updates promotion-level metadata (name, description) without affecting versioned configuration.
 
 **Use this for:**
@@ -191,27 +211,37 @@ export class PromotionsController {
 Changes take effect immediately and are reflected in all API responses.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Promotion ID to update',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Promotion ID to update",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
-  @ApiResponse({ status: 200, description: 'Promotion metadata updated', schema: PromotionSchema })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
-  @ApiResponse({ status: 404, description: 'Promotion not found' })
+  @ApiResponse({
+    status: 200,
+    description: "Promotion metadata updated",
+    schema: PromotionSchema,
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
+  @ApiResponse({ status: 404, description: "Promotion not found" })
   async update(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdatePromotionDto
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: UpdatePromotionDto,
   ) {
     return this.promotionsService.update(workspaceId, id, dto);
   }
 
-  @Post(':id/archive')
+  @Post(":id/archive")
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Archive promotion',
+    summary: "Archive promotion",
     description: `Archives a promotion, preventing it from being used in new checkouts.
 
 **Use this when:**
@@ -232,25 +262,35 @@ Changes take effect immediately and are reflected in all API responses.`,
 **This is reversible** through direct status update, but prefer creating new promotions for new campaigns.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Promotion ID to archive',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Promotion ID to archive",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
-  @ApiResponse({ status: 200, description: 'Promotion archived successfully', schema: PromotionSchema })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
-  @ApiResponse({ status: 404, description: 'Promotion not found' })
+  @ApiResponse({
+    status: 200,
+    description: "Promotion archived successfully",
+    schema: PromotionSchema,
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
+  @ApiResponse({ status: 404, description: "Promotion not found" })
   async archive(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     return this.promotionsService.archive(workspaceId, id);
   }
 
-  @Get(':id/versions')
+  @Get(":id/versions")
   @MemberOnly()
   @ApiOperation({
-    summary: 'List promotion versions',
+    summary: "List promotion versions",
     description: `Retrieves all versions of a promotion, ordered by version number (newest first).
 
 **Use this to:**
@@ -266,28 +306,34 @@ Changes take effect immediately and are reflected in all API responses.`,
 Only one version can be \`published\` at a time. Each version contains the complete discount configuration at that point in time.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Promotion ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Promotion ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'List of all versions with their configurations',
+    description: "List of all versions with their configurations",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
-  @ApiResponse({ status: 404, description: 'Promotion not found' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
+  @ApiResponse({ status: 404, description: "Promotion not found" })
   async getVersions(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     return this.promotionsService.getVersions(workspaceId, id);
   }
 
-  @Post(':id/versions')
+  @Post(":id/versions")
   @AdminOnly()
   @ApiOperation({
-    summary: 'Create draft version',
+    summary: "Create draft version",
     description: `Creates a new draft version for a promotion with updated configuration.
 
 **Use this when:**
@@ -311,34 +357,40 @@ Only one version can be \`published\` at a time. Each version contains the compl
 - Does NOT sync to billing provider until published`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Promotion ID to create version for',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Promotion ID to create version for",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 201,
-    description: 'Draft version created. Call publish to make it active.',
+    description: "Draft version created. Call publish to make it active.",
   })
   @ApiResponse({
     status: 400,
-    description: 'A draft version already exists. Publish or delete it first.',
+    description: "A draft version already exists. Publish or delete it first.",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
-  @ApiResponse({ status: 404, description: 'Promotion not found' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
+  @ApiResponse({ status: 404, description: "Promotion not found" })
   async createVersion(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: CreatePromotionVersionRequestDto
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: CreatePromotionVersionRequestDto,
   ) {
     return this.promotionsService.createVersion(workspaceId, id, dto.config);
   }
 
-  @Post(':id/publish')
+  @Post(":id/publish")
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Publish version',
+    summary: "Publish version",
     description: `Publishes a draft version, making it the active version for new redemptions.
 
 **What happens:**
@@ -362,38 +414,48 @@ Only one version can be \`published\` at a time. Each version contains the compl
 **Best practice:** Always test promotions in a test environment before publishing to production.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Promotion ID to publish',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Promotion ID to publish",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Version published and synced to billing provider',
+    description: "Version published and synced to billing provider",
     schema: PromotionSchema,
   })
   @ApiResponse({
     status: 400,
-    description: 'Only draft versions can be published',
+    description: "Only draft versions can be published",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
   @ApiResponse({
     status: 404,
-    description: 'Promotion not found or no draft version exists',
+    description: "Promotion not found or no draft version exists",
   })
   async publish(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: PublishPromotionDto
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: PublishPromotionDto,
   ) {
-    return this.promotionsService.publishVersion(workspaceId, id, dto.versionId);
+    return this.promotionsService.publishVersion(
+      workspaceId,
+      id,
+      dto.versionId,
+    );
   }
 
-  @Post('validate')
+  @Post("validate")
   @MemberOnly()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Validate promotion code',
+    summary: "Validate promotion code",
     description: `Validates a promotion code before applying it to a checkout, checking all applicable restrictions.
 
 **Use this to:**
@@ -428,54 +490,74 @@ Only one version can be \`published\` at a time. Each version contains the compl
   })
   @ApiResponse({
     status: 200,
-    description: 'Validation result with promotion details if valid',
+    description: "Validation result with promotion details if valid",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        valid: { type: 'boolean', description: 'Whether the promotion code is valid for this context' },
+        valid: {
+          type: "boolean",
+          description: "Whether the promotion code is valid for this context",
+        },
         promotion: {
-          type: 'object',
+          type: "object",
           nullable: true,
-          description: 'Promotion details if valid, null if invalid',
+          description: "Promotion details if valid, null if invalid",
         },
         discountPreview: {
-          type: 'object',
+          type: "object",
           nullable: true,
-          description: 'Preview of the discount that would be applied',
+          description: "Preview of the discount that would be applied",
           properties: {
-            type: { type: 'string', enum: ['percent', 'fixed_amount', 'free_trial_days'] },
-            value: { type: 'number', description: 'Discount value (percentage, cents, or days)' },
-            calculatedAmount: { type: 'number', nullable: true, description: 'Calculated discount in cents (for percent/fixed_amount)' },
+            type: {
+              type: "string",
+              enum: ["percent", "fixed_amount", "free_trial_days"],
+            },
+            value: {
+              type: "number",
+              description: "Discount value (percentage, cents, or days)",
+            },
+            calculatedAmount: {
+              type: "number",
+              nullable: true,
+              description:
+                "Calculated discount in cents (for percent/fixed_amount)",
+            },
           },
         },
         invalidReason: {
-          type: 'string',
+          type: "string",
           nullable: true,
-          description: 'Human-readable explanation if validation failed',
-          example: 'Promotion has reached maximum redemptions',
+          description: "Human-readable explanation if validation failed",
+          example: "Promotion has reached maximum redemptions",
         },
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   async validate(
     @WorkspaceId() workspaceId: string,
-    @Body() dto: ValidatePromotionDto
+    @Body() dto: ValidatePromotionDto,
   ) {
     return this.promotionsService.validate(
       workspaceId,
       dto.code,
       dto.offerId,
       dto.customerId,
-      dto.orderAmount
+      dto.orderAmount,
     );
   }
 
-  @Get(':id/usage')
+  @Get(":id/usage")
   @MemberOnly()
   @ApiOperation({
-    summary: 'Get promotion usage statistics',
+    summary: "Get promotion usage statistics",
     description: `Retrieves redemption statistics for a promotion, useful for monitoring campaign performance.
 
 **Use this to:**
@@ -490,43 +572,53 @@ Only one version can be \`published\` at a time. Each version contains the compl
 **Note:** Statistics are updated in near real-time as checkouts complete. For detailed redemption history, query the applied_promotions via database or webhook events.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Promotion ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Promotion ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Usage statistics',
+    description: "Usage statistics",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        promotionId: { type: 'string', format: 'uuid' },
+        promotionId: { type: "string", format: "uuid" },
         redemptionCount: {
-          type: 'integer',
-          description: 'Total number of successful redemptions',
+          type: "integer",
+          description: "Total number of successful redemptions",
           example: 47,
         },
         totalDiscountAmount: {
-          type: 'integer',
-          description: 'Total discount value in smallest currency unit (e.g., cents)',
+          type: "integer",
+          description:
+            "Total discount value in smallest currency unit (e.g., cents)",
           example: 235000,
         },
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
-  @ApiResponse({ status: 404, description: 'Promotion not found' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
+  @ApiResponse({ status: 404, description: "Promotion not found" })
   async getUsage(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     const promotion = await this.promotionsService.findById(workspaceId, id);
     if (!promotion) {
-      throw new NotFoundException('Promotion not found');
+      throw new NotFoundException("Promotion not found");
     }
 
-    const usage = await this.promotionsService.getAppliedPromotions(workspaceId, id);
+    const usage = await this.promotionsService.getAppliedPromotions(
+      workspaceId,
+      id,
+    );
 
     return {
       promotionId: id,

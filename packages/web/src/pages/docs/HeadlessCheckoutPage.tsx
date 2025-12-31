@@ -1,17 +1,18 @@
-import { CodeBlock } from '../../components/CodeBlock';
+import { CodeBlock } from "../../components/CodeBlock";
 
 export function HeadlessCheckoutPage() {
   return (
     <article className="prose-docs">
       <h1>Headless Checkout</h1>
       <p className="lead text-lg text-gray-600 mb-8">
-        Build fully custom checkout experiences while Relay handles pricing logic,
-        entitlements, and provider integration behind the scenes.
+        Build fully custom checkout experiences while Relay handles pricing
+        logic, entitlements, and provider integration behind the scenes.
       </p>
 
       <h2 id="overview">Overview</h2>
       <p>
-        Headless checkout lets you create your own payment UI while Relay manages:
+        Headless checkout lets you create your own payment UI while Relay
+        manages:
       </p>
       <ul>
         <li>Price calculation and currency formatting</li>
@@ -27,28 +28,41 @@ export function HeadlessCheckoutPage() {
       <div className="not-prose my-8">
         <div className="flex flex-col sm:flex-row gap-4 text-sm">
           <div className="flex-1 p-4 bg-gray-50 rounded-lg">
-            <div className="font-semibold text-gray-900 mb-1">1. Create Intent</div>
-            <div className="text-gray-600">Initialize checkout with offer and customer</div>
+            <div className="font-semibold text-gray-900 mb-1">
+              1. Create Intent
+            </div>
+            <div className="text-gray-600">
+              Initialize checkout with offer and customer
+            </div>
           </div>
           <div className="hidden sm:flex items-center text-gray-300">→</div>
           <div className="flex-1 p-4 bg-gray-50 rounded-lg">
-            <div className="font-semibold text-gray-900 mb-1">2. Collect Payment</div>
+            <div className="font-semibold text-gray-900 mb-1">
+              2. Collect Payment
+            </div>
             <div className="text-gray-600">Use Stripe Elements in your UI</div>
           </div>
           <div className="hidden sm:flex items-center text-gray-300">→</div>
           <div className="flex-1 p-4 bg-gray-50 rounded-lg">
-            <div className="font-semibold text-gray-900 mb-1">3. Confirm Intent</div>
-            <div className="text-gray-600">Relay provisions the subscription</div>
+            <div className="font-semibold text-gray-900 mb-1">
+              3. Confirm Intent
+            </div>
+            <div className="text-gray-600">
+              Relay provisions the subscription
+            </div>
           </div>
         </div>
       </div>
 
       <h2 id="step-1-create-intent">Step 1: Create a Checkout Intent</h2>
       <p>
-        A checkout intent reserves pricing and prepares Stripe resources. It returns
-        a <code>clientSecret</code> for Stripe Elements.
+        A checkout intent reserves pricing and prepares Stripe resources. It
+        returns a <code>clientSecret</code> for Stripe Elements.
       </p>
-      <CodeBlock title="Terminal" language="bash">{`curl -X POST http://localhost:3002/api/v1/checkout/intents \\
+      <CodeBlock
+        title="Terminal"
+        language="bash"
+      >{`curl -X POST http://localhost:3002/api/v1/checkout/intents \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_API_KEY" \\
   -d '{
@@ -79,10 +93,14 @@ export function HeadlessCheckoutPage() {
 
       <h2 id="step-2-collect-payment">Step 2: Collect Payment Details</h2>
       <p>
-        Use Stripe Elements to collect payment information. The <code>clientSecret</code>
+        Use Stripe Elements to collect payment information. The{" "}
+        <code>clientSecret</code>
         from the intent response initializes the PaymentElement.
       </p>
-      <CodeBlock title="CheckoutForm.tsx" language="tsx">{`import { loadStripe } from '@stripe/stripe-js';
+      <CodeBlock
+        title="CheckoutForm.tsx"
+        language="tsx"
+      >{`import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe } from '@stripe/react-stripe-js';
 
 const stripePromise = loadStripe('pk_test_...');
@@ -123,9 +141,13 @@ function App() {
 
       <h2 id="step-3-confirm-intent">Step 3: Confirm the Intent</h2>
       <p>
-        After Stripe confirms the payment, call Relay to provision the subscription:
+        After Stripe confirms the payment, call Relay to provision the
+        subscription:
       </p>
-      <CodeBlock title="Terminal" language="bash">{`curl -X POST http://localhost:3002/api/v1/checkout/intents/{intentId}/confirm \\
+      <CodeBlock
+        title="Terminal"
+        language="bash"
+      >{`curl -X POST http://localhost:3002/api/v1/checkout/intents/{intentId}/confirm \\
   -H "x-api-key: YOUR_API_KEY"
 
 # Response
@@ -140,7 +162,10 @@ function App() {
       <p>
         If the offer includes a trial period, no payment is collected upfront:
       </p>
-      <CodeBlock title="Response" language="json">{`// Intent response with trial
+      <CodeBlock
+        title="Response"
+        language="json"
+      >{`// Intent response with trial
 {
   "id": "ci_...",
   "status": "pending",
@@ -158,13 +183,15 @@ function App() {
   "stripeClientSecret": "seti_...secret_..."
 }`}</CodeBlock>
       <p>
-        For trials, Stripe returns a SetupIntent secret instead of PaymentIntent.
-        Use <code>stripe.confirmSetup()</code> to save the payment method for future billing.
+        For trials, Stripe returns a SetupIntent secret instead of
+        PaymentIntent. Use <code>stripe.confirmSetup()</code> to save the
+        payment method for future billing.
       </p>
 
       <h2 id="promotions">Applying Promotions</h2>
       <p>
-        Pass a <code>promotionCode</code> when creating the intent to apply discounts:
+        Pass a <code>promotionCode</code> when creating the intent to apply
+        discounts:
       </p>
       <CodeBlock title="Request body" language="json">{`{
   "customerId": "cust_...",
@@ -173,7 +200,8 @@ function App() {
 }`}</CodeBlock>
       <p>
         Invalid or expired codes return a <code>PROMOTION_INVALID</code> error.
-        The <code>pricing</code> object in the response shows the applied discount.
+        The <code>pricing</code> object in the response shows the applied
+        discount.
       </p>
 
       <h2 id="metadata">Passing Metadata</h2>
@@ -197,36 +225,57 @@ function App() {
         <table className="min-w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className="text-left py-2 pr-4 font-medium text-gray-900">Code</th>
-              <th className="text-left py-2 font-medium text-gray-900">Description</th>
+              <th className="text-left py-2 pr-4 font-medium text-gray-900">
+                Code
+              </th>
+              <th className="text-left py-2 font-medium text-gray-900">
+                Description
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             <tr>
-              <td className="py-2 pr-4"><code>OFFER_NOT_PUBLISHED</code></td>
-              <td className="py-2 text-gray-600">The offer hasn't been published yet</td>
+              <td className="py-2 pr-4">
+                <code>OFFER_NOT_PUBLISHED</code>
+              </td>
+              <td className="py-2 text-gray-600">
+                The offer hasn't been published yet
+              </td>
             </tr>
             <tr>
-              <td className="py-2 pr-4"><code>PROMOTION_INVALID</code></td>
-              <td className="py-2 text-gray-600">Promo code is invalid, expired, or already used</td>
+              <td className="py-2 pr-4">
+                <code>PROMOTION_INVALID</code>
+              </td>
+              <td className="py-2 text-gray-600">
+                Promo code is invalid, expired, or already used
+              </td>
             </tr>
             <tr>
-              <td className="py-2 pr-4"><code>CUSTOMER_NOT_FOUND</code></td>
-              <td className="py-2 text-gray-600">The customer ID doesn't exist</td>
+              <td className="py-2 pr-4">
+                <code>CUSTOMER_NOT_FOUND</code>
+              </td>
+              <td className="py-2 text-gray-600">
+                The customer ID doesn't exist
+              </td>
             </tr>
             <tr>
-              <td className="py-2 pr-4"><code>INTENT_EXPIRED</code></td>
-              <td className="py-2 text-gray-600">The checkout intent has expired</td>
+              <td className="py-2 pr-4">
+                <code>INTENT_EXPIRED</code>
+              </td>
+              <td className="py-2 text-gray-600">
+                The checkout intent has expired
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <h2 id="complete-example">Complete Example</h2>
-      <p>
-        Here's a full React implementation:
-      </p>
-      <CodeBlock title="CheckoutPage.tsx" language="tsx">{`import { useState, useEffect } from 'react';
+      <p>Here's a full React implementation:</p>
+      <CodeBlock
+        title="CheckoutPage.tsx"
+        language="tsx"
+      >{`import { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
@@ -322,16 +371,26 @@ function PaymentForm({ intentId }) {
         <h3 className="font-semibold text-gray-900 mb-2">Related Guides</h3>
         <ul className="space-y-2 text-sm">
           <li>
-            <a href="/docs/quickstart" className="text-primary-600 hover:text-primary-700">
+            <a
+              href="/docs/quickstart"
+              className="text-primary-600 hover:text-primary-700"
+            >
               Quickstart →
             </a>
-            <span className="text-gray-500 ml-2">Get started with hosted checkout</span>
+            <span className="text-gray-500 ml-2">
+              Get started with hosted checkout
+            </span>
           </li>
           <li>
-            <a href="/docs/webhooks" className="text-primary-600 hover:text-primary-700">
+            <a
+              href="/docs/webhooks"
+              className="text-primary-600 hover:text-primary-700"
+            >
               Webhooks →
             </a>
-            <span className="text-gray-500 ml-2">React to subscription events</span>
+            <span className="text-gray-500 ml-2">
+              React to subscription events
+            </span>
           </li>
         </ul>
       </div>

@@ -222,14 +222,14 @@ X-API-Key: rl_test_your_key_here
   })
   async create(
     @WorkspaceId() workspaceId: string,
-    @Body() dto: CreateApiKeyDto
+    @Body() dto: CreateApiKeyDto,
   ) {
     const result = await this.apiKeyService.generateApiKey(
       workspaceId,
       dto.name,
       dto.role,
       dto.environment,
-      dto.expiresAt ? new Date(dto.expiresAt) : undefined
+      dto.expiresAt ? new Date(dto.expiresAt) : undefined,
     );
 
     return {
@@ -283,7 +283,7 @@ X-API-Key: rl_test_your_key_here
   })
   async revoke(
     @WorkspaceId() workspaceId: string,
-    @Param("id", ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     await this.apiKeyService.revokeApiKey(workspaceId, id);
   }

@@ -61,6 +61,7 @@ yarn db:seed
 ```
 
 Save the API key from the output:
+
 ```
 Created test API key: Development Test Key
   Full key (save this): relay_test_xxxxxxxx...
@@ -74,6 +75,7 @@ yarn dev:all
 ```
 
 You'll see:
+
 - API: http://localhost:3002
 - Admin UI: http://localhost:3001
 - API Docs: http://localhost:3002/docs
@@ -85,9 +87,11 @@ Open http://localhost:3001 and set your API key:
 1. Open browser DevTools (F12)
 2. Go to Console
 3. Run:
+
 ```javascript
-localStorage.setItem('relay_api_key', 'relay_test_YOUR_KEY_HERE')
+localStorage.setItem("relay_api_key", "relay_test_YOUR_KEY_HERE");
 ```
+
 4. Refresh the page
 
 ### 7. Create Your First Offer (2 min)
@@ -151,6 +155,7 @@ curl -X POST http://localhost:3002/api/v1/checkout/sessions \
 ```
 
 Response:
+
 ```json
 {
   "id": "checkout-session-id",
@@ -225,6 +230,7 @@ lsof -ti:3001,3002 | xargs kill -9
 ### Stripe webhook not received
 
 Make sure `stripe listen` is running:
+
 ```bash
 stripe listen --forward-to localhost:3002/api/v1/webhooks/stripe
 ```
@@ -232,6 +238,7 @@ stripe listen --forward-to localhost:3002/api/v1/webhooks/stripe
 ### Database connection error
 
 Check Docker containers:
+
 ```bash
 docker-compose ps
 docker-compose logs postgres
@@ -270,24 +277,24 @@ docker-compose logs postgres
 
 ## Key Concepts
 
-| Concept | Description |
-|---------|-------------|
-| **Workspace** | Tenant isolation. All data scoped to a workspace. |
-| **Offer** | A product with pricing, trials, and entitlements. |
+| Concept          | Description                                       |
+| ---------------- | ------------------------------------------------- |
+| **Workspace**    | Tenant isolation. All data scoped to a workspace. |
+| **Offer**        | A product with pricing, trials, and entitlements. |
 | **OfferVersion** | Immutable snapshot. Draft → Published → Archived. |
-| **Subscription** | Customer's active plan. |
-| **Entitlement** | Feature access granted by subscription. |
-| **Checkout** | Stripe Checkout session for payment. |
+| **Subscription** | Customer's active plan.                           |
+| **Entitlement**  | Feature access granted by subscription.           |
+| **Checkout**     | Stripe Checkout session for payment.              |
 
 ---
 
 ## Test Cards
 
-| Card Number | Scenario |
-|-------------|----------|
-| 4242 4242 4242 4242 | Success |
+| Card Number         | Scenario           |
+| ------------------- | ------------------ |
+| 4242 4242 4242 4242 | Success            |
 | 4000 0000 0000 3220 | 3D Secure required |
-| 4000 0000 0000 9995 | Payment fails |
-| 4000 0000 0000 0341 | Attaching fails |
+| 4000 0000 0000 9995 | Payment fails      |
+| 4000 0000 0000 0341 | Attaching fails    |
 
 Full list: https://stripe.com/docs/testing

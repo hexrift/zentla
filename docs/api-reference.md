@@ -54,11 +54,11 @@ GET /offers
 
 **Query Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| limit | number | Max items to return (default: 20, max: 100) |
-| cursor | string | Pagination cursor |
-| status | string | Filter by status: `active`, `archived` |
+| Parameter | Type   | Description                                 |
+| --------- | ------ | ------------------------------------------- |
+| limit     | number | Max items to return (default: 20, max: 100) |
+| cursor    | string | Pagination cursor                           |
+| status    | string | Filter by status: `active`, `archived`      |
 
 **Response:**
 
@@ -115,7 +115,11 @@ GET /offers/:id
           },
           "entitlements": [
             { "featureKey": "seats", "value": 10, "valueType": "number" },
-            { "featureKey": "api_access", "value": true, "valueType": "boolean" }
+            {
+              "featureKey": "api_access",
+              "value": true,
+              "valueType": "boolean"
+            }
           ]
         },
         "publishedAt": "2024-01-15T10:30:00Z",
@@ -218,11 +222,11 @@ GET /customers
 
 **Query Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| limit | number | Max items to return |
-| cursor | string | Pagination cursor |
-| email | string | Filter by email |
+| Parameter | Type   | Description         |
+| --------- | ------ | ------------------- |
+| limit     | number | Max items to return |
+| cursor    | string | Pagination cursor   |
+| email     | string | Filter by email     |
 
 ### Get Customer
 
@@ -270,8 +274,18 @@ Returns all active entitlements for the customer.
   "data": {
     "customerId": "cust_123",
     "entitlements": [
-      { "featureKey": "seats", "hasAccess": true, "value": 10, "valueType": "number" },
-      { "featureKey": "api_access", "hasAccess": true, "value": true, "valueType": "boolean" }
+      {
+        "featureKey": "seats",
+        "hasAccess": true,
+        "value": 10,
+        "valueType": "number"
+      },
+      {
+        "featureKey": "api_access",
+        "hasAccess": true,
+        "value": true,
+        "valueType": "boolean"
+      }
     ],
     "activeSubscriptionIds": ["sub_456"]
   }
@@ -309,12 +323,12 @@ GET /subscriptions
 
 **Query Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| limit | number | Max items to return |
-| cursor | string | Pagination cursor |
-| customerId | string | Filter by customer |
-| status | string | Filter by status |
+| Parameter  | Type   | Description         |
+| ---------- | ------ | ------------------- |
+| limit      | number | Max items to return |
+| cursor     | string | Pagination cursor   |
+| customerId | string | Filter by customer  |
+| status     | string | Filter by status    |
 
 ### Get Subscription
 
@@ -385,11 +399,11 @@ Changes the subscription to a different offer (plan upgrade or downgrade).
 }
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| newOfferId | string (UUID) | Yes | The offer to change to |
-| newOfferVersionId | string (UUID) | No | Specific version (defaults to published) |
-| prorationBehavior | string | No | `create_prorations`, `none`, or `always_invoice` |
+| Field             | Type          | Required | Description                                      |
+| ----------------- | ------------- | -------- | ------------------------------------------------ |
+| newOfferId        | string (UUID) | Yes      | The offer to change to                           |
+| newOfferVersionId | string (UUID) | No       | Specific version (defaults to published)         |
+| prorationBehavior | string        | No       | `create_prorations`, `none`, or `always_invoice` |
 
 **Response:**
 
@@ -529,9 +543,9 @@ POST /checkout/intents
 
 **Headers:**
 
-| Header | Required | Description |
-|--------|----------|-------------|
-| Idempotency-Key | Yes | Unique key to prevent duplicate charges |
+| Header          | Required | Description                             |
+| --------------- | -------- | --------------------------------------- |
+| Idempotency-Key | Yes      | Unique key to prevent duplicate charges |
 
 **Request Body:**
 
@@ -548,14 +562,14 @@ POST /checkout/intents
 }
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| offerId | string (UUID) | Yes | The offer to purchase |
-| offerVersionId | string (UUID) | No | Specific version (defaults to published) |
-| customerId | string (UUID) | No | Existing customer ID |
-| customerEmail | string | No | Email for new customer (required if no customerId) |
-| promotionCode | string | No | Promo code to apply |
-| metadata | object | No | Custom key-value data |
+| Field          | Type          | Required | Description                                        |
+| -------------- | ------------- | -------- | -------------------------------------------------- |
+| offerId        | string (UUID) | Yes      | The offer to purchase                              |
+| offerVersionId | string (UUID) | No       | Specific version (defaults to published)           |
+| customerId     | string (UUID) | No       | Existing customer ID                               |
+| customerEmail  | string        | No       | Email for new customer (required if no customerId) |
+| promotionCode  | string        | No       | Promo code to apply                                |
+| metadata       | object        | No       | Custom key-value data                              |
 
 **Response:**
 
@@ -593,7 +607,7 @@ Use the `clientSecret` with Stripe.js to confirm the payment:
 const { error } = await stripe.confirmPayment({
   clientSecret: checkoutIntent.clientSecret,
   confirmParams: {
-    return_url: 'https://yourapp.com/checkout/complete',
+    return_url: "https://yourapp.com/checkout/complete",
   },
 });
 
@@ -601,7 +615,7 @@ const { error } = await stripe.confirmPayment({
 const { error } = await stripe.confirmSetup({
   clientSecret: checkoutIntent.clientSecret,
   confirmParams: {
-    return_url: 'https://yourapp.com/checkout/complete',
+    return_url: "https://yourapp.com/checkout/complete",
   },
 });
 ```
@@ -643,14 +657,14 @@ GET /checkout/intents/:id
 
 **Checkout Intent Statuses:**
 
-| Status | Description |
-|--------|-------------|
-| `pending` | Awaiting payment confirmation |
-| `processing` | Payment being processed |
+| Status            | Description                              |
+| ----------------- | ---------------------------------------- |
+| `pending`         | Awaiting payment confirmation            |
+| `processing`      | Payment being processed                  |
 | `requires_action` | Additional authentication required (3DS) |
-| `succeeded` | Payment complete, subscription created |
-| `failed` | Payment failed |
-| `expired` | Intent expired (24 hours) |
+| `succeeded`       | Payment complete, subscription created   |
+| `failed`          | Payment failed                           |
+| `expired`         | Intent expired (24 hours)                |
 
 ---
 
@@ -664,14 +678,14 @@ GET /events
 
 **Query Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| limit | number | Max items to return (default: 50) |
-| cursor | string | Pagination cursor |
-| status | string | Filter by status: `pending`, `processed`, `failed` |
-| eventType | string | Filter by event type |
-| aggregateType | string | Filter by aggregate type |
-| aggregateId | string | Filter by aggregate ID |
+| Parameter     | Type   | Description                                        |
+| ------------- | ------ | -------------------------------------------------- |
+| limit         | number | Max items to return (default: 50)                  |
+| cursor        | string | Pagination cursor                                  |
+| status        | string | Filter by status: `pending`, `processed`, `failed` |
+| eventType     | string | Filter by event type                               |
+| aggregateType | string | Filter by aggregate type                           |
+| aggregateId   | string | Filter by aggregate ID                             |
 
 **Response:**
 
@@ -737,17 +751,17 @@ GET /audit-logs
 
 **Query Parameters:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| limit | number | Max items to return (default: 50) |
-| cursor | string | Pagination cursor |
-| actorType | string | Filter by actor: `api_key`, `user`, `system`, `webhook` |
-| actorId | string | Filter by actor ID |
-| action | string | Filter by action (e.g., `create`, `update`, `delete`) |
-| resourceType | string | Filter by resource type |
-| resourceId | string | Filter by resource ID |
-| startDate | string | ISO 8601 start date |
-| endDate | string | ISO 8601 end date |
+| Parameter    | Type   | Description                                             |
+| ------------ | ------ | ------------------------------------------------------- |
+| limit        | number | Max items to return (default: 50)                       |
+| cursor       | string | Pagination cursor                                       |
+| actorType    | string | Filter by actor: `api_key`, `user`, `system`, `webhook` |
+| actorId      | string | Filter by actor ID                                      |
+| action       | string | Filter by action (e.g., `create`, `update`, `delete`)   |
+| resourceType | string | Filter by resource type                                 |
+| resourceId   | string | Filter by resource ID                                   |
+| startDate    | string | ISO 8601 start date                                     |
+| endDate      | string | ISO 8601 end date                                       |
 
 **Response:**
 
@@ -923,25 +937,25 @@ GET /health
 
 ## Error Codes
 
-| Code | Description |
-|------|-------------|
-| `VALIDATION_ERROR` | Input validation failed |
-| `NOT_FOUND` | Resource not found |
-| `UNAUTHORIZED` | Invalid or missing API key |
-| `FORBIDDEN` | Insufficient permissions |
-| `RATE_LIMITED` | Too many requests |
-| `CONFLICT` | Resource conflict (e.g., duplicate) |
-| `INTERNAL_ERROR` | Server error |
+| Code               | Description                         |
+| ------------------ | ----------------------------------- |
+| `VALIDATION_ERROR` | Input validation failed             |
+| `NOT_FOUND`        | Resource not found                  |
+| `UNAUTHORIZED`     | Invalid or missing API key          |
+| `FORBIDDEN`        | Insufficient permissions            |
+| `RATE_LIMITED`     | Too many requests                   |
+| `CONFLICT`         | Resource conflict (e.g., duplicate) |
+| `INTERNAL_ERROR`   | Server error                        |
 
 ---
 
 ## Rate Limits
 
-| Tier | Window | Limit |
-|------|--------|-------|
-| Short | 1 second | 10 requests |
-| Medium | 10 seconds | 50 requests |
-| Long | 60 seconds | 100 requests |
+| Tier   | Window     | Limit        |
+| ------ | ---------- | ------------ |
+| Short  | 1 second   | 10 requests  |
+| Medium | 10 seconds | 50 requests  |
+| Long   | 60 seconds | 100 requests |
 
 Rate limit headers are included in responses:
 

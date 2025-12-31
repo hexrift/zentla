@@ -1,30 +1,30 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { api } from '../lib/api';
-import type { Offer, PaginatedResponse } from '../lib/types';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { api } from "../lib/api";
+import type { Offer, PaginatedResponse } from "../lib/types";
 
-type DiscountType = 'percent' | 'fixed_amount' | 'free_trial_days';
+type DiscountType = "percent" | "fixed_amount" | "free_trial_days";
 
 export function PromotionNewPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    code: '',
-    description: '',
-    discountType: 'percent' as DiscountType,
-    discountValue: '',
-    currency: 'GBP',
-    maxRedemptions: '',
-    validFrom: '',
-    validUntil: '',
+    name: "",
+    code: "",
+    description: "",
+    discountType: "percent" as DiscountType,
+    discountValue: "",
+    currency: "GBP",
+    maxRedemptions: "",
+    validFrom: "",
+    validUntil: "",
   });
   const [selectedOfferIds, setSelectedOfferIds] = useState<string[]>([]);
 
   // Fetch active offers for the multi-select
   const { data: offersData, isLoading: offersLoading } = useQuery({
-    queryKey: ['offers', 'active'],
-    queryFn: () => api.offers.list({ status: 'active', limit: 100 }),
+    queryKey: ["offers", "active"],
+    queryFn: () => api.offers.list({ status: "active", limit: 100 }),
   });
 
   const offers = (offersData as PaginatedResponse<Offer>)?.data ?? [];
@@ -34,12 +34,12 @@ export function PromotionNewPage() {
       const config: Record<string, unknown> = {
         discountType: data.discountType,
         discountValue:
-          data.discountType === 'fixed_amount'
+          data.discountType === "fixed_amount"
             ? Math.round(parseFloat(data.discountValue) * 100)
             : parseInt(data.discountValue, 10),
       };
 
-      if (data.discountType === 'fixed_amount') {
+      if (data.discountType === "fixed_amount") {
         config.currency = data.currency.toLowerCase();
       }
 
@@ -79,33 +79,37 @@ export function PromotionNewPage() {
 
   const getValueLabel = () => {
     switch (formData.discountType) {
-      case 'percent':
-        return 'Discount Percentage';
-      case 'fixed_amount':
-        return 'Discount Amount';
-      case 'free_trial_days':
-        return 'Trial Days';
+      case "percent":
+        return "Discount Percentage";
+      case "fixed_amount":
+        return "Discount Amount";
+      case "free_trial_days":
+        return "Trial Days";
     }
   };
 
   const getValuePlaceholder = () => {
     switch (formData.discountType) {
-      case 'percent':
-        return 'e.g., 20 for 20% off';
-      case 'fixed_amount':
-        return 'e.g., 10.00';
-      case 'free_trial_days':
-        return 'e.g., 14';
+      case "percent":
+        return "e.g., 20 for 20% off";
+      case "fixed_amount":
+        return "e.g., 10.00";
+      case "free_trial_days":
+        return "e.g., 14";
     }
   };
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Create Promotion</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-8">
+        Create Promotion
+      </h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h2 className="text-lg font-medium text-gray-900">Basic Information</h2>
+          <h2 className="text-lg font-medium text-gray-900">
+            Basic Information
+          </h2>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -115,7 +119,9 @@ export function PromotionNewPage() {
               type="text"
               required
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="e.g., Summer Sale 2025"
             />
@@ -169,7 +175,7 @@ export function PromotionNewPage() {
                 setFormData({
                   ...formData,
                   discountType: e.target.value as DiscountType,
-                  discountValue: '',
+                  discountValue: "",
                 })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -189,8 +195,8 @@ export function PromotionNewPage() {
                 type="number"
                 required
                 min="1"
-                step={formData.discountType === 'fixed_amount' ? '0.01' : '1'}
-                max={formData.discountType === 'percent' ? '100' : undefined}
+                step={formData.discountType === "fixed_amount" ? "0.01" : "1"}
+                max={formData.discountType === "percent" ? "100" : undefined}
                 value={formData.discountValue}
                 onChange={(e) =>
                   setFormData({ ...formData, discountValue: e.target.value })
@@ -200,7 +206,7 @@ export function PromotionNewPage() {
               />
             </div>
 
-            {formData.discountType === 'fixed_amount' && (
+            {formData.discountType === "fixed_amount" && (
               <div className="w-32">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Currency
@@ -222,7 +228,9 @@ export function PromotionNewPage() {
         </div>
 
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h2 className="text-lg font-medium text-gray-900">Limits (optional)</h2>
+          <h2 className="text-lg font-medium text-gray-900">
+            Limits (optional)
+          </h2>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -271,9 +279,12 @@ export function PromotionNewPage() {
         </div>
 
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h2 className="text-lg font-medium text-gray-900">Applicable Offers</h2>
+          <h2 className="text-lg font-medium text-gray-900">
+            Applicable Offers
+          </h2>
           <p className="text-sm text-gray-500">
-            Select which offers this promotion can be used with. Leave empty to apply to all offers.
+            Select which offers this promotion can be used with. Leave empty to
+            apply to all offers.
           </p>
 
           {offersLoading ? (
@@ -296,15 +307,21 @@ export function PromotionNewPage() {
                       if (e.target.checked) {
                         setSelectedOfferIds([...selectedOfferIds, offer.id]);
                       } else {
-                        setSelectedOfferIds(selectedOfferIds.filter((id) => id !== offer.id));
+                        setSelectedOfferIds(
+                          selectedOfferIds.filter((id) => id !== offer.id),
+                        );
                       }
                     }}
                     className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">{offer.name}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {offer.name}
+                    </div>
                     {offer.description && (
-                      <div className="text-xs text-gray-500 truncate">{offer.description}</div>
+                      <div className="text-xs text-gray-500 truncate">
+                        {offer.description}
+                      </div>
                     )}
                   </div>
                 </label>
@@ -315,7 +332,8 @@ export function PromotionNewPage() {
           {selectedOfferIds.length > 0 && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600">
-                {selectedOfferIds.length} offer{selectedOfferIds.length === 1 ? '' : 's'} selected
+                {selectedOfferIds.length} offer
+                {selectedOfferIds.length === 1 ? "" : "s"} selected
               </span>
               <button
                 type="button"
@@ -340,11 +358,11 @@ export function PromotionNewPage() {
             disabled={createMutation.isPending}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
           >
-            {createMutation.isPending ? 'Creating...' : 'Create Promotion'}
+            {createMutation.isPending ? "Creating..." : "Create Promotion"}
           </button>
           <button
             type="button"
-            onClick={() => navigate('/promotions')}
+            onClick={() => navigate("/promotions")}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
           >
             Cancel

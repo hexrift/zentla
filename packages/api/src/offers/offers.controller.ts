@@ -10,29 +10,40 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiSecurity,
   ApiParam,
-} from '@nestjs/swagger';
-import { OffersService } from './offers.service';
-import { WorkspaceId, AdminOnly, MemberOnly } from '../common/decorators';
-import { CreateOfferRequestDto, CreateVersionRequestDto, QueryOffersDto, PublishOfferDto, RollbackOfferDto, UpdateOfferDto } from './dto';
-import { OfferSchema, OfferVersionSchema, PaginationSchema } from '../common/schemas';
+} from "@nestjs/swagger";
+import { OffersService } from "./offers.service";
+import { WorkspaceId, AdminOnly, MemberOnly } from "../common/decorators";
+import {
+  CreateOfferRequestDto,
+  CreateVersionRequestDto,
+  QueryOffersDto,
+  PublishOfferDto,
+  RollbackOfferDto,
+  UpdateOfferDto,
+} from "./dto";
+import {
+  OfferSchema,
+  OfferVersionSchema,
+  PaginationSchema,
+} from "../common/schemas";
 
-@ApiTags('offers')
-@ApiSecurity('api-key')
-@Controller('offers')
+@ApiTags("offers")
+@ApiSecurity("api-key")
+@Controller("offers")
 export class OffersController {
   constructor(private readonly offersService: OffersService) {}
 
   @Get()
   @MemberOnly()
   @ApiOperation({
-    summary: 'List offers',
+    summary: "List offers",
     description: `Retrieves a paginated list of offers in your workspace.
 
 **Use this to:**
@@ -46,20 +57,27 @@ export class OffersController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Paginated list of offers with their current published version (if any).',
+    description:
+      "Paginated list of offers with their current published version (if any).",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        data: { type: 'array', items: OfferSchema },
+        data: { type: "array", items: OfferSchema },
         ...PaginationSchema.properties,
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   async findAll(
     @WorkspaceId() workspaceId: string,
-    @Query() query: QueryOffersDto
+    @Query() query: QueryOffersDto,
   ) {
     return this.offersService.findMany(workspaceId, {
       limit: query.limit ?? 20,
@@ -69,10 +87,10 @@ export class OffersController {
     });
   }
 
-  @Get(':id')
+  @Get(":id")
   @MemberOnly()
   @ApiOperation({
-    summary: 'Get offer details',
+    summary: "Get offer details",
     description: `Retrieves complete details for a single offer, including all versions.
 
 **Use this to:**
@@ -91,25 +109,34 @@ export class OffersController {
 - \`archived\`: Previously published, preserved for existing subscribers`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Unique offer identifier (UUID)',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Unique offer identifier (UUID)",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Offer with all versions',
+    description: "Offer with all versions",
     schema: OfferSchema,
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
-  @ApiResponse({ status: 404, description: 'Offer not found in this workspace' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Offer not found in this workspace",
+  })
   async findOne(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     const offer = await this.offersService.findById(workspaceId, id);
     if (!offer) {
-      throw new NotFoundException('Offer not found');
+      throw new NotFoundException("Offer not found");
     }
     return offer;
   }
@@ -117,7 +144,7 @@ export class OffersController {
   @Post()
   @AdminOnly()
   @ApiOperation({
-    summary: 'Create offer',
+    summary: "Create offer",
     description: `Creates a new offer with an initial draft version (v1).
 
 **Workflow:**
@@ -136,23 +163,34 @@ export class OffersController {
   })
   @ApiResponse({
     status: 201,
-    description: 'Offer created with draft version 1. Publish to make available for checkouts.',
+    description:
+      "Offer created with draft version 1. Publish to make available for checkouts.",
     schema: OfferSchema,
   })
-  @ApiResponse({ status: 400, description: 'Invalid configuration. Check that pricing model matches provided fields.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 400,
+    description:
+      "Invalid configuration. Check that pricing model matches provided fields.",
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
   async create(
     @WorkspaceId() workspaceId: string,
-    @Body() dto: CreateOfferRequestDto
+    @Body() dto: CreateOfferRequestDto,
   ) {
     return this.offersService.create(workspaceId, dto);
   }
 
-  @Patch(':id')
+  @Patch(":id")
   @AdminOnly()
   @ApiOperation({
-    summary: 'Update offer metadata',
+    summary: "Update offer metadata",
     description: `Updates offer-level metadata (name, description) without affecting versioned configuration.
 
 **Use this for:**
@@ -168,44 +206,58 @@ export class OffersController {
 Changes take effect immediately and are reflected in all API responses.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Offer ID to update',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Offer ID to update",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
-  @ApiResponse({ status: 200, description: 'Offer metadata updated', schema: OfferSchema })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
-  @ApiResponse({ status: 404, description: 'Offer not found' })
+  @ApiResponse({
+    status: 200,
+    description: "Offer metadata updated",
+    schema: OfferSchema,
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
+  @ApiResponse({ status: 404, description: "Offer not found" })
   async update(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdateOfferDto
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: UpdateOfferDto,
   ) {
     return this.offersService.update(workspaceId, id, dto);
   }
 
-  @Post(':id/sync')
+  @Post(":id/sync")
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Sync offer to Stripe',
-    description: 'Manually sync a published offer to Stripe. Use this to retry if the initial sync failed.',
+    summary: "Sync offer to Stripe",
+    description:
+      "Manually sync a published offer to Stripe. Use this to retry if the initial sync failed.",
   })
-  @ApiResponse({ status: 200, description: 'Offer synced successfully' })
-  @ApiResponse({ status: 400, description: 'No published version or Stripe not configured' })
-  @ApiResponse({ status: 404, description: 'Offer not found' })
+  @ApiResponse({ status: 200, description: "Offer synced successfully" })
+  @ApiResponse({
+    status: 400,
+    description: "No published version or Stripe not configured",
+  })
+  @ApiResponse({ status: 404, description: "Offer not found" })
   async syncToStripe(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     return this.offersService.syncOfferToStripe(workspaceId, id);
   }
 
-  @Post(':id/archive')
+  @Post(":id/archive")
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Archive offer',
+    summary: "Archive offer",
     description: `Archives an offer, hiding it from listings and preventing new subscriptions.
 
 **Use this when:**
@@ -226,25 +278,35 @@ Changes take effect immediately and are reflected in all API responses.`,
 **This is reversible** by updating the offer status, but prefer creating new offers for major changes.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Offer ID to archive',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Offer ID to archive",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
-  @ApiResponse({ status: 200, description: 'Offer archived successfully', schema: OfferSchema })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
-  @ApiResponse({ status: 404, description: 'Offer not found' })
+  @ApiResponse({
+    status: 200,
+    description: "Offer archived successfully",
+    schema: OfferSchema,
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
+  @ApiResponse({ status: 404, description: "Offer not found" })
   async archive(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     return this.offersService.archive(workspaceId, id);
   }
 
-  @Get(':id/versions')
+  @Get(":id/versions")
   @MemberOnly()
   @ApiOperation({
-    summary: 'List offer versions',
+    summary: "List offer versions",
     description: `Retrieves all versions of an offer, ordered by version number (newest first).
 
 **Use this to:**
@@ -260,32 +322,38 @@ Changes take effect immediately and are reflected in all API responses.`,
 Only one version can be \`published\` at a time.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Offer ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Offer ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'List of all versions with their configurations',
+    description: "List of all versions with their configurations",
     schema: {
-      type: 'array',
+      type: "array",
       items: OfferVersionSchema,
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
-  @ApiResponse({ status: 404, description: 'Offer not found' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
+  @ApiResponse({ status: 404, description: "Offer not found" })
   async getVersions(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     return this.offersService.getVersions(workspaceId, id);
   }
 
-  @Post(':id/versions')
+  @Post(":id/versions")
   @AdminOnly()
   @ApiOperation({
-    summary: 'Create draft version',
+    summary: "Create draft version",
     description: `Creates a new draft version for an offer with updated configuration.
 
 **Use this when:**
@@ -308,34 +376,40 @@ Only one version can be \`published\` at a time.`,
 - Does NOT sync to billing provider until published`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Offer ID to create version for',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Offer ID to create version for",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 201,
-    description: 'Draft version created. Call publish to make it active.',
+    description: "Draft version created. Call publish to make it active.",
     schema: OfferVersionSchema,
   })
   @ApiResponse({
     status: 400,
-    description: 'A draft version already exists. Publish or delete it first.',
+    description: "A draft version already exists. Publish or delete it first.",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
-  @ApiResponse({ status: 404, description: 'Offer not found' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
+  @ApiResponse({ status: 404, description: "Offer not found" })
   async createVersion(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: CreateVersionRequestDto
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: CreateVersionRequestDto,
   ) {
     return this.offersService.createVersion(workspaceId, id, dto.config);
   }
 
-  @Patch(':id/versions/draft')
+  @Patch(":id/versions/draft")
   @AdminOnly()
   @ApiOperation({
-    summary: 'Update draft version',
+    summary: "Update draft version",
     description: `Updates the existing draft version with new configuration, or creates one if none exists.
 
 **Use this when:**
@@ -345,31 +419,41 @@ Only one version can be \`published\` at a time.`,
 **This is idempotent:** Call it multiple times with different configs; only the latest config is saved.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Offer ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Offer ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Draft version updated or created',
+    description: "Draft version updated or created",
     schema: OfferVersionSchema,
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
-  @ApiResponse({ status: 404, description: 'Offer not found' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
+  @ApiResponse({ status: 404, description: "Offer not found" })
   async updateDraftVersion(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: CreateVersionRequestDto
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: CreateVersionRequestDto,
   ) {
-    return this.offersService.createOrUpdateDraftVersion(workspaceId, id, dto.config);
+    return this.offersService.createOrUpdateDraftVersion(
+      workspaceId,
+      id,
+      dto.config,
+    );
   }
 
-  @Post(':id/publish')
+  @Post(":id/publish")
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Publish version',
+    summary: "Publish version",
     description: `Publishes a draft version, making it active for new subscriptions (immediately or at a scheduled time).
 
 **Immediate publish (default):**
@@ -396,38 +480,52 @@ Only one version can be \`published\` at a time.`,
 **Best practice:** Always test offers in a test environment before publishing to production.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Offer ID to publish',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Offer ID to publish",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Version published (immediately or scheduled) and synced to billing provider',
+    description:
+      "Version published (immediately or scheduled) and synced to billing provider",
     schema: OfferSchema,
   })
   @ApiResponse({
     status: 400,
-    description: 'Only draft versions can be published',
+    description: "Only draft versions can be published",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
   @ApiResponse({
     status: 404,
-    description: 'Offer not found or no draft version exists',
+    description: "Offer not found or no draft version exists",
   })
   async publish(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: PublishOfferDto
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: PublishOfferDto,
   ) {
-    const effectiveFrom = dto.effectiveFrom ? new Date(dto.effectiveFrom) : undefined;
-    return this.offersService.publishVersion(workspaceId, id, dto.versionId, effectiveFrom);
+    const effectiveFrom = dto.effectiveFrom
+      ? new Date(dto.effectiveFrom)
+      : undefined;
+    return this.offersService.publishVersion(
+      workspaceId,
+      id,
+      dto.versionId,
+      effectiveFrom,
+    );
   }
 
-  @Get(':id/scheduled')
+  @Get(":id/scheduled")
   @MemberOnly()
   @ApiOperation({
-    summary: 'List scheduled versions',
+    summary: "List scheduled versions",
     description: `Retrieves all scheduled (future-dated) versions for an offer.
 
 **Use this to:**
@@ -443,33 +541,39 @@ Only one version can be \`published\` at a time.`,
 Immediately-effective versions are not included.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Offer ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Offer ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'List of scheduled versions',
+    description: "List of scheduled versions",
     schema: {
-      type: 'array',
+      type: "array",
       items: OfferVersionSchema,
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
-  @ApiResponse({ status: 404, description: 'Offer not found' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
+  @ApiResponse({ status: 404, description: "Offer not found" })
   async getScheduledVersions(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     return this.offersService.getScheduledVersions(workspaceId, id);
   }
 
-  @Post(':id/rollback')
+  @Post(":id/rollback")
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Rollback to previous version',
+    summary: "Rollback to previous version",
     description: `Creates a new draft version by copying configuration from a previously published version.
 
 **Use this when:**
@@ -487,30 +591,40 @@ Immediately-effective versions are not included.`,
 **Example:** If you published v3 and it had issues, rollback to v2 creates v4 (draft) with v2's config. Publishing v4 makes it active.`,
   })
   @ApiParam({
-    name: 'id',
-    description: 'Offer ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "Offer ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'New draft version created with copied configuration',
+    description: "New draft version created with copied configuration",
     schema: OfferVersionSchema,
   })
   @ApiResponse({
     status: 400,
-    description: 'A draft version already exists. Publish or delete it first.',
+    description: "A draft version already exists. Publish or delete it first.",
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing API key' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions (requires admin role)' })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions (requires admin role)",
+  })
   @ApiResponse({
     status: 404,
-    description: 'Offer or target version not found',
+    description: "Offer or target version not found",
   })
   async rollback(
     @WorkspaceId() workspaceId: string,
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: RollbackOfferDto
+    @Param("id", ParseUUIDPipe) id: string,
+    @Body() dto: RollbackOfferDto,
   ) {
-    return this.offersService.rollbackToVersion(workspaceId, id, dto.targetVersionId);
+    return this.offersService.rollbackToVersion(
+      workspaceId,
+      id,
+      dto.targetVersionId,
+    );
   }
 }

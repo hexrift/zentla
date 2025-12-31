@@ -3,14 +3,18 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import type { Request } from 'express';
-import { UserSessionService } from './user-session.service';
-import { PrismaService } from '../database/prisma.service';
-import { IS_PUBLIC_KEY, type SessionContext, type ApiKeyContext } from '../common/decorators';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import type { Request } from "express";
+import { UserSessionService } from "./user-session.service";
+import { PrismaService } from "../database/prisma.service";
+import {
+  IS_PUBLIC_KEY,
+  type SessionContext,
+  type ApiKeyContext,
+} from "../common/decorators";
 
-const SESSION_PREFIX = 'relay_session_';
+const SESSION_PREFIX = "relay_session_";
 
 interface SessionValidationResult {
   userId: string;
@@ -23,7 +27,7 @@ export class SessionGuard implements CanActivate {
   constructor(
     private readonly sessionService: UserSessionService,
     private readonly prisma: PrismaService,
-    private readonly reflector: Reflector
+    private readonly reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -45,9 +49,9 @@ export class SessionGuard implements CanActivate {
       return true;
     }
 
-    const [type, token] = authHeader.split(' ');
+    const [type, token] = authHeader.split(" ");
 
-    if (type !== 'Bearer' || !token) {
+    if (type !== "Bearer" || !token) {
       return true;
     }
 
@@ -57,10 +61,12 @@ export class SessionGuard implements CanActivate {
       return true;
     }
 
-    const validationResult = await this.sessionService.validateSession(token) as SessionValidationResult | null;
+    const validationResult = (await this.sessionService.validateSession(
+      token,
+    )) as SessionValidationResult | null;
 
     if (!validationResult) {
-      throw new UnauthorizedException('Invalid or expired session');
+      throw new UnauthorizedException("Invalid or expired session");
     }
 
     // Attach session context to request (typed via global Express.Request augmentation)
@@ -76,15 +82,15 @@ export class SessionGuard implements CanActivate {
     const membership = await this.prisma.workspaceMembership.findFirst({
       where: { userId: validationResult.userId },
       include: { workspace: true },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: "asc" },
     });
 
     if (membership) {
       const apiKeyContext: ApiKeyContext = {
         keyId: `session:${validationResult.sessionId}`,
         workspaceId: membership.workspaceId,
-        role: membership.role as ApiKeyContext['role'],
-        environment: membership.workspace.mode as ApiKeyContext['environment'],
+        role: membership.role as ApiKeyContext["role"],
+        environment: membership.workspace.mode as ApiKeyContext["environment"],
       };
       request.apiKeyContext = apiKeyContext;
     }

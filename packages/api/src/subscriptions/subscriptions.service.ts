@@ -1,11 +1,16 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import { BillingService } from '../billing/billing.service';
-import { ProviderRefService } from '../billing/provider-ref.service';
-import { OffersService } from '../offers/offers.service';
-import { EntitlementsService } from '../entitlements/entitlements.service';
-import type { Subscription, SubscriptionStatus, Prisma } from '@prisma/client';
-import type { PaginatedResult } from '@relay/database';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import { BillingService } from "../billing/billing.service";
+import { ProviderRefService } from "../billing/provider-ref.service";
+import { OffersService } from "../offers/offers.service";
+import { EntitlementsService } from "../entitlements/entitlements.service";
+import type { Subscription, SubscriptionStatus, Prisma } from "@prisma/client";
+import type { PaginatedResult } from "@relay/database";
 
 export interface SubscriptionWithRelations extends Subscription {
   customer: {
@@ -41,7 +46,7 @@ export interface CancelSubscriptionDto {
 export interface ChangeSubscriptionDto {
   newOfferId: string;
   newOfferVersionId?: string;
-  prorationBehavior?: 'create_prorations' | 'none' | 'always_invoice';
+  prorationBehavior?: "create_prorations" | "none" | "always_invoice";
 }
 
 @Injectable()
@@ -58,7 +63,7 @@ export class SubscriptionsService {
 
   async findById(
     workspaceId: string,
-    id: string
+    id: string,
   ): Promise<SubscriptionWithRelations | null> {
     return this.prisma.subscription.findFirst({
       where: { id, workspaceId },
@@ -76,16 +81,19 @@ export class SubscriptionsService {
     });
   }
 
-  async findByCustomerId(workspaceId: string, customerId: string): Promise<Subscription[]> {
+  async findByCustomerId(
+    workspaceId: string,
+    customerId: string,
+  ): Promise<Subscription[]> {
     return this.prisma.subscription.findMany({
       where: { workspaceId, customerId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
   async findMany(
     workspaceId: string,
-    params: SubscriptionQueryParams
+    params: SubscriptionQueryParams,
   ): Promise<PaginatedResult<Subscription>> {
     const { limit, cursor, customerId, offerId, status, statuses } = params;
 
@@ -104,7 +112,7 @@ export class SubscriptionsService {
         cursor: { id: cursor },
         skip: 1,
       }),
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         customer: {
           select: { id: true, email: true, name: true },
@@ -129,7 +137,7 @@ export class SubscriptionsService {
   async cancel(
     workspaceId: string,
     id: string,
-    dto: CancelSubscriptionDto
+    dto: CancelSubscriptionDto,
   ): Promise<Subscription> {
     const subscription = await this.prisma.subscription.findFirst({
       where: { id, workspaceId },
@@ -160,7 +168,7 @@ export class SubscriptionsService {
     const canceledSubscription = await this.prisma.subscription.update({
       where: { id },
       data: {
-        status: 'canceled',
+        status: "canceled",
         canceledAt: now,
         endedAt: now,
         metadata: {
@@ -181,7 +189,7 @@ export class SubscriptionsService {
   async updateStatus(
     workspaceId: string,
     id: string,
-    status: SubscriptionStatus
+    status: SubscriptionStatus,
   ): Promise<Subscription> {
     const subscription = await this.prisma.subscription.findFirst({
       where: { id, workspaceId },
@@ -199,13 +207,13 @@ export class SubscriptionsService {
 
   async getActiveSubscriptionsForCustomer(
     workspaceId: string,
-    customerId: string
+    customerId: string,
   ): Promise<Subscription[]> {
     return this.prisma.subscription.findMany({
       where: {
         workspaceId,
         customerId,
-        status: { in: ['active', 'trialing'] },
+        status: { in: ["active", "trialing"] },
       },
       include: {
         offer: true,
@@ -217,7 +225,7 @@ export class SubscriptionsService {
   async change(
     workspaceId: string,
     id: string,
-    dto: ChangeSubscriptionDto
+    dto: ChangeSubscriptionDto,
   ): Promise<Subscription> {
     // 1. Verify subscription exists and is changeable
     const subscription = await this.prisma.subscription.findFirst({
@@ -232,14 +240,17 @@ export class SubscriptionsService {
       throw new NotFoundException(`Subscription ${id} not found`);
     }
 
-    if (!['active', 'trialing'].includes(subscription.status)) {
+    if (!["active", "trialing"].includes(subscription.status)) {
       throw new BadRequestException(
-        `Cannot change subscription in '${subscription.status}' status. Only active or trialing subscriptions can be changed.`
+        `Cannot change subscription in '${subscription.status}' status. Only active or trialing subscriptions can be changed.`,
       );
     }
 
     // 2. Validate the new offer exists and has a published version
-    const newOffer = await this.offersService.findById(workspaceId, dto.newOfferId);
+    const newOffer = await this.offersService.findById(
+      workspaceId,
+      dto.newOfferId,
+    );
     if (!newOffer) {
       throw new NotFoundException(`Offer ${dto.newOfferId} not found`);
     }
@@ -247,50 +258,55 @@ export class SubscriptionsService {
     // Get the target version (either specified or the current published version)
     let newVersion = dto.newOfferVersionId
       ? await this.offersService.getVersion(workspaceId, dto.newOfferVersionId)
-      : await this.offersService.getPublishedVersion(workspaceId, dto.newOfferId);
+      : await this.offersService.getPublishedVersion(
+          workspaceId,
+          dto.newOfferId,
+        );
 
     if (!newVersion) {
       throw new BadRequestException(
         dto.newOfferVersionId
           ? `Version ${dto.newOfferVersionId} not found`
-          : `Offer ${dto.newOfferId} has no published version`
+          : `Offer ${dto.newOfferId} has no published version`,
       );
     }
 
-    if (newVersion.status !== 'published') {
+    if (newVersion.status !== "published") {
       throw new BadRequestException(
-        `Cannot change to version ${newVersion.id} - only published versions can be used`
+        `Cannot change to version ${newVersion.id} - only published versions can be used`,
       );
     }
 
     // 3. Check if Stripe is configured
-    if (!this.billingService.isConfigured('stripe')) {
-      throw new BadRequestException('Stripe billing provider is not configured');
+    if (!this.billingService.isConfigured("stripe")) {
+      throw new BadRequestException(
+        "Stripe billing provider is not configured",
+      );
     }
 
     // 4. Get the Stripe subscription ID
     const stripeSubscriptionRef = await this.providerRefService.findByEntity(
       workspaceId,
-      'subscription',
+      "subscription",
       id,
-      'stripe'
+      "stripe",
     );
 
     if (!stripeSubscriptionRef) {
       throw new BadRequestException(
-        `Subscription ${id} is not linked to Stripe. Cannot change plan.`
+        `Subscription ${id} is not linked to Stripe. Cannot change plan.`,
       );
     }
 
     // 5. Get the new Stripe price ID
     const newStripePriceId = await this.providerRefService.getStripePriceId(
       workspaceId,
-      newVersion.id
+      newVersion.id,
     );
 
     if (!newStripePriceId) {
       throw new BadRequestException(
-        `Offer version ${newVersion.id} is not synced to Stripe. Please sync the offer first.`
+        `Offer version ${newVersion.id} is not synced to Stripe. Please sync the offer first.`,
       );
     }
 
@@ -299,17 +315,19 @@ export class SubscriptionsService {
     const result = await stripeAdapter.changeSubscription(
       {
         ...stripeSubscriptionRef,
-        metadata: stripeSubscriptionRef.metadata as Record<string, unknown> | undefined,
+        metadata: stripeSubscriptionRef.metadata as
+          | Record<string, unknown>
+          | undefined,
       },
       {
         newOfferId: dto.newOfferId,
         newOfferVersionId: newStripePriceId, // Pass the Stripe price ID
         prorationBehavior: dto.prorationBehavior,
-      }
+      },
     );
 
     this.logger.log(
-      `Changed subscription ${id} from offer ${subscription.offerId} to ${dto.newOfferId} (Stripe: ${stripeSubscriptionRef.externalId})`
+      `Changed subscription ${id} from offer ${subscription.offerId} to ${dto.newOfferId} (Stripe: ${stripeSubscriptionRef.externalId})`,
     );
 
     // 7. Update the local subscription record
@@ -323,14 +341,14 @@ export class SubscriptionsService {
           previousOfferId: subscription.offerId,
           previousOfferVersionId: subscription.offerVersionId,
           changedAt: new Date().toISOString(),
-          prorationBehavior: dto.prorationBehavior ?? 'create_prorations',
+          prorationBehavior: dto.prorationBehavior ?? "create_prorations",
         },
         version: { increment: 1 },
       },
     });
 
     this.logger.log(
-      `Subscription ${id} plan changed. Effective date: ${result.effectiveDate.toISOString()}`
+      `Subscription ${id} plan changed. Effective date: ${result.effectiveDate.toISOString()}`,
     );
 
     return updatedSubscription;

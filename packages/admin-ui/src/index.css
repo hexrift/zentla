@@ -23,7 +23,10 @@ table {
 }
 
 /* Subtle transitions for interactive elements */
-button, a, select, input {
+button,
+a,
+select,
+input {
   transition: all 0.15s ease;
 }
 

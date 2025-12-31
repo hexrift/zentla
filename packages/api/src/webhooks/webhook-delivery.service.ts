@@ -1,9 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { PrismaService } from '../database/prisma.service';
-import { WebhooksService } from './webhooks.service';
-import { OutboxService } from './outbox.service';
-import type { WebhookEndpoint, WebhookEvent, OutboxEvent, Prisma } from '@prisma/client';
+import { Injectable, Logger } from "@nestjs/common";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { PrismaService } from "../database/prisma.service";
+import { WebhooksService } from "./webhooks.service";
+import { OutboxService } from "./outbox.service";
+import type {
+  WebhookEndpoint,
+  WebhookEvent,
+  OutboxEvent,
+  Prisma,
+} from "@prisma/client";
 
 export interface WebhookDeliveryConfig {
   maxRetries: number;
@@ -15,10 +20,10 @@ export interface WebhookDeliveryConfig {
 
 const DEFAULT_CONFIG: WebhookDeliveryConfig = {
   maxRetries: 5,
-  initialDelayMs: 1000,      // 1 second
-  maxDelayMs: 300000,        // 5 minutes
+  initialDelayMs: 1000, // 1 second
+  maxDelayMs: 300000, // 5 minutes
   backoffMultiplier: 2,
-  timeoutMs: 30000,          // 30 seconds
+  timeoutMs: 30000, // 30 seconds
 };
 
 @Injectable()
@@ -70,17 +75,14 @@ export class WebhookDeliveryService {
     // Find events that are pending and due for delivery/retry
     const events = await this.prisma.webhookEvent.findMany({
       where: {
-        status: 'pending',
-        OR: [
-          { nextRetryAt: null },
-          { nextRetryAt: { lte: now } },
-        ],
+        status: "pending",
+        OR: [{ nextRetryAt: null }, { nextRetryAt: { lte: now } }],
       },
       include: {
         endpoint: true,
       },
       take: 50,
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: "asc" },
     });
 
     if (events.length === 0) {
@@ -91,14 +93,16 @@ export class WebhookDeliveryService {
 
     // Process in parallel with concurrency limit
     const results = await Promise.allSettled(
-      events.map((event) => this.deliverWebhook(event, event.endpoint))
+      events.map((event) => this.deliverWebhook(event, event.endpoint)),
     );
 
-    const succeeded = results.filter((r) => r.status === 'fulfilled').length;
-    const failed = results.filter((r) => r.status === 'rejected').length;
+    const succeeded = results.filter((r) => r.status === "fulfilled").length;
+    const failed = results.filter((r) => r.status === "rejected").length;
 
     if (succeeded > 0 || failed > 0) {
-      this.logger.log(`Webhook delivery: ${succeeded} succeeded, ${failed} failed`);
+      this.logger.log(
+        `Webhook delivery: ${succeeded} succeeded, ${failed} failed`,
+      );
     }
   }
 
@@ -110,7 +114,7 @@ export class WebhookDeliveryService {
     const endpoints = await this.prisma.webhookEndpoint.findMany({
       where: {
         workspaceId: event.workspaceId,
-        status: 'active',
+        status: "active",
         events: { has: event.eventType },
       },
     });
@@ -127,13 +131,13 @@ export class WebhookDeliveryService {
         endpointId: endpoint.id,
         eventType: event.eventType,
         payload: event.payload as Prisma.InputJsonValue,
-        status: 'pending' as const,
+        status: "pending" as const,
         attempts: 0,
       })),
     });
 
     this.logger.debug(
-      `Created ${endpoints.length} webhook events for ${event.eventType}`
+      `Created ${endpoints.length} webhook events for ${event.eventType}`,
     );
   }
 
@@ -142,7 +146,7 @@ export class WebhookDeliveryService {
    */
   private async deliverWebhook(
     event: WebhookEvent,
-    endpoint: WebhookEndpoint
+    endpoint: WebhookEndpoint,
   ): Promise<void> {
     const payload = {
       id: event.id,
@@ -152,22 +156,25 @@ export class WebhookDeliveryService {
     };
 
     // Sign the payload
-    const signature = this.webhooksService.signPayload(payload, endpoint.secret);
+    const signature = this.webhooksService.signPayload(
+      payload,
+      endpoint.secret,
+    );
 
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(
         () => controller.abort(),
-        this.config.timeoutMs
+        this.config.timeoutMs,
       );
 
       const response = await fetch(endpoint.url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Webhook-Signature': signature,
-          'X-Webhook-Id': event.id,
-          'X-Webhook-Timestamp': new Date().toISOString(),
+          "Content-Type": "application/json",
+          "X-Webhook-Signature": signature,
+          "X-Webhook-Id": event.id,
+          "X-Webhook-Timestamp": new Date().toISOString(),
         },
         body: JSON.stringify(payload),
         signal: controller.signal,
@@ -184,12 +191,13 @@ export class WebhookDeliveryService {
         await this.handleDeliveryFailure(
           event,
           endpoint,
-          `HTTP ${response.status}: ${response.statusText}`
+          `HTTP ${response.status}: ${response.statusText}`,
         );
       }
     } catch (error) {
       // Network/timeout error - schedule retry
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       await this.handleDeliveryFailure(event, endpoint, errorMessage);
     }
   }
@@ -200,7 +208,7 @@ export class WebhookDeliveryService {
   private async handleDeliveryFailure(
     event: WebhookEvent,
     endpoint: WebhookEndpoint,
-    errorMessage: string
+    errorMessage: string,
   ): Promise<void> {
     const newAttempts = event.attempts + 1;
 
@@ -212,8 +220,9 @@ export class WebhookDeliveryService {
 
     // Calculate next retry time with exponential backoff
     const delay = Math.min(
-      this.config.initialDelayMs * Math.pow(this.config.backoffMultiplier, event.attempts),
-      this.config.maxDelayMs
+      this.config.initialDelayMs *
+        Math.pow(this.config.backoffMultiplier, event.attempts),
+      this.config.maxDelayMs,
     );
     const nextRetryAt = new Date(Date.now() + delay);
 
@@ -228,20 +237,24 @@ export class WebhookDeliveryService {
     });
 
     this.logger.warn(
-      `Webhook ${event.id} failed (attempt ${newAttempts}/${this.config.maxRetries}): ${errorMessage}. Retry at ${nextRetryAt.toISOString()}`
+      `Webhook ${event.id} failed (attempt ${newAttempts}/${this.config.maxRetries}): ${errorMessage}. Retry at ${nextRetryAt.toISOString()}`,
     );
   }
 
   /**
    * Mark a webhook event as successfully delivered
    */
-  private async markDelivered(eventId: string, statusCode: number, endpointId: string): Promise<void> {
+  private async markDelivered(
+    eventId: string,
+    statusCode: number,
+    endpointId: string,
+  ): Promise<void> {
     const now = new Date();
     await this.prisma.$transaction([
       this.prisma.webhookEvent.update({
         where: { id: eventId },
         data: {
-          status: 'delivered',
+          status: "delivered",
           deliveredAt: now,
           response: { statusCode } as Prisma.InputJsonValue,
         },
@@ -265,7 +278,7 @@ export class WebhookDeliveryService {
     event: WebhookEvent,
     endpoint: WebhookEndpoint,
     failureReason: string,
-    attempts: number
+    attempts: number,
   ): Promise<void> {
     const now = new Date();
     await this.prisma.$transaction([
@@ -273,7 +286,7 @@ export class WebhookDeliveryService {
       this.prisma.webhookEvent.update({
         where: { id: event.id },
         data: {
-          status: 'failed',
+          status: "failed",
           lastAttemptAt: now,
           response: { error: failureReason } as Prisma.InputJsonValue,
         },
@@ -303,21 +316,23 @@ export class WebhookDeliveryService {
     ]);
 
     this.logger.error(
-      `Webhook ${event.id} moved to dead letter queue after ${attempts} attempts: ${failureReason}`
+      `Webhook ${event.id} moved to dead letter queue after ${attempts} attempts: ${failureReason}`,
     );
   }
 
   /**
    * Manually trigger delivery of a specific webhook event (for testing)
    */
-  async deliverSingleEvent(eventId: string): Promise<{ success: boolean; error?: string }> {
+  async deliverSingleEvent(
+    eventId: string,
+  ): Promise<{ success: boolean; error?: string }> {
     const event = await this.prisma.webhookEvent.findUnique({
       where: { id: eventId },
       include: { endpoint: true },
     });
 
     if (!event) {
-      return { success: false, error: 'Event not found' };
+      return { success: false, error: "Event not found" };
     }
 
     try {
@@ -331,18 +346,20 @@ export class WebhookDeliveryService {
   /**
    * Retry a dead letter event
    */
-  async retryDeadLetterEvent(deadLetterId: string): Promise<{ success: boolean; newEventId?: string; error?: string }> {
+  async retryDeadLetterEvent(
+    deadLetterId: string,
+  ): Promise<{ success: boolean; newEventId?: string; error?: string }> {
     const deadLetter = await this.prisma.deadLetterEvent.findUnique({
       where: { id: deadLetterId },
       include: { endpoint: true },
     });
 
     if (!deadLetter) {
-      return { success: false, error: 'Dead letter event not found' };
+      return { success: false, error: "Dead letter event not found" };
     }
 
-    if (deadLetter.endpoint.status !== 'active') {
-      return { success: false, error: 'Endpoint is not active' };
+    if (deadLetter.endpoint.status !== "active") {
+      return { success: false, error: "Endpoint is not active" };
     }
 
     // Create a new webhook event for retry
@@ -352,7 +369,7 @@ export class WebhookDeliveryService {
         endpointId: deadLetter.endpointId,
         eventType: deadLetter.eventType,
         payload: deadLetter.payload as Prisma.InputJsonValue,
-        status: 'pending',
+        status: "pending",
         attempts: 0,
       },
     });
@@ -362,7 +379,9 @@ export class WebhookDeliveryService {
       where: { id: deadLetterId },
     });
 
-    this.logger.log(`Retrying dead letter ${deadLetterId} as new event ${newEvent.id}`);
+    this.logger.log(
+      `Retrying dead letter ${deadLetterId} as new event ${newEvent.id}`,
+    );
 
     return { success: true, newEventId: newEvent.id };
   }

@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '../lib/api';
-import type { Offer } from '../lib/types';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../lib/api";
+import type { Offer } from "../lib/types";
 
 export function OffersPage() {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['offers', search],
+    queryKey: ["offers", search],
     queryFn: () => api.offers.list({ search }),
   });
 
@@ -81,11 +81,11 @@ export function OffersPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        offer.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : offer.status === 'draft'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-gray-100 text-gray-800'
+                        offer.status === "active"
+                          ? "bg-green-100 text-green-800"
+                          : offer.status === "draft"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {offer.status}
@@ -94,7 +94,7 @@ export function OffersPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {offer.currentVersion
                       ? `v${offer.currentVersion.version}`
-                      : 'No published version'}
+                      : "No published version"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(offer.createdAt).toLocaleDateString()}

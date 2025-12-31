@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { createHash, randomBytes, timingSafeEqual } from 'crypto';
-import type { ApiKeyContext } from '../../common/decorators';
-import { PrismaService } from '../../database/prisma.service';
-import type { ApiKey, ApiKeyRole, ApiKeyEnvironment } from '@relay/database';
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { createHash, randomBytes, timingSafeEqual } from "crypto";
+import type { ApiKeyContext } from "../../common/decorators";
+import { PrismaService } from "../../database/prisma.service";
+import type { ApiKey, ApiKeyRole, ApiKeyEnvironment } from "@relay/database";
 
-const API_KEY_PREFIX_LIVE = 'relay_live_';
-const API_KEY_PREFIX_TEST = 'relay_test_';
+const API_KEY_PREFIX_LIVE = "relay_live_";
+const API_KEY_PREFIX_TEST = "relay_test_";
 const API_KEY_LENGTH = 32;
 
 export interface GeneratedApiKey {
@@ -28,11 +28,11 @@ export class ApiKeyService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
   ) {
-    const secret = this.config.get<string>('apiKey.secret');
+    const secret = this.config.get<string>("apiKey.secret");
     if (!secret) {
-      throw new Error('API_KEY_SECRET is required');
+      throw new Error("API_KEY_SECRET is required");
     }
     this.secret = secret;
   }
@@ -42,10 +42,11 @@ export class ApiKeyService {
     name: string,
     role: ApiKeyRole,
     environment: ApiKeyEnvironment,
-    expiresAt?: Date
+    expiresAt?: Date,
   ): Promise<GeneratedApiKey> {
-    const rawKey = randomBytes(API_KEY_LENGTH).toString('hex');
-    const prefix = environment === 'live' ? API_KEY_PREFIX_LIVE : API_KEY_PREFIX_TEST;
+    const rawKey = randomBytes(API_KEY_LENGTH).toString("hex");
+    const prefix =
+      environment === "live" ? API_KEY_PREFIX_LIVE : API_KEY_PREFIX_TEST;
     const fullKey = `${prefix}${rawKey}`;
     const keyHash = this.hashApiKey(fullKey);
     const keyPrefix = fullKey.substring(0, prefix.length + 8);
@@ -93,8 +94,8 @@ export class ApiKeyService {
     }
 
     // Timing-safe comparison
-    const storedHash = Buffer.from(apiKey.keyHash, 'hex');
-    const providedHash = Buffer.from(keyHash, 'hex');
+    const storedHash = Buffer.from(apiKey.keyHash, "hex");
+    const providedHash = Buffer.from(keyHash, "hex");
 
     if (storedHash.length !== providedHash.length) {
       return null;
@@ -141,16 +142,16 @@ export class ApiKeyService {
         revokedAt: null,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
   }
 
   private hashApiKey(apiKey: string): string {
-    return createHash('sha256')
+    return createHash("sha256")
       .update(apiKey)
       .update(this.secret)
-      .digest('hex');
+      .digest("hex");
   }
 
   private async updateLastUsed(keyId: string): Promise<void> {
@@ -164,8 +165,8 @@ export class ApiKeyService {
     return {
       keyId: validated.id,
       workspaceId: validated.workspaceId,
-      role: validated.role as ApiKeyContext['role'],
-      environment: validated.environment as ApiKeyContext['environment'],
+      role: validated.role as ApiKeyContext["role"],
+      environment: validated.environment as ApiKeyContext["environment"],
     };
   }
 }

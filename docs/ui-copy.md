@@ -6,20 +6,21 @@ Clear, non-technical copy for the Relay admin dashboard.
 
 ## Navigation Labels
 
-| Section | Label | Tooltip |
-|---------|-------|---------|
-| Offers | Offers | Manage your pricing plans |
+| Section       | Label         | Tooltip                            |
+| ------------- | ------------- | ---------------------------------- |
+| Offers        | Offers        | Manage your pricing plans          |
 | Subscriptions | Subscriptions | View active and past subscriptions |
-| Customers | Customers | Manage your customer accounts |
-| Webhooks | Webhooks | Configure event notifications |
-| API Keys | API Keys | Manage access credentials |
-| Settings | Settings | Workspace configuration |
+| Customers     | Customers     | Manage your customer accounts      |
+| Webhooks      | Webhooks      | Configure event notifications      |
+| API Keys      | API Keys      | Manage access credentials          |
+| Settings      | Settings      | Workspace configuration            |
 
 ---
 
 ## Environment Indicator
 
 ### Test Mode Banner
+
 ```
 🧪 Test Mode
 You're viewing test data. Payments won't be processed.
@@ -27,6 +28,7 @@ You're viewing test data. Payments won't be processed.
 ```
 
 ### Live Mode Banner
+
 ```
 🟢 Live Mode
 Real payments are being processed.
@@ -38,6 +40,7 @@ Real payments are being processed.
 ## Offers Section
 
 ### Page Header
+
 ```
 Offers
 Create and manage your pricing plans. Each offer defines what customers pay
@@ -45,6 +48,7 @@ and what features they receive.
 ```
 
 ### Empty State
+
 ```
 No offers yet
 
@@ -56,13 +60,14 @@ accepting payments from customers.
 
 ### Offer States
 
-| State | Badge Color | Label | Description |
-|-------|-------------|-------|-------------|
-| Draft | Yellow | Draft | Not yet available for purchase |
-| Published | Green | Live | Customers can subscribe to this offer |
-| Archived | Gray | Archived | No longer available for new subscriptions |
+| State     | Badge Color | Label    | Description                               |
+| --------- | ----------- | -------- | ----------------------------------------- |
+| Draft     | Yellow      | Draft    | Not yet available for purchase            |
+| Published | Green       | Live     | Customers can subscribe to this offer     |
+| Archived  | Gray        | Archived | No longer available for new subscriptions |
 
 ### Offer Card
+
 ```
 ┌─────────────────────────────────────────────┐
 │ Pro Plan                           [Live]   │
@@ -77,6 +82,7 @@ accepting payments from customers.
 ### Create Offer Form
 
 **Name Field**
+
 ```
 Label: Offer Name
 Placeholder: e.g., Pro Plan, Enterprise, Starter
@@ -84,6 +90,7 @@ Helper: This is what customers will see during checkout.
 ```
 
 **Description Field**
+
 ```
 Label: Description
 Placeholder: Describe what's included in this plan...
@@ -91,12 +98,14 @@ Helper: A brief summary shown on the checkout page.
 ```
 
 **Pricing Section**
+
 ```
 Header: Pricing
 Subheader: Set how much customers pay and how often.
 ```
 
 **Amount Field**
+
 ```
 Label: Price
 Placeholder: 29.00
@@ -104,6 +113,7 @@ Helper: Enter the amount in dollars. We'll handle the cents.
 ```
 
 **Interval Field**
+
 ```
 Label: Billing Frequency
 Options:
@@ -114,6 +124,7 @@ Options:
 ```
 
 ### Publish Confirmation Dialog
+
 ```
 Title: Publish this offer?
 
@@ -127,6 +138,7 @@ on their current terms unless you migrate them.
 ```
 
 ### Archive Confirmation Dialog
+
 ```
 Title: Archive this offer?
 
@@ -142,6 +154,7 @@ This can't be undone, but you can create a new offer anytime.
 ```
 
 ### Version History
+
 ```
 Header: Version History
 
@@ -168,12 +181,14 @@ Changes to pricing or features require a new version.
 ## Subscriptions Section
 
 ### Page Header
+
 ```
 Subscriptions
 Track your active subscriptions and customer billing status.
 ```
 
 ### Empty State
+
 ```
 No subscriptions yet
 
@@ -185,15 +200,16 @@ Create an offer first, then share the checkout link with customers.
 
 ### Subscription States
 
-| State | Badge Color | Label | Customer-Friendly Meaning |
-|-------|-------------|-------|---------------------------|
-| Active | Green | Active | Subscription is current and paid |
-| Trialing | Blue | Trial | Free trial period, no charge yet |
-| Past Due | Orange | Past Due | Payment failed, retrying |
-| Canceled | Gray | Canceled | Subscription ended |
-| Paused | Yellow | Paused | Temporarily suspended |
+| State    | Badge Color | Label    | Customer-Friendly Meaning        |
+| -------- | ----------- | -------- | -------------------------------- |
+| Active   | Green       | Active   | Subscription is current and paid |
+| Trialing | Blue        | Trial    | Free trial period, no charge yet |
+| Past Due | Orange      | Past Due | Payment failed, retrying         |
+| Canceled | Gray        | Canceled | Subscription ended               |
+| Paused   | Yellow      | Paused   | Temporarily suspended            |
 
 ### Subscription Card
+
 ```
 ┌─────────────────────────────────────────────┐
 │ john@example.com                  [Active]  │
@@ -207,6 +223,7 @@ Create an offer first, then share the checkout link with customers.
 ```
 
 ### Cancel Confirmation Dialog
+
 ```
 Title: Cancel this subscription?
 
@@ -226,12 +243,14 @@ Canceling will:
 ## Customers Section
 
 ### Page Header
+
 ```
 Customers
 View and manage your customer accounts.
 ```
 
 ### Empty State
+
 ```
 No customers yet
 
@@ -242,6 +261,7 @@ or you can add them manually.
 ```
 
 ### Customer Card
+
 ```
 ┌─────────────────────────────────────────────┐
 │ Jane Smith                                  │
@@ -259,6 +279,7 @@ or you can add them manually.
 ## Webhooks Section
 
 ### Page Header
+
 ```
 Webhooks
 Get notified when events happen in your Relay workspace.
@@ -266,6 +287,7 @@ We'll send a POST request to your URL for each event.
 ```
 
 ### Empty State
+
 ```
 No webhooks configured
 
@@ -278,6 +300,7 @@ cancellations, and payment failures in real-time.
 ### Create Webhook Form
 
 **URL Field**
+
 ```
 Label: Endpoint URL
 Placeholder: https://your-app.com/webhooks/relay
@@ -285,6 +308,7 @@ Helper: Must be HTTPS and publicly accessible.
 ```
 
 **Events Field**
+
 ```
 Label: Events to send
 Helper: Select which events should trigger this webhook.
@@ -307,17 +331,18 @@ Payments
 
 ### Webhook Status
 
-| Status | Badge | Meaning |
-|--------|-------|---------|
-| Active | Green | Receiving events |
-| Disabled | Gray | Paused, not sending |
-| Failing | Red | Recent deliveries failed |
+| Status   | Badge | Meaning                  |
+| -------- | ----- | ------------------------ |
+| Active   | Green | Receiving events         |
+| Disabled | Gray  | Paused, not sending      |
+| Failing  | Red   | Recent deliveries failed |
 
 ---
 
 ## API Keys Section
 
 ### Page Header
+
 ```
 API Keys
 Manage credentials for accessing the Relay API.
@@ -325,6 +350,7 @@ Keep your keys secure and never share them publicly.
 ```
 
 ### Empty State
+
 ```
 No API keys
 
@@ -334,6 +360,7 @@ Create an API key to start integrating with Relay.
 ```
 
 ### Environment Explanation
+
 ```
 Test Keys (relay_test_...)
 Use for development and testing. No real charges.
@@ -343,6 +370,7 @@ Use in production. Processes real payments.
 ```
 
 ### Role Explanation
+
 ```
 Owner - Full access to all resources and settings
 Admin - Can manage offers, subscriptions, and webhooks
@@ -350,6 +378,7 @@ Member - Read-only access to most resources
 ```
 
 ### Key Created Success
+
 ```
 Title: API Key Created
 
@@ -367,6 +396,7 @@ Store this key securely. If you lose it, you'll need to create a new one.
 ```
 
 ### Revoke Key Confirmation
+
 ```
 Title: Revoke this API key?
 
@@ -384,12 +414,14 @@ This cannot be undone.
 ## Settings Section
 
 ### Page Header
+
 ```
 Settings
 Configure your Relay workspace.
 ```
 
 ### Workspace Settings
+
 ```
 Header: Workspace
 
@@ -403,6 +435,7 @@ Default Currency:
 ```
 
 ### Danger Zone
+
 ```
 Header: Danger Zone
 
@@ -417,6 +450,7 @@ These actions are destructive and cannot be undone.
 ## Global Messages
 
 ### Success Toasts
+
 ```
 Offer created successfully
 Offer published — customers can now subscribe
@@ -427,6 +461,7 @@ Settings saved
 ```
 
 ### Error Toasts
+
 ```
 Something went wrong. Please try again.
 Unable to connect. Check your internet connection.
@@ -436,6 +471,7 @@ Webhook URL must use HTTPS.
 ```
 
 ### Loading States
+
 ```
 Creating offer...
 Publishing...
@@ -447,12 +483,12 @@ Saving changes...
 
 ## Tooltips
 
-| Element | Tooltip |
-|---------|---------|
-| Draft badge | This version isn't available to customers yet |
-| Live badge | Customers can subscribe to this offer |
-| Archived badge | No longer accepting new subscriptions |
-| Trial days | Customers get free access for this many days |
-| Entitlements | Features and limits included with this offer |
-| Webhook secret | Use this to verify webhook signatures |
-| Test mode | Use test API keys and test card numbers |
+| Element        | Tooltip                                       |
+| -------------- | --------------------------------------------- |
+| Draft badge    | This version isn't available to customers yet |
+| Live badge     | Customers can subscribe to this offer         |
+| Archived badge | No longer accepting new subscriptions         |
+| Trial days     | Customers get free access for this many days  |
+| Entitlements   | Features and limits included with this offer  |
+| Webhook secret | Use this to verify webhook signatures         |
+| Test mode      | Use test API keys and test card numbers       |

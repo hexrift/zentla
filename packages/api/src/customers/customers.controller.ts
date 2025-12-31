@@ -255,7 +255,7 @@ export class CustomersController {
   })
   async findAll(
     @WorkspaceId() workspaceId: string,
-    @Query() query: QueryCustomersDto
+    @Query() query: QueryCustomersDto,
   ) {
     return this.customersService.findMany(workspaceId, {
       limit: query.limit ?? 20,
@@ -321,7 +321,7 @@ Use this value in the \`If-Match\` header when updating to prevent concurrent mo
   })
   async findOne(
     @WorkspaceId() workspaceId: string,
-    @Param("id", ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     const customer = await this.customersService.findById(workspaceId, id);
     if (!customer) {
@@ -369,7 +369,7 @@ Use this value in the \`If-Match\` header when updating to prevent concurrent mo
   })
   async create(
     @WorkspaceId() workspaceId: string,
-    @Body() dto: CreateCustomerDto
+    @Body() dto: CreateCustomerDto,
   ) {
     return this.customersService.create(workspaceId, dto);
   }
@@ -455,7 +455,7 @@ If the resource has been modified since you fetched it, the update will fail wit
     @WorkspaceId() workspaceId: string,
     @Param("id", ParseUUIDPipe) id: string,
     @Headers("if-match") ifMatch: string | undefined,
-    @Body() dto: UpdateCustomerDto
+    @Body() dto: UpdateCustomerDto,
   ) {
     // Parse version from If-Match header if provided
     const requiredVersion = ifMatch
@@ -513,7 +513,7 @@ If the resource has been modified since you fetched it, the update will fail wit
   })
   async delete(
     @WorkspaceId() workspaceId: string,
-    @Param("id", ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     await this.customersService.delete(workspaceId, id);
   }
@@ -583,12 +583,12 @@ If the resource has been modified since you fetched it, the update will fail wit
   async createPortalSession(
     @WorkspaceId() workspaceId: string,
     @Param("id", ParseUUIDPipe) id: string,
-    @Body() dto: CreatePortalSessionDto
+    @Body() dto: CreatePortalSessionDto,
   ) {
     const session = await this.customersService.createPortalSession(
       workspaceId,
       id,
-      dto.returnUrl
+      dto.returnUrl,
     );
     return session;
   }

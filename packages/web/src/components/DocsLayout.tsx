@@ -1,106 +1,109 @@
-import { useState, useEffect } from 'react';
-import { Outlet, Link, NavLink, useLocation } from 'react-router-dom';
-import { clsx } from 'clsx';
+import { useState, useEffect } from "react";
+import { Outlet, Link, NavLink, useLocation } from "react-router-dom";
+import { clsx } from "clsx";
 
-const DASHBOARD_URL = 'http://localhost:3001';
-const API_DOCS_URL = 'http://localhost:3002/docs';
-const FEEDBACK_URL = 'https://github.com/your-org/relay/issues';
+const DASHBOARD_URL = "http://localhost:3001";
+const API_DOCS_URL = "http://localhost:3002/docs";
+const FEEDBACK_URL = "https://github.com/your-org/relay/issues";
 
 const navigation = [
   {
-    title: 'Getting Started',
+    title: "Getting Started",
     items: [
-      { name: 'Quickstart', href: '/docs/quickstart' },
-      { name: 'End-to-End Example', href: '/docs/example' },
+      { name: "Quickstart", href: "/docs/quickstart" },
+      { name: "End-to-End Example", href: "/docs/example" },
     ],
   },
   {
-    title: 'Guides',
+    title: "Guides",
     items: [
-      { name: 'Headless Checkout', href: '/docs/headless-checkout' },
-      { name: 'Webhooks', href: '/docs/webhooks' },
+      { name: "Headless Checkout", href: "/docs/headless-checkout" },
+      { name: "Webhooks", href: "/docs/webhooks" },
     ],
   },
   {
-    title: 'Reference',
+    title: "Reference",
     items: [
-      { name: 'API Reference', href: API_DOCS_URL, external: true },
-      { name: 'Versioning & Stability', href: '/docs/versioning' },
+      { name: "API Reference", href: API_DOCS_URL, external: true },
+      { name: "Versioning & Stability", href: "/docs/versioning" },
     ],
   },
 ];
 
 // Table of contents for each page
-const tableOfContents: Record<string, Array<{ id: string; title: string; level: number }>> = {
-  '/docs': [
-    { id: 'prerequisites', title: 'Prerequisites', level: 2 },
-    { id: 'step-1-configure-stripe', title: 'Configure Stripe', level: 2 },
-    { id: 'step-2-create-feature', title: 'Define a Feature', level: 2 },
-    { id: 'step-3-create-offer', title: 'Create an Offer', level: 2 },
-    { id: 'step-4-publish-offer', title: 'Publish the Offer', level: 2 },
-    { id: 'step-5-create-customer', title: 'Create a Customer', level: 2 },
-    { id: 'step-6-create-checkout', title: 'Generate Checkout Link', level: 2 },
-    { id: 'step-7-check-entitlements', title: 'Check Entitlements', level: 2 },
-    { id: 'whats-next', title: "What's Next", level: 2 },
+const tableOfContents: Record<
+  string,
+  Array<{ id: string; title: string; level: number }>
+> = {
+  "/docs": [
+    { id: "prerequisites", title: "Prerequisites", level: 2 },
+    { id: "step-1-configure-stripe", title: "Configure Stripe", level: 2 },
+    { id: "step-2-create-feature", title: "Define a Feature", level: 2 },
+    { id: "step-3-create-offer", title: "Create an Offer", level: 2 },
+    { id: "step-4-publish-offer", title: "Publish the Offer", level: 2 },
+    { id: "step-5-create-customer", title: "Create a Customer", level: 2 },
+    { id: "step-6-create-checkout", title: "Generate Checkout Link", level: 2 },
+    { id: "step-7-check-entitlements", title: "Check Entitlements", level: 2 },
+    { id: "whats-next", title: "What's Next", level: 2 },
   ],
-  '/docs/quickstart': [
-    { id: 'prerequisites', title: 'Prerequisites', level: 2 },
-    { id: 'step-1-configure-stripe', title: 'Configure Stripe', level: 2 },
-    { id: 'step-2-create-feature', title: 'Define a Feature', level: 2 },
-    { id: 'step-3-create-offer', title: 'Create an Offer', level: 2 },
-    { id: 'step-4-publish-offer', title: 'Publish the Offer', level: 2 },
-    { id: 'step-5-create-customer', title: 'Create a Customer', level: 2 },
-    { id: 'step-6-create-checkout', title: 'Generate Checkout Link', level: 2 },
-    { id: 'step-7-check-entitlements', title: 'Check Entitlements', level: 2 },
-    { id: 'whats-next', title: "What's Next", level: 2 },
+  "/docs/quickstart": [
+    { id: "prerequisites", title: "Prerequisites", level: 2 },
+    { id: "step-1-configure-stripe", title: "Configure Stripe", level: 2 },
+    { id: "step-2-create-feature", title: "Define a Feature", level: 2 },
+    { id: "step-3-create-offer", title: "Create an Offer", level: 2 },
+    { id: "step-4-publish-offer", title: "Publish the Offer", level: 2 },
+    { id: "step-5-create-customer", title: "Create a Customer", level: 2 },
+    { id: "step-6-create-checkout", title: "Generate Checkout Link", level: 2 },
+    { id: "step-7-check-entitlements", title: "Check Entitlements", level: 2 },
+    { id: "whats-next", title: "What's Next", level: 2 },
   ],
-  '/docs/headless-checkout': [
-    { id: 'overview', title: 'Overview', level: 2 },
-    { id: 'flow', title: 'Checkout Flow', level: 2 },
-    { id: 'step-1-create-intent', title: 'Create Intent', level: 2 },
-    { id: 'step-2-collect-payment', title: 'Collect Payment', level: 2 },
-    { id: 'step-3-confirm-intent', title: 'Confirm Intent', level: 2 },
-    { id: 'handling-trials', title: 'Handling Trials', level: 2 },
-    { id: 'promotions', title: 'Applying Promotions', level: 2 },
-    { id: 'metadata', title: 'Passing Metadata', level: 2 },
-    { id: 'error-handling', title: 'Error Handling', level: 2 },
-    { id: 'complete-example', title: 'Complete Example', level: 2 },
+  "/docs/headless-checkout": [
+    { id: "overview", title: "Overview", level: 2 },
+    { id: "flow", title: "Checkout Flow", level: 2 },
+    { id: "step-1-create-intent", title: "Create Intent", level: 2 },
+    { id: "step-2-collect-payment", title: "Collect Payment", level: 2 },
+    { id: "step-3-confirm-intent", title: "Confirm Intent", level: 2 },
+    { id: "handling-trials", title: "Handling Trials", level: 2 },
+    { id: "promotions", title: "Applying Promotions", level: 2 },
+    { id: "metadata", title: "Passing Metadata", level: 2 },
+    { id: "error-handling", title: "Error Handling", level: 2 },
+    { id: "complete-example", title: "Complete Example", level: 2 },
   ],
-  '/docs/webhooks': [
-    { id: 'overview', title: 'Overview', level: 2 },
-    { id: 'setup', title: 'Setting Up Webhooks', level: 2 },
-    { id: 'events', title: 'Event Types', level: 2 },
-    { id: 'payload-examples', title: 'Payload Examples', level: 2 },
-    { id: 'best-practices', title: 'Best Practices', level: 2 },
-    { id: 'testing', title: 'Testing Webhooks', level: 2 },
+  "/docs/webhooks": [
+    { id: "overview", title: "Overview", level: 2 },
+    { id: "setup", title: "Setting Up Webhooks", level: 2 },
+    { id: "events", title: "Event Types", level: 2 },
+    { id: "payload-examples", title: "Payload Examples", level: 2 },
+    { id: "best-practices", title: "Best Practices", level: 2 },
+    { id: "testing", title: "Testing Webhooks", level: 2 },
   ],
-  '/docs/versioning': [
-    { id: 'api-versioning', title: 'API Versioning', level: 2 },
-    { id: 'change-policy', title: 'Change Policy', level: 2 },
-    { id: 'deprecation-process', title: 'Deprecation Process', level: 2 },
-    { id: 'beta-considerations', title: 'Beta Considerations', level: 2 },
-    { id: 'sdk-versioning', title: 'SDK Versioning', level: 2 },
-    { id: 'offer-versioning', title: 'Offer Versioning', level: 2 },
-    { id: 'webhook-versioning', title: 'Webhook Versioning', level: 2 },
-    { id: 'stability-indicators', title: 'Stability Indicators', level: 2 },
-    { id: 'changelog', title: 'Changelog', level: 2 },
-    { id: 'support', title: 'Getting Help', level: 2 },
+  "/docs/versioning": [
+    { id: "api-versioning", title: "API Versioning", level: 2 },
+    { id: "change-policy", title: "Change Policy", level: 2 },
+    { id: "deprecation-process", title: "Deprecation Process", level: 2 },
+    { id: "beta-considerations", title: "Beta Considerations", level: 2 },
+    { id: "sdk-versioning", title: "SDK Versioning", level: 2 },
+    { id: "offer-versioning", title: "Offer Versioning", level: 2 },
+    { id: "webhook-versioning", title: "Webhook Versioning", level: 2 },
+    { id: "stability-indicators", title: "Stability Indicators", level: 2 },
+    { id: "changelog", title: "Changelog", level: 2 },
+    { id: "support", title: "Getting Help", level: 2 },
   ],
-  '/docs/example': [
-    { id: 'scenario', title: 'Scenario', level: 2 },
-    { id: 'step-1-setup', title: 'Initial Setup', level: 2 },
-    { id: 'step-2-offer', title: 'Create Offer', level: 2 },
-    { id: 'step-3-webhook', title: 'Set Up Webhooks', level: 2 },
-    { id: 'step-4-backend', title: 'Backend Integration', level: 2 },
-    { id: 'step-5-frontend', title: 'Frontend Integration', level: 2 },
-    { id: 'step-6-testing', title: 'Testing the Flow', level: 2 },
-    { id: 'summary', title: 'Summary', level: 2 },
+  "/docs/example": [
+    { id: "scenario", title: "Scenario", level: 2 },
+    { id: "step-1-setup", title: "Initial Setup", level: 2 },
+    { id: "step-2-offer", title: "Create Offer", level: 2 },
+    { id: "step-3-webhook", title: "Set Up Webhooks", level: 2 },
+    { id: "step-4-backend", title: "Backend Integration", level: 2 },
+    { id: "step-5-frontend", title: "Frontend Integration", level: 2 },
+    { id: "step-6-testing", title: "Testing the Flow", level: 2 },
+    { id: "summary", title: "Summary", level: 2 },
   ],
 };
 
 export function DocsLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeHeading, setActiveHeading] = useState<string>('');
+  const [activeHeading, setActiveHeading] = useState<string>("");
   const location = useLocation();
 
   const currentToc = tableOfContents[location.pathname] ?? [];
@@ -117,7 +120,7 @@ export function DocsLayout() {
           }
         });
       },
-      { rootMargin: '-80px 0px -80% 0px', threshold: 0 }
+      { rootMargin: "-80px 0px -80% 0px", threshold: 0 },
     );
 
     currentToc.forEach((item) => {
@@ -131,7 +134,7 @@ export function DocsLayout() {
   const scrollToHeading = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -147,8 +150,18 @@ export function DocsLayout() {
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="lg:hidden p-2 -ml-2 text-gray-500 hover:text-gray-700"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               </button>
               <Link to="/" className="flex items-center gap-2">
@@ -161,7 +174,9 @@ export function DocsLayout() {
                 </span>
               </Link>
               <span className="hidden sm:block text-gray-300">|</span>
-              <span className="hidden sm:block text-sm font-medium text-gray-600">Documentation</span>
+              <span className="hidden sm:block text-sm font-medium text-gray-600">
+                Documentation
+              </span>
             </div>
 
             {/* Right side */}
@@ -180,12 +195,25 @@ export function DocsLayout() {
                 rel="noopener"
                 className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                  />
                 </svg>
                 Feedback
               </a>
-              <a href={DASHBOARD_URL} className="btn-primary text-xs py-1.5 px-3">
+              <a
+                href={DASHBOARD_URL}
+                className="btn-primary text-xs py-1.5 px-3"
+              >
                 Dashboard
               </a>
             </div>
@@ -206,8 +234,8 @@ export function DocsLayout() {
         {/* Left Sidebar - Navigation */}
         <aside
           className={clsx(
-            'fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 lg:static lg:translate-x-0 flex flex-col',
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 lg:static lg:translate-x-0 flex flex-col",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
           {/* Mobile header */}
@@ -217,8 +245,18 @@ export function DocsLayout() {
               onClick={() => setSidebarOpen(false)}
               className="p-1 text-gray-500 hover:text-gray-700"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -241,8 +279,18 @@ export function DocsLayout() {
                           className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
                         >
                           {item.name}
-                          <svg className="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          <svg
+                            className="w-3 h-3 text-gray-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
                           </svg>
                         </a>
                       </li>
@@ -253,17 +301,19 @@ export function DocsLayout() {
                           onClick={() => setSidebarOpen(false)}
                           className={({ isActive }) =>
                             clsx(
-                              'block px-3 py-2 text-sm rounded-lg transition-colors',
-                              isActive || (location.pathname === '/docs' && item.href === '/docs/quickstart')
-                                ? 'bg-primary-50 text-primary-700 font-medium'
-                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                              "block px-3 py-2 text-sm rounded-lg transition-colors",
+                              isActive ||
+                                (location.pathname === "/docs" &&
+                                  item.href === "/docs/quickstart")
+                                ? "bg-primary-50 text-primary-700 font-medium"
+                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
                             )
                           }
                         >
                           {item.name}
                         </NavLink>
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </div>
@@ -282,8 +332,18 @@ export function DocsLayout() {
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700"
               >
                 Share feedback
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
                 </svg>
               </a>
             </div>
@@ -311,11 +371,11 @@ export function DocsLayout() {
                       key={item.id}
                       onClick={() => scrollToHeading(item.id)}
                       className={clsx(
-                        'block w-full text-left text-sm py-1.5 transition-colors',
-                        item.level === 3 ? 'pl-4' : 'pl-0',
+                        "block w-full text-left text-sm py-1.5 transition-colors",
+                        item.level === 3 ? "pl-4" : "pl-0",
                         activeHeading === item.id
-                          ? 'text-primary-600 font-medium'
-                          : 'text-gray-500 hover:text-gray-900'
+                          ? "text-primary-600 font-medium"
+                          : "text-gray-500 hover:text-gray-900",
                       )}
                     >
                       {item.title}
@@ -336,8 +396,18 @@ export function DocsLayout() {
                         rel="noopener"
                         className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900"
                       >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
                         </svg>
                         API Reference
                       </a>
@@ -347,8 +417,18 @@ export function DocsLayout() {
                         href={DASHBOARD_URL}
                         className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900"
                       >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
+                          />
                         </svg>
                         Dashboard
                       </a>
@@ -360,8 +440,18 @@ export function DocsLayout() {
                         rel="noopener"
                         className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900"
                       >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                          />
                         </svg>
                         Send Feedback
                       </a>

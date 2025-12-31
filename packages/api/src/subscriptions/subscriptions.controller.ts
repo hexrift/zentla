@@ -231,7 +231,7 @@ export class SubscriptionsController {
   })
   async findAll(
     @WorkspaceId() workspaceId: string,
-    @Query() query: QuerySubscriptionsDto
+    @Query() query: QuerySubscriptionsDto,
   ) {
     return this.subscriptionsService.findMany(workspaceId, {
       limit: query.limit ?? 20,
@@ -285,11 +285,11 @@ export class SubscriptionsController {
   })
   async findOne(
     @WorkspaceId() workspaceId: string,
-    @Param("id", ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     const subscription = await this.subscriptionsService.findById(
       workspaceId,
-      id
+      id,
     );
     if (!subscription) {
       throw new NotFoundException(`Subscription ${id} not found`);
@@ -355,7 +355,7 @@ export class SubscriptionsController {
   async cancel(
     @WorkspaceId() workspaceId: string,
     @Param("id", ParseUUIDPipe) id: string,
-    @Body() dto: CancelSubscriptionDto
+    @Body() dto: CancelSubscriptionDto,
   ) {
     return this.subscriptionsService.cancel(workspaceId, id, dto);
   }
@@ -429,7 +429,7 @@ With \`none\`: They keep $99 plan until renewal, then switch to $29.
   async change(
     @WorkspaceId() workspaceId: string,
     @Param("id", ParseUUIDPipe) id: string,
-    @Body() dto: ChangeSubscriptionDto
+    @Body() dto: ChangeSubscriptionDto,
   ) {
     return this.subscriptionsService.change(workspaceId, id, dto);
   }

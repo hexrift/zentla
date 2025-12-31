@@ -1,14 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import { BillingService } from '../billing/billing.service';
-import { ProviderRefService } from '../billing/provider-ref.service';
-import type {
-  Offer,
-  OfferVersion,
-  OfferStatus,
-  Prisma,
-} from '@prisma/client';
-import type { PaginatedResult } from '@relay/database';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import { BillingService } from "../billing/billing.service";
+import { ProviderRefService } from "../billing/provider-ref.service";
+import type { Offer, OfferVersion, OfferStatus, Prisma } from "@prisma/client";
+import type { PaginatedResult } from "@relay/database";
 
 export interface OfferWithVersions extends Offer {
   versions: OfferVersion[];
@@ -31,12 +31,12 @@ export interface OfferConfigDto {
 }
 
 export interface PricingConfigDto {
-  model: 'flat' | 'per_unit' | 'tiered' | 'volume';
+  model: "flat" | "per_unit" | "tiered" | "volume";
   currency: string;
   amount: number;
-  interval?: 'day' | 'week' | 'month' | 'year';
+  interval?: "day" | "week" | "month" | "year";
   intervalCount?: number;
-  usageType?: 'licensed' | 'metered';
+  usageType?: "licensed" | "metered";
   tiers?: PricingTierDto[];
 }
 
@@ -54,7 +54,7 @@ export interface TrialConfigDto {
 export interface EntitlementConfigDto {
   featureKey: string;
   value: string | number | boolean;
-  valueType: 'boolean' | 'number' | 'string' | 'unlimited';
+  valueType: "boolean" | "number" | "string" | "unlimited";
 }
 
 export interface OfferQueryParams {
@@ -74,7 +74,10 @@ export class OffersService {
     private readonly providerRefService: ProviderRefService,
   ) {}
 
-  async findById(workspaceId: string, id: string): Promise<OfferWithVersions | null> {
+  async findById(
+    workspaceId: string,
+    id: string,
+  ): Promise<OfferWithVersions | null> {
     const offer = await this.prisma.offer.findFirst({
       where: {
         id,
@@ -82,7 +85,7 @@ export class OffersService {
       },
       include: {
         versions: {
-          orderBy: { version: 'desc' },
+          orderBy: { version: "desc" },
         },
         currentVersion: true,
       },
@@ -93,7 +96,7 @@ export class OffersService {
 
   async findMany(
     workspaceId: string,
-    params: OfferQueryParams
+    params: OfferQueryParams,
   ): Promise<PaginatedResult<Offer>> {
     const { limit, cursor, status, search } = params;
 
@@ -102,8 +105,8 @@ export class OffersService {
       ...(status && { status }),
       ...(search && {
         OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } },
+          { name: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
         ],
       }),
     };
@@ -115,7 +118,7 @@ export class OffersService {
         cursor: { id: cursor },
         skip: 1,
       }),
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         currentVersion: true,
       },
@@ -132,7 +135,10 @@ export class OffersService {
     };
   }
 
-  async create(workspaceId: string, dto: CreateOfferDto): Promise<OfferWithVersions> {
+  async create(
+    workspaceId: string,
+    dto: CreateOfferDto,
+  ): Promise<OfferWithVersions> {
     return this.prisma.executeInTransaction(async (tx) => {
       // Create offer with draft status (becomes active when first version is published)
       const offer = await tx.offer.create({
@@ -140,7 +146,7 @@ export class OffersService {
           workspaceId,
           name: dto.name,
           description: dto.description,
-          status: 'draft',
+          status: "draft",
           metadata: (dto.metadata ?? {}) as Prisma.InputJsonValue,
         },
       });
@@ -152,7 +158,7 @@ export class OffersService {
           data: {
             offerId: offer.id,
             version: 1,
-            status: 'draft',
+            status: "draft",
             config: JSON.parse(JSON.stringify(dto.config)),
           },
         });
@@ -169,7 +175,9 @@ export class OffersService {
   async update(
     workspaceId: string,
     id: string,
-    dto: Partial<Pick<Offer, 'name' | 'description'>> & { metadata?: Record<string, unknown> }
+    dto: Partial<Pick<Offer, "name" | "description">> & {
+      metadata?: Record<string, unknown>;
+    },
   ): Promise<Offer> {
     const offer = await this.prisma.offer.findFirst({
       where: { id, workspaceId },
@@ -188,8 +196,12 @@ export class OffersService {
 
     if (dto.metadata) {
       // Merge new metadata with existing
-      const existingMetadata = (offer.metadata as Record<string, unknown>) ?? {};
-      updateData.metadata = { ...existingMetadata, ...dto.metadata } as Prisma.InputJsonValue;
+      const existingMetadata =
+        (offer.metadata as Record<string, unknown>) ?? {};
+      updateData.metadata = {
+        ...existingMetadata,
+        ...dto.metadata,
+      } as Prisma.InputJsonValue;
     }
 
     return this.prisma.offer.update({
@@ -209,18 +221,20 @@ export class OffersService {
 
     // Archive in Stripe if product exists
     try {
-      if (this.billingService.isConfigured('stripe')) {
+      if (this.billingService.isConfigured("stripe")) {
         const productRef = await this.providerRefService.findByEntity(
           workspaceId,
-          'product',
+          "product",
           id,
-          'stripe'
+          "stripe",
         );
 
         if (productRef) {
           const stripeAdapter = this.billingService.getStripeAdapter();
           await stripeAdapter.archiveProduct(productRef.externalId);
-          this.logger.log(`Archived offer ${id} in Stripe: product=${productRef.externalId}`);
+          this.logger.log(
+            `Archived offer ${id} in Stripe: product=${productRef.externalId}`,
+          );
         }
       }
     } catch (error) {
@@ -230,20 +244,20 @@ export class OffersService {
 
     return this.prisma.offer.update({
       where: { id },
-      data: { status: 'archived', version: { increment: 1 } },
+      data: { status: "archived", version: { increment: 1 } },
     });
   }
 
   async createVersion(
     workspaceId: string,
     offerId: string,
-    config: OfferConfigDto
+    config: OfferConfigDto,
   ): Promise<OfferVersion> {
     const offer = await this.prisma.offer.findFirst({
       where: { id: offerId, workspaceId },
       include: {
         versions: {
-          orderBy: { version: 'desc' },
+          orderBy: { version: "desc" },
           take: 1,
         },
       },
@@ -257,13 +271,13 @@ export class OffersService {
     const existingDraft = await this.prisma.offerVersion.findFirst({
       where: {
         offerId,
-        status: 'draft',
+        status: "draft",
       },
     });
 
     if (existingDraft) {
       throw new BadRequestException(
-        'A draft version already exists. Publish or delete it before creating a new version.'
+        "A draft version already exists. Publish or delete it before creating a new version.",
       );
     }
 
@@ -273,7 +287,7 @@ export class OffersService {
       data: {
         offerId,
         version: nextVersion,
-        status: 'draft',
+        status: "draft",
         config: JSON.parse(JSON.stringify(config)),
       },
     });
@@ -282,7 +296,7 @@ export class OffersService {
   async updateDraftVersion(
     workspaceId: string,
     offerId: string,
-    config: OfferConfigDto
+    config: OfferConfigDto,
   ): Promise<OfferVersion> {
     const offer = await this.prisma.offer.findFirst({
       where: { id: offerId, workspaceId },
@@ -296,12 +310,12 @@ export class OffersService {
     const existingDraft = await this.prisma.offerVersion.findFirst({
       where: {
         offerId,
-        status: 'draft',
+        status: "draft",
       },
     });
 
     if (!existingDraft) {
-      throw new NotFoundException('No draft version found to update');
+      throw new NotFoundException("No draft version found to update");
     }
 
     return this.prisma.offerVersion.update({
@@ -315,13 +329,13 @@ export class OffersService {
   async createOrUpdateDraftVersion(
     workspaceId: string,
     offerId: string,
-    config: OfferConfigDto
+    config: OfferConfigDto,
   ): Promise<OfferVersion> {
     const offer = await this.prisma.offer.findFirst({
       where: { id: offerId, workspaceId },
       include: {
         versions: {
-          orderBy: { version: 'desc' },
+          orderBy: { version: "desc" },
           take: 1,
         },
       },
@@ -335,7 +349,7 @@ export class OffersService {
     const existingDraft = await this.prisma.offerVersion.findFirst({
       where: {
         offerId,
-        status: 'draft',
+        status: "draft",
       },
     });
 
@@ -356,7 +370,7 @@ export class OffersService {
       data: {
         offerId,
         version: nextVersion,
-        status: 'draft',
+        status: "draft",
         config: JSON.parse(JSON.stringify(config)),
       },
     });
@@ -366,7 +380,7 @@ export class OffersService {
     workspaceId: string,
     offerId: string,
     versionId?: string,
-    effectiveFrom?: Date
+    effectiveFrom?: Date,
   ): Promise<OfferVersion> {
     const offer = await this.prisma.offer.findFirst({
       where: { id: offerId, workspaceId },
@@ -386,44 +400,44 @@ export class OffersService {
     } else {
       // Find the latest draft
       versionToPublish = await this.prisma.offerVersion.findFirst({
-        where: { offerId, status: 'draft' },
-        orderBy: { version: 'desc' },
+        where: { offerId, status: "draft" },
+        orderBy: { version: "desc" },
       });
     }
 
     if (!versionToPublish) {
-      throw new NotFoundException('No draft version found to publish');
+      throw new NotFoundException("No draft version found to publish");
     }
 
-    if (versionToPublish.status !== 'draft') {
-      throw new BadRequestException('Only draft versions can be published');
+    if (versionToPublish.status !== "draft") {
+      throw new BadRequestException("Only draft versions can be published");
     }
 
     // Validate pricing configuration BEFORE any changes
     const config = versionToPublish.config as Record<string, unknown>;
     if (!config?.pricing) {
       throw new BadRequestException(
-        'Cannot publish: Offer version has no pricing configuration. Configure pricing in the Pricing tab first.'
+        "Cannot publish: Offer version has no pricing configuration. Configure pricing in the Pricing tab first.",
       );
     }
 
     const pricing = config.pricing as Record<string, unknown>;
     if (!pricing.currency) {
       throw new BadRequestException(
-        'Cannot publish: Pricing is missing currency. Configure pricing in the Pricing tab first.'
+        "Cannot publish: Pricing is missing currency. Configure pricing in the Pricing tab first.",
       );
     }
 
     if (pricing.amount === undefined || pricing.amount === null) {
       throw new BadRequestException(
-        'Cannot publish: Pricing is missing amount. Configure pricing in the Pricing tab first.'
+        "Cannot publish: Pricing is missing amount. Configure pricing in the Pricing tab first.",
       );
     }
 
     // Validate Stripe is configured
-    if (!this.billingService.isConfigured('stripe')) {
+    if (!this.billingService.isConfigured("stripe")) {
       throw new BadRequestException(
-        'Cannot publish: Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in Settings.'
+        "Cannot publish: Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in Settings.",
       );
     }
 
@@ -435,46 +449,51 @@ export class OffersService {
     const previousVersionId = offer.currentVersionId;
     const previousOfferStatus = offer.status;
 
-    const publishedVersion = await this.prisma.executeInTransaction(async (tx) => {
-      // For immediate publish, archive currently published version
-      // For scheduled publish, leave current version alone
-      if (!isScheduled && offer.currentVersionId) {
-        await tx.offerVersion.update({
-          where: { id: offer.currentVersionId },
-          data: { status: 'archived' },
-        });
-      }
+    const publishedVersion = await this.prisma.executeInTransaction(
+      async (tx) => {
+        // For immediate publish, archive currently published version
+        // For scheduled publish, leave current version alone
+        if (!isScheduled && offer.currentVersionId) {
+          await tx.offerVersion.update({
+            where: { id: offer.currentVersionId },
+            data: { status: "archived" },
+          });
+        }
 
-      // Publish the new version
-      const published = await tx.offerVersion.update({
-        where: { id: versionToPublish!.id },
-        data: {
-          status: 'published',
-          publishedAt: new Date(),
-          effectiveFrom: effectiveFrom ?? null,
-        },
-      });
-
-      // Only update offer's current version for immediate publishes
-      if (!isScheduled) {
-        await tx.offer.update({
-          where: { id: offerId },
+        // Publish the new version
+        const published = await tx.offerVersion.update({
+          where: { id: versionToPublish!.id },
           data: {
-            currentVersionId: published.id,
-            // Activate offer when first version is published
-            status: 'active',
+            status: "published",
+            publishedAt: new Date(),
+            effectiveFrom: effectiveFrom ?? null,
           },
         });
-      }
 
-      return published;
-    });
+        // Only update offer's current version for immediate publishes
+        if (!isScheduled) {
+          await tx.offer.update({
+            where: { id: offerId },
+            data: {
+              currentVersionId: published.id,
+              // Activate offer when first version is published
+              status: "active",
+            },
+          });
+        }
+
+        return published;
+      },
+    );
 
     // Sync to Stripe - if this fails, rollback database changes
     try {
       await this.syncToStripe(workspaceId, offer, publishedVersion);
     } catch (error) {
-      this.logger.error(`Stripe sync failed, rolling back publish for offer ${offerId}:`, error);
+      this.logger.error(
+        `Stripe sync failed, rolling back publish for offer ${offerId}:`,
+        error,
+      );
 
       // Rollback: revert the database changes
       await this.prisma.executeInTransaction(async (tx) => {
@@ -482,7 +501,7 @@ export class OffersService {
         await tx.offerVersion.update({
           where: { id: publishedVersion.id },
           data: {
-            status: 'draft',
+            status: "draft",
             publishedAt: null,
             effectiveFrom: null,
           },
@@ -492,7 +511,7 @@ export class OffersService {
         if (!isScheduled && previousVersionId) {
           await tx.offerVersion.update({
             where: { id: previousVersionId },
-            data: { status: 'published' },
+            data: { status: "published" },
           });
         }
 
@@ -509,9 +528,10 @@ export class OffersService {
       });
 
       // Re-throw with a clear message
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       throw new BadRequestException(
-        `Failed to sync to Stripe: ${errorMessage}. Changes have been rolled back.`
+        `Failed to sync to Stripe: ${errorMessage}. Changes have been rolled back.`,
       );
     }
 
@@ -521,11 +541,11 @@ export class OffersService {
   private async syncToStripe(
     workspaceId: string,
     offer: Offer,
-    version: OfferVersion
+    version: OfferVersion,
   ): Promise<void> {
-    if (!this.billingService.isConfigured('stripe')) {
+    if (!this.billingService.isConfigured("stripe")) {
       throw new BadRequestException(
-        'Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET environment variables.'
+        "Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET environment variables.",
       );
     }
 
@@ -533,20 +553,20 @@ export class OffersService {
     const config = version.config as Record<string, unknown>;
     if (!config?.pricing) {
       throw new BadRequestException(
-        'Cannot sync to Stripe: Offer version has no pricing configuration. Configure pricing in the Pricing tab first.'
+        "Cannot sync to Stripe: Offer version has no pricing configuration. Configure pricing in the Pricing tab first.",
       );
     }
 
     const pricing = config.pricing as Record<string, unknown>;
     if (!pricing.currency) {
       throw new BadRequestException(
-        'Cannot sync to Stripe: Pricing is missing currency. Configure pricing in the Pricing tab first.'
+        "Cannot sync to Stripe: Pricing is missing currency. Configure pricing in the Pricing tab first.",
       );
     }
 
     if (pricing.amount === undefined || pricing.amount === null) {
       throw new BadRequestException(
-        'Cannot sync to Stripe: Pricing is missing amount. Configure pricing in the Pricing tab first.'
+        "Cannot sync to Stripe: Pricing is missing amount. Configure pricing in the Pricing tab first.",
       );
     }
 
@@ -555,25 +575,25 @@ export class OffersService {
     // Check if we have an existing product ref
     const existingProductRef = await this.providerRefService.findByEntity(
       workspaceId,
-      'product',
+      "product",
       offer.id,
-      'stripe'
+      "stripe",
     );
 
     // Sync to Stripe
     const result = await stripeAdapter.syncOffer(
       offer as never, // Type cast for interface compatibility
       version as never,
-      existingProductRef as never
+      existingProductRef as never,
     );
 
     // Store product ref if new
     if (!existingProductRef) {
       await this.providerRefService.create({
         workspaceId,
-        entityType: 'product',
+        entityType: "product",
         entityId: offer.id,
-        provider: 'stripe',
+        provider: "stripe",
         externalId: result.productRef.externalId,
       });
     }
@@ -581,18 +601,21 @@ export class OffersService {
     // Store price ref for this version
     await this.providerRefService.create({
       workspaceId,
-      entityType: 'price',
+      entityType: "price",
       entityId: version.id,
-      provider: 'stripe',
+      provider: "stripe",
       externalId: result.priceRef.externalId,
     });
 
     this.logger.log(
-      `Synced offer ${offer.id} version ${version.id} to Stripe: product=${result.productRef.externalId}, price=${result.priceRef.externalId}`
+      `Synced offer ${offer.id} version ${version.id} to Stripe: product=${result.productRef.externalId}, price=${result.priceRef.externalId}`,
     );
   }
 
-  async syncOfferToStripe(workspaceId: string, offerId: string): Promise<{ success: boolean; message: string }> {
+  async syncOfferToStripe(
+    workspaceId: string,
+    offerId: string,
+  ): Promise<{ success: boolean; message: string }> {
     const offer = await this.prisma.offer.findFirst({
       where: { id: offerId, workspaceId },
       include: { currentVersion: true },
@@ -603,30 +626,36 @@ export class OffersService {
     }
 
     if (!offer.currentVersion) {
-      throw new BadRequestException('No published version to sync. Publish the offer first.');
+      throw new BadRequestException(
+        "No published version to sync. Publish the offer first.",
+      );
     }
 
     // Validate config has pricing
     const config = offer.currentVersion.config as Record<string, unknown>;
     if (!config?.pricing) {
-      throw new BadRequestException('Offer version has no pricing configuration. Edit the pricing tab and save.');
+      throw new BadRequestException(
+        "Offer version has no pricing configuration. Edit the pricing tab and save.",
+      );
     }
 
     const pricing = config.pricing as Record<string, unknown>;
     if (!pricing.currency) {
-      throw new BadRequestException('Offer pricing is missing currency. Edit the pricing tab and save.');
+      throw new BadRequestException(
+        "Offer pricing is missing currency. Edit the pricing tab and save.",
+      );
     }
 
     try {
       await this.syncToStripe(workspaceId, offer, offer.currentVersion);
-      return { success: true, message: 'Offer synced to Stripe successfully' };
+      return { success: true, message: "Offer synced to Stripe successfully" };
     } catch (error) {
       this.logger.error(`Failed to sync offer ${offerId} to Stripe:`, error);
       if (error instanceof BadRequestException) {
         throw error;
       }
       throw new BadRequestException(
-        `Failed to sync to Stripe: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to sync to Stripe: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -634,7 +663,7 @@ export class OffersService {
   async rollbackToVersion(
     workspaceId: string,
     offerId: string,
-    targetVersionId: string
+    targetVersionId: string,
   ): Promise<OfferVersion> {
     const offer = await this.prisma.offer.findFirst({
       where: { id: offerId, workspaceId },
@@ -656,7 +685,7 @@ export class OffersService {
       // Get the latest version number
       const latestVersion = await tx.offerVersion.findFirst({
         where: { offerId },
-        orderBy: { version: 'desc' },
+        orderBy: { version: "desc" },
       });
 
       const newVersionNumber = (latestVersion?.version ?? 0) + 1;
@@ -666,7 +695,7 @@ export class OffersService {
         data: {
           offerId,
           version: newVersionNumber,
-          status: 'draft',
+          status: "draft",
           config: targetVersion.config as Prisma.InputJsonValue,
         },
       });
@@ -675,7 +704,10 @@ export class OffersService {
     });
   }
 
-  async getVersions(workspaceId: string, offerId: string): Promise<OfferVersion[]> {
+  async getVersions(
+    workspaceId: string,
+    offerId: string,
+  ): Promise<OfferVersion[]> {
     const offer = await this.prisma.offer.findFirst({
       where: { id: offerId, workspaceId },
     });
@@ -686,11 +718,14 @@ export class OffersService {
 
     return this.prisma.offerVersion.findMany({
       where: { offerId },
-      orderBy: { version: 'desc' },
+      orderBy: { version: "desc" },
     });
   }
 
-  async getVersion(workspaceId: string, versionId: string): Promise<OfferVersion | null> {
+  async getVersion(
+    workspaceId: string,
+    versionId: string,
+  ): Promise<OfferVersion | null> {
     return this.prisma.offerVersion.findFirst({
       where: {
         id: versionId,
@@ -699,17 +734,23 @@ export class OffersService {
     });
   }
 
-  async getDraftVersion(workspaceId: string, offerId: string): Promise<OfferVersion | null> {
+  async getDraftVersion(
+    workspaceId: string,
+    offerId: string,
+  ): Promise<OfferVersion | null> {
     return this.prisma.offerVersion.findFirst({
       where: {
         offerId,
-        status: 'draft',
+        status: "draft",
         offer: { workspaceId },
       },
     });
   }
 
-  async getPublishedVersion(workspaceId: string, offerId: string): Promise<OfferVersion | null> {
+  async getPublishedVersion(
+    workspaceId: string,
+    offerId: string,
+  ): Promise<OfferVersion | null> {
     const offer = await this.prisma.offer.findFirst({
       where: { id: offerId, workspaceId },
       include: { currentVersion: true },
@@ -731,7 +772,7 @@ export class OffersService {
   async getEffectiveVersion(
     workspaceId: string,
     offerId: string,
-    asOfDate?: Date
+    asOfDate?: Date,
   ): Promise<OfferVersion | null> {
     const now = asOfDate ?? new Date();
 
@@ -739,18 +780,15 @@ export class OffersService {
     const effectiveVersions = await this.prisma.offerVersion.findMany({
       where: {
         offerId,
-        status: 'published',
+        status: "published",
         offer: { workspaceId },
-        OR: [
-          { effectiveFrom: null },
-          { effectiveFrom: { lte: now } },
-        ],
+        OR: [{ effectiveFrom: null }, { effectiveFrom: { lte: now } }],
       },
       orderBy: [
         // Prefer versions with explicit effectiveFrom dates
-        { effectiveFrom: { sort: 'desc', nulls: 'last' } },
+        { effectiveFrom: { sort: "desc", nulls: "last" } },
         // Fall back to publishedAt for versions without effectiveFrom
-        { publishedAt: 'desc' },
+        { publishedAt: "desc" },
       ],
       take: 1,
     });
@@ -764,7 +802,10 @@ export class OffersService {
    * Returns published versions whose effectiveFrom is in the future,
    * ordered by effectiveFrom ascending (soonest first).
    */
-  async getScheduledVersions(workspaceId: string, offerId: string): Promise<OfferVersion[]> {
+  async getScheduledVersions(
+    workspaceId: string,
+    offerId: string,
+  ): Promise<OfferVersion[]> {
     const offer = await this.prisma.offer.findFirst({
       where: { id: offerId, workspaceId },
     });
@@ -776,11 +817,11 @@ export class OffersService {
     return this.prisma.offerVersion.findMany({
       where: {
         offerId,
-        status: 'published',
+        status: "published",
         effectiveFrom: { gt: new Date() },
         offer: { workspaceId },
       },
-      orderBy: { effectiveFrom: 'asc' },
+      orderBy: { effectiveFrom: "asc" },
     });
   }
 }

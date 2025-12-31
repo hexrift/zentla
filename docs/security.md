@@ -13,6 +13,7 @@ Authorization: Bearer relay_live_xxxxx
 ```
 
 Key properties:
+
 - **Prefixed**: `relay_live_` or `relay_test_`
 - **Hashed**: Keys are stored as SHA-256 hashes
 - **Scoped**: Each key belongs to one workspace
@@ -27,12 +28,12 @@ Key properties:
 
 ## Authorization (RBAC)
 
-| Role | Offers | Subscriptions | Customers | Settings | API Keys |
-|------|--------|---------------|-----------|----------|----------|
-| owner | Full | Full | Full | Full | Full |
-| admin | Full | Full | Full | Read | None |
-| member | Read | Read | Full | None | None |
-| readonly | Read | Read | Read | None | None |
+| Role     | Offers | Subscriptions | Customers | Settings | API Keys |
+| -------- | ------ | ------------- | --------- | -------- | -------- |
+| owner    | Full   | Full          | Full      | Full     | Full     |
+| admin    | Full   | Full          | Full      | Read     | None     |
+| member   | Read   | Read          | Full      | None     | None     |
+| readonly | Read   | Read          | Read      | None     | None     |
 
 ## Tenant Isolation
 
@@ -43,7 +44,7 @@ Every database query is automatically scoped by `workspace_id`:
 ```typescript
 // All queries include workspace filter
 prisma.offer.findMany({
-  where: { workspaceId: ctx.workspaceId, ...filters }
+  where: { workspaceId: ctx.workspaceId, ...filters },
 });
 ```
 
@@ -80,7 +81,7 @@ Prisma ORM uses parameterized queries by default:
 ```typescript
 // Safe - parameterized
 prisma.customer.findFirst({
-  where: { email: userInput }
+  where: { email: userInput },
 });
 
 // Never concatenate user input into queries
@@ -92,14 +93,11 @@ prisma.customer.findFirst({
 
 ```typescript
 // Verify Stripe signature with raw body
-const event = stripe.webhooks.constructEvent(
-  rawBody,
-  signature,
-  webhookSecret
-);
+const event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
 ```
 
 Requirements:
+
 - Raw body preserved (no JSON parsing)
 - Signature header validation
 - Timestamp tolerance check
@@ -115,14 +113,14 @@ Relay-Signature: t=1234567890,v1=abc123...
 Verify in your handler:
 
 ```typescript
-const signature = req.headers['relay-signature'];
+const signature = req.headers["relay-signature"];
 const payload = req.body;
 
 // Verify
 const [timestamp, hash] = parseSignature(signature);
-const expected = hmac('sha256', secret, `${timestamp}.${payload}`);
+const expected = hmac("sha256", secret, `${timestamp}.${payload}`);
 if (!timingSafeEqual(hash, expected)) {
-  throw new Error('Invalid signature');
+  throw new Error("Invalid signature");
 }
 ```
 
@@ -130,13 +128,14 @@ if (!timingSafeEqual(hash, expected)) {
 
 Three tiers of rate limiting:
 
-| Tier | Window | Limit |
-|------|--------|-------|
-| Short | 1s | 10 requests |
-| Medium | 10s | 50 requests |
-| Long | 60s | 100 requests |
+| Tier   | Window | Limit        |
+| ------ | ------ | ------------ |
+| Short  | 1s     | 10 requests  |
+| Medium | 10s    | 50 requests  |
+| Long   | 60s    | 100 requests |
 
 Limits apply per:
+
 - IP address
 - API key
 - Workspace

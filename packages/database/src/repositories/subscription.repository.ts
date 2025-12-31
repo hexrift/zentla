@@ -1,14 +1,42 @@
-import type { Subscription, SubscriptionStatus, Entitlement } from '@prisma/client';
-import type { PaginationParams, PaginatedResult } from '../types';
+import type {
+  Subscription,
+  SubscriptionStatus,
+  Entitlement,
+} from "@prisma/client";
+import type { PaginationParams, PaginatedResult } from "../types";
 
 export interface SubscriptionRepository {
-  findById(workspaceId: string, id: string): Promise<SubscriptionWithRelations | null>;
-  findByCustomerId(workspaceId: string, customerId: string): Promise<Subscription[]>;
-  findMany(workspaceId: string, params: SubscriptionQueryParams): Promise<PaginatedResult<Subscription>>;
-  create(workspaceId: string, data: SubscriptionCreateData): Promise<Subscription>;
-  update(workspaceId: string, id: string, data: SubscriptionUpdateData): Promise<Subscription>;
-  updateStatus(workspaceId: string, id: string, status: SubscriptionStatus): Promise<Subscription>;
-  cancel(workspaceId: string, id: string, params: CancelParams): Promise<Subscription>;
+  findById(
+    workspaceId: string,
+    id: string,
+  ): Promise<SubscriptionWithRelations | null>;
+  findByCustomerId(
+    workspaceId: string,
+    customerId: string,
+  ): Promise<Subscription[]>;
+  findMany(
+    workspaceId: string,
+    params: SubscriptionQueryParams,
+  ): Promise<PaginatedResult<Subscription>>;
+  create(
+    workspaceId: string,
+    data: SubscriptionCreateData,
+  ): Promise<Subscription>;
+  update(
+    workspaceId: string,
+    id: string,
+    data: SubscriptionUpdateData,
+  ): Promise<Subscription>;
+  updateStatus(
+    workspaceId: string,
+    id: string,
+    status: SubscriptionStatus,
+  ): Promise<Subscription>;
+  cancel(
+    workspaceId: string,
+    id: string,
+    params: CancelParams,
+  ): Promise<Subscription>;
 }
 
 export interface SubscriptionWithRelations extends Subscription {

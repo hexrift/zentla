@@ -10,7 +10,7 @@ export interface Promotion {
   updatedAt: Date;
 }
 
-export type PromotionStatus = 'draft' | 'active' | 'archived';
+export type PromotionStatus = "draft" | "active" | "archived";
 
 export interface PromotionVersion {
   id: string;
@@ -22,7 +22,7 @@ export interface PromotionVersion {
   createdAt: Date;
 }
 
-export type PromotionVersionStatus = 'draft' | 'published' | 'archived';
+export type PromotionVersionStatus = "draft" | "published" | "archived";
 
 export interface PromotionConfig {
   discountType: DiscountType;
@@ -46,9 +46,9 @@ export interface PromotionConfig {
   metadata?: Record<string, unknown>;
 }
 
-export type DiscountType = 'percent' | 'fixed_amount' | 'free_trial_days';
+export type DiscountType = "percent" | "fixed_amount" | "free_trial_days";
 
-export type PromotionDuration = 'once' | 'repeating' | 'forever';
+export type PromotionDuration = "once" | "repeating" | "forever";
 
 export interface AppliedPromotion {
   id: string;
@@ -71,11 +71,11 @@ export interface PromotionValidationResult {
 }
 
 export type PromotionValidationError =
-  | 'not_found'
-  | 'expired'
-  | 'not_yet_valid'
-  | 'max_redemptions_reached'
-  | 'customer_limit_reached'
-  | 'offer_not_applicable'
-  | 'minimum_not_met'
-  | 'not_published';
+  | "not_found"
+  | "expired"
+  | "not_yet_valid"
+  | "max_redemptions_reached"
+  | "customer_limit_reached"
+  | "offer_not_applicable"
+  | "minimum_not_met"
+  | "not_published";

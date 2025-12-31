@@ -19,7 +19,11 @@ import {
 } from "@nestjs/swagger";
 import { CheckoutService } from "./checkout.service";
 import { WorkspaceId, MemberOnly } from "../common/decorators";
-import { CheckoutSessionSchema, CheckoutIntentSchema, CheckoutQuoteSchema } from "../common/schemas";
+import {
+  CheckoutSessionSchema,
+  CheckoutIntentSchema,
+  CheckoutQuoteSchema,
+} from "../common/schemas";
 import {
   IsOptional,
   Matches,
@@ -229,7 +233,8 @@ class CreateQuoteDto {
   offerId!: string;
 
   @ApiPropertyOptional({
-    description: "Specific offer version ID. If omitted, uses the currently published version.",
+    description:
+      "Specific offer version ID. If omitted, uses the currently published version.",
     example: "123e4567-e89b-12d3-a456-426614174000",
     format: "uuid",
   })
@@ -265,7 +270,8 @@ class CreateCheckoutIntentDto {
   offerId!: string;
 
   @ApiPropertyOptional({
-    description: "Specific offer version ID. If omitted, uses the currently published version.",
+    description:
+      "Specific offer version ID. If omitted, uses the currently published version.",
     example: "123e4567-e89b-12d3-a456-426614174000",
     format: "uuid",
   })
@@ -283,7 +289,8 @@ class CreateCheckoutIntentDto {
   customerId?: string;
 
   @ApiPropertyOptional({
-    description: "Email for new customer creation. Required if customerId is not provided.",
+    description:
+      "Email for new customer creation. Required if customerId is not provided.",
     example: "customer@example.com",
     format: "email",
   })
@@ -312,7 +319,8 @@ class CreateCheckoutIntentDto {
   trialDays?: number;
 
   @ApiPropertyOptional({
-    description: "Arbitrary metadata to store with the intent and resulting subscription.",
+    description:
+      "Arbitrary metadata to store with the intent and resulting subscription.",
     example: { campaign: "summer_2024" },
   })
   @IsOptional()
@@ -345,27 +353,36 @@ export class CheckoutController {
     @WorkspaceId() workspaceId: string,
     @Query("status") status?: string,
     @Query("limit") limitParam?: string,
-    @Query("cursor") cursor?: string
+    @Query("cursor") cursor?: string,
   ) {
     const limit = limitParam ? parseInt(limitParam, 10) : undefined;
-    return this.checkoutService.listSessions(workspaceId, { status, limit, cursor });
+    return this.checkoutService.listSessions(workspaceId, {
+      status,
+      limit,
+      cursor,
+    });
   }
 
   @Get("intents")
   @MemberOnly()
   @ApiOperation({
     summary: "List checkout intents",
-    description: "List all checkout intents (headless) with optional status filter.",
+    description:
+      "List all checkout intents (headless) with optional status filter.",
   })
   @ApiResponse({ status: 200, description: "List of checkout intents" })
   async listIntents(
     @WorkspaceId() workspaceId: string,
     @Query("status") status?: string,
     @Query("limit") limitParam?: string,
-    @Query("cursor") cursor?: string
+    @Query("cursor") cursor?: string,
   ) {
     const limit = limitParam ? parseInt(limitParam, 10) : undefined;
-    return this.checkoutService.listIntents(workspaceId, { status, limit, cursor });
+    return this.checkoutService.listIntents(workspaceId, {
+      status,
+      limit,
+      cursor,
+    });
   }
 
   @Get("stats")
@@ -445,7 +462,7 @@ export class CheckoutController {
   })
   async createSession(
     @WorkspaceId() workspaceId: string,
-    @Body() dto: CreateCheckoutSessionDto
+    @Body() dto: CreateCheckoutSessionDto,
   ) {
     const session = await this.checkoutService.create(workspaceId, dto);
 
@@ -504,7 +521,7 @@ export class CheckoutController {
   })
   async getSession(
     @WorkspaceId() workspaceId: string,
-    @Param("id", ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     const checkout = await this.checkoutService.findById(workspaceId, id);
     if (!checkout) {
@@ -547,7 +564,7 @@ export class CheckoutController {
   })
   async createQuote(
     @WorkspaceId() workspaceId: string,
-    @Body() dto: CreateQuoteDto
+    @Body() dto: CreateQuoteDto,
   ) {
     return this.checkoutService.createQuote(workspaceId, dto);
   }
@@ -556,7 +573,8 @@ export class CheckoutController {
   @MemberOnly()
   @ApiHeader({
     name: "Idempotency-Key",
-    description: "Unique key to prevent duplicate intent creation. Reusing the same key returns the existing intent.",
+    description:
+      "Unique key to prevent duplicate intent creation. Reusing the same key returns the existing intent.",
     required: false,
     example: "intent_abc123",
   })
@@ -593,12 +611,13 @@ Pass \`Idempotency-Key\` header to safely retry. Same key returns existing inten
   })
   @ApiResponse({
     status: 409,
-    description: "Intent with this idempotency key already exists with different parameters",
+    description:
+      "Intent with this idempotency key already exists with different parameters",
   })
   async createIntent(
     @WorkspaceId() workspaceId: string,
     @Body() dto: CreateCheckoutIntentDto,
-    @Headers("idempotency-key") idempotencyKey?: string
+    @Headers("idempotency-key") idempotencyKey?: string,
   ) {
     return this.checkoutService.createIntent(workspaceId, dto, idempotencyKey);
   }
@@ -638,7 +657,7 @@ Pass \`Idempotency-Key\` header to safely retry. Same key returns existing inten
   })
   async getIntent(
     @WorkspaceId() workspaceId: string,
-    @Param("id", ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     const intent = await this.checkoutService.findIntentById(workspaceId, id);
     if (!intent) {

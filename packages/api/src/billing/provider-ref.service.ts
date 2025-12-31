@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import type { ProviderRef, EntityType, Provider, Prisma } from '@prisma/client';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import type { ProviderRef, EntityType, Provider, Prisma } from "@prisma/client";
 
 export interface CreateProviderRefDto {
   workspaceId: string;
@@ -19,7 +19,7 @@ export class ProviderRefService {
     workspaceId: string,
     entityType: EntityType,
     entityId: string,
-    provider: Provider
+    provider: Provider,
   ): Promise<ProviderRef | null> {
     return this.prisma.providerRef.findFirst({
       where: {
@@ -35,7 +35,7 @@ export class ProviderRefService {
     workspaceId: string,
     provider: Provider,
     entityType: EntityType,
-    externalId: string
+    externalId: string,
   ): Promise<ProviderRef | null> {
     return this.prisma.providerRef.findFirst({
       where: {
@@ -55,7 +55,7 @@ export class ProviderRefService {
         entityId: dto.entityId,
         provider: dto.provider,
         externalId: dto.externalId,
-        metadata: dto.metadata as Prisma.InputJsonValue ?? undefined,
+        metadata: (dto.metadata as Prisma.InputJsonValue) ?? undefined,
       },
     });
   }
@@ -72,7 +72,7 @@ export class ProviderRefService {
       },
       update: {
         externalId: dto.externalId,
-        metadata: dto.metadata as Prisma.InputJsonValue ?? undefined,
+        metadata: (dto.metadata as Prisma.InputJsonValue) ?? undefined,
       },
       create: {
         workspaceId: dto.workspaceId,
@@ -80,7 +80,7 @@ export class ProviderRefService {
         entityId: dto.entityId,
         provider: dto.provider,
         externalId: dto.externalId,
-        metadata: dto.metadata as Prisma.InputJsonValue ?? undefined,
+        metadata: (dto.metadata as Prisma.InputJsonValue) ?? undefined,
       },
     });
   }
@@ -89,7 +89,7 @@ export class ProviderRefService {
     workspaceId: string,
     entityType: EntityType,
     entityId: string,
-    provider: Provider
+    provider: Provider,
   ): Promise<void> {
     await this.prisma.providerRef.deleteMany({
       where: {
@@ -115,9 +115,14 @@ export class ProviderRefService {
   async getProviderCustomerId(
     workspaceId: string,
     customerId: string,
-    provider: Provider = 'stripe'
+    provider: Provider = "stripe",
   ): Promise<string | null> {
-    const ref = await this.findByEntity(workspaceId, 'customer', customerId, provider);
+    const ref = await this.findByEntity(
+      workspaceId,
+      "customer",
+      customerId,
+      provider,
+    );
     return ref?.externalId ?? null;
   }
 
@@ -131,9 +136,14 @@ export class ProviderRefService {
   async getProviderPriceId(
     workspaceId: string,
     offerVersionId: string,
-    provider: Provider = 'stripe'
+    provider: Provider = "stripe",
   ): Promise<string | null> {
-    const ref = await this.findByEntity(workspaceId, 'price', offerVersionId, provider);
+    const ref = await this.findByEntity(
+      workspaceId,
+      "price",
+      offerVersionId,
+      provider,
+    );
     return ref?.externalId ?? null;
   }
 
@@ -147,9 +157,14 @@ export class ProviderRefService {
   async getProviderProductId(
     workspaceId: string,
     offerId: string,
-    provider: Provider = 'stripe'
+    provider: Provider = "stripe",
   ): Promise<string | null> {
-    const ref = await this.findByEntity(workspaceId, 'product', offerId, provider);
+    const ref = await this.findByEntity(
+      workspaceId,
+      "product",
+      offerId,
+      provider,
+    );
     return ref?.externalId ?? null;
   }
 
@@ -163,9 +178,14 @@ export class ProviderRefService {
   async getProviderSubscriptionId(
     workspaceId: string,
     subscriptionId: string,
-    provider: Provider = 'stripe'
+    provider: Provider = "stripe",
   ): Promise<string | null> {
-    const ref = await this.findByEntity(workspaceId, 'subscription', subscriptionId, provider);
+    const ref = await this.findByEntity(
+      workspaceId,
+      "subscription",
+      subscriptionId,
+      provider,
+    );
     return ref?.externalId ?? null;
   }
 
@@ -179,9 +199,9 @@ export class ProviderRefService {
    */
   async getStripeCustomerId(
     workspaceId: string,
-    customerId: string
+    customerId: string,
   ): Promise<string | null> {
-    return this.getProviderCustomerId(workspaceId, customerId, 'stripe');
+    return this.getProviderCustomerId(workspaceId, customerId, "stripe");
   }
 
   /**
@@ -189,9 +209,9 @@ export class ProviderRefService {
    */
   async getStripePriceId(
     workspaceId: string,
-    offerVersionId: string
+    offerVersionId: string,
   ): Promise<string | null> {
-    return this.getProviderPriceId(workspaceId, offerVersionId, 'stripe');
+    return this.getProviderPriceId(workspaceId, offerVersionId, "stripe");
   }
 
   /**
@@ -199,8 +219,8 @@ export class ProviderRefService {
    */
   async getStripeProductId(
     workspaceId: string,
-    offerId: string
+    offerId: string,
   ): Promise<string | null> {
-    return this.getProviderProductId(workspaceId, offerId, 'stripe');
+    return this.getProviderProductId(workspaceId, offerId, "stripe");
   }
 }

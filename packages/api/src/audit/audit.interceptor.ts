@@ -3,12 +3,12 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-} from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
-import { AuditService } from './audit.service';
-import type { Request } from 'express';
-import type { ApiKeyContext, SessionContext } from '../common/decorators';
+} from "@nestjs/common";
+import { Observable, throwError } from "rxjs";
+import { tap, catchError } from "rxjs/operators";
+import { AuditService } from "./audit.service";
+import type { Request } from "express";
+import type { ApiKeyContext, SessionContext } from "../common/decorators";
 
 interface RequestWithAuth extends Request {
   apiKeyContext?: ApiKeyContext;
@@ -17,25 +17,25 @@ interface RequestWithAuth extends Request {
 
 // PII fields to anonymize
 const PII_FIELDS = new Set([
-  'email',
-  'customerEmail',
-  'name',
-  'firstName',
-  'lastName',
-  'phone',
-  'phoneNumber',
-  'address',
-  'street',
-  'city',
-  'postalCode',
-  'zipCode',
-  'ssn',
-  'taxId',
-  'cardNumber',
-  'cvv',
-  'password',
-  'secret',
-  'token',
+  "email",
+  "customerEmail",
+  "name",
+  "firstName",
+  "lastName",
+  "phone",
+  "phoneNumber",
+  "address",
+  "street",
+  "city",
+  "postalCode",
+  "zipCode",
+  "ssn",
+  "taxId",
+  "cardNumber",
+  "cvv",
+  "password",
+  "secret",
+  "token",
 ]);
 
 /**
@@ -50,30 +50,40 @@ function anonymizePII(data: unknown): unknown {
     return data.map(anonymizePII);
   }
 
-  if (typeof data === 'object') {
+  if (typeof data === "object") {
     const result: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
-      if (PII_FIELDS.has(key) || key.toLowerCase().includes('email') || key.toLowerCase().includes('password')) {
+    for (const [key, value] of Object.entries(
+      data as Record<string, unknown>,
+    )) {
+      if (
+        PII_FIELDS.has(key) ||
+        key.toLowerCase().includes("email") ||
+        key.toLowerCase().includes("password")
+      ) {
         // Anonymize the value
-        if (typeof value === 'string') {
-          if (key.toLowerCase().includes('email')) {
+        if (typeof value === "string") {
+          if (key.toLowerCase().includes("email")) {
             // Mask email: john@example.com -> j***@e***.com
-            const parts = value.split('@');
+            const parts = value.split("@");
             if (parts.length === 2) {
               const [local, domain] = parts;
-              const domainParts = domain.split('.');
-              result[key] = `${local[0]}***@${domainParts[0][0]}***.${domainParts.slice(1).join('.')}`;
+              const domainParts = domain.split(".");
+              result[key] =
+                `${local[0]}***@${domainParts[0][0]}***.${domainParts.slice(1).join(".")}`;
             } else {
-              result[key] = '[REDACTED]';
+              result[key] = "[REDACTED]";
             }
-          } else if (key.toLowerCase().includes('name')) {
+          } else if (key.toLowerCase().includes("name")) {
             // Mask name: John Doe -> J*** D***
-            result[key] = value.split(' ').map(part => part[0] + '***').join(' ');
+            result[key] = value
+              .split(" ")
+              .map((part) => part[0] + "***")
+              .join(" ");
           } else {
-            result[key] = '[REDACTED]';
+            result[key] = "[REDACTED]";
           }
         } else {
-          result[key] = '[REDACTED]';
+          result[key] = "[REDACTED]";
         }
       } else {
         result[key] = anonymizePII(value);
@@ -88,54 +98,54 @@ function anonymizePII(data: unknown): unknown {
 // Map HTTP methods and paths to actions
 function getActionFromRequest(method: string, path: string): string | null {
   // Skip GET requests (read-only) except for specific audit-worthy reads
-  if (method === 'GET') {
+  if (method === "GET") {
     // Log access to sensitive endpoints
-    if (path.includes('/api-keys')) return 'view_api_keys';
-    if (path.includes('/audit-logs')) return 'view_audit_logs';
+    if (path.includes("/api-keys")) return "view_api_keys";
+    if (path.includes("/audit-logs")) return "view_audit_logs";
     return null;
   }
 
   // Auth actions
-  if (path.includes('/auth/signup')) return 'signup';
-  if (path.includes('/auth/login')) return 'login';
-  if (path.includes('/auth/logout') || path.includes('/auth/session')) {
-    if (method === 'DELETE') return 'logout';
+  if (path.includes("/auth/signup")) return "signup";
+  if (path.includes("/auth/login")) return "login";
+  if (path.includes("/auth/logout") || path.includes("/auth/session")) {
+    if (method === "DELETE") return "logout";
   }
-  if (path.includes('/auth/github')) return 'github_auth';
+  if (path.includes("/auth/github")) return "github_auth";
 
   // Extract resource from path (e.g., /api/v1/offers/123 -> offers)
-  const pathParts = path.split('/').filter(Boolean);
-  const apiIndex = pathParts.indexOf('api');
+  const pathParts = path.split("/").filter(Boolean);
+  const apiIndex = pathParts.indexOf("api");
   const resourceIndex = apiIndex >= 0 ? apiIndex + 2 : 0;
-  const resource = pathParts[resourceIndex]?.replace(/-/g, '_');
+  const resource = pathParts[resourceIndex]?.replace(/-/g, "_");
 
   if (!resource) return null;
 
   // Determine action based on method and path
-  if (method === 'POST') {
-    if (path.includes('/publish')) return 'publish';
-    if (path.includes('/archive')) return 'archive';
-    if (path.includes('/cancel')) return 'cancel';
-    if (path.includes('/versions')) return 'create_version';
-    if (path.includes('/rotate-secret')) return 'rotate_secret';
-    if (path.includes('/checkout/sessions')) return 'create_checkout_session';
-    if (path.includes('/checkout/intents')) return 'create_checkout_intent';
-    if (path.includes('/checkout/quotes')) return 'get_checkout_quote';
-    if (path.includes('/validate')) return 'validate';
-    return 'create';
+  if (method === "POST") {
+    if (path.includes("/publish")) return "publish";
+    if (path.includes("/archive")) return "archive";
+    if (path.includes("/cancel")) return "cancel";
+    if (path.includes("/versions")) return "create_version";
+    if (path.includes("/rotate-secret")) return "rotate_secret";
+    if (path.includes("/checkout/sessions")) return "create_checkout_session";
+    if (path.includes("/checkout/intents")) return "create_checkout_intent";
+    if (path.includes("/checkout/quotes")) return "get_checkout_quote";
+    if (path.includes("/validate")) return "validate";
+    return "create";
   }
-  if (method === 'PATCH' || method === 'PUT') return 'update';
-  if (method === 'DELETE') return 'delete';
+  if (method === "PATCH" || method === "PUT") return "update";
+  if (method === "DELETE") return "delete";
 
   return null;
 }
 
 function getResourceTypeFromPath(path: string): string | null {
   // Handle auth endpoints specially
-  if (path.includes('/auth/')) return 'auth';
+  if (path.includes("/auth/")) return "auth";
 
-  const pathParts = path.split('/').filter(Boolean);
-  const apiIndex = pathParts.indexOf('api');
+  const pathParts = path.split("/").filter(Boolean);
+  const apiIndex = pathParts.indexOf("api");
   const resourceIndex = apiIndex >= 0 ? apiIndex + 2 : 0;
   const resource = pathParts[resourceIndex];
 
@@ -143,28 +153,28 @@ function getResourceTypeFromPath(path: string): string | null {
 
   // Map plural endpoints to singular resource types
   const resourceMap: Record<string, string> = {
-    offers: 'offer',
-    subscriptions: 'subscription',
-    customers: 'customer',
-    promotions: 'promotion',
-    'webhook-endpoints': 'webhook_endpoint',
-    'api-keys': 'api_key',
-    workspaces: 'workspace',
-    checkout: 'checkout',
-    sessions: 'checkout_session',
-    intents: 'checkout_intent',
-    quotes: 'checkout_quote',
-    dashboard: 'dashboard',
-    auth: 'auth',
-    'audit-logs': 'audit_log',
+    offers: "offer",
+    subscriptions: "subscription",
+    customers: "customer",
+    promotions: "promotion",
+    "webhook-endpoints": "webhook_endpoint",
+    "api-keys": "api_key",
+    workspaces: "workspace",
+    checkout: "checkout",
+    sessions: "checkout_session",
+    intents: "checkout_intent",
+    quotes: "checkout_quote",
+    dashboard: "dashboard",
+    auth: "auth",
+    "audit-logs": "audit_log",
   };
 
   return resourceMap[resource] ?? resource;
 }
 
 function getResourceIdFromPath(path: string): string | null {
-  const pathParts = path.split('/').filter(Boolean);
-  const apiIndex = pathParts.indexOf('api');
+  const pathParts = path.split("/").filter(Boolean);
+  const apiIndex = pathParts.indexOf("api");
   const resourceIndex = apiIndex >= 0 ? apiIndex + 2 : 0;
 
   // Resource ID is typically the next part after the resource
@@ -199,26 +209,28 @@ export class AuditInterceptor implements NestInterceptor {
     const sessionContext = request.sessionContext;
 
     // Determine actor type and ID
-    let actorType: 'api_key' | 'user' | 'system' = 'api_key';
-    let actorId = 'unknown';
+    let actorType: "api_key" | "user" | "system" = "api_key";
+    let actorId = "unknown";
     let workspaceId: string | undefined;
-    let environment: 'test' | 'live' = 'test';
+    let environment: "test" | "live" = "test";
 
     if (sessionContext) {
-      actorType = 'user';
+      actorType = "user";
       actorId = sessionContext.userId;
       // For session auth, workspace comes from apiKeyContext (set by SessionGuard)
       workspaceId = apiKeyContext?.workspaceId;
-      environment = (apiKeyContext?.environment as 'test' | 'live') ?? 'test';
+      environment = (apiKeyContext?.environment as "test" | "live") ?? "test";
     } else if (apiKeyContext) {
-      actorType = 'api_key';
+      actorType = "api_key";
       actorId = apiKeyContext.keyId;
       workspaceId = apiKeyContext.workspaceId;
       environment = apiKeyContext.environment;
     }
 
     // For auth actions (signup/login), we may not have workspace context yet
-    const isAuthAction = ['signup', 'login', 'github_auth', 'logout'].includes(action);
+    const isAuthAction = ["signup", "login", "github_auth", "logout"].includes(
+      action,
+    );
 
     // Skip if no workspace context and not an auth action
     if (!workspaceId && !isAuthAction) {
@@ -229,9 +241,14 @@ export class AuditInterceptor implements NestInterceptor {
     const anonymizedBody = body ? anonymizePII(body) : undefined;
 
     // Helper to create audit log
-    const createLog = (success: boolean, resourceId: string, errorMessage?: string) => {
+    const createLog = (
+      success: boolean,
+      resourceId: string,
+      errorMessage?: string,
+    ) => {
       // For auth actions without workspace, use a placeholder
-      const logWorkspaceId = workspaceId ?? '00000000-0000-0000-0000-000000000000';
+      const logWorkspaceId =
+        workspaceId ?? "00000000-0000-0000-0000-000000000000";
 
       this.auditService
         .createAuditLog({
@@ -239,7 +256,7 @@ export class AuditInterceptor implements NestInterceptor {
           actorType,
           actorId,
           action: success ? action : `${action}_failed`,
-          resourceType: resourceType ?? 'unknown',
+          resourceType: resourceType ?? "unknown",
           resourceId: resourceId,
           changes: anonymizedBody as Record<string, unknown> | undefined,
           metadata: {
@@ -250,7 +267,7 @@ export class AuditInterceptor implements NestInterceptor {
             ...(errorMessage ? { error: errorMessage } : {}),
           },
           ipAddress: ip,
-          userAgent: headers['user-agent'],
+          userAgent: headers["user-agent"],
         })
         .catch(() => {
           // Silently ignore audit log failures
@@ -262,30 +279,41 @@ export class AuditInterceptor implements NestInterceptor {
         next: (response) => {
           // Extract resource ID from response if not in path
           let resourceId = resourceIdFromPath;
-          if (!resourceId && response && typeof response === 'object') {
-            const data = (response as Record<string, unknown>).data as Record<string, unknown> | undefined;
-            resourceId = (data?.id as string) ?? (response as Record<string, unknown>).id as string ?? 'unknown';
+          if (!resourceId && response && typeof response === "object") {
+            const data = (response as Record<string, unknown>).data as
+              | Record<string, unknown>
+              | undefined;
+            resourceId =
+              (data?.id as string) ??
+              ((response as Record<string, unknown>).id as string) ??
+              "unknown";
           }
 
           // For signup, try to get the new workspace ID from response
-          if (action === 'signup' && response && typeof response === 'object') {
-            const data = (response as Record<string, unknown>).data as Record<string, unknown> | undefined;
-            const workspaces = (data?.workspaces ?? (response as Record<string, unknown>).workspaces) as Array<{ id: string }> | undefined;
+          if (action === "signup" && response && typeof response === "object") {
+            const data = (response as Record<string, unknown>).data as
+              | Record<string, unknown>
+              | undefined;
+            const workspaces = (data?.workspaces ??
+              (response as Record<string, unknown>).workspaces) as
+              | Array<{ id: string }>
+              | undefined;
             if (workspaces?.[0]?.id) {
               resourceId = workspaces[0].id;
             }
           }
 
           // Log successful action
-          createLog(true, resourceId ?? 'unknown');
+          createLog(true, resourceId ?? "unknown");
         },
       }),
       catchError((error) => {
         // Log failed action
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        createLog(false, resourceIdFromPath ?? 'unknown', errorMessage);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        createLog(false, resourceIdFromPath ?? "unknown", errorMessage);
         return throwError(() => error);
-      })
+      }),
     );
   }
 }

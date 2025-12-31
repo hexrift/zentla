@@ -31,6 +31,7 @@ End-to-end walkthrough of the Relay subscription flow with gap analysis.
 **Action**: Admin creates a new offer in the dashboard
 
 **API Call**:
+
 ```http
 POST /api/v1/offers
 {
@@ -48,11 +49,11 @@ POST /api/v1/offers
 
 **State**: Offer created with version 1 in `draft` status
 
-| Status | Gap? | Issue |
-|--------|------|-------|
-| API | OK | Works |
-| UI | OK | `/offers/new` page exists |
-| Validation | GAP | No validation for pricing amount > 0 |
+| Status     | Gap? | Issue                                |
+| ---------- | ---- | ------------------------------------ |
+| API        | OK   | Works                                |
+| UI         | OK   | `/offers/new` page exists            |
+| Validation | GAP  | No validation for pricing amount > 0 |
 
 ---
 
@@ -61,6 +62,7 @@ POST /api/v1/offers
 **Action**: Admin publishes the draft version
 
 **API Call**:
+
 ```http
 POST /api/v1/offers/:id/publish
 { "versionId": "optional-specific-version" }
@@ -68,13 +70,14 @@ POST /api/v1/offers/:id/publish
 
 **State**: OfferVersion status `draft` → `published`
 
-| Status | Gap? | Issue |
-|--------|------|-------|
-| API | OK | Works |
-| UI | PARTIAL | Button exists but no confirmation dialog |
-| Stripe Sync | GAP | Does NOT sync to Stripe Products/Prices |
+| Status      | Gap?    | Issue                                    |
+| ----------- | ------- | ---------------------------------------- |
+| API         | OK      | Works                                    |
+| UI          | PARTIAL | Button exists but no confirmation dialog |
+| Stripe Sync | GAP     | Does NOT sync to Stripe Products/Prices  |
 
 **Critical Gap**: Publishing an offer should:
+
 1. Create/update Stripe Product
 2. Create Stripe Price for the version
 3. Store `provider_ref` mappings
@@ -86,6 +89,7 @@ POST /api/v1/offers/:id/publish
 **Action**: Developer's app calls Relay to start checkout
 
 **API Call**:
+
 ```http
 POST /api/v1/checkout/sessions
 {
@@ -97,6 +101,7 @@ POST /api/v1/checkout/sessions
 ```
 
 **Expected Response**:
+
 ```json
 {
   "id": "checkout-uuid",
@@ -105,13 +110,14 @@ POST /api/v1/checkout/sessions
 }
 ```
 
-| Status | Gap? | Issue |
-|--------|------|-------|
-| API | GAP | Controller exists but doesn't call Stripe |
-| Stripe | GAP | No Stripe Checkout Session creation |
-| Customer | GAP | Customer not created/linked if new |
+| Status   | Gap? | Issue                                     |
+| -------- | ---- | ----------------------------------------- |
+| API      | GAP  | Controller exists but doesn't call Stripe |
+| Stripe   | GAP  | No Stripe Checkout Session creation       |
+| Customer | GAP  | Customer not created/linked if new        |
 
 **Current Code Issue** (`checkout.controller.ts`):
+
 ```typescript
 // Currently returns stub data, needs:
 // 1. Get or create Customer
@@ -129,14 +135,15 @@ POST /api/v1/checkout/sessions
 
 **Stripe Webhook**: `checkout.session.completed`
 
-| Status | Gap? | Issue |
-|--------|------|-------|
-| Webhook Endpoint | OK | Route exists at `/api/v1/webhooks/stripe` |
-| Signature Verification | GAP | Not implemented |
-| Event Processing | GAP | Handler is a stub |
-| Subscription Creation | GAP | Not implemented |
+| Status                 | Gap? | Issue                                     |
+| ---------------------- | ---- | ----------------------------------------- |
+| Webhook Endpoint       | OK   | Route exists at `/api/v1/webhooks/stripe` |
+| Signature Verification | GAP  | Not implemented                           |
+| Event Processing       | GAP  | Handler is a stub                         |
+| Subscription Creation  | GAP  | Not implemented                           |
 
 **Current Code** (`webhooks.controller.ts`):
+
 ```typescript
 // Currently just returns { received: true }
 // Needs full implementation
@@ -149,6 +156,7 @@ POST /api/v1/checkout/sessions
 **Action**: Relay creates subscription from webhook
 
 **Expected**:
+
 1. Parse `checkout.session.completed` event
 2. Extract `subscription` ID from event
 3. Fetch full subscription from Stripe
@@ -156,12 +164,12 @@ POST /api/v1/checkout/sessions
 5. Create `provider_ref` mapping
 6. Emit `subscription.created` domain event
 
-| Status | Gap? | Issue |
-|--------|------|-------|
-| Subscription Model | OK | Prisma model exists |
+| Status               | Gap?    | Issue                       |
+| -------------------- | ------- | --------------------------- |
+| Subscription Model   | OK      | Prisma model exists         |
 | Subscription Service | PARTIAL | CRUD exists, no Stripe sync |
-| Provider Ref | GAP | Not created during webhook |
-| Domain Events | GAP | Not emitted |
+| Provider Ref         | GAP     | Not created during webhook  |
+| Domain Events        | GAP     | Not emitted                 |
 
 ---
 
@@ -170,17 +178,19 @@ POST /api/v1/checkout/sessions
 **Action**: System grants entitlements based on offer config
 
 **Expected**:
+
 1. Read entitlements from OfferVersion config
 2. Create Entitlement records for customer
 3. Set expiration based on subscription period
 
-| Status | Gap? | Issue |
-|--------|------|-------|
-| Entitlement Model | OK | Prisma model exists |
-| Entitlement Service | OK | Basic CRUD works |
-| Auto-Grant | GAP | Not triggered on subscription create |
+| Status              | Gap? | Issue                                |
+| ------------------- | ---- | ------------------------------------ |
+| Entitlement Model   | OK   | Prisma model exists                  |
+| Entitlement Service | OK   | Basic CRUD works                     |
+| Auto-Grant          | GAP  | Not triggered on subscription create |
 
 **Missing Logic**:
+
 ```typescript
 async function grantEntitlements(subscription: Subscription) {
   const offerVersion = await getOfferVersion(subscription.offerVersionId);
@@ -193,7 +203,7 @@ async function grantEntitlements(subscription: Subscription) {
       featureKey: e.featureKey,
       value: e.value,
       valueType: e.valueType,
-      expiresAt: subscription.currentPeriodEnd
+      expiresAt: subscription.currentPeriodEnd,
     });
   }
 }
@@ -206,11 +216,13 @@ async function grantEntitlements(subscription: Subscription) {
 **Action**: Developer's app checks if customer has access
 
 **API Call**:
+
 ```http
 GET /api/v1/customers/:id/entitlements/check/seats
 ```
 
 **Response**:
+
 ```json
 {
   "featureKey": "seats",
@@ -220,11 +232,11 @@ GET /api/v1/customers/:id/entitlements/check/seats
 }
 ```
 
-| Status | Gap? | Issue |
-|--------|------|-------|
-| API | OK | Endpoint works |
-| Logic | PARTIAL | Checks existence, not expiration |
-| Caching | GAP | No caching layer |
+| Status  | Gap?    | Issue                            |
+| ------- | ------- | -------------------------------- |
+| API     | OK      | Endpoint works                   |
+| Logic   | PARTIAL | Checks existence, not expiration |
+| Caching | GAP     | No caching layer                 |
 
 ---
 
@@ -232,29 +244,29 @@ GET /api/v1/customers/:id/entitlements/check/seats
 
 ### Critical (Blocking)
 
-| # | Gap | Impact | Fix Effort |
-|---|-----|--------|------------|
-| 1 | Checkout doesn't create Stripe session | Cannot complete purchase | Medium |
-| 2 | Webhook handler is stub | No subscription created | Medium |
-| 3 | Offer publish doesn't sync to Stripe | No Stripe Price to charge | Medium |
-| 4 | Entitlements not auto-granted | No feature access | Low |
+| #   | Gap                                    | Impact                    | Fix Effort |
+| --- | -------------------------------------- | ------------------------- | ---------- |
+| 1   | Checkout doesn't create Stripe session | Cannot complete purchase  | Medium     |
+| 2   | Webhook handler is stub                | No subscription created   | Medium     |
+| 3   | Offer publish doesn't sync to Stripe   | No Stripe Price to charge | Medium     |
+| 4   | Entitlements not auto-granted          | No feature access         | Low        |
 
 ### Important (Degraded Experience)
 
-| # | Gap | Impact | Fix Effort |
-|---|-----|--------|------------|
-| 5 | No webhook signature verification | Security risk | Low |
-| 6 | No domain events emitted | No outbound webhooks | Medium |
-| 7 | Customer not created from checkout | Manual customer management | Low |
-| 8 | No entitlement expiration check | Stale access | Low |
+| #   | Gap                                | Impact                     | Fix Effort |
+| --- | ---------------------------------- | -------------------------- | ---------- |
+| 5   | No webhook signature verification  | Security risk              | Low        |
+| 6   | No domain events emitted           | No outbound webhooks       | Medium     |
+| 7   | Customer not created from checkout | Manual customer management | Low        |
+| 8   | No entitlement expiration check    | Stale access               | Low        |
 
 ### Nice to Have
 
-| # | Gap | Impact | Fix Effort |
-|---|-----|--------|------------|
-| 9 | No publish confirmation in UI | UX | Low |
-| 10 | No entitlement caching | Performance | Medium |
-| 11 | No subscription change flow | Limited flexibility | High |
+| #   | Gap                           | Impact              | Fix Effort |
+| --- | ----------------------------- | ------------------- | ---------- |
+| 9   | No publish confirmation in UI | UX                  | Low        |
+| 10  | No entitlement caching        | Performance         | Medium     |
+| 11  | No subscription change flow   | Limited flexibility | High       |
 
 ---
 

@@ -228,7 +228,7 @@ export class WebhookEndpointsController {
   })
   async findAll(
     @WorkspaceId() workspaceId: string,
-    @Query() query: QueryEndpointsDto
+    @Query() query: QueryEndpointsDto,
   ) {
     return this.webhooksService.findEndpoints(workspaceId, {
       limit: query.limit ?? 20,
@@ -270,11 +270,11 @@ export class WebhookEndpointsController {
   @ApiResponse({ status: 404, description: "Endpoint not found" })
   async findOne(
     @WorkspaceId() workspaceId: string,
-    @Param("id", ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     const endpoint = await this.webhooksService.findEndpointById(
       workspaceId,
-      id
+      id,
     );
     if (!endpoint) {
       throw new NotFoundException(`Webhook endpoint ${id} not found`);
@@ -342,7 +342,7 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
   })
   async create(
     @WorkspaceId() workspaceId: string,
-    @Body() dto: CreateWebhookEndpointDto
+    @Body() dto: CreateWebhookEndpointDto,
   ) {
     return this.webhooksService.createEndpoint(workspaceId, dto);
   }
@@ -386,7 +386,7 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
   async update(
     @WorkspaceId() workspaceId: string,
     @Param("id", ParseUUIDPipe) id: string,
-    @Body() dto: UpdateWebhookEndpointDto
+    @Body() dto: UpdateWebhookEndpointDto,
   ) {
     return this.webhooksService.updateEndpoint(workspaceId, id, dto);
   }
@@ -427,7 +427,7 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
   @ApiResponse({ status: 404, description: "Endpoint not found" })
   async delete(
     @WorkspaceId() workspaceId: string,
-    @Param("id", ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     await this.webhooksService.deleteEndpoint(workspaceId, id);
   }
@@ -485,7 +485,7 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
   @ApiResponse({ status: 404, description: "Endpoint not found" })
   async rotateSecret(
     @WorkspaceId() workspaceId: string,
-    @Param("id", ParseUUIDPipe) id: string
+    @Param("id", ParseUUIDPipe) id: string,
   ) {
     const newSecret = await this.webhooksService.rotateSecret(workspaceId, id);
     return { secret: newSecret };

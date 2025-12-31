@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { randomBytes, createHash } from 'crypto';
-import { PrismaService } from '../database/prisma.service';
-import type { UserSession } from '@relay/database';
+import { Injectable } from "@nestjs/common";
+import { randomBytes, createHash } from "crypto";
+import { PrismaService } from "../database/prisma.service";
+import type { UserSession } from "@relay/database";
 
 const SESSION_TOKEN_LENGTH = 32;
-const SESSION_PREFIX = 'relay_session_';
+const SESSION_PREFIX = "relay_session_";
 const DEFAULT_SESSION_DURATION_DAYS = 30;
 
 export interface SessionContext {
@@ -23,8 +23,10 @@ export interface CreateSessionDto {
 export class UserSessionService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createSession(dto: CreateSessionDto): Promise<{ token: string; session: UserSession }> {
-    const rawToken = randomBytes(SESSION_TOKEN_LENGTH).toString('hex');
+  async createSession(
+    dto: CreateSessionDto,
+  ): Promise<{ token: string; session: UserSession }> {
+    const rawToken = randomBytes(SESSION_TOKEN_LENGTH).toString("hex");
     const token = `${SESSION_PREFIX}${rawToken}`;
     const tokenHash = this.hashToken(token);
 
@@ -74,11 +76,13 @@ export class UserSessionService {
   }
 
   async revokeSession(sessionId: string): Promise<void> {
-    await this.prisma.userSession.delete({
-      where: { id: sessionId },
-    }).catch(() => {
-      // Ignore if already deleted
-    });
+    await this.prisma.userSession
+      .delete({
+        where: { id: sessionId },
+      })
+      .catch(() => {
+        // Ignore if already deleted
+      });
   }
 
   async revokeAllUserSessions(userId: string): Promise<void> {
@@ -93,7 +97,7 @@ export class UserSessionService {
         userId,
         expiresAt: { gt: new Date() },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -107,6 +111,6 @@ export class UserSessionService {
   }
 
   private hashToken(token: string): string {
-    return createHash('sha256').update(token).digest('hex');
+    return createHash("sha256").update(token).digest("hex");
   }
 }

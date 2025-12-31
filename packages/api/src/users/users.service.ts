@@ -2,13 +2,16 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
-} from '@nestjs/common';
-import { randomBytes, scrypt, timingSafeEqual } from 'crypto';
-import { promisify } from 'util';
-import { PrismaService } from '../database/prisma.service';
-import { WorkspacesService } from '../workspaces/workspaces.service';
-import { ApiKeyService, type GeneratedApiKey } from '../auth/services/api-key.service';
-import type { User, WorkspaceRole, WorkspaceMode } from '@relay/database';
+} from "@nestjs/common";
+import { randomBytes, scrypt, timingSafeEqual } from "crypto";
+import { promisify } from "util";
+import { PrismaService } from "../database/prisma.service";
+import { WorkspacesService } from "../workspaces/workspaces.service";
+import {
+  ApiKeyService,
+  type GeneratedApiKey,
+} from "../auth/services/api-key.service";
+import type { User, WorkspaceRole, WorkspaceMode } from "@relay/database";
 
 const scryptAsync = promisify(scrypt);
 
@@ -63,7 +66,7 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly workspacesService: WorkspacesService,
-    private readonly apiKeyService: ApiKeyService
+    private readonly apiKeyService: ApiKeyService,
   ) {}
 
   async signup(dto: SignupDto): Promise<SignupResult> {
@@ -73,7 +76,7 @@ export class UsersService {
     });
 
     if (existing) {
-      throw new ConflictException('A user with this email already exists');
+      throw new ConflictException("A user with this email already exists");
     }
 
     // Hash password
@@ -89,7 +92,7 @@ export class UsersService {
       const newUser = await tx.user.create({
         data: {
           email: dto.email.toLowerCase(),
-          name: dto.name || dto.email.split('@')[0],
+          name: dto.name || dto.email.split("@")[0],
           passwordHash,
         },
       });
@@ -97,12 +100,12 @@ export class UsersService {
       // Create default workspace for user (in test mode)
       const workspace = await tx.workspace.create({
         data: {
-          name: `${dto.name || dto.email.split('@')[0]}'s Workspace`,
+          name: `${dto.name || dto.email.split("@")[0]}'s Workspace`,
           slug,
-          defaultProvider: 'stripe',
-          mode: 'test',
+          defaultProvider: "stripe",
+          mode: "test",
           settings: {
-            defaultCurrency: 'USD',
+            defaultCurrency: "USD",
             webhookRetryPolicy: {
               maxRetries: 5,
               initialDelayMs: 1000,
@@ -118,7 +121,7 @@ export class UsersService {
         data: {
           userId: newUser.id,
           workspaceId: workspace.id,
-          role: 'owner',
+          role: "owner",
         },
       });
 
@@ -147,9 +150,9 @@ export class UsersService {
     // Generate initial test API key for the new workspace
     const initialApiKey = await this.apiKeyService.generateApiKey(
       workspaceId,
-      'Default Test Key',
-      'admin',
-      'test'
+      "Default Test Key",
+      "admin",
+      "test",
     );
 
     return {
@@ -223,7 +226,7 @@ export class UsersService {
       const newUser = await tx.user.create({
         data: {
           email: dto.email.toLowerCase(),
-          name: dto.name || dto.email.split('@')[0],
+          name: dto.name || dto.email.split("@")[0],
           githubId: dto.githubId,
           avatarUrl: dto.avatarUrl,
           emailVerifiedAt: new Date(), // GitHub emails are verified
@@ -232,12 +235,12 @@ export class UsersService {
 
       const workspace = await tx.workspace.create({
         data: {
-          name: `${dto.name || dto.email.split('@')[0]}'s Workspace`,
+          name: `${dto.name || dto.email.split("@")[0]}'s Workspace`,
           slug,
-          defaultProvider: 'stripe',
-          mode: 'test',
+          defaultProvider: "stripe",
+          mode: "test",
           settings: {
-            defaultCurrency: 'USD',
+            defaultCurrency: "USD",
             webhookRetryPolicy: {
               maxRetries: 5,
               initialDelayMs: 1000,
@@ -252,7 +255,7 @@ export class UsersService {
         data: {
           userId: newUser.id,
           workspaceId: workspace.id,
-          role: 'owner',
+          role: "owner",
         },
       });
 
@@ -280,9 +283,9 @@ export class UsersService {
     // Generate initial test API key for new GitHub user
     const initialApiKey = await this.apiKeyService.generateApiKey(
       workspaceId,
-      'Default Test Key',
-      'admin',
-      'test'
+      "Default Test Key",
+      "admin",
+      "test",
     );
 
     return {
@@ -311,12 +314,12 @@ export class UsersService {
     });
 
     if (!user || !user.passwordHash) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException("Invalid email or password");
     }
 
     const isValid = await this.verifyPassword(dto.password, user.passwordHash);
     if (!isValid) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException("Invalid email or password");
     }
 
     return user as UserWithWorkspaces;
@@ -351,28 +354,28 @@ export class UsersService {
   }
 
   private async hashPassword(password: string): Promise<string> {
-    const salt = randomBytes(16).toString('hex');
+    const salt = randomBytes(16).toString("hex");
     const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
-    return `${salt}:${derivedKey.toString('hex')}`;
+    return `${salt}:${derivedKey.toString("hex")}`;
   }
 
   private async verifyPassword(
     password: string,
-    storedHash: string
+    storedHash: string,
   ): Promise<boolean> {
-    const [salt, hash] = storedHash.split(':');
+    const [salt, hash] = storedHash.split(":");
     const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
-    const storedKey = Buffer.from(hash, 'hex');
+    const storedKey = Buffer.from(hash, "hex");
     return timingSafeEqual(derivedKey, storedKey);
   }
 
   private generateSlugFromEmail(email: string): string {
-    const localPart = email.split('@')[0];
+    const localPart = email.split("@")[0];
     return localPart
       .toLowerCase()
-      .replace(/[^a-z0-9]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
+      .replace(/[^a-z0-9]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
       .substring(0, 30);
   }
 

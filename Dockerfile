@@ -13,9 +13,11 @@ WORKDIR /app
 # Install build dependencies for native modules
 RUN apk add --no-cache libc6-compat python3 make g++
 
+# Enable Corepack for Yarn 4
+RUN corepack enable
+
 # Copy package files
 COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn ./.yarn
 COPY packages/api/package.json ./packages/api/
 COPY packages/core/package.json ./packages/core/
 COPY packages/database/package.json ./packages/database/
@@ -24,7 +26,7 @@ COPY packages/adapters/stripe/package.json ./packages/adapters/stripe/
 COPY packages/adapters/zuora/package.json ./packages/adapters/zuora/
 
 # Install all dependencies (including devDependencies for build)
-RUN yarn install --immutable
+RUN yarn install
 
 # -----------------------------------------------------------------------------
 # Stage 2: Builder
@@ -33,24 +35,31 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/.yarn ./.yarn
-COPY --from=deps /app/packages/api/node_modules ./packages/api/node_modules
-COPY --from=deps /app/packages/core/node_modules ./packages/core/node_modules
-COPY --from=deps /app/packages/database/node_modules ./packages/database/node_modules
-COPY --from=deps /app/packages/sdk/node_modules ./packages/sdk/node_modules
-COPY --from=deps /app/packages/adapters/stripe/node_modules ./packages/adapters/stripe/node_modules
-COPY --from=deps /app/packages/adapters/zuora/node_modules ./packages/adapters/zuora/node_modules
+# Enable Corepack for Yarn 4
+RUN corepack enable
 
-# Copy source code
-COPY . .
+# Copy dependencies from deps stage (Yarn 4 hoists all deps to root node_modules)
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy only API-related source code (not admin-ui)
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY tsconfig.base.json ./
+COPY packages/core ./packages/core
+COPY packages/database ./packages/database
+COPY packages/sdk ./packages/sdk
+COPY packages/adapters ./packages/adapters
+COPY packages/api ./packages/api
 
 # Generate Prisma client
 RUN yarn db:generate
 
-# Build all packages
-RUN yarn build
+# Build API-related packages only (exclude admin-ui)
+RUN yarn workspace @relay/core build && \
+    yarn workspace @relay/database build && \
+    yarn workspace @relay/sdk build && \
+    yarn workspace @relay/stripe-adapter build && \
+    yarn workspace @relay/zuora-adapter build && \
+    yarn workspace @relay/api build
 
 # -----------------------------------------------------------------------------
 # Stage 3: Production
@@ -66,9 +75,11 @@ RUN addgroup --system --gid 1001 nodejs && \
 # Install production dependencies only
 ENV NODE_ENV=production
 
+# Enable Corepack for Yarn 4
+RUN corepack enable
+
 # Copy package files for production install
 COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn ./.yarn
 COPY packages/api/package.json ./packages/api/
 COPY packages/core/package.json ./packages/core/
 COPY packages/database/package.json ./packages/database/

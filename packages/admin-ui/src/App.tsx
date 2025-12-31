@@ -1,24 +1,24 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './lib/auth-context';
-import ProtectedRoute from './components/ProtectedRoute';
-import { Layout } from './components/Layout';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import { CheckoutsPage } from './pages/CheckoutsPage';
-import { OffersPage } from './pages/OffersPage';
-import { OfferNewPage } from './pages/OfferNewPage';
-import { OfferDetailPage } from './pages/OfferDetailPage';
-import { PromotionsPage } from './pages/PromotionsPage';
-import { PromotionNewPage } from './pages/PromotionNewPage';
-import { PromotionDetailPage } from './pages/PromotionDetailPage';
-import { SubscriptionsPage } from './pages/SubscriptionsPage';
-import { SubscriptionDetailPage } from './pages/SubscriptionDetailPage';
-import { CustomersPage } from './pages/CustomersPage';
-import { WebhooksPage } from './pages/WebhooksPage';
-import { EventsPage } from './pages/EventsPage';
-import { AuditLogsPage } from './pages/AuditLogsPage';
-import { ApiKeysPage } from './pages/ApiKeysPage';
-import { SettingsPage } from './pages/SettingsPage';
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./lib/auth-context";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { Layout } from "./components/Layout";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import { CheckoutsPage } from "./pages/CheckoutsPage";
+import { OffersPage } from "./pages/OffersPage";
+import { OfferNewPage } from "./pages/OfferNewPage";
+import { OfferDetailPage } from "./pages/OfferDetailPage";
+import { PromotionsPage } from "./pages/PromotionsPage";
+import { PromotionNewPage } from "./pages/PromotionNewPage";
+import { PromotionDetailPage } from "./pages/PromotionDetailPage";
+import { SubscriptionsPage } from "./pages/SubscriptionsPage";
+import { SubscriptionDetailPage } from "./pages/SubscriptionDetailPage";
+import { CustomersPage } from "./pages/CustomersPage";
+import { WebhooksPage } from "./pages/WebhooksPage";
+import { EventsPage } from "./pages/EventsPage";
+import { AuditLogsPage } from "./pages/AuditLogsPage";
+import { ApiKeysPage } from "./pages/ApiKeysPage";
+import { SettingsPage } from "./pages/SettingsPage";
 
 export default function App() {
   return (
@@ -46,7 +46,10 @@ export default function App() {
           <Route path="promotions/new" element={<PromotionNewPage />} />
           <Route path="promotions/:id" element={<PromotionDetailPage />} />
           <Route path="subscriptions" element={<SubscriptionsPage />} />
-          <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
+          <Route
+            path="subscriptions/:id"
+            element={<SubscriptionDetailPage />}
+          />
           <Route path="customers" element={<CustomersPage />} />
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="events" element={<EventsPage />} />

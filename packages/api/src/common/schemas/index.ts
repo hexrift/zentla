@@ -14,37 +14,37 @@
  * All error responses follow this format.
  */
 export const ErrorResponseSchema = {
-  type: 'object',
-  required: ['success', 'error', 'meta'],
+  type: "object",
+  required: ["success", "error", "meta"],
   properties: {
-    success: { type: 'boolean', enum: [false] },
+    success: { type: "boolean", enum: [false] },
     error: {
-      type: 'object',
-      required: ['code', 'message'],
+      type: "object",
+      required: ["code", "message"],
       properties: {
         code: {
-          type: 'string',
-          description: 'Machine-readable error code for programmatic handling',
-          example: 'RESOURCE_NOT_FOUND',
+          type: "string",
+          description: "Machine-readable error code for programmatic handling",
+          example: "RESOURCE_NOT_FOUND",
         },
         message: {
-          type: 'string',
-          description: 'Human-readable error description',
-          example: 'Customer not found',
+          type: "string",
+          description: "Human-readable error description",
+          example: "Customer not found",
         },
         details: {
-          type: 'object',
-          description: 'Additional context (validation errors, field info)',
+          type: "object",
+          description: "Additional context (validation errors, field info)",
           nullable: true,
         },
       },
     },
     meta: {
-      type: 'object',
+      type: "object",
       properties: {
-        requestId: { type: 'string', nullable: true },
-        timestamp: { type: 'string', format: 'date-time' },
-        path: { type: 'string' },
+        requestId: { type: "string", nullable: true },
+        timestamp: { type: "string", format: "date-time" },
+        path: { type: "string" },
       },
     },
   },
@@ -54,16 +54,16 @@ export const ErrorResponseSchema = {
  * Pagination metadata included in list responses.
  */
 export const PaginationSchema = {
-  type: 'object',
+  type: "object",
   properties: {
     hasMore: {
-      type: 'boolean',
-      description: 'True if more pages exist',
+      type: "boolean",
+      description: "True if more pages exist",
     },
     nextCursor: {
-      type: 'string',
+      type: "string",
       nullable: true,
-      description: 'Pass to cursor param for next page',
+      description: "Pass to cursor param for next page",
     },
   },
 } as const;
@@ -73,44 +73,44 @@ export const PaginationSchema = {
 // ============================================================================
 
 export const PricingConfigSchema = {
-  type: 'object',
-  required: ['model', 'amount', 'currency', 'interval'],
+  type: "object",
+  required: ["model", "amount", "currency", "interval"],
   properties: {
     model: {
-      type: 'string',
-      enum: ['flat', 'per_unit', 'tiered', 'usage'] as string[],
-      description: 'Pricing model type',
+      type: "string",
+      enum: ["flat", "per_unit", "tiered", "usage"] as string[],
+      description: "Pricing model type",
     },
     amount: {
-      type: 'integer',
-      description: 'Price in cents (smallest currency unit)',
+      type: "integer",
+      description: "Price in cents (smallest currency unit)",
       example: 2999,
     },
     currency: {
-      type: 'string',
-      description: 'Three-letter ISO currency code',
-      example: 'usd',
+      type: "string",
+      description: "Three-letter ISO currency code",
+      example: "usd",
     },
     interval: {
-      type: 'string',
-      enum: ['month', 'year', 'week', 'day'] as string[],
-      description: 'Billing interval',
+      type: "string",
+      enum: ["month", "year", "week", "day"] as string[],
+      description: "Billing interval",
     },
     intervalCount: {
-      type: 'integer',
+      type: "integer",
       default: 1,
-      description: 'Number of intervals between billings',
+      description: "Number of intervals between billings",
     },
     tiers: {
-      type: 'array',
+      type: "array",
       nullable: true,
-      description: 'Required for tiered pricing model',
+      description: "Required for tiered pricing model",
       items: {
-        type: 'object',
+        type: "object",
         properties: {
-          upTo: { type: 'integer', nullable: true },
-          unitAmount: { type: 'integer' },
-          flatAmount: { type: 'integer' },
+          upTo: { type: "integer", nullable: true },
+          unitAmount: { type: "integer" },
+          flatAmount: { type: "integer" },
         },
       },
     },
@@ -118,93 +118,96 @@ export const PricingConfigSchema = {
 };
 
 export const TrialConfigSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    enabled: { type: 'boolean', default: false },
+    enabled: { type: "boolean", default: false },
     days: {
-      type: 'integer',
+      type: "integer",
       minimum: 1,
       maximum: 365,
-      description: 'Trial period in days',
+      description: "Trial period in days",
     },
     requirePaymentMethod: {
-      type: 'boolean',
+      type: "boolean",
       default: true,
-      description: 'Whether to collect payment method upfront',
+      description: "Whether to collect payment method upfront",
     },
   },
 };
 
 export const EntitlementConfigSchema = {
-  type: 'object',
-  required: ['featureKey', 'valueType', 'value'] as string[],
+  type: "object",
+  required: ["featureKey", "valueType", "value"] as string[],
   properties: {
     featureKey: {
-      type: 'string',
-      description: 'Unique feature identifier (e.g., "api_calls", "storage_gb")',
-      example: 'api_calls',
+      type: "string",
+      description:
+        'Unique feature identifier (e.g., "api_calls", "storage_gb")',
+      example: "api_calls",
     },
     valueType: {
-      type: 'string',
-      enum: ['boolean', 'number', 'string', 'unlimited'] as string[],
+      type: "string",
+      enum: ["boolean", "number", "string", "unlimited"] as string[],
     },
     value: {
-      description: 'Feature value (type depends on valueType)',
-      oneOf: [
-        { type: 'boolean' },
-        { type: 'number' },
-        { type: 'string' },
-      ],
+      description: "Feature value (type depends on valueType)",
+      oneOf: [{ type: "boolean" }, { type: "number" }, { type: "string" }],
     },
   },
 };
 
 export const OfferConfigSchema = {
-  type: 'object',
-  required: ['pricing'] as string[],
+  type: "object",
+  required: ["pricing"] as string[],
   properties: {
     pricing: PricingConfigSchema,
     trial: TrialConfigSchema,
     entitlements: {
-      type: 'array',
+      type: "array",
       items: EntitlementConfigSchema,
     },
   },
 };
 
 export const OfferVersionSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    id: { type: 'string', format: 'uuid' },
-    version: { type: 'integer', description: 'Version number (1, 2, 3...)' },
-    status: { type: 'string', enum: ['draft', 'published', 'archived'] as string[] },
+    id: { type: "string", format: "uuid" },
+    version: { type: "integer", description: "Version number (1, 2, 3...)" },
+    status: {
+      type: "string",
+      enum: ["draft", "published", "archived"] as string[],
+    },
     config: OfferConfigSchema,
     effectiveFrom: {
-      type: 'string',
-      format: 'date-time',
+      type: "string",
+      format: "date-time",
       nullable: true,
-      description: 'When this version becomes active (null = immediate)',
+      description: "When this version becomes active (null = immediate)",
     },
-    publishedAt: { type: 'string', format: 'date-time', nullable: true },
-    createdAt: { type: 'string', format: 'date-time' },
+    publishedAt: { type: "string", format: "date-time", nullable: true },
+    createdAt: { type: "string", format: "date-time" },
   },
 };
 
 export const OfferSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    id: { type: 'string', format: 'uuid' },
-    name: { type: 'string', description: 'Offer display name' },
-    description: { type: 'string', nullable: true },
-    status: { type: 'string', enum: ['active', 'archived'] as string[] },
-    version: { type: 'integer', description: 'Resource version for concurrency control' },
+    id: { type: "string", format: "uuid" },
+    name: { type: "string", description: "Offer display name" },
+    description: { type: "string", nullable: true },
+    status: { type: "string", enum: ["active", "archived"] as string[] },
+    version: {
+      type: "integer",
+      description: "Resource version for concurrency control",
+    },
     currentVersion: {
       ...OfferVersionSchema,
       nullable: true,
-      description: 'Currently published version (null if none published)',
+      description: "Currently published version (null if none published)",
     },
-    createdAt: { type: 'string', format: 'date-time' },
-    updatedAt: { type: 'string', format: 'date-time' },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
   },
 };
 
@@ -213,20 +216,23 @@ export const OfferSchema = {
 // ============================================================================
 
 export const CustomerSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    id: { type: 'string', format: 'uuid' },
-    email: { type: 'string', format: 'email' },
-    name: { type: 'string', nullable: true },
+    id: { type: "string", format: "uuid" },
+    email: { type: "string", format: "email" },
+    name: { type: "string", nullable: true },
     externalId: {
-      type: 'string',
+      type: "string",
       nullable: true,
-      description: 'Your system identifier for this customer',
+      description: "Your system identifier for this customer",
     },
-    metadata: { type: 'object', description: 'Custom key-value data' },
-    version: { type: 'integer', description: 'Resource version for concurrency control' },
-    createdAt: { type: 'string', format: 'date-time' },
-    updatedAt: { type: 'string', format: 'date-time' },
+    metadata: { type: "object", description: "Custom key-value data" },
+    version: {
+      type: "integer",
+      description: "Resource version for concurrency control",
+    },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
   },
 };
 
@@ -235,26 +241,37 @@ export const CustomerSchema = {
 // ============================================================================
 
 export const SubscriptionSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    id: { type: 'string', format: 'uuid' },
-    customerId: { type: 'string', format: 'uuid' },
-    offerId: { type: 'string', format: 'uuid' },
-    offerVersionId: { type: 'string', format: 'uuid' },
+    id: { type: "string", format: "uuid" },
+    customerId: { type: "string", format: "uuid" },
+    offerId: { type: "string", format: "uuid" },
+    offerVersionId: { type: "string", format: "uuid" },
     status: {
-      type: 'string',
-      enum: ['trialing', 'active', 'past_due', 'canceled', 'unpaid', 'incomplete', 'paused'] as string[],
+      type: "string",
+      enum: [
+        "trialing",
+        "active",
+        "past_due",
+        "canceled",
+        "unpaid",
+        "incomplete",
+        "paused",
+      ] as string[],
     },
-    currentPeriodStart: { type: 'string', format: 'date-time' },
-    currentPeriodEnd: { type: 'string', format: 'date-time' },
-    cancelAt: { type: 'string', format: 'date-time', nullable: true },
-    canceledAt: { type: 'string', format: 'date-time', nullable: true },
-    trialStart: { type: 'string', format: 'date-time', nullable: true },
-    trialEnd: { type: 'string', format: 'date-time', nullable: true },
-    version: { type: 'integer', description: 'Resource version for concurrency control' },
-    metadata: { type: 'object' },
-    createdAt: { type: 'string', format: 'date-time' },
-    updatedAt: { type: 'string', format: 'date-time' },
+    currentPeriodStart: { type: "string", format: "date-time" },
+    currentPeriodEnd: { type: "string", format: "date-time" },
+    cancelAt: { type: "string", format: "date-time", nullable: true },
+    canceledAt: { type: "string", format: "date-time", nullable: true },
+    trialStart: { type: "string", format: "date-time", nullable: true },
+    trialEnd: { type: "string", format: "date-time", nullable: true },
+    version: {
+      type: "integer",
+      description: "Resource version for concurrency control",
+    },
+    metadata: { type: "object" },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
   },
 };
 
@@ -263,67 +280,70 @@ export const SubscriptionSchema = {
 // ============================================================================
 
 export const PromotionConfigSchema = {
-  type: 'object',
-  required: ['discountType'] as string[],
+  type: "object",
+  required: ["discountType"] as string[],
   properties: {
     discountType: {
-      type: 'string',
-      enum: ['percentage', 'fixed_amount'] as string[],
+      type: "string",
+      enum: ["percentage", "fixed_amount"] as string[],
     },
     discountValue: {
-      type: 'integer',
-      description: 'Percentage (0-100) or amount in cents',
+      type: "integer",
+      description: "Percentage (0-100) or amount in cents",
     },
     duration: {
-      type: 'string',
-      enum: ['once', 'forever', 'repeating'] as string[],
+      type: "string",
+      enum: ["once", "forever", "repeating"] as string[],
     },
     durationInMonths: {
-      type: 'integer',
+      type: "integer",
       nullable: true,
       description: 'Required when duration is "repeating"',
     },
     maxRedemptions: {
-      type: 'integer',
+      type: "integer",
       nullable: true,
-      description: 'Maximum total uses across all customers',
+      description: "Maximum total uses across all customers",
     },
     maxRedemptionsPerCustomer: {
-      type: 'integer',
+      type: "integer",
       nullable: true,
       default: 1,
     },
-    validFrom: { type: 'string', format: 'date-time', nullable: true },
-    validUntil: { type: 'string', format: 'date-time', nullable: true },
+    validFrom: { type: "string", format: "date-time", nullable: true },
+    validUntil: { type: "string", format: "date-time", nullable: true },
     applicableOfferIds: {
-      type: 'array',
-      items: { type: 'string', format: 'uuid' },
+      type: "array",
+      items: { type: "string", format: "uuid" },
       nullable: true,
-      description: 'Limit to specific offers (null = all offers)',
+      description: "Limit to specific offers (null = all offers)",
     },
   },
 };
 
 export const PromotionSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    id: { type: 'string', format: 'uuid' },
-    code: { type: 'string', description: 'Promo code customers enter' },
-    name: { type: 'string' },
-    description: { type: 'string', nullable: true },
-    status: { type: 'string', enum: ['active', 'archived'] as string[] },
+    id: { type: "string", format: "uuid" },
+    code: { type: "string", description: "Promo code customers enter" },
+    name: { type: "string" },
+    description: { type: "string", nullable: true },
+    status: { type: "string", enum: ["active", "archived"] as string[] },
     currentVersion: {
-      type: 'object',
+      type: "object",
       nullable: true,
       properties: {
-        id: { type: 'string', format: 'uuid' },
-        version: { type: 'integer' },
-        status: { type: 'string', enum: ['draft', 'published', 'archived'] as string[] },
+        id: { type: "string", format: "uuid" },
+        version: { type: "integer" },
+        status: {
+          type: "string",
+          enum: ["draft", "published", "archived"] as string[],
+        },
         config: PromotionConfigSchema,
       },
     },
-    createdAt: { type: 'string', format: 'date-time' },
-    updatedAt: { type: 'string', format: 'date-time' },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
   },
 };
 
@@ -332,136 +352,153 @@ export const PromotionSchema = {
 // ============================================================================
 
 export const CheckoutSessionSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    id: { type: 'string', format: 'uuid' },
-    offerId: { type: 'string', format: 'uuid' },
-    offerVersionId: { type: 'string', format: 'uuid' },
-    customerId: { type: 'string', format: 'uuid', nullable: true },
-    status: { type: 'string', enum: ['pending', 'open', 'complete', 'expired'] as string[] },
-    sessionUrl: {
-      type: 'string',
-      format: 'uri',
-      description: 'URL to redirect customer to complete checkout',
+    id: { type: "string", format: "uuid" },
+    offerId: { type: "string", format: "uuid" },
+    offerVersionId: { type: "string", format: "uuid" },
+    customerId: { type: "string", format: "uuid", nullable: true },
+    status: {
+      type: "string",
+      enum: ["pending", "open", "complete", "expired"] as string[],
     },
-    successUrl: { type: 'string', format: 'uri' },
-    cancelUrl: { type: 'string', format: 'uri' },
-    expiresAt: { type: 'string', format: 'date-time' },
-    completedAt: { type: 'string', format: 'date-time', nullable: true },
-    metadata: { type: 'object' },
-    createdAt: { type: 'string', format: 'date-time' },
+    sessionUrl: {
+      type: "string",
+      format: "uri",
+      description: "URL to redirect customer to complete checkout",
+    },
+    successUrl: { type: "string", format: "uri" },
+    cancelUrl: { type: "string", format: "uri" },
+    expiresAt: { type: "string", format: "date-time" },
+    completedAt: { type: "string", format: "date-time", nullable: true },
+    metadata: { type: "object" },
+    createdAt: { type: "string", format: "date-time" },
   },
 };
 
 export const CheckoutQuoteSchema = {
-  type: 'object',
-  description: 'Price breakdown for an offer with optional promotion applied',
+  type: "object",
+  description: "Price breakdown for an offer with optional promotion applied",
   properties: {
-    offerId: { type: 'string', format: 'uuid' },
-    offerVersionId: { type: 'string', format: 'uuid' },
+    offerId: { type: "string", format: "uuid" },
+    offerVersionId: { type: "string", format: "uuid" },
     currency: {
-      type: 'string',
-      description: 'Three-letter ISO currency code',
-      example: 'USD',
+      type: "string",
+      description: "Three-letter ISO currency code",
+      example: "USD",
     },
     subtotal: {
-      type: 'integer',
-      description: 'Price before discount in smallest currency unit (cents)',
+      type: "integer",
+      description: "Price before discount in smallest currency unit (cents)",
       example: 2999,
     },
     discount: {
-      type: 'integer',
-      description: 'Discount amount in smallest currency unit',
+      type: "integer",
+      description: "Discount amount in smallest currency unit",
       example: 500,
     },
     tax: {
-      type: 'integer',
-      description: 'Tax amount in smallest currency unit (0 if not calculated)',
+      type: "integer",
+      description: "Tax amount in smallest currency unit (0 if not calculated)",
       example: 0,
     },
     total: {
-      type: 'integer',
-      description: 'Final amount to charge in smallest currency unit',
+      type: "integer",
+      description: "Final amount to charge in smallest currency unit",
       example: 2499,
     },
     interval: {
-      type: 'string',
-      enum: ['month', 'year', 'week', 'day'] as string[],
+      type: "string",
+      enum: ["month", "year", "week", "day"] as string[],
       nullable: true,
-      description: 'Billing interval (null for one-time purchases)',
+      description: "Billing interval (null for one-time purchases)",
     },
     intervalCount: {
-      type: 'integer',
-      description: 'Number of intervals between billings',
+      type: "integer",
+      description: "Number of intervals between billings",
       example: 1,
     },
     trial: {
-      type: 'object',
+      type: "object",
       nullable: true,
-      description: 'Trial information if offer includes a trial',
+      description: "Trial information if offer includes a trial",
       properties: {
-        days: { type: 'integer', description: 'Trial duration in days' },
-        requiresPaymentMethod: { type: 'boolean' },
+        days: { type: "integer", description: "Trial duration in days" },
+        requiresPaymentMethod: { type: "boolean" },
       },
     },
     promotion: {
-      type: 'object',
+      type: "object",
       nullable: true,
-      description: 'Applied promotion details',
+      description: "Applied promotion details",
       properties: {
-        id: { type: 'string', format: 'uuid' },
-        code: { type: 'string' },
-        discountType: { type: 'string', enum: ['percent', 'fixed_amount'] as string[] },
-        discountValue: { type: 'integer' },
-        duration: { type: 'string', enum: ['once', 'repeating', 'forever'] as string[] },
-        durationInMonths: { type: 'integer', nullable: true },
+        id: { type: "string", format: "uuid" },
+        code: { type: "string" },
+        discountType: {
+          type: "string",
+          enum: ["percent", "fixed_amount"] as string[],
+        },
+        discountValue: { type: "integer" },
+        duration: {
+          type: "string",
+          enum: ["once", "repeating", "forever"] as string[],
+        },
+        durationInMonths: { type: "integer", nullable: true },
       },
     },
     validationErrors: {
-      type: 'array',
-      items: { type: 'string' },
-      description: 'Any validation errors (e.g., expired promo code)',
+      type: "array",
+      items: { type: "string" },
+      description: "Any validation errors (e.g., expired promo code)",
     },
   },
 };
 
 export const CheckoutIntentSchema = {
-  type: 'object',
-  description: 'Checkout intent for headless payment flow',
+  type: "object",
+  description: "Checkout intent for headless payment flow",
   properties: {
-    id: { type: 'string', format: 'uuid' },
+    id: { type: "string", format: "uuid" },
     status: {
-      type: 'string',
-      enum: ['pending', 'processing', 'requires_action', 'succeeded', 'failed', 'expired'] as string[],
-      description: 'Current status of the checkout intent',
+      type: "string",
+      enum: [
+        "pending",
+        "processing",
+        "requires_action",
+        "succeeded",
+        "failed",
+        "expired",
+      ] as string[],
+      description: "Current status of the checkout intent",
     },
     clientSecret: {
-      type: 'string',
-      description: 'Stripe client secret for client-side payment confirmation. Use with stripe.confirmPayment().',
+      type: "string",
+      description:
+        "Stripe client secret for client-side payment confirmation. Use with stripe.confirmPayment().",
     },
-    offerId: { type: 'string', format: 'uuid' },
-    offerVersionId: { type: 'string', format: 'uuid' },
-    customerId: { type: 'string', format: 'uuid', nullable: true },
+    offerId: { type: "string", format: "uuid" },
+    offerVersionId: { type: "string", format: "uuid" },
+    customerId: { type: "string", format: "uuid", nullable: true },
     // Quote snapshot
-    currency: { type: 'string', example: 'USD' },
-    subtotal: { type: 'integer', description: 'Subtotal in cents' },
-    discount: { type: 'integer', description: 'Discount in cents' },
-    tax: { type: 'integer', description: 'Tax in cents' },
-    total: { type: 'integer', description: 'Total to charge in cents' },
-    trialDays: { type: 'integer', nullable: true },
+    currency: { type: "string", example: "USD" },
+    subtotal: { type: "integer", description: "Subtotal in cents" },
+    discount: { type: "integer", description: "Discount in cents" },
+    tax: { type: "integer", description: "Tax in cents" },
+    total: { type: "integer", description: "Total to charge in cents" },
+    trialDays: { type: "integer", nullable: true },
     // Promotion
-    promotionCode: { type: 'string', nullable: true },
+    promotionCode: { type: "string", nullable: true },
     // Result
     subscriptionId: {
-      type: 'string',
-      format: 'uuid',
+      type: "string",
+      format: "uuid",
       nullable: true,
-      description: 'Subscription ID after successful payment',
+      description: "Subscription ID after successful payment",
     },
-    expiresAt: { type: 'string', format: 'date-time' },
-    completedAt: { type: 'string', format: 'date-time', nullable: true },
-    metadata: { type: 'object' },
-    createdAt: { type: 'string', format: 'date-time' },
+    expiresAt: { type: "string", format: "date-time" },
+    completedAt: { type: "string", format: "date-time", nullable: true },
+    metadata: { type: "object" },
+    createdAt: { type: "string", format: "date-time" },
   },
 };
 
@@ -470,30 +507,39 @@ export const CheckoutIntentSchema = {
 // ============================================================================
 
 export const EntitlementSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    id: { type: 'string', format: 'uuid' },
-    customerId: { type: 'string', format: 'uuid' },
-    subscriptionId: { type: 'string', format: 'uuid' },
-    featureKey: { type: 'string' },
-    value: { type: 'string' },
-    valueType: { type: 'string', enum: ['boolean', 'number', 'string', 'unlimited'] as string[] },
-    expiresAt: { type: 'string', format: 'date-time', nullable: true },
-    createdAt: { type: 'string', format: 'date-time' },
+    id: { type: "string", format: "uuid" },
+    customerId: { type: "string", format: "uuid" },
+    subscriptionId: { type: "string", format: "uuid" },
+    featureKey: { type: "string" },
+    value: { type: "string" },
+    valueType: {
+      type: "string",
+      enum: ["boolean", "number", "string", "unlimited"] as string[],
+    },
+    expiresAt: { type: "string", format: "date-time", nullable: true },
+    createdAt: { type: "string", format: "date-time" },
   },
 };
 
 export const EntitlementCheckSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    hasAccess: { type: 'boolean', description: 'Whether customer has access to this feature' },
-    featureKey: { type: 'string' },
-    value: { description: 'Current value for this feature' },
-    valueType: { type: 'string', enum: ['boolean', 'number', 'string', 'unlimited'] as string[] },
+    hasAccess: {
+      type: "boolean",
+      description: "Whether customer has access to this feature",
+    },
+    featureKey: { type: "string" },
+    value: { description: "Current value for this feature" },
+    valueType: {
+      type: "string",
+      enum: ["boolean", "number", "string", "unlimited"] as string[],
+    },
     source: {
-      type: 'string',
-      enum: ['subscription', 'override', 'default'] as string[],
-      description: 'Where this entitlement came from',
+      type: "string",
+      enum: ["subscription", "override", "default"] as string[],
+      description: "Where this entitlement came from",
     },
   },
 };
@@ -503,20 +549,20 @@ export const EntitlementCheckSchema = {
 // ============================================================================
 
 export const WebhookEndpointSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    id: { type: 'string', format: 'uuid' },
-    url: { type: 'string', format: 'uri' },
+    id: { type: "string", format: "uuid" },
+    url: { type: "string", format: "uri" },
     events: {
-      type: 'array',
-      items: { type: 'string' },
-      description: 'Event types this endpoint receives',
+      type: "array",
+      items: { type: "string" },
+      description: "Event types this endpoint receives",
     },
-    status: { type: 'string', enum: ['active', 'disabled'] as string[] },
-    description: { type: 'string', nullable: true },
-    version: { type: 'integer' },
-    createdAt: { type: 'string', format: 'date-time' },
-    updatedAt: { type: 'string', format: 'date-time' },
+    status: { type: "string", enum: ["active", "disabled"] as string[] },
+    description: { type: "string", nullable: true },
+    version: { type: "integer" },
+    createdAt: { type: "string", format: "date-time" },
+    updatedAt: { type: "string", format: "date-time" },
   },
 };
 
@@ -525,59 +571,64 @@ export const WebhookEndpointSchema = {
 // ============================================================================
 
 export const ProviderConnectionSchema = {
-  type: 'object',
+  type: "object",
   properties: {
     provider: {
-      type: 'string',
-      enum: ['stripe', 'zuora'] as string[],
-      description: 'Billing provider identifier',
+      type: "string",
+      enum: ["stripe", "zuora"] as string[],
+      description: "Billing provider identifier",
     },
     status: {
-      type: 'string',
-      enum: ['connected', 'disconnected', 'error', 'not_configured'] as string[],
-      description: 'Connection status',
+      type: "string",
+      enum: [
+        "connected",
+        "disconnected",
+        "error",
+        "not_configured",
+      ] as string[],
+      description: "Connection status",
     },
     mode: {
-      type: 'string',
-      enum: ['live', 'test'] as string[],
-      description: 'API mode (live or test/sandbox)',
+      type: "string",
+      enum: ["live", "test"] as string[],
+      description: "API mode (live or test/sandbox)",
     },
     lastVerifiedAt: {
-      type: 'string',
-      format: 'date-time',
+      type: "string",
+      format: "date-time",
       nullable: true,
-      description: 'Last successful API verification',
+      description: "Last successful API verification",
     },
     capabilities: {
-      type: 'object',
-      description: 'Provider capabilities and configuration',
+      type: "object",
+      description: "Provider capabilities and configuration",
       properties: {
-        subscriptions: { type: 'boolean' },
-        invoices: { type: 'boolean' },
-        customerPortal: { type: 'boolean' },
-        webhooksConfigured: { type: 'boolean' },
+        subscriptions: { type: "boolean" },
+        invoices: { type: "boolean" },
+        customerPortal: { type: "boolean" },
+        webhooksConfigured: { type: "boolean" },
       },
     },
     errors: {
-      type: 'array',
-      items: { type: 'string' },
-      description: 'Configuration issues or errors',
+      type: "array",
+      items: { type: "string" },
+      description: "Configuration issues or errors",
     },
   },
 };
 
 export const ProviderStatusSchema = {
-  type: 'object',
+  type: "object",
   properties: {
     defaultProvider: {
-      type: 'string',
-      enum: ['stripe', 'zuora'] as string[],
-      description: 'Default billing provider for this workspace',
+      type: "string",
+      enum: ["stripe", "zuora"] as string[],
+      description: "Default billing provider for this workspace",
     },
     providers: {
-      type: 'array',
+      type: "array",
       items: ProviderConnectionSchema,
-      description: 'Status of all configured providers',
+      description: "Status of all configured providers",
     },
   },
 };
@@ -587,19 +638,22 @@ export const ProviderStatusSchema = {
 // ============================================================================
 
 export const ApiKeySchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    id: { type: 'string', format: 'uuid' },
-    name: { type: 'string' },
+    id: { type: "string", format: "uuid" },
+    name: { type: "string" },
     keyPrefix: {
-      type: 'string',
-      description: 'Visible prefix for identification (e.g., relay_live_abc)',
+      type: "string",
+      description: "Visible prefix for identification (e.g., relay_live_abc)",
     },
-    role: { type: 'string', enum: ['owner', 'admin', 'member', 'readonly'] as string[] },
-    environment: { type: 'string', enum: ['live', 'test'] as string[] },
-    lastUsedAt: { type: 'string', format: 'date-time', nullable: true },
-    expiresAt: { type: 'string', format: 'date-time', nullable: true },
-    createdAt: { type: 'string', format: 'date-time' },
+    role: {
+      type: "string",
+      enum: ["owner", "admin", "member", "readonly"] as string[],
+    },
+    environment: { type: "string", enum: ["live", "test"] as string[] },
+    lastUsedAt: { type: "string", format: "date-time", nullable: true },
+    expiresAt: { type: "string", format: "date-time", nullable: true },
+    createdAt: { type: "string", format: "date-time" },
   },
 };
 
@@ -621,17 +675,17 @@ Possible causes:
 - API key not found or revoked
 - API key expired`,
     content: {
-      'application/json': {
+      "application/json": {
         schema: ErrorResponseSchema,
         example: {
           success: false,
           error: {
-            code: 'API_KEY_INVALID',
-            message: 'Invalid or expired API key',
+            code: "API_KEY_INVALID",
+            message: "Invalid or expired API key",
           },
           meta: {
-            timestamp: '2025-01-15T10:30:00Z',
-            path: '/api/v1/customers',
+            timestamp: "2025-01-15T10:30:00Z",
+            path: "/api/v1/customers",
           },
         },
       },
@@ -648,18 +702,19 @@ The API key is valid but lacks the required role for this operation.
 - \`admin\`: Full access except API key management
 - \`owner\`: Full access including API key management`,
     content: {
-      'application/json': {
+      "application/json": {
         schema: ErrorResponseSchema,
         example: {
           success: false,
           error: {
-            code: 'API_KEY_INSUFFICIENT_ROLE',
-            message: 'This operation requires admin role, but current key has member role',
-            details: { requiredRole: 'admin', currentRole: 'member' },
+            code: "API_KEY_INSUFFICIENT_ROLE",
+            message:
+              "This operation requires admin role, but current key has member role",
+            details: { requiredRole: "admin", currentRole: "member" },
           },
           meta: {
-            timestamp: '2025-01-15T10:30:00Z',
-            path: '/api/v1/customers',
+            timestamp: "2025-01-15T10:30:00Z",
+            path: "/api/v1/customers",
           },
         },
       },
@@ -671,20 +726,20 @@ The API key is valid but lacks the required role for this operation.
  * Standard 404 error response.
  */
 export const NotFoundResponse = {
-  description: 'Resource not found in this workspace',
+  description: "Resource not found in this workspace",
   content: {
-    'application/json': {
+    "application/json": {
       schema: ErrorResponseSchema,
       example: {
         success: false,
         error: {
-          code: 'RESOURCE_NOT_FOUND',
-          message: 'Customer not found',
-          details: { resourceType: 'Customer', identifier: '123e4567-...' },
+          code: "RESOURCE_NOT_FOUND",
+          message: "Customer not found",
+          details: { resourceType: "Customer", identifier: "123e4567-..." },
         },
         meta: {
-          timestamp: '2025-01-15T10:30:00Z',
-          path: '/api/v1/customers/123e4567-...',
+          timestamp: "2025-01-15T10:30:00Z",
+          path: "/api/v1/customers/123e4567-...",
         },
       },
     },
@@ -695,22 +750,22 @@ export const NotFoundResponse = {
  * Standard 400 validation error response.
  */
 export const ValidationErrorResponse = {
-  description: 'Validation failed',
+  description: "Validation failed",
   content: {
-    'application/json': {
+    "application/json": {
       schema: ErrorResponseSchema,
       example: {
         success: false,
         error: {
-          code: 'VALIDATION_FAILED',
-          message: 'Validation failed',
+          code: "VALIDATION_FAILED",
+          message: "Validation failed",
           details: [
-            { field: 'email', message: 'email must be a valid email address' },
+            { field: "email", message: "email must be a valid email address" },
           ],
         },
         meta: {
-          timestamp: '2025-01-15T10:30:00Z',
-          path: '/api/v1/customers',
+          timestamp: "2025-01-15T10:30:00Z",
+          path: "/api/v1/customers",
         },
       },
     },

@@ -11,7 +11,7 @@ export interface WebhookEndpoint {
   updatedAt: Date;
 }
 
-export type WebhookEndpointStatus = 'active' | 'disabled';
+export type WebhookEndpointStatus = "active" | "disabled";
 
 export interface WebhookEvent {
   id: string;
@@ -28,7 +28,11 @@ export interface WebhookEvent {
   createdAt: Date;
 }
 
-export type WebhookEventStatus = 'pending' | 'delivered' | 'failed' | 'dead_letter';
+export type WebhookEventStatus =
+  | "pending"
+  | "delivered"
+  | "failed"
+  | "dead_letter";
 
 export interface WebhookResponse {
   statusCode: number;
@@ -49,7 +53,7 @@ export interface OutboxEvent {
   createdAt: Date;
 }
 
-export type OutboxEventStatus = 'pending' | 'processed' | 'failed';
+export type OutboxEventStatus = "pending" | "processed" | "failed";
 
 export interface DeadLetterEvent {
   id: string;

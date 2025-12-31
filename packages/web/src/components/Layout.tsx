@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { useState } from "react";
+import { Outlet, Link } from "react-router-dom";
 
-const DASHBOARD_URL = 'http://localhost:3001';
-const API_DOCS_URL = 'http://localhost:3002/docs';
-const FEEDBACK_URL = 'https://github.com/your-org/relay/issues';
+const DASHBOARD_URL = "http://localhost:3001";
+const API_DOCS_URL = "http://localhost:3002/docs";
+const FEEDBACK_URL = "https://github.com/your-org/relay/issues";
 
 export function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,13 +27,26 @@ export function Layout() {
 
             {/* Desktop nav */}
             <div className="hidden md:flex items-center gap-8">
-              <Link to="/docs" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <Link
+                to="/docs"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
                 Docs
               </Link>
-              <a href={API_DOCS_URL} target="_blank" rel="noopener" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <a
+                href={API_DOCS_URL}
+                target="_blank"
+                rel="noopener"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
                 API Reference
               </a>
-              <a href={FEEDBACK_URL} target="_blank" rel="noopener" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+              <a
+                href={FEEDBACK_URL}
+                target="_blank"
+                rel="noopener"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
                 Feedback
               </a>
             </div>
@@ -54,12 +67,32 @@ export function Layout() {
               className="md:hidden p-2 text-gray-500 hover:text-gray-700"
             >
               {mobileMenuOpen ? (
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               )}
             </button>
@@ -69,20 +102,38 @@ export function Layout() {
           {mobileMenuOpen && (
             <div className="md:hidden py-4 border-t border-gray-100">
               <div className="flex flex-col gap-4">
-                <Link to="/docs" onClick={() => setMobileMenuOpen(false)} className="text-sm font-medium text-gray-600">
+                <Link
+                  to="/docs"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-medium text-gray-600"
+                >
                   Docs
                 </Link>
-                <a href={API_DOCS_URL} target="_blank" rel="noopener" className="text-sm font-medium text-gray-600">
+                <a
+                  href={API_DOCS_URL}
+                  target="_blank"
+                  rel="noopener"
+                  className="text-sm font-medium text-gray-600"
+                >
                   API Reference
                 </a>
-                <a href={FEEDBACK_URL} target="_blank" rel="noopener" className="text-sm font-medium text-gray-600">
+                <a
+                  href={FEEDBACK_URL}
+                  target="_blank"
+                  rel="noopener"
+                  className="text-sm font-medium text-gray-600"
+                >
                   Feedback
                 </a>
                 <div className="flex flex-col gap-3 pt-4 border-t border-gray-100">
                   <a href={DASHBOARD_URL} className="btn-secondary text-center">
                     Dashboard
                   </a>
-                  <Link to="/docs/quickstart" onClick={() => setMobileMenuOpen(false)} className="btn-primary text-center">
+                  <Link
+                    to="/docs/quickstart"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="btn-primary text-center"
+                  >
                     Get Started
                   </Link>
                 </div>
@@ -115,23 +166,76 @@ export function Layout() {
             <div>
               <h4 className="font-medium text-gray-900 mb-3">Documentation</h4>
               <ul className="space-y-2">
-                <li><Link to="/docs/quickstart" className="text-sm text-gray-500 hover:text-gray-700">Quickstart</Link></li>
-                <li><Link to="/docs/headless-checkout" className="text-sm text-gray-500 hover:text-gray-700">Headless Checkout</Link></li>
-                <li><Link to="/docs/webhooks" className="text-sm text-gray-500 hover:text-gray-700">Webhooks</Link></li>
+                <li>
+                  <Link
+                    to="/docs/quickstart"
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Quickstart
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/docs/headless-checkout"
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Headless Checkout
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/docs/webhooks"
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Webhooks
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="font-medium text-gray-900 mb-3">Resources</h4>
               <ul className="space-y-2">
-                <li><a href={API_DOCS_URL} target="_blank" rel="noopener" className="text-sm text-gray-500 hover:text-gray-700">API Reference</a></li>
-                <li><Link to="/docs/versioning" className="text-sm text-gray-500 hover:text-gray-700">Versioning</Link></li>
-                <li><a href={FEEDBACK_URL} target="_blank" rel="noopener" className="text-sm text-gray-500 hover:text-gray-700">Feedback</a></li>
+                <li>
+                  <a
+                    href={API_DOCS_URL}
+                    target="_blank"
+                    rel="noopener"
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    API Reference
+                  </a>
+                </li>
+                <li>
+                  <Link
+                    to="/docs/versioning"
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Versioning
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href={FEEDBACK_URL}
+                    target="_blank"
+                    rel="noopener"
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Feedback
+                  </a>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="font-medium text-gray-900 mb-3">Product</h4>
               <ul className="space-y-2">
-                <li><a href={DASHBOARD_URL} className="text-sm text-gray-500 hover:text-gray-700">Dashboard</a></li>
+                <li>
+                  <a
+                    href={DASHBOARD_URL}
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Dashboard
+                  </a>
+                </li>
               </ul>
             </div>
           </div>

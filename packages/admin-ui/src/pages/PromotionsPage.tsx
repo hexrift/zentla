@@ -1,20 +1,20 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '../lib/api';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../lib/api";
 
 interface Promotion {
   id: string;
   code: string;
   name: string;
   description?: string;
-  status: 'draft' | 'active' | 'archived';
+  status: "draft" | "active" | "archived";
   currentVersion?: {
     id: string;
     version: number;
     status: string;
     config: {
-      discountType: 'percent' | 'fixed_amount' | 'free_trial_days';
+      discountType: "percent" | "fixed_amount" | "free_trial_days";
       discountValue: number;
       currency?: string;
     };
@@ -23,26 +23,27 @@ interface Promotion {
 }
 
 export function PromotionsPage() {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['promotions', search],
+    queryKey: ["promotions", search],
     queryFn: () => api.promotions.list({ search }),
   });
 
   const formatDiscount = (promotion: Promotion) => {
-    if (!promotion.currentVersion) return '-';
-    const { discountType, discountValue, currency } = promotion.currentVersion.config;
+    if (!promotion.currentVersion) return "-";
+    const { discountType, discountValue, currency } =
+      promotion.currentVersion.config;
 
     switch (discountType) {
-      case 'percent':
+      case "percent":
         return `${discountValue}% off`;
-      case 'fixed_amount':
-        return `${(discountValue / 100).toFixed(2)} ${currency?.toUpperCase() || 'USD'} off`;
-      case 'free_trial_days':
+      case "fixed_amount":
+        return `${(discountValue / 100).toFixed(2)} ${currency?.toUpperCase() || "USD"} off`;
+      case "free_trial_days":
         return `${discountValue} day trial`;
       default:
-        return '-';
+        return "-";
     }
   };
 
@@ -127,11 +128,11 @@ export function PromotionsPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        promotion.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : promotion.status === 'draft'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-gray-100 text-gray-800'
+                        promotion.status === "active"
+                          ? "bg-green-100 text-green-800"
+                          : promotion.status === "draft"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {promotion.status}
@@ -140,7 +141,7 @@ export function PromotionsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {promotion.currentVersion
                       ? `v${promotion.currentVersion.version}`
-                      : 'Draft'}
+                      : "Draft"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(promotion.createdAt).toLocaleDateString()}

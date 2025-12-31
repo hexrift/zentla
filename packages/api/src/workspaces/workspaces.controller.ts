@@ -43,7 +43,7 @@ class UpdateWorkspaceDto {
 export class WorkspacesController {
   constructor(
     private readonly workspacesService: WorkspacesService,
-    private readonly billingService: BillingService
+    private readonly billingService: BillingService,
   ) {}
 
   @Get("current")
@@ -134,7 +134,7 @@ export class WorkspacesController {
   @ApiResponse({ status: 200, description: "Workspace updated" })
   async updateCurrent(
     @WorkspaceId() workspaceId: string,
-    @Body() dto: UpdateWorkspaceDto
+    @Body() dto: UpdateWorkspaceDto,
   ) {
     return this.workspacesService.update(workspaceId, dto);
   }

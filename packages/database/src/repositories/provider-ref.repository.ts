@@ -1,24 +1,24 @@
-import type { ProviderRef, Provider, EntityType } from '@prisma/client';
+import type { ProviderRef, Provider, EntityType } from "@prisma/client";
 
 export interface ProviderRefRepository {
   findByEntity(
     workspaceId: string,
     entityType: EntityType,
     entityId: string,
-    provider: Provider
+    provider: Provider,
   ): Promise<ProviderRef | null>;
 
   findByExternalId(
     workspaceId: string,
     provider: Provider,
     entityType: EntityType,
-    externalId: string
+    externalId: string,
   ): Promise<ProviderRef | null>;
 
   findAllByEntity(
     workspaceId: string,
     entityType: EntityType,
-    entityId: string
+    entityId: string,
   ): Promise<ProviderRef[]>;
 
   create(data: ProviderRefCreateData): Promise<ProviderRef>;
@@ -29,13 +29,13 @@ export interface ProviderRefRepository {
     workspaceId: string,
     entityType: EntityType,
     entityId: string,
-    provider: Provider
+    provider: Provider,
   ): Promise<void>;
 
   deleteAllByEntity(
     workspaceId: string,
     entityType: EntityType,
-    entityId: string
+    entityId: string,
   ): Promise<void>;
 }
 

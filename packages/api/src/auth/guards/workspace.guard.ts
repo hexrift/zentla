@@ -3,10 +3,10 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import type { Request } from 'express';
-import { IS_PUBLIC_KEY, SKIP_WORKSPACE_KEY } from '../../common/decorators';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import type { Request } from "express";
+import { IS_PUBLIC_KEY, SKIP_WORKSPACE_KEY } from "../../common/decorators";
 
 @Injectable()
 export class WorkspaceGuard implements CanActivate {
@@ -26,7 +26,7 @@ export class WorkspaceGuard implements CanActivate {
     // Check if workspace validation should be skipped
     const skipWorkspace = this.reflector.getAllAndOverride<boolean>(
       SKIP_WORKSPACE_KEY,
-      [context.getHandler(), context.getClass()]
+      [context.getHandler(), context.getClass()],
     );
 
     if (skipWorkspace) {
@@ -44,7 +44,7 @@ export class WorkspaceGuard implements CanActivate {
     const apiKeyContext = request.apiKeyContext;
 
     if (!apiKeyContext) {
-      throw new ForbiddenException('API key context not found');
+      throw new ForbiddenException("API key context not found");
     }
 
     // Check if workspace ID is in the URL and matches the API key's workspace
@@ -52,7 +52,7 @@ export class WorkspaceGuard implements CanActivate {
 
     if (workspaceIdParam && workspaceIdParam !== apiKeyContext.workspaceId) {
       throw new ForbiddenException(
-        'API key does not have access to this workspace'
+        "API key does not have access to this workspace",
       );
     }
 

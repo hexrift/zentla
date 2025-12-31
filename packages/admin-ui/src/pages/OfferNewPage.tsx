@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import { api } from '../lib/api';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { api } from "../lib/api";
 
 export function OfferNewPage() {
   const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
 
   const createMutation = useMutation({
     mutationFn: () =>
@@ -31,7 +31,9 @@ export function OfferNewPage() {
       <div className="p-6 bg-white rounded-lg shadow">
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Name
+            </label>
             <input
               type="text"
               value={name}
@@ -42,7 +44,9 @@ export function OfferNewPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Description
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -54,14 +58,15 @@ export function OfferNewPage() {
 
           <div className="p-4 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600">
-              After creating the offer, you'll be able to configure pricing, trials, and entitlements on the detail page.
+              After creating the offer, you'll be able to configure pricing,
+              trials, and entitlements on the detail page.
             </p>
           </div>
 
           <div className="flex justify-end space-x-4 pt-6 border-t">
             <button
               type="button"
-              onClick={() => navigate('/offers')}
+              onClick={() => navigate("/offers")}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
               Cancel
@@ -71,7 +76,7 @@ export function OfferNewPage() {
               disabled={!name || createMutation.isPending}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
-              {createMutation.isPending ? 'Creating...' : 'Create Offer'}
+              {createMutation.isPending ? "Creating..." : "Create Offer"}
             </button>
           </div>
 

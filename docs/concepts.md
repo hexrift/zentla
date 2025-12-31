@@ -14,6 +14,7 @@ Relay Subscription <-> Stripe Subscription
 ```
 
 This allows:
+
 - Switching providers without code changes
 - Using multiple providers simultaneously
 - Keeping your domain model clean
@@ -62,14 +63,14 @@ Entitlements are derived from the active subscription's offer configuration:
 // Offer config
 {
   entitlements: [
-    { featureKey: 'seats', value: 10, valueType: 'number' },
-    { featureKey: 'api_access', value: true, valueType: 'boolean' },
-    { featureKey: 'storage_gb', value: 100, valueType: 'number' },
-  ]
+    { featureKey: "seats", value: 10, valueType: "number" },
+    { featureKey: "api_access", value: true, valueType: "boolean" },
+    { featureKey: "storage_gb", value: 100, valueType: "number" },
+  ];
 }
 
 // Check at runtime
-const check = await relay.customers.checkEntitlement(customerId, 'seats');
+const check = await relay.customers.checkEntitlement(customerId, "seats");
 // { featureKey: 'seats', hasAccess: true, value: 10, valueType: 'number' }
 ```
 

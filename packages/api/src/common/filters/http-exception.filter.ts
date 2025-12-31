@@ -5,9 +5,9 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-} from '@nestjs/common';
-import type { Request, Response } from 'express';
-import { ErrorCode } from '@relay/core';
+} from "@nestjs/common";
+import type { Request, Response } from "express";
+import { ErrorCode } from "@relay/core";
 
 /**
  * Standardized API error response format.
@@ -81,14 +81,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
 
-      if (typeof exceptionResponse === 'string') {
+      if (typeof exceptionResponse === "string") {
         message = exceptionResponse;
         code = getDefaultErrorCode(status);
-      } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+      } else if (
+        typeof exceptionResponse === "object" &&
+        exceptionResponse !== null
+      ) {
         const responseObj = exceptionResponse as Record<string, unknown>;
 
         // Check if this is a RelayException with a code
-        if (responseObj.code && typeof responseObj.code === 'string') {
+        if (responseObj.code && typeof responseObj.code === "string") {
           code = responseObj.code as ErrorCode;
         } else {
           code = getDefaultErrorCode(status);
@@ -96,7 +99,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
         // Handle validation errors (array of messages)
         if (Array.isArray(responseObj.message)) {
-          message = 'Validation failed';
+          message = "Validation failed";
           details = (responseObj.message as string[]).map((msg) => ({
             field: this.extractFieldFromMessage(msg),
             message: msg,
@@ -115,20 +118,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
     } else if (exception instanceof Error) {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
-      message = 'Internal server error';
+      message = "Internal server error";
       code = ErrorCode.INTERNAL_ERROR;
 
       // Log the actual error for debugging
       this.logger.error(
         `Unhandled exception: ${exception.message}`,
-        exception.stack
+        exception.stack,
       );
     } else {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
-      message = 'Internal server error';
+      message = "Internal server error";
       code = ErrorCode.INTERNAL_ERROR;
 
-      this.logger.error('Unknown exception type', String(exception));
+      this.logger.error("Unknown exception type", String(exception));
     }
 
     const errorResponse: ApiErrorResponse = {
@@ -139,7 +142,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ...(details && { details }),
       },
       meta: {
-        requestId: request.headers['x-request-id'] as string | undefined,
+        requestId: request.headers["x-request-id"] as string | undefined,
         timestamp: new Date().toISOString(),
         path: request.url,
       },
@@ -154,6 +157,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
    */
   private extractFieldFromMessage(message: string): string {
     const match = message.match(/^(\w+)\s/);
-    return match?.[1] ?? 'unknown';
+    return match?.[1] ?? "unknown";
   }
 }

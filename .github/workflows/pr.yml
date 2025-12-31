@@ -29,20 +29,23 @@ jobs:
   size:
     name: PR Size Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Check PR size
         uses: codelytv/pr-size-labeler@v1
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          xs_label: 'size/xs'
+          xs_label: "size/xs"
           xs_max_size: 10
-          s_label: 'size/s'
+          s_label: "size/s"
           s_max_size: 100
-          m_label: 'size/m'
+          m_label: "size/m"
           m_max_size: 500
-          l_label: 'size/l'
+          l_label: "size/l"
           l_max_size: 1000
-          xl_label: 'size/xl'
+          xl_label: "size/xl"
           fail_if_xl: false
           message_if_xl: >
             This PR is quite large. Consider breaking it into smaller, more focused PRs
@@ -55,6 +58,9 @@ jobs:
     name: Auto Assign
     runs-on: ubuntu-latest
     if: github.event.action == 'opened'
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Auto-assign author
         uses: toshimaru/auto-author-assign@v2.0.1
@@ -67,6 +73,8 @@ jobs:
   conventional-commits:
     name: Conventional Commits
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
     steps:
       - name: Check PR title
         uses: amannn/action-semantic-pull-request@v5
@@ -86,9 +94,6 @@ jobs:
             chore
             revert
           requireScope: false
-          subjectPattern: ^[A-Z].+$
-          subjectPatternError: |
-            The subject "{subject}" must start with an uppercase letter.
 
   # ---------------------------------------------------------------------------
   # Check for breaking changes
@@ -96,6 +101,9 @@ jobs:
   breaking-changes:
     name: Breaking Changes Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import type { ActorType, Prisma } from '@prisma/client';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import type { ActorType, Prisma } from "@prisma/client";
 
 interface ListAuditLogsParams {
   limit: number;
@@ -46,8 +46,8 @@ export class AuditService {
         action: dto.action,
         resourceType: dto.resourceType,
         resourceId: dto.resourceId,
-        changes: dto.changes as Prisma.InputJsonValue ?? undefined,
-        metadata: dto.metadata as Prisma.InputJsonValue ?? {},
+        changes: (dto.changes as Prisma.InputJsonValue) ?? undefined,
+        metadata: (dto.metadata as Prisma.InputJsonValue) ?? {},
         ipAddress: dto.ipAddress,
         userAgent: dto.userAgent,
       },
@@ -56,7 +56,7 @@ export class AuditService {
 
   async listAuditLogs(
     workspaceId: string,
-    params: ListAuditLogsParams
+    params: ListAuditLogsParams,
   ): Promise<PaginatedResult<Record<string, unknown>>> {
     const {
       limit,
@@ -90,7 +90,7 @@ export class AuditService {
 
     const logs = await this.prisma.auditLog.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: limit + 1,
     });
 

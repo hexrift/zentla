@@ -1,11 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
-import { BillingService } from '../billing/billing.service';
-import { ProviderRefService } from '../billing/provider-ref.service';
-import { OutboxService } from './outbox.service';
-import { EntitlementsService } from '../entitlements/entitlements.service';
-import type Stripe from 'stripe';
-import type { Prisma } from '@prisma/client';
+import { Injectable, Logger } from "@nestjs/common";
+import { PrismaService } from "../database/prisma.service";
+import { BillingService } from "../billing/billing.service";
+import { ProviderRefService } from "../billing/provider-ref.service";
+import { OutboxService } from "./outbox.service";
+import { EntitlementsService } from "../entitlements/entitlements.service";
+import type Stripe from "stripe";
+import type { Prisma } from "@prisma/client";
 
 @Injectable()
 export class StripeWebhookService {
@@ -21,13 +21,13 @@ export class StripeWebhookService {
 
   async processWebhook(
     rawBody: Buffer,
-    signature: string
+    signature: string,
   ): Promise<{ received: boolean; eventId?: string }> {
     const stripeAdapter = this.billingService.getStripeAdapter();
 
     // Verify and parse the webhook
     if (!stripeAdapter.verifyWebhook(rawBody, signature)) {
-      throw new Error('Invalid webhook signature');
+      throw new Error("Invalid webhook signature");
     }
 
     const event = stripeAdapter.parseWebhookEvent(rawBody, signature);
@@ -36,7 +36,7 @@ export class StripeWebhookService {
     // Use the new provider-agnostic table
     const existingEvent = await this.prisma.processedProviderEvent.findFirst({
       where: {
-        provider: 'stripe',
+        provider: "stripe",
         providerEventId: event.id,
       },
     });
@@ -52,7 +52,7 @@ export class StripeWebhookService {
     // Mark event as processed (for deduplication)
     await this.prisma.processedProviderEvent.create({
       data: {
-        provider: 'stripe',
+        provider: "stripe",
         providerEventId: event.id,
         eventType: event.type,
       },
@@ -65,28 +65,28 @@ export class StripeWebhookService {
     this.logger.log(`Processing Stripe event: ${event.type} (${event.id})`);
 
     switch (event.type) {
-      case 'checkout.session.completed':
+      case "checkout.session.completed":
         await this.handleCheckoutCompleted(event);
         break;
-      case 'customer.subscription.created':
+      case "customer.subscription.created":
         await this.handleSubscriptionCreated(event);
         break;
-      case 'customer.subscription.updated':
+      case "customer.subscription.updated":
         await this.handleSubscriptionUpdated(event);
         break;
-      case 'customer.subscription.deleted':
+      case "customer.subscription.deleted":
         await this.handleSubscriptionDeleted(event);
         break;
-      case 'invoice.paid':
+      case "invoice.paid":
         await this.handleInvoicePaid(event);
         break;
-      case 'invoice.payment_failed':
+      case "invoice.payment_failed":
         await this.handleInvoicePaymentFailed(event);
         break;
-      case 'payment_intent.succeeded':
+      case "payment_intent.succeeded":
         await this.handlePaymentIntentSucceeded(event);
         break;
-      case 'setup_intent.succeeded':
+      case "setup_intent.succeeded":
         await this.handleSetupIntentSucceeded(event);
         break;
       default:
@@ -101,7 +101,7 @@ export class StripeWebhookService {
     const checkoutId = metadata.relay_checkout_id;
 
     if (!workspaceId) {
-      this.logger.warn('No workspace ID in checkout session metadata');
+      this.logger.warn("No workspace ID in checkout session metadata");
       return;
     }
 
@@ -110,7 +110,7 @@ export class StripeWebhookService {
       await this.prisma.checkout.update({
         where: { id: checkoutId },
         data: {
-          status: 'complete',
+          status: "complete",
           completedAt: new Date(),
         },
       });
@@ -118,16 +118,17 @@ export class StripeWebhookService {
 
     // Get or create customer
     const stripeCustomerId = session.customer as string;
-    const customerEmail = session.customer_email ?? session.customer_details?.email;
+    const customerEmail =
+      session.customer_email ?? session.customer_details?.email;
 
     let customerId: string;
 
     // Check if we have this Stripe customer mapped
     const customerRef = await this.providerRefService.findByExternalId(
       workspaceId,
-      'stripe',
-      'customer',
-      stripeCustomerId
+      "stripe",
+      "customer",
+      stripeCustomerId,
     );
 
     if (customerRef) {
@@ -137,10 +138,10 @@ export class StripeWebhookService {
       const customer = await this.prisma.customer.create({
         data: {
           workspaceId,
-          email: customerEmail ?? 'unknown@example.com',
+          email: customerEmail ?? "unknown@example.com",
           metadata: {
             stripeCustomerId,
-            source: 'checkout',
+            source: "checkout",
           },
         },
       });
@@ -149,9 +150,9 @@ export class StripeWebhookService {
       // Store provider ref
       await this.providerRefService.create({
         workspaceId,
-        entityType: 'customer',
+        entityType: "customer",
         entityId: customer.id,
-        provider: 'stripe',
+        provider: "stripe",
         externalId: stripeCustomerId,
       });
     }
@@ -164,7 +165,9 @@ export class StripeWebhookService {
       });
     }
 
-    this.logger.log(`Checkout completed: ${checkoutId}, customer: ${customerId}`);
+    this.logger.log(
+      `Checkout completed: ${checkoutId}, customer: ${customerId}`,
+    );
   }
 
   private async handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
@@ -177,18 +180,23 @@ export class StripeWebhookService {
       const stripeCustomerId = stripeSubscription.customer as string;
       const customerRef = await this.prisma.providerRef.findFirst({
         where: {
-          provider: 'stripe',
-          entityType: 'customer',
+          provider: "stripe",
+          entityType: "customer",
           externalId: stripeCustomerId,
         },
       });
 
       if (!customerRef) {
-        this.logger.warn(`No workspace found for subscription ${stripeSubscription.id}`);
+        this.logger.warn(
+          `No workspace found for subscription ${stripeSubscription.id}`,
+        );
         return;
       }
 
-      await this.createSubscriptionFromStripe(customerRef.workspaceId, stripeSubscription);
+      await this.createSubscriptionFromStripe(
+        customerRef.workspaceId,
+        stripeSubscription,
+      );
     } else {
       await this.createSubscriptionFromStripe(workspaceId, stripeSubscription);
     }
@@ -196,14 +204,14 @@ export class StripeWebhookService {
 
   private async createSubscriptionFromStripe(
     workspaceId: string,
-    stripeSubscription: Stripe.Subscription
+    stripeSubscription: Stripe.Subscription,
   ): Promise<void> {
     // Check if subscription already exists
     const existingRef = await this.providerRefService.findByExternalId(
       workspaceId,
-      'stripe',
-      'subscription',
-      stripeSubscription.id
+      "stripe",
+      "subscription",
+      stripeSubscription.id,
     );
 
     if (existingRef) {
@@ -215,28 +223,30 @@ export class StripeWebhookService {
     const stripeCustomerId = stripeSubscription.customer as string;
     const customerRef = await this.providerRefService.findByExternalId(
       workspaceId,
-      'stripe',
-      'customer',
-      stripeCustomerId
+      "stripe",
+      "customer",
+      stripeCustomerId,
     );
 
     if (!customerRef) {
-      this.logger.warn(`Customer not found for Stripe customer ${stripeCustomerId}`);
+      this.logger.warn(
+        `Customer not found for Stripe customer ${stripeCustomerId}`,
+      );
       return;
     }
 
     // Get offer from price
     const priceId = stripeSubscription.items.data[0]?.price.id;
     if (!priceId) {
-      this.logger.warn('No price found in subscription');
+      this.logger.warn("No price found in subscription");
       return;
     }
 
     const priceRef = await this.providerRefService.findByExternalId(
       workspaceId,
-      'stripe',
-      'price',
-      priceId
+      "stripe",
+      "price",
+      priceId,
     );
 
     if (!priceRef) {
@@ -291,20 +301,25 @@ export class StripeWebhookService {
     // Store provider ref
     await this.providerRefService.create({
       workspaceId,
-      entityType: 'subscription',
+      entityType: "subscription",
       entityId: subscription.id,
-      provider: 'stripe',
+      provider: "stripe",
       externalId: stripeSubscription.id,
     });
 
     // Grant entitlements
-    await this.grantEntitlements(workspaceId, subscription.id, customerRef.entityId, offerVersion);
+    await this.grantEntitlements(
+      workspaceId,
+      subscription.id,
+      customerRef.entityId,
+      offerVersion,
+    );
 
     // Create outbox event for webhook delivery
     await this.outboxService.createEvent({
       workspaceId,
-      eventType: 'subscription.created',
-      aggregateType: 'subscription',
+      eventType: "subscription.created",
+      aggregateType: "subscription",
       aggregateId: subscription.id,
       payload: {
         subscription: {
@@ -322,20 +337,24 @@ export class StripeWebhookService {
       },
     });
 
-    this.logger.log(`Created subscription ${subscription.id} from Stripe ${stripeSubscription.id}`);
+    this.logger.log(
+      `Created subscription ${subscription.id} from Stripe ${stripeSubscription.id}`,
+    );
   }
 
   private async grantEntitlements(
     workspaceId: string,
     subscriptionId: string,
     customerId: string,
-    offerVersion: { id: string; config: Prisma.JsonValue }
+    offerVersion: { id: string; config: Prisma.JsonValue },
   ): Promise<void> {
-    const config = offerVersion.config as { entitlements?: Array<{
-      featureKey: string;
-      value: string | number | boolean;
-      valueType: string;
-    }> };
+    const config = offerVersion.config as {
+      entitlements?: Array<{
+        featureKey: string;
+        value: string | number | boolean;
+        valueType: string;
+      }>;
+    };
 
     const entitlements = config?.entitlements ?? [];
 
@@ -349,7 +368,11 @@ export class StripeWebhookService {
         },
         update: {
           value: String(e.value),
-          valueType: e.valueType as 'boolean' | 'number' | 'string' | 'unlimited',
+          valueType: e.valueType as
+            | "boolean"
+            | "number"
+            | "string"
+            | "unlimited",
         },
         create: {
           workspaceId,
@@ -357,12 +380,18 @@ export class StripeWebhookService {
           subscriptionId,
           featureKey: e.featureKey,
           value: String(e.value),
-          valueType: e.valueType as 'boolean' | 'number' | 'string' | 'unlimited',
+          valueType: e.valueType as
+            | "boolean"
+            | "number"
+            | "string"
+            | "unlimited",
         },
       });
     }
 
-    this.logger.log(`Granted ${entitlements.length} entitlements for subscription ${subscriptionId}`);
+    this.logger.log(
+      `Granted ${entitlements.length} entitlements for subscription ${subscriptionId}`,
+    );
   }
 
   private async handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
@@ -371,8 +400,8 @@ export class StripeWebhookService {
     // Find our subscription
     const subscriptionRef = await this.prisma.providerRef.findFirst({
       where: {
-        provider: 'stripe',
-        entityType: 'subscription',
+        provider: "stripe",
+        entityType: "subscription",
         externalId: stripeSubscription.id,
       },
     });
@@ -388,8 +417,12 @@ export class StripeWebhookService {
       where: { id: subscriptionRef.entityId },
       data: {
         status: this.mapStripeStatus(stripeSubscription.status),
-        currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
-        currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+        currentPeriodStart: new Date(
+          stripeSubscription.current_period_start * 1000,
+        ),
+        currentPeriodEnd: new Date(
+          stripeSubscription.current_period_end * 1000,
+        ),
         cancelAt: stripeSubscription.cancel_at
           ? new Date(stripeSubscription.cancel_at * 1000)
           : null,
@@ -402,8 +435,8 @@ export class StripeWebhookService {
     // Create outbox event for webhook delivery
     await this.outboxService.createEvent({
       workspaceId: subscriptionRef.workspaceId,
-      eventType: 'subscription.updated',
-      aggregateType: 'subscription',
+      eventType: "subscription.updated",
+      aggregateType: "subscription",
       aggregateId: subscriptionRef.entityId,
       payload: {
         subscription: {
@@ -427,14 +460,16 @@ export class StripeWebhookService {
     // Find our subscription
     const subscriptionRef = await this.prisma.providerRef.findFirst({
       where: {
-        provider: 'stripe',
-        entityType: 'subscription',
+        provider: "stripe",
+        entityType: "subscription",
         externalId: stripeSubscription.id,
       },
     });
 
     if (!subscriptionRef) {
-      this.logger.warn(`Subscription ref not found for ${stripeSubscription.id}`);
+      this.logger.warn(
+        `Subscription ref not found for ${stripeSubscription.id}`,
+      );
       return;
     }
 
@@ -442,7 +477,7 @@ export class StripeWebhookService {
     const canceledSubscription = await this.prisma.subscription.update({
       where: { id: subscriptionRef.entityId },
       data: {
-        status: 'canceled',
+        status: "canceled",
         canceledAt: new Date(),
         endedAt: new Date(),
       },
@@ -451,15 +486,17 @@ export class StripeWebhookService {
     // Revoke all entitlements for this subscription
     await this.entitlementsService.revokeAllForSubscription(
       subscriptionRef.workspaceId,
-      subscriptionRef.entityId
+      subscriptionRef.entityId,
     );
-    this.logger.log(`Revoked entitlements for subscription ${subscriptionRef.entityId}`);
+    this.logger.log(
+      `Revoked entitlements for subscription ${subscriptionRef.entityId}`,
+    );
 
     // Create outbox event for webhook delivery
     await this.outboxService.createEvent({
       workspaceId: subscriptionRef.workspaceId,
-      eventType: 'subscription.canceled',
-      aggregateType: 'subscription',
+      eventType: "subscription.canceled",
+      aggregateType: "subscription",
       aggregateId: subscriptionRef.entityId,
       payload: {
         subscription: {
@@ -473,7 +510,9 @@ export class StripeWebhookService {
       },
     });
 
-    this.logger.log(`Marked subscription ${subscriptionRef.entityId} as canceled`);
+    this.logger.log(
+      `Marked subscription ${subscriptionRef.entityId} as canceled`,
+    );
   }
 
   private async handleInvoicePaid(event: Stripe.Event): Promise<void> {
@@ -487,8 +526,8 @@ export class StripeWebhookService {
     // Find our subscription
     const subscriptionRef = await this.prisma.providerRef.findFirst({
       where: {
-        provider: 'stripe',
-        entityType: 'subscription',
+        provider: "stripe",
+        entityType: "subscription",
         externalId: subscriptionId,
       },
     });
@@ -505,7 +544,7 @@ export class StripeWebhookService {
       await this.prisma.subscription.update({
         where: { id: subscriptionRef.entityId },
         data: {
-          status: 'active',
+          status: "active",
           currentPeriodStart: new Date(line.period.start * 1000),
           currentPeriodEnd: newPeriodEnd,
         },
@@ -515,15 +554,17 @@ export class StripeWebhookService {
       await this.entitlementsService.refreshExpirationForSubscription(
         subscriptionRef.workspaceId,
         subscriptionRef.entityId,
-        newPeriodEnd
+        newPeriodEnd,
       );
-      this.logger.log(`Refreshed entitlement expiration for subscription ${subscriptionRef.entityId}`);
+      this.logger.log(
+        `Refreshed entitlement expiration for subscription ${subscriptionRef.entityId}`,
+      );
 
       // Create outbox event for webhook delivery
       await this.outboxService.createEvent({
         workspaceId: subscriptionRef.workspaceId,
-        eventType: 'invoice.paid',
-        aggregateType: 'invoice',
+        eventType: "invoice.paid",
+        aggregateType: "invoice",
         aggregateId: invoice.id ?? subscriptionRef.entityId,
         payload: {
           invoice: {
@@ -539,7 +580,9 @@ export class StripeWebhookService {
       });
     }
 
-    this.logger.log(`Invoice paid for subscription ${subscriptionRef.entityId}`);
+    this.logger.log(
+      `Invoice paid for subscription ${subscriptionRef.entityId}`,
+    );
   }
 
   private async handleInvoicePaymentFailed(event: Stripe.Event): Promise<void> {
@@ -553,8 +596,8 @@ export class StripeWebhookService {
     // Find our subscription
     const subscriptionRef = await this.prisma.providerRef.findFirst({
       where: {
-        provider: 'stripe',
-        entityType: 'subscription',
+        provider: "stripe",
+        entityType: "subscription",
         externalId: subscriptionId,
       },
     });
@@ -567,15 +610,15 @@ export class StripeWebhookService {
     await this.prisma.subscription.update({
       where: { id: subscriptionRef.entityId },
       data: {
-        status: 'past_due',
+        status: "past_due",
       },
     });
 
     // Create outbox event for webhook delivery
     await this.outboxService.createEvent({
       workspaceId: subscriptionRef.workspaceId,
-      eventType: 'invoice.payment_failed',
-      aggregateType: 'invoice',
+      eventType: "invoice.payment_failed",
+      aggregateType: "invoice",
       aggregateId: invoice.id ?? subscriptionRef.entityId,
       payload: {
         invoice: {
@@ -591,21 +634,25 @@ export class StripeWebhookService {
       },
     });
 
-    this.logger.log(`Payment failed for subscription ${subscriptionRef.entityId}`);
+    this.logger.log(
+      `Payment failed for subscription ${subscriptionRef.entityId}`,
+    );
   }
 
   /**
    * Handle payment_intent.succeeded for headless checkout flow.
    * This is triggered when a customer completes payment via Stripe.js.
    */
-  private async handlePaymentIntentSucceeded(event: Stripe.Event): Promise<void> {
+  private async handlePaymentIntentSucceeded(
+    event: Stripe.Event,
+  ): Promise<void> {
     const paymentIntent = event.data.object as Stripe.PaymentIntent;
     const metadata = paymentIntent.metadata ?? {};
     const checkoutIntentId = metadata.checkoutIntentId;
     const workspaceId = metadata.workspaceId;
 
     if (!checkoutIntentId || !workspaceId) {
-      this.logger.log('PaymentIntent not from headless checkout, skipping');
+      this.logger.log("PaymentIntent not from headless checkout, skipping");
       return;
     }
 
@@ -623,7 +670,7 @@ export class StripeWebhookService {
       return;
     }
 
-    if (checkoutIntent.status === 'succeeded') {
+    if (checkoutIntent.status === "succeeded") {
       this.logger.log(`CheckoutIntent ${checkoutIntentId} already succeeded`);
       return;
     }
@@ -644,7 +691,7 @@ export class StripeWebhookService {
             workspaceId,
             email: checkoutIntent.customerEmail,
             metadata: {
-              source: 'headless_checkout',
+              source: "headless_checkout",
               checkoutIntentId,
             },
           },
@@ -654,13 +701,18 @@ export class StripeWebhookService {
 
       // Store Stripe customer ref if available and not already stored
       if (stripeCustomerId) {
-        const existingRef = await this.providerRefService.findByEntity(workspaceId, 'customer', customer.id, 'stripe');
+        const existingRef = await this.providerRefService.findByEntity(
+          workspaceId,
+          "customer",
+          customer.id,
+          "stripe",
+        );
         if (!existingRef) {
           await this.providerRefService.create({
             workspaceId,
-            entityType: 'customer',
+            entityType: "customer",
             entityId: customer.id,
-            provider: 'stripe',
+            provider: "stripe",
             externalId: stripeCustomerId,
           });
         }
@@ -676,14 +728,14 @@ export class StripeWebhookService {
     const subscription = await this.createSubscriptionFromIntent(
       workspaceId,
       customerId,
-      checkoutIntent
+      checkoutIntent,
     );
 
     // Update checkout intent
     await this.prisma.checkoutIntent.update({
       where: { id: checkoutIntentId },
       data: {
-        status: 'succeeded',
+        status: "succeeded",
         customerId,
         subscriptionId: subscription.id,
         completedAt: new Date(),
@@ -693,8 +745,8 @@ export class StripeWebhookService {
     // Emit checkout.intent.completed event
     await this.outboxService.createEvent({
       workspaceId,
-      eventType: 'checkout.intent.completed',
-      aggregateType: 'checkout_intent',
+      eventType: "checkout.intent.completed",
+      aggregateType: "checkout_intent",
       aggregateId: checkoutIntentId,
       payload: {
         checkoutIntent: {
@@ -708,7 +760,9 @@ export class StripeWebhookService {
       },
     });
 
-    this.logger.log(`Payment succeeded for checkout intent ${checkoutIntentId}, subscription ${subscription.id}`);
+    this.logger.log(
+      `Payment succeeded for checkout intent ${checkoutIntentId}, subscription ${subscription.id}`,
+    );
   }
 
   /**
@@ -722,7 +776,7 @@ export class StripeWebhookService {
     const workspaceId = metadata.workspaceId;
 
     if (!checkoutIntentId || !workspaceId) {
-      this.logger.log('SetupIntent not from headless checkout, skipping');
+      this.logger.log("SetupIntent not from headless checkout, skipping");
       return;
     }
 
@@ -740,7 +794,7 @@ export class StripeWebhookService {
       return;
     }
 
-    if (checkoutIntent.status === 'succeeded') {
+    if (checkoutIntent.status === "succeeded") {
       this.logger.log(`CheckoutIntent ${checkoutIntentId} already succeeded`);
       return;
     }
@@ -761,7 +815,7 @@ export class StripeWebhookService {
             workspaceId,
             email: checkoutIntent.customerEmail,
             metadata: {
-              source: 'headless_checkout',
+              source: "headless_checkout",
               checkoutIntentId,
             },
           },
@@ -771,13 +825,18 @@ export class StripeWebhookService {
 
       // Store Stripe customer ref if available and not already stored
       if (stripeCustomerId) {
-        const existingRef = await this.providerRefService.findByEntity(workspaceId, 'customer', customer.id, 'stripe');
+        const existingRef = await this.providerRefService.findByEntity(
+          workspaceId,
+          "customer",
+          customer.id,
+          "stripe",
+        );
         if (!existingRef) {
           await this.providerRefService.create({
             workspaceId,
-            entityType: 'customer',
+            entityType: "customer",
             entityId: customer.id,
-            provider: 'stripe',
+            provider: "stripe",
             externalId: stripeCustomerId,
           });
         }
@@ -793,14 +852,14 @@ export class StripeWebhookService {
     const subscription = await this.createSubscriptionFromIntent(
       workspaceId,
       customerId,
-      checkoutIntent
+      checkoutIntent,
     );
 
     // Update checkout intent
     await this.prisma.checkoutIntent.update({
       where: { id: checkoutIntentId },
       data: {
-        status: 'succeeded',
+        status: "succeeded",
         customerId,
         subscriptionId: subscription.id,
         completedAt: new Date(),
@@ -809,8 +868,8 @@ export class StripeWebhookService {
 
     await this.outboxService.createEvent({
       workspaceId,
-      eventType: 'checkout.intent.completed',
-      aggregateType: 'checkout_intent',
+      eventType: "checkout.intent.completed",
+      aggregateType: "checkout_intent",
       aggregateId: checkoutIntentId,
       payload: {
         checkoutIntent: {
@@ -824,7 +883,9 @@ export class StripeWebhookService {
       },
     });
 
-    this.logger.log(`Setup succeeded for checkout intent ${checkoutIntentId}, subscription ${subscription.id}`);
+    this.logger.log(
+      `Setup succeeded for checkout intent ${checkoutIntentId}, subscription ${subscription.id}`,
+    );
   }
 
   /**
@@ -842,7 +903,7 @@ export class StripeWebhookService {
       promotionVersionId: string | null;
       metadata: unknown;
       offerVersion: { id: string; config: Prisma.JsonValue };
-    }
+    },
   ): Promise<{ id: string }> {
     const now = new Date();
     const trialDays = checkoutIntent.trialDays;
@@ -862,28 +923,34 @@ export class StripeWebhookService {
       const config = checkoutIntent.offerVersion.config as {
         pricing?: { interval?: string; intervalCount?: number };
       };
-      const interval = config?.pricing?.interval ?? 'month';
+      const interval = config?.pricing?.interval ?? "month";
       const intervalCount = config?.pricing?.intervalCount ?? 1;
 
       // Calculate period end based on interval
       currentPeriodEnd = new Date(now);
       switch (interval) {
-        case 'day':
+        case "day":
           currentPeriodEnd.setDate(currentPeriodEnd.getDate() + intervalCount);
           break;
-        case 'week':
-          currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 7 * intervalCount);
+        case "week":
+          currentPeriodEnd.setDate(
+            currentPeriodEnd.getDate() + 7 * intervalCount,
+          );
           break;
-        case 'month':
-          currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + intervalCount);
+        case "month":
+          currentPeriodEnd.setMonth(
+            currentPeriodEnd.getMonth() + intervalCount,
+          );
           break;
-        case 'year':
-          currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + intervalCount);
+        case "year":
+          currentPeriodEnd.setFullYear(
+            currentPeriodEnd.getFullYear() + intervalCount,
+          );
           break;
       }
     }
 
-    const status = trialDays && trialDays > 0 ? 'trialing' : 'active';
+    const status = trialDays && trialDays > 0 ? "trialing" : "active";
 
     // Create subscription
     const subscription = await this.prisma.subscription.create({
@@ -897,7 +964,7 @@ export class StripeWebhookService {
         currentPeriodEnd,
         trialStart,
         trialEnd,
-        metadata: checkoutIntent.metadata as object ?? {},
+        metadata: (checkoutIntent.metadata as object) ?? {},
       },
     });
 
@@ -906,7 +973,7 @@ export class StripeWebhookService {
       workspaceId,
       subscription.id,
       customerId,
-      checkoutIntent.offerVersion
+      checkoutIntent.offerVersion,
     );
 
     // Record promotion usage if applicable
@@ -926,8 +993,8 @@ export class StripeWebhookService {
     // Emit subscription.created event
     await this.outboxService.createEvent({
       workspaceId,
-      eventType: 'subscription.created',
-      aggregateType: 'subscription',
+      eventType: "subscription.created",
+      aggregateType: "subscription",
       aggregateId: subscription.id,
       payload: {
         subscription: {
@@ -949,17 +1016,35 @@ export class StripeWebhookService {
   }
 
   private mapStripeStatus(
-    status: Stripe.Subscription.Status
-  ): 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired' | 'paused' {
-    const statusMap: Record<Stripe.Subscription.Status, 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired' | 'paused'> = {
-      active: 'active',
-      trialing: 'trialing',
-      past_due: 'past_due',
-      canceled: 'canceled',
-      unpaid: 'unpaid',
-      incomplete: 'incomplete',
-      incomplete_expired: 'incomplete_expired',
-      paused: 'paused',
+    status: Stripe.Subscription.Status,
+  ):
+    | "active"
+    | "trialing"
+    | "past_due"
+    | "canceled"
+    | "unpaid"
+    | "incomplete"
+    | "incomplete_expired"
+    | "paused" {
+    const statusMap: Record<
+      Stripe.Subscription.Status,
+      | "active"
+      | "trialing"
+      | "past_due"
+      | "canceled"
+      | "unpaid"
+      | "incomplete"
+      | "incomplete_expired"
+      | "paused"
+    > = {
+      active: "active",
+      trialing: "trialing",
+      past_due: "past_due",
+      canceled: "canceled",
+      unpaid: "unpaid",
+      incomplete: "incomplete",
+      incomplete_expired: "incomplete_expired",
+      paused: "paused",
     };
     return statusMap[status];
   }

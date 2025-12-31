@@ -1,4 +1,4 @@
-import Stripe from 'stripe';
+import Stripe from "stripe";
 import type {
   BillingProvider,
   SyncOfferResult,
@@ -24,19 +24,19 @@ import type {
   CreateCustomerParams,
   UpdateCustomerParams,
   CustomerResult,
-} from '@relay/core';
-import type { StripeConfig } from './stripe.config';
-import { validateStripeConfig } from './stripe.config';
+} from "@relay/core";
+import type { StripeConfig } from "./stripe.config";
+import { validateStripeConfig } from "./stripe.config";
 
 export class StripeAdapter implements BillingProvider {
-  readonly name = 'stripe' as const;
+  readonly name = "stripe" as const;
   private readonly stripe: Stripe;
   private readonly webhookSecret: string;
 
   constructor(config: StripeConfig) {
     const validatedConfig = validateStripeConfig(config);
     this.stripe = new Stripe(validatedConfig.secretKey, {
-      apiVersion: '2023-10-16',
+      apiVersion: "2023-10-16",
       typescript: true,
     });
     this.webhookSecret = validatedConfig.webhookSecret;
@@ -45,7 +45,11 @@ export class StripeAdapter implements BillingProvider {
   /**
    * Get Stripe account info for connection verification.
    */
-  async getAccountInfo(): Promise<{ id: string; name: string | null; email: string | null }> {
+  async getAccountInfo(): Promise<{
+    id: string;
+    name: string | null;
+    email: string | null;
+  }> {
     const account = await this.stripe.accounts.retrieve();
     return {
       id: account.id,
@@ -57,7 +61,7 @@ export class StripeAdapter implements BillingProvider {
   async syncOffer(
     offer: Offer,
     version: OfferVersion,
-    existingRef?: ProviderRef
+    existingRef?: ProviderRef,
   ): Promise<SyncOfferResult> {
     const config = version.config as unknown as OfferConfig;
     const pricing = config.pricing;
@@ -101,18 +105,18 @@ export class StripeAdapter implements BillingProvider {
       productRef: {
         id: crypto.randomUUID(),
         workspaceId: offer.workspaceId,
-        entityType: 'product',
+        entityType: "product",
         entityId: offer.id,
-        provider: 'stripe',
+        provider: "stripe",
         externalId: product.id,
         createdAt: new Date(),
       },
       priceRef: {
         id: crypto.randomUUID(),
         workspaceId: offer.workspaceId,
-        entityType: 'price',
+        entityType: "price",
         entityId: version.id,
-        provider: 'stripe',
+        provider: "stripe",
         externalId: price.id,
         createdAt: new Date(),
       },
@@ -152,10 +156,13 @@ export class StripeAdapter implements BillingProvider {
     return { externalId: customer.id };
   }
 
-  async updateCustomer(externalId: string, params: UpdateCustomerParams): Promise<CustomerResult> {
+  async updateCustomer(
+    externalId: string,
+    params: UpdateCustomerParams,
+  ): Promise<CustomerResult> {
     await this.stripe.customers.update(externalId, {
       ...(params.email && { email: params.email }),
-      ...(params.name !== undefined && { name: params.name ?? '' }),
+      ...(params.name !== undefined && { name: params.name ?? "" }),
       ...(params.metadata && { metadata: params.metadata }),
     });
 
@@ -170,7 +177,7 @@ export class StripeAdapter implements BillingProvider {
     productId: string,
     pricing: PricingConfig,
     offerId: string,
-    versionId: string
+    versionId: string,
   ): Promise<Stripe.Price> {
     const priceData: Stripe.PriceCreateParams = {
       product: productId,
@@ -186,28 +193,40 @@ export class StripeAdapter implements BillingProvider {
       priceData.recurring = {
         interval: pricing.interval,
         interval_count: pricing.intervalCount ?? 1,
-        usage_type: pricing.usageType === 'metered' ? 'metered' : 'licensed',
+        usage_type: pricing.usageType === "metered" ? "metered" : "licensed",
       };
     }
 
-    if (pricing.model === 'flat' || pricing.model === 'per_unit') {
+    if (pricing.model === "flat" || pricing.model === "per_unit") {
       priceData.unit_amount = pricing.amount;
-    } else if ((pricing.model === 'tiered' || pricing.model === 'volume') && pricing.tiers) {
-      priceData.billing_scheme = 'tiered';
-      priceData.tiers_mode = pricing.model === 'volume' ? 'volume' : 'graduated';
-      priceData.tiers = pricing.tiers.map((tier: { upTo: number | null; unitAmount: number; flatAmount?: number }) => ({
-        up_to: tier.upTo === null ? 'inf' : tier.upTo,
-        unit_amount: tier.unitAmount,
-        flat_amount: tier.flatAmount,
-      }));
+    } else if (
+      (pricing.model === "tiered" || pricing.model === "volume") &&
+      pricing.tiers
+    ) {
+      priceData.billing_scheme = "tiered";
+      priceData.tiers_mode =
+        pricing.model === "volume" ? "volume" : "graduated";
+      priceData.tiers = pricing.tiers.map(
+        (tier: {
+          upTo: number | null;
+          unitAmount: number;
+          flatAmount?: number;
+        }) => ({
+          up_to: tier.upTo === null ? "inf" : tier.upTo,
+          unit_amount: tier.unitAmount,
+          flat_amount: tier.flatAmount,
+        }),
+      );
     }
 
     return this.stripe.prices.create(priceData);
   }
 
-  async createCheckoutSession(params: CreateCheckoutParams): Promise<CheckoutSession> {
+  async createCheckoutSession(
+    params: CreateCheckoutParams,
+  ): Promise<CheckoutSession> {
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
-      mode: 'subscription',
+      mode: "subscription",
       success_url: params.successUrl,
       cancel_url: params.cancelUrl,
       line_items: [
@@ -219,7 +238,7 @@ export class StripeAdapter implements BillingProvider {
       metadata: {
         relay_workspace_id: params.workspaceId,
         relay_offer_id: params.offerId,
-        relay_checkout_id: params.metadata?.checkoutId as string ?? '',
+        relay_checkout_id: (params.metadata?.checkoutId as string) ?? "",
         ...(params.metadata as Record<string, string>),
       },
     };
@@ -248,7 +267,7 @@ export class StripeAdapter implements BillingProvider {
 
     return {
       id: session.id,
-      url: session.url ?? '',
+      url: session.url ?? "",
       expiresAt: new Date(session.expires_at * 1000),
     };
   }
@@ -269,13 +288,15 @@ export class StripeAdapter implements BillingProvider {
       customer: params.customerId,
       automatic_payment_methods: { enabled: true },
       metadata: Object.fromEntries(
-        Object.entries(params.metadata ?? {}).filter(([, v]) => v !== undefined)
+        Object.entries(params.metadata ?? {}).filter(
+          ([, v]) => v !== undefined,
+        ),
       ) as Record<string, string>,
     });
 
     return {
       id: paymentIntent.id,
-      clientSecret: paymentIntent.client_secret ?? '',
+      clientSecret: paymentIntent.client_secret ?? "",
     };
   }
 
@@ -291,25 +312,29 @@ export class StripeAdapter implements BillingProvider {
       customer: params.customerId,
       automatic_payment_methods: { enabled: true },
       metadata: Object.fromEntries(
-        Object.entries(params.metadata ?? {}).filter(([, v]) => v !== undefined)
+        Object.entries(params.metadata ?? {}).filter(
+          ([, v]) => v !== undefined,
+        ),
       ) as Record<string, string>,
     });
 
     return {
       id: setupIntent.id,
-      clientSecret: setupIntent.client_secret ?? '',
+      clientSecret: setupIntent.client_secret ?? "",
     };
   }
 
   async getSubscription(ref: ProviderRef): Promise<SubscriptionData> {
-    const subscription = await this.stripe.subscriptions.retrieve(ref.externalId);
+    const subscription = await this.stripe.subscriptions.retrieve(
+      ref.externalId,
+    );
 
     return this.mapSubscription(subscription);
   }
 
   async cancelSubscription(
     ref: ProviderRef,
-    params: CancelSubscriptionInput
+    params: CancelSubscriptionInput,
   ): Promise<void> {
     if (params.cancelAtPeriodEnd) {
       await this.stripe.subscriptions.update(ref.externalId, {
@@ -323,16 +348,20 @@ export class StripeAdapter implements BillingProvider {
 
   async changeSubscription(
     ref: ProviderRef,
-    params: ChangeSubscriptionInput
+    params: ChangeSubscriptionInput,
   ): Promise<ChangeSubscriptionResult> {
-    const subscription = await this.stripe.subscriptions.retrieve(ref.externalId);
+    const subscription = await this.stripe.subscriptions.retrieve(
+      ref.externalId,
+    );
     const currentItem = subscription.items.data[0];
 
     if (!currentItem) {
-      throw new Error('Subscription has no items');
+      throw new Error("Subscription has no items");
     }
 
-    const prorationBehavior = this.mapProrationBehavior(params.prorationBehavior);
+    const prorationBehavior = this.mapProrationBehavior(
+      params.prorationBehavior,
+    );
 
     const updated = await this.stripe.subscriptions.update(ref.externalId, {
       items: [
@@ -350,7 +379,9 @@ export class StripeAdapter implements BillingProvider {
     };
   }
 
-  async createPortalSession(params: CreatePortalSessionParams): Promise<PortalSession> {
+  async createPortalSession(
+    params: CreatePortalSessionParams,
+  ): Promise<PortalSession> {
     const session = await this.stripe.billingPortal.sessions.create({
       customer: params.customerId, // Stripe customer ID
       return_url: params.returnUrl,
@@ -364,7 +395,11 @@ export class StripeAdapter implements BillingProvider {
 
   verifyWebhook(payload: Buffer, signature: string): boolean {
     try {
-      this.stripe.webhooks.constructEvent(payload, signature, this.webhookSecret);
+      this.stripe.webhooks.constructEvent(
+        payload,
+        signature,
+        this.webhookSecret,
+      );
       return true;
     } catch {
       return false;
@@ -372,28 +407,35 @@ export class StripeAdapter implements BillingProvider {
   }
 
   parseWebhookEvent(payload: Buffer, signature: string): Stripe.Event {
-    return this.stripe.webhooks.constructEvent(payload, signature, this.webhookSecret);
+    return this.stripe.webhooks.constructEvent(
+      payload,
+      signature,
+      this.webhookSecret,
+    );
   }
 
   normalizeEvent(rawEvent: unknown): DomainEvent | null {
     const event = rawEvent as Stripe.Event;
 
     switch (event.type) {
-      case 'checkout.session.completed':
+      case "checkout.session.completed":
         return this.normalizeCheckoutCompleted(event);
-      case 'customer.subscription.created':
-      case 'customer.subscription.updated':
-      case 'customer.subscription.deleted':
+      case "customer.subscription.created":
+      case "customer.subscription.updated":
+      case "customer.subscription.deleted":
         return this.normalizeSubscriptionEvent(event);
-      case 'invoice.paid':
-      case 'invoice.payment_failed':
+      case "invoice.paid":
+      case "invoice.payment_failed":
         return this.normalizeInvoiceEvent(event);
       default:
         return null;
     }
   }
 
-  async validatePromoCode(code: string, _offerId: string): Promise<PromoCodeValidation> {
+  async validatePromoCode(
+    code: string,
+    _offerId: string,
+  ): Promise<PromoCodeValidation> {
     try {
       const promotionCodes = await this.stripe.promotionCodes.list({
         code,
@@ -411,7 +453,7 @@ export class StripeAdapter implements BillingProvider {
       return {
         valid: true,
         code,
-        discountType: coupon.percent_off ? 'percent' : 'amount',
+        discountType: coupon.percent_off ? "percent" : "amount",
         discountValue: coupon.percent_off ?? coupon.amount_off ?? 0,
         expiresAt: promoCode.expires_at
           ? new Date(promoCode.expires_at * 1000)
@@ -427,7 +469,7 @@ export class StripeAdapter implements BillingProvider {
   async syncPromotion(
     promotion: Promotion,
     version: PromotionVersion,
-    existingCouponRef?: ProviderRef
+    existingCouponRef?: ProviderRef,
   ): Promise<SyncPromotionResult> {
     const config = version.config as unknown as PromotionConfig;
 
@@ -445,22 +487,22 @@ export class StripeAdapter implements BillingProvider {
     };
 
     // Set discount type
-    if (config.discountType === 'percent') {
+    if (config.discountType === "percent") {
       couponParams.percent_off = config.discountValue;
-    } else if (config.discountType === 'fixed_amount') {
+    } else if (config.discountType === "fixed_amount") {
       couponParams.amount_off = config.discountValue;
-      couponParams.currency = config.currency?.toLowerCase() ?? 'usd';
+      couponParams.currency = config.currency?.toLowerCase() ?? "usd";
     }
     // Note: free_trial_days is handled at checkout, not as a coupon
 
     // Set duration
-    if (config.duration === 'once') {
-      couponParams.duration = 'once';
-    } else if (config.duration === 'repeating' && config.durationInMonths) {
-      couponParams.duration = 'repeating';
+    if (config.duration === "once") {
+      couponParams.duration = "once";
+    } else if (config.duration === "repeating" && config.durationInMonths) {
+      couponParams.duration = "repeating";
       couponParams.duration_in_months = config.durationInMonths;
     } else {
-      couponParams.duration = 'forever';
+      couponParams.duration = "forever";
     }
 
     // Set redemption limits (on coupon level)
@@ -470,7 +512,9 @@ export class StripeAdapter implements BillingProvider {
 
     // Set expiration
     if (config.validUntil) {
-      couponParams.redeem_by = Math.floor(new Date(config.validUntil).getTime() / 1000);
+      couponParams.redeem_by = Math.floor(
+        new Date(config.validUntil).getTime() / 1000,
+      );
     }
 
     if (existingCouponRef) {
@@ -509,7 +553,7 @@ export class StripeAdapter implements BillingProvider {
       promotionCodeParams.restrictions = {
         ...promotionCodeParams.restrictions,
         minimum_amount: config.minimumAmount,
-        minimum_amount_currency: config.currency?.toLowerCase() ?? 'usd',
+        minimum_amount_currency: config.currency?.toLowerCase() ?? "usd",
       };
     }
 
@@ -520,11 +564,14 @@ export class StripeAdapter implements BillingProvider {
 
     // Set validity dates
     if (config.validUntil) {
-      promotionCodeParams.expires_at = Math.floor(new Date(config.validUntil).getTime() / 1000);
+      promotionCodeParams.expires_at = Math.floor(
+        new Date(config.validUntil).getTime() / 1000,
+      );
     }
 
     try {
-      promotionCode = await this.stripe.promotionCodes.create(promotionCodeParams);
+      promotionCode =
+        await this.stripe.promotionCodes.create(promotionCodeParams);
     } catch (error) {
       // If promotion code already exists, try to find and update it
       const existingCodes = await this.stripe.promotionCodes.list({
@@ -534,10 +581,13 @@ export class StripeAdapter implements BillingProvider {
 
       if (existingCodes.data[0]) {
         // Update the existing promotion code (limited fields can be updated)
-        promotionCode = await this.stripe.promotionCodes.update(existingCodes.data[0].id, {
-          active: true,
-          metadata: promotionCodeParams.metadata,
-        });
+        promotionCode = await this.stripe.promotionCodes.update(
+          existingCodes.data[0].id,
+          {
+            active: true,
+            metadata: promotionCodeParams.metadata,
+          },
+        );
       } else {
         throw error;
       }
@@ -547,18 +597,18 @@ export class StripeAdapter implements BillingProvider {
       couponRef: {
         id: crypto.randomUUID(),
         workspaceId: promotion.workspaceId,
-        entityType: 'coupon',
+        entityType: "coupon",
         entityId: promotion.id,
-        provider: 'stripe',
+        provider: "stripe",
         externalId: coupon.id,
         createdAt: new Date(),
       },
       promotionCodeRef: {
         id: crypto.randomUUID(),
         workspaceId: promotion.workspaceId,
-        entityType: 'promotion_code',
+        entityType: "promotion_code",
         entityId: version.id,
-        provider: 'stripe',
+        provider: "stripe",
         externalId: promotionCode.id,
         createdAt: new Date(),
       },
@@ -586,31 +636,34 @@ export class StripeAdapter implements BillingProvider {
   }
 
   private mapSubscriptionStatus(
-    status: Stripe.Subscription.Status
-  ): SubscriptionData['status'] {
-    const statusMap: Record<Stripe.Subscription.Status, SubscriptionData['status']> = {
-      active: 'active',
-      canceled: 'canceled',
-      incomplete: 'incomplete',
-      incomplete_expired: 'incomplete_expired',
-      past_due: 'past_due',
-      paused: 'paused',
-      trialing: 'trialing',
-      unpaid: 'unpaid',
+    status: Stripe.Subscription.Status,
+  ): SubscriptionData["status"] {
+    const statusMap: Record<
+      Stripe.Subscription.Status,
+      SubscriptionData["status"]
+    > = {
+      active: "active",
+      canceled: "canceled",
+      incomplete: "incomplete",
+      incomplete_expired: "incomplete_expired",
+      past_due: "past_due",
+      paused: "paused",
+      trialing: "trialing",
+      unpaid: "unpaid",
     };
     return statusMap[status];
   }
 
   private mapProrationBehavior(
-    behavior?: 'create_prorations' | 'none' | 'always_invoice'
+    behavior?: "create_prorations" | "none" | "always_invoice",
   ): Stripe.SubscriptionUpdateParams.ProrationBehavior {
     switch (behavior) {
-      case 'none':
-        return 'none';
-      case 'always_invoice':
-        return 'always_invoice';
+      case "none":
+        return "none";
+      case "always_invoice":
+        return "always_invoice";
       default:
-        return 'create_prorations';
+        return "create_prorations";
     }
   }
 
@@ -620,9 +673,9 @@ export class StripeAdapter implements BillingProvider {
 
     return {
       id: crypto.randomUUID(),
-      type: 'checkout.completed',
-      workspaceId: metadata.relay_workspace_id ?? '',
-      aggregateType: 'checkout',
+      type: "checkout.completed",
+      workspaceId: metadata.relay_workspace_id ?? "",
+      aggregateType: "checkout",
       aggregateId: metadata.relay_checkout_id ?? session.id,
       data: {
         sessionId: session.id,
@@ -633,8 +686,8 @@ export class StripeAdapter implements BillingProvider {
       },
       metadata: {
         version: 1,
-        source: 'stripe',
-        provider: 'stripe',
+        source: "stripe",
+        provider: "stripe",
       },
       occurredAt: new Date(event.created * 1000),
     };
@@ -645,16 +698,16 @@ export class StripeAdapter implements BillingProvider {
     const metadata = subscription.metadata ?? {};
 
     const eventTypeMap: Record<string, string> = {
-      'customer.subscription.created': 'subscription.created',
-      'customer.subscription.updated': 'subscription.updated',
-      'customer.subscription.deleted': 'subscription.canceled',
+      "customer.subscription.created": "subscription.created",
+      "customer.subscription.updated": "subscription.updated",
+      "customer.subscription.deleted": "subscription.canceled",
     };
 
     return {
       id: crypto.randomUUID(),
       type: eventTypeMap[event.type] ?? event.type,
-      workspaceId: metadata.relay_workspace_id ?? '',
-      aggregateType: 'subscription',
+      workspaceId: metadata.relay_workspace_id ?? "",
+      aggregateType: "subscription",
       aggregateId: subscription.id,
       data: {
         subscriptionId: subscription.id,
@@ -668,8 +721,8 @@ export class StripeAdapter implements BillingProvider {
       },
       metadata: {
         version: 1,
-        source: 'stripe',
-        provider: 'stripe',
+        source: "stripe",
+        provider: "stripe",
       },
       occurredAt: new Date(event.created * 1000),
     };
@@ -680,16 +733,16 @@ export class StripeAdapter implements BillingProvider {
     const metadata = invoice.metadata ?? {};
 
     const eventTypeMap: Record<string, string> = {
-      'invoice.paid': 'invoice.paid',
-      'invoice.payment_failed': 'invoice.payment_failed',
+      "invoice.paid": "invoice.paid",
+      "invoice.payment_failed": "invoice.payment_failed",
     };
 
     return {
       id: crypto.randomUUID(),
       type: eventTypeMap[event.type] ?? event.type,
-      workspaceId: metadata.relay_workspace_id ?? '',
-      aggregateType: 'invoice',
-      aggregateId: invoice.id ?? '',
+      workspaceId: metadata.relay_workspace_id ?? "",
+      aggregateType: "invoice",
+      aggregateId: invoice.id ?? "",
       data: {
         invoiceId: invoice.id,
         subscriptionId: invoice.subscription as string,
@@ -701,8 +754,8 @@ export class StripeAdapter implements BillingProvider {
       },
       metadata: {
         version: 1,
-        source: 'stripe',
-        provider: 'stripe',
+        source: "stripe",
+        provider: "stripe",
       },
       occurredAt: new Date(event.created * 1000),
     };

@@ -15,7 +15,7 @@ export interface Checkout {
   updatedAt: Date;
 }
 
-export type CheckoutStatus = 'pending' | 'open' | 'complete' | 'expired';
+export type CheckoutStatus = "pending" | "open" | "complete" | "expired";
 
 export interface CreateCheckoutParams {
   workspaceId: string;

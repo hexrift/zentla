@@ -14,31 +14,31 @@
  */
 export enum WebhookEventType {
   // Subscription Events
-  SUBSCRIPTION_CREATED = 'subscription.created',
-  SUBSCRIPTION_UPDATED = 'subscription.updated',
-  SUBSCRIPTION_CANCELED = 'subscription.canceled',
-  SUBSCRIPTION_PAUSED = 'subscription.paused',
-  SUBSCRIPTION_RESUMED = 'subscription.resumed',
-  SUBSCRIPTION_RENEWED = 'subscription.renewed',
+  SUBSCRIPTION_CREATED = "subscription.created",
+  SUBSCRIPTION_UPDATED = "subscription.updated",
+  SUBSCRIPTION_CANCELED = "subscription.canceled",
+  SUBSCRIPTION_PAUSED = "subscription.paused",
+  SUBSCRIPTION_RESUMED = "subscription.resumed",
+  SUBSCRIPTION_RENEWED = "subscription.renewed",
 
   // Customer Events
-  CUSTOMER_CREATED = 'customer.created',
-  CUSTOMER_UPDATED = 'customer.updated',
-  CUSTOMER_DELETED = 'customer.deleted',
+  CUSTOMER_CREATED = "customer.created",
+  CUSTOMER_UPDATED = "customer.updated",
+  CUSTOMER_DELETED = "customer.deleted",
 
   // Invoice Events
-  INVOICE_PAID = 'invoice.paid',
-  INVOICE_PAYMENT_FAILED = 'invoice.payment_failed',
-  INVOICE_UPCOMING = 'invoice.upcoming',
+  INVOICE_PAID = "invoice.paid",
+  INVOICE_PAYMENT_FAILED = "invoice.payment_failed",
+  INVOICE_UPCOMING = "invoice.upcoming",
 
   // Entitlement Events
-  ENTITLEMENT_GRANTED = 'entitlement.granted',
-  ENTITLEMENT_REVOKED = 'entitlement.revoked',
-  ENTITLEMENT_UPDATED = 'entitlement.updated',
+  ENTITLEMENT_GRANTED = "entitlement.granted",
+  ENTITLEMENT_REVOKED = "entitlement.revoked",
+  ENTITLEMENT_UPDATED = "entitlement.updated",
 
   // Checkout Events
-  CHECKOUT_COMPLETED = 'checkout.completed',
-  CHECKOUT_EXPIRED = 'checkout.expired',
+  CHECKOUT_COMPLETED = "checkout.completed",
+  CHECKOUT_EXPIRED = "checkout.expired",
 }
 
 // ============================================================================
@@ -73,7 +73,14 @@ export interface SubscriptionEventData {
     customerId: string;
     offerId: string;
     offerVersionId: string;
-    status: 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'paused';
+    status:
+      | "trialing"
+      | "active"
+      | "past_due"
+      | "canceled"
+      | "unpaid"
+      | "incomplete"
+      | "paused";
     currentPeriodStart: string;
     currentPeriodEnd: string;
     trialStart?: string | null;
@@ -169,7 +176,7 @@ export interface EntitlementEventData {
     subscriptionId: string;
     featureKey: string;
     value: string;
-    valueType: 'boolean' | 'number' | 'string' | 'unlimited';
+    valueType: "boolean" | "number" | "string" | "unlimited";
     expiresAt?: string | null;
   };
 }
@@ -194,7 +201,7 @@ export interface CheckoutEventData {
     customerId?: string | null;
     offerId: string;
     offerVersionId: string;
-    status: 'pending' | 'open' | 'complete' | 'expired';
+    status: "pending" | "open" | "complete" | "expired";
     completedAt?: string | null;
     metadata: Record<string, unknown>;
   };
@@ -231,13 +238,13 @@ export type WebhookEvent =
  * After 5 failed attempts, events are moved to dead letter queue.
  */
 export const WEBHOOK_RETRY_SCHEDULE = {
-  attempt1: '5 seconds',
-  attempt2: '30 seconds',
-  attempt3: '5 minutes',
-  attempt4: '30 minutes',
-  attempt5: '2 hours',
+  attempt1: "5 seconds",
+  attempt2: "30 seconds",
+  attempt3: "5 minutes",
+  attempt4: "30 minutes",
+  attempt5: "2 hours",
   maxAttempts: 5,
-  deadLetterAfter: 'All retries exhausted',
+  deadLetterAfter: "All retries exhausted",
 } as const;
 
 /**
@@ -254,7 +261,7 @@ export const WEBHOOK_RETRY_SCHEDULE = {
  * 4. Compare signatures using timing-safe comparison
  * 5. Reject if timestamp is older than 5 minutes
  */
-export const WEBHOOK_SIGNATURE_HEADER = 'X-Relay-Signature';
+export const WEBHOOK_SIGNATURE_HEADER = "X-Relay-Signature";
 export const WEBHOOK_SIGNATURE_TOLERANCE_SECONDS = 300; // 5 minutes
 
 /**

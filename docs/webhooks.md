@@ -14,14 +14,14 @@ Provider (Stripe) -> Relay Inbound Webhook -> Normalize Event -> Outbox -> Your 
 
 ```typescript
 const endpoint = await relay.webhooks.create({
-  url: 'https://yourapp.com/webhooks/relay',
+  url: "https://yourapp.com/webhooks/relay",
   events: [
-    'subscription.created',
-    'subscription.updated',
-    'subscription.canceled',
-    'checkout.completed',
+    "subscription.created",
+    "subscription.updated",
+    "subscription.canceled",
+    "checkout.completed",
   ],
-  description: 'Main webhook handler',
+  description: "Main webhook handler",
 });
 
 // Save the secret securely - it's only shown once
@@ -31,51 +31,53 @@ const webhookSecret = endpoint.secret;
 ### 2. Implement Your Handler
 
 ```typescript
-import crypto from 'crypto';
-import express from 'express';
+import crypto from "crypto";
+import express from "express";
 
 const app = express();
 
 // Use raw body for signature verification
 app.post(
-  '/webhooks/relay',
-  express.raw({ type: 'application/json' }),
+  "/webhooks/relay",
+  express.raw({ type: "application/json" }),
   (req, res) => {
-    const signature = req.headers['relay-signature'] as string;
+    const signature = req.headers["relay-signature"] as string;
     const payload = req.body;
 
     // Verify signature
-    if (!verifySignature(payload, signature, process.env.RELAY_WEBHOOK_SECRET)) {
-      return res.status(400).send('Invalid signature');
+    if (
+      !verifySignature(payload, signature, process.env.RELAY_WEBHOOK_SECRET)
+    ) {
+      return res.status(400).send("Invalid signature");
     }
 
     const event = JSON.parse(payload.toString());
 
     // Handle event
     switch (event.type) {
-      case 'subscription.created':
+      case "subscription.created":
         handleSubscriptionCreated(event.data);
         break;
-      case 'subscription.canceled':
+      case "subscription.canceled":
         handleSubscriptionCanceled(event.data);
         break;
-      case 'checkout.completed':
+      case "checkout.completed":
         handleCheckoutCompleted(event.data);
         break;
     }
 
     res.json({ received: true });
-  }
+  },
 );
 
 function verifySignature(
   payload: Buffer,
   signature: string,
-  secret: string
+  secret: string,
 ): boolean {
-  const [timestampPart, hashPart] = signature.split(',');
-  const timestamp = timestampPart.replace('t=', '');
-  const receivedHash = hashPart.replace('v1=', '');
+  const [timestampPart, hashPart] = signature.split(",");
+  const timestamp = timestampPart.replace("t=", "");
+  const receivedHash = hashPart.replace("v1=", "");
 
   // Check timestamp to prevent replay attacks (5 minute tolerance)
   const now = Math.floor(Date.now() / 1000);
@@ -86,14 +88,14 @@ function verifySignature(
   // Compute expected hash
   const signedPayload = `${timestamp}.${payload.toString()}`;
   const expectedHash = crypto
-    .createHmac('sha256', secret)
+    .createHmac("sha256", secret)
     .update(signedPayload)
-    .digest('hex');
+    .digest("hex");
 
   // Timing-safe comparison
   return crypto.timingSafeEqual(
     Buffer.from(receivedHash),
-    Buffer.from(expectedHash)
+    Buffer.from(expectedHash),
   );
 }
 ```
@@ -102,13 +104,13 @@ function verifySignature(
 
 Relay automatically manages entitlements based on subscription events:
 
-| Event | Entitlement Action |
-|-------|-------------------|
-| Subscription created | Entitlements granted based on offer config |
-| Invoice paid (renewal) | Entitlement expiration dates extended to new period end |
-| Subscription canceled (immediate) | All entitlements revoked immediately |
-| Subscription canceled (at period end) | Entitlements remain until period end, then revoked |
-| Subscription deleted | All entitlements revoked |
+| Event                                 | Entitlement Action                                      |
+| ------------------------------------- | ------------------------------------------------------- |
+| Subscription created                  | Entitlements granted based on offer config              |
+| Invoice paid (renewal)                | Entitlement expiration dates extended to new period end |
+| Subscription canceled (immediate)     | All entitlements revoked immediately                    |
+| Subscription canceled (at period end) | Entitlements remain until period end, then revoked      |
+| Subscription deleted                  | All entitlements revoked                                |
 
 This means your application can simply query the entitlements API to check access - Relay handles the lifecycle automatically.
 
@@ -300,15 +302,15 @@ Relay-Signature: t=1705315800,v1=abc123def456...
 
 Failed webhook deliveries are retried with exponential backoff:
 
-| Attempt | Delay |
-|---------|-------|
-| 1 | Immediate |
-| 2 | 1 minute |
-| 3 | 5 minutes |
-| 4 | 30 minutes |
-| 5 | 2 hours |
-| 6 | 8 hours |
-| 7 | 24 hours |
+| Attempt | Delay      |
+| ------- | ---------- |
+| 1       | Immediate  |
+| 2       | 1 minute   |
+| 3       | 5 minutes  |
+| 4       | 30 minutes |
+| 5       | 2 hours    |
+| 6       | 8 hours    |
+| 7       | 24 hours   |
 
 After 7 failed attempts, the event is moved to the dead letter queue.
 
@@ -331,10 +333,10 @@ POST /webhook-endpoints/:id/dead-letter/:eventId/replay
 Return a 2xx response as quickly as possible. Process events asynchronously:
 
 ```typescript
-app.post('/webhooks/relay', async (req, res) => {
+app.post("/webhooks/relay", async (req, res) => {
   // Verify signature first
-  if (!verifySignature(req.body, req.headers['relay-signature'], secret)) {
-    return res.status(400).send('Invalid signature');
+  if (!verifySignature(req.body, req.headers["relay-signature"], secret)) {
+    return res.status(400).send("Invalid signature");
   }
 
   // Acknowledge immediately
@@ -342,7 +344,7 @@ app.post('/webhooks/relay', async (req, res) => {
 
   // Process asynchronously
   const event = JSON.parse(req.body.toString());
-  await queue.add('process-webhook', event);
+  await queue.add("process-webhook", event);
 });
 ```
 
@@ -377,7 +379,7 @@ Always verify webhook signatures to ensure authenticity:
 
 ```typescript
 if (!verifySignature(payload, signature, secret)) {
-  return res.status(400).send('Invalid signature');
+  return res.status(400).send("Invalid signature");
 }
 ```
 
@@ -386,11 +388,11 @@ if (!verifySignature(payload, signature, secret)) {
 Reject webhooks with old timestamps to prevent replay attacks:
 
 ```typescript
-const timestamp = parseInt(signature.split(',')[0].replace('t=', ''));
+const timestamp = parseInt(signature.split(",")[0].replace("t=", ""));
 const now = Math.floor(Date.now() / 1000);
 
 if (Math.abs(now - timestamp) > 300) {
-  return res.status(400).send('Timestamp too old');
+  return res.status(400).send("Timestamp too old");
 }
 ```
 
@@ -400,13 +402,13 @@ Parse the raw body for signature verification, then parse JSON:
 
 ```typescript
 // Express
-app.post('/webhooks', express.raw({ type: 'application/json' }), handler);
+app.post("/webhooks", express.raw({ type: "application/json" }), handler);
 
 // Fastify
 fastify.addContentTypeParser(
-  'application/json',
-  { parseAs: 'buffer' },
-  (req, body, done) => done(null, body)
+  "application/json",
+  { parseAs: "buffer" },
+  (req, body, done) => done(null, body),
 );
 ```
 
@@ -426,7 +428,7 @@ const { secret } = await relay.webhooks.rotateSecret(endpointId);
 Temporarily disable an endpoint without deleting it:
 
 ```typescript
-await relay.webhooks.update(endpointId, { status: 'disabled' });
+await relay.webhooks.update(endpointId, { status: "disabled" });
 ```
 
 ### Filter Events
@@ -435,7 +437,7 @@ Only subscribe to events you need:
 
 ```typescript
 await relay.webhooks.create({
-  url: 'https://yourapp.com/webhooks',
-  events: ['subscription.created', 'subscription.canceled'],
+  url: "https://yourapp.com/webhooks",
+  events: ["subscription.created", "subscription.canceled"],
 });
 ```

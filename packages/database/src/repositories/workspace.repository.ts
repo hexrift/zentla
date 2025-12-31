@@ -1,5 +1,5 @@
-import type { Workspace } from '@prisma/client';
-import type { PaginationParams, PaginatedResult } from '../types';
+import type { Workspace } from "@prisma/client";
+import type { PaginationParams, PaginatedResult } from "../types";
 
 export interface WorkspaceRepository {
   findById(id: string): Promise<Workspace | null>;
@@ -13,13 +13,13 @@ export interface WorkspaceRepository {
 export interface WorkspaceCreateData {
   name: string;
   slug: string;
-  defaultProvider?: 'stripe' | 'zuora';
+  defaultProvider?: "stripe" | "zuora";
   settings?: WorkspaceSettings;
 }
 
 export interface WorkspaceUpdateData {
   name?: string;
-  defaultProvider?: 'stripe' | 'zuora';
+  defaultProvider?: "stripe" | "zuora";
   settings?: Partial<WorkspaceSettings>;
 }
 

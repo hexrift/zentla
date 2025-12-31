@@ -1,5 +1,5 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
+import { PrismaClient, Prisma } from "@prisma/client";
 
 @Injectable()
 export class PrismaService
@@ -9,8 +9,8 @@ export class PrismaService
   constructor() {
     super({
       log: [
-        { emit: 'stdout', level: 'error' },
-        { emit: 'stdout', level: 'warn' },
+        { emit: "stdout", level: "error" },
+        { emit: "stdout", level: "warn" },
       ],
     });
   }
@@ -46,7 +46,7 @@ export class PrismaService
       maxWait?: number;
       timeout?: number;
       isolationLevel?: Prisma.TransactionIsolationLevel;
-    }
+    },
   ): Promise<T> {
     return this.$transaction(fn, options);
   }

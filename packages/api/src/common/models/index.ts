@@ -9,36 +9,43 @@
  * happens in services/controllers using the schema objects.
  */
 
-import { ApiProperty, ApiPropertyOptional, ApiSchema, ApiExtraModels } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  ApiSchema,
+  ApiExtraModels,
+} from "@nestjs/swagger";
 
 // ============================================================================
 // ENTITLEMENT
 // ============================================================================
 
-@ApiSchema({ name: 'Entitlement' })
+@ApiSchema({ name: "Entitlement" })
 export class EntitlementModel {
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   id!: string;
 
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   customerId!: string;
 
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   subscriptionId!: string;
 
-  @ApiProperty({ description: 'Feature identifier (e.g., "api_calls", "seats")' })
+  @ApiProperty({
+    description: 'Feature identifier (e.g., "api_calls", "seats")',
+  })
   featureKey!: string;
 
-  @ApiProperty({ description: 'Entitlement value' })
+  @ApiProperty({ description: "Entitlement value" })
   value!: string | number | boolean;
 
-  @ApiProperty({ enum: ['boolean', 'number', 'string', 'unlimited'] })
+  @ApiProperty({ enum: ["boolean", "number", "string", "unlimited"] })
   valueType!: string;
 
-  @ApiPropertyOptional({ format: 'date-time', nullable: true })
+  @ApiPropertyOptional({ format: "date-time", nullable: true })
   expiresAt?: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   createdAt!: string;
 }
 
@@ -46,12 +53,12 @@ export class EntitlementModel {
 // CUSTOMER
 // ============================================================================
 
-@ApiSchema({ name: 'Customer' })
+@ApiSchema({ name: "Customer" })
 export class CustomerModel {
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   id!: string;
 
-  @ApiProperty({ format: 'email' })
+  @ApiProperty({ format: "email" })
   email!: string;
 
   @ApiPropertyOptional({ nullable: true })
@@ -59,20 +66,20 @@ export class CustomerModel {
 
   @ApiPropertyOptional({
     nullable: true,
-    description: 'Your system identifier for this customer',
+    description: "Your system identifier for this customer",
   })
   externalId?: string;
 
-  @ApiPropertyOptional({ description: 'Custom key-value data' })
+  @ApiPropertyOptional({ description: "Custom key-value data" })
   metadata?: Record<string, unknown>;
 
-  @ApiProperty({ description: 'Resource version for concurrency control' })
+  @ApiProperty({ description: "Resource version for concurrency control" })
   version!: number;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   createdAt!: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   updatedAt!: string;
 }
 
@@ -80,18 +87,18 @@ export class CustomerModel {
 // OFFER VERSION
 // ============================================================================
 
-@ApiSchema({ name: 'OfferVersion' })
+@ApiSchema({ name: "OfferVersion" })
 export class OfferVersionModel {
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   id!: string;
 
-  @ApiProperty({ description: 'Version number (1, 2, 3...)' })
+  @ApiProperty({ description: "Version number (1, 2, 3...)" })
   version!: number;
 
-  @ApiProperty({ enum: ['draft', 'published', 'archived'] })
+  @ApiProperty({ enum: ["draft", "published", "archived"] })
   status!: string;
 
-  @ApiProperty({ description: 'Pricing, trial, and entitlement configuration' })
+  @ApiProperty({ description: "Pricing, trial, and entitlement configuration" })
   config!: {
     pricing: {
       model: string;
@@ -112,16 +119,16 @@ export class OfferVersionModel {
   };
 
   @ApiPropertyOptional({
-    format: 'date-time',
+    format: "date-time",
     nullable: true,
-    description: 'When this version becomes active (null = immediate)',
+    description: "When this version becomes active (null = immediate)",
   })
   effectiveFrom?: string;
 
-  @ApiPropertyOptional({ format: 'date-time', nullable: true })
+  @ApiPropertyOptional({ format: "date-time", nullable: true })
   publishedAt?: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   createdAt!: string;
 }
 
@@ -129,35 +136,35 @@ export class OfferVersionModel {
 // OFFER
 // ============================================================================
 
-@ApiSchema({ name: 'Offer' })
+@ApiSchema({ name: "Offer" })
 @ApiExtraModels(OfferVersionModel)
 export class OfferModel {
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   id!: string;
 
-  @ApiProperty({ description: 'Offer display name' })
+  @ApiProperty({ description: "Offer display name" })
   name!: string;
 
   @ApiPropertyOptional({ nullable: true })
   description?: string;
 
-  @ApiProperty({ enum: ['active', 'archived'] })
+  @ApiProperty({ enum: ["active", "archived"] })
   status!: string;
 
-  @ApiProperty({ description: 'Resource version for concurrency control' })
+  @ApiProperty({ description: "Resource version for concurrency control" })
   version!: number;
 
   @ApiPropertyOptional({
     type: () => OfferVersionModel,
     nullable: true,
-    description: 'Currently published version (null if none published)',
+    description: "Currently published version (null if none published)",
   })
   currentVersion?: OfferVersionModel;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   createdAt!: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   updatedAt!: string;
 }
 
@@ -165,53 +172,61 @@ export class OfferModel {
 // SUBSCRIPTION
 // ============================================================================
 
-@ApiSchema({ name: 'Subscription' })
+@ApiSchema({ name: "Subscription" })
 export class SubscriptionModel {
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   id!: string;
 
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   customerId!: string;
 
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   offerId!: string;
 
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   offerVersionId!: string;
 
   @ApiProperty({
-    enum: ['trialing', 'active', 'past_due', 'canceled', 'unpaid', 'incomplete', 'paused'],
+    enum: [
+      "trialing",
+      "active",
+      "past_due",
+      "canceled",
+      "unpaid",
+      "incomplete",
+      "paused",
+    ],
   })
   status!: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   currentPeriodStart!: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   currentPeriodEnd!: string;
 
-  @ApiPropertyOptional({ format: 'date-time', nullable: true })
+  @ApiPropertyOptional({ format: "date-time", nullable: true })
   cancelAt?: string;
 
-  @ApiPropertyOptional({ format: 'date-time', nullable: true })
+  @ApiPropertyOptional({ format: "date-time", nullable: true })
   canceledAt?: string;
 
-  @ApiPropertyOptional({ format: 'date-time', nullable: true })
+  @ApiPropertyOptional({ format: "date-time", nullable: true })
   trialStart?: string;
 
-  @ApiPropertyOptional({ format: 'date-time', nullable: true })
+  @ApiPropertyOptional({ format: "date-time", nullable: true })
   trialEnd?: string;
 
-  @ApiProperty({ description: 'Resource version for concurrency control' })
+  @ApiProperty({ description: "Resource version for concurrency control" })
   version!: number;
 
   @ApiPropertyOptional()
   metadata?: Record<string, unknown>;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   createdAt!: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   updatedAt!: string;
 }
 
@@ -219,12 +234,12 @@ export class SubscriptionModel {
 // PROMOTION
 // ============================================================================
 
-@ApiSchema({ name: 'Promotion' })
+@ApiSchema({ name: "Promotion" })
 export class PromotionModel {
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   id!: string;
 
-  @ApiProperty({ description: 'Promo code customers enter' })
+  @ApiProperty({ description: "Promo code customers enter" })
   code!: string;
 
   @ApiProperty()
@@ -233,12 +248,12 @@ export class PromotionModel {
   @ApiPropertyOptional({ nullable: true })
   description?: string;
 
-  @ApiProperty({ enum: ['active', 'archived'] })
+  @ApiProperty({ enum: ["active", "archived"] })
   status!: string;
 
   @ApiPropertyOptional({
     nullable: true,
-    description: 'Currently published version',
+    description: "Currently published version",
   })
   currentVersion?: {
     id: string;
@@ -255,10 +270,10 @@ export class PromotionModel {
     };
   };
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   createdAt!: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   updatedAt!: string;
 }
 
@@ -266,45 +281,45 @@ export class PromotionModel {
 // CHECKOUT SESSION
 // ============================================================================
 
-@ApiSchema({ name: 'CheckoutSession' })
+@ApiSchema({ name: "CheckoutSession" })
 export class CheckoutSessionModel {
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   id!: string;
 
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   offerId!: string;
 
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   offerVersionId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  @ApiPropertyOptional({ format: "uuid", nullable: true })
   customerId?: string;
 
-  @ApiProperty({ enum: ['pending', 'open', 'complete', 'expired'] })
+  @ApiProperty({ enum: ["pending", "open", "complete", "expired"] })
   status!: string;
 
   @ApiProperty({
-    format: 'uri',
-    description: 'URL to redirect customer to complete checkout',
+    format: "uri",
+    description: "URL to redirect customer to complete checkout",
   })
   url!: string;
 
-  @ApiProperty({ format: 'uri' })
+  @ApiProperty({ format: "uri" })
   successUrl!: string;
 
-  @ApiProperty({ format: 'uri' })
+  @ApiProperty({ format: "uri" })
   cancelUrl!: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   expiresAt!: string;
 
-  @ApiPropertyOptional({ format: 'date-time', nullable: true })
+  @ApiPropertyOptional({ format: "date-time", nullable: true })
   completedAt?: string;
 
   @ApiPropertyOptional()
   metadata?: Record<string, unknown>;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   createdAt!: string;
 }
 
@@ -312,44 +327,54 @@ export class CheckoutSessionModel {
 // CHECKOUT INTENT (headless)
 // ============================================================================
 
-@ApiSchema({ name: 'CheckoutIntent' })
+@ApiSchema({ name: "CheckoutIntent" })
 export class CheckoutIntentModel {
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   id!: string;
 
   @ApiProperty({
-    enum: ['pending', 'processing', 'requires_action', 'succeeded', 'failed', 'expired'],
-    description: 'Current status of the checkout intent',
+    enum: [
+      "pending",
+      "processing",
+      "requires_action",
+      "succeeded",
+      "failed",
+      "expired",
+    ],
+    description: "Current status of the checkout intent",
   })
   status!: string;
 
   @ApiProperty({
-    description: 'Stripe client secret for client-side payment confirmation',
+    description: "Stripe client secret for client-side payment confirmation",
   })
   clientSecret!: string;
 
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   offerId!: string;
 
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   offerVersionId!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  @ApiPropertyOptional({ format: "uuid", nullable: true })
   customerId?: string;
 
-  @ApiProperty({ description: 'Three-letter ISO currency code', example: 'USD' })
+  @ApiProperty({
+    description: "Three-letter ISO currency code",
+    example: "USD",
+  })
   currency!: string;
 
-  @ApiProperty({ description: 'Subtotal in cents' })
+  @ApiProperty({ description: "Subtotal in cents" })
   subtotal!: number;
 
-  @ApiProperty({ description: 'Discount in cents' })
+  @ApiProperty({ description: "Discount in cents" })
   discount!: number;
 
-  @ApiProperty({ description: 'Tax in cents' })
+  @ApiProperty({ description: "Tax in cents" })
   tax!: number;
 
-  @ApiProperty({ description: 'Total to charge in cents' })
+  @ApiProperty({ description: "Total to charge in cents" })
   total!: number;
 
   @ApiPropertyOptional({ nullable: true })
@@ -359,22 +384,22 @@ export class CheckoutIntentModel {
   promotionCode?: string;
 
   @ApiPropertyOptional({
-    format: 'uuid',
+    format: "uuid",
     nullable: true,
-    description: 'Subscription ID after successful payment',
+    description: "Subscription ID after successful payment",
   })
   subscriptionId?: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   expiresAt!: string;
 
-  @ApiPropertyOptional({ format: 'date-time', nullable: true })
+  @ApiPropertyOptional({ format: "date-time", nullable: true })
   completedAt?: string;
 
   @ApiPropertyOptional()
   metadata?: Record<string, unknown>;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   createdAt!: string;
 }
 
@@ -382,30 +407,30 @@ export class CheckoutIntentModel {
 // WEBHOOK EVENT
 // ============================================================================
 
-@ApiSchema({ name: 'WebhookEvent' })
+@ApiSchema({ name: "WebhookEvent" })
 export class WebhookEventModel {
   @ApiProperty({
-    description: 'Event type identifier',
-    example: 'subscription.created',
+    description: "Event type identifier",
+    example: "subscription.created",
   })
   type!: string;
 
   @ApiProperty({
-    format: 'uuid',
-    description: 'Unique event ID for idempotency',
+    format: "uuid",
+    description: "Unique event ID for idempotency",
   })
   id!: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   createdAt!: string;
 
   @ApiProperty({
-    description: 'Event-specific data payload',
+    description: "Event-specific data payload",
     example: {
       subscription: {
-        id: '123e4567-e89b-12d3-a456-426614174000',
-        customerId: '123e4567-e89b-12d3-a456-426614174000',
-        status: 'active',
+        id: "123e4567-e89b-12d3-a456-426614174000",
+        customerId: "123e4567-e89b-12d3-a456-426614174000",
+        status: "active",
       },
     },
   })
@@ -416,34 +441,34 @@ export class WebhookEventModel {
 // WEBHOOK ENDPOINT
 // ============================================================================
 
-@ApiSchema({ name: 'WebhookEndpoint' })
+@ApiSchema({ name: "WebhookEndpoint" })
 export class WebhookEndpointModel {
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   id!: string;
 
-  @ApiProperty({ format: 'uri' })
+  @ApiProperty({ format: "uri" })
   url!: string;
 
   @ApiProperty({
     type: [String],
-    description: 'Event types this endpoint receives',
-    example: ['subscription.created', 'subscription.canceled'],
+    description: "Event types this endpoint receives",
+    example: ["subscription.created", "subscription.canceled"],
   })
   events!: string[];
 
-  @ApiProperty({ enum: ['active', 'disabled'] })
+  @ApiProperty({ enum: ["active", "disabled"] })
   status!: string;
 
   @ApiPropertyOptional({ nullable: true })
   description?: string;
 
-  @ApiProperty({ description: 'Resource version for concurrency control' })
+  @ApiProperty({ description: "Resource version for concurrency control" })
   version!: number;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   createdAt!: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   updatedAt!: string;
 }
 
@@ -451,30 +476,32 @@ export class WebhookEndpointModel {
 // API KEY (response, without secret)
 // ============================================================================
 
-@ApiSchema({ name: 'ApiKey' })
+@ApiSchema({ name: "ApiKey" })
 export class ApiKeyModel {
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: "uuid" })
   id!: string;
 
   @ApiProperty()
   name!: string;
 
-  @ApiProperty({ description: 'Visible prefix for identification (e.g., rl_live_abc...)' })
+  @ApiProperty({
+    description: "Visible prefix for identification (e.g., rl_live_abc...)",
+  })
   keyPrefix!: string;
 
-  @ApiProperty({ enum: ['owner', 'admin', 'member', 'readonly'] })
+  @ApiProperty({ enum: ["owner", "admin", "member", "readonly"] })
   role!: string;
 
-  @ApiProperty({ enum: ['live', 'test'] })
+  @ApiProperty({ enum: ["live", "test"] })
   environment!: string;
 
-  @ApiPropertyOptional({ format: 'date-time', nullable: true })
+  @ApiPropertyOptional({ format: "date-time", nullable: true })
   lastUsedAt?: string;
 
-  @ApiPropertyOptional({ format: 'date-time', nullable: true })
+  @ApiPropertyOptional({ format: "date-time", nullable: true })
   expiresAt?: string;
 
-  @ApiProperty({ format: 'date-time' })
+  @ApiProperty({ format: "date-time" })
   createdAt!: string;
 }
 
