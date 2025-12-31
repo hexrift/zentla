@@ -747,8 +747,8 @@ function CheckoutTab({ offer }: { offer: Offer }) {
   const hasPublishedVersion = !!currentVersion;
 
   // Generate the API endpoint for creating checkout sessions
-  const baseUrl = window.location.origin;
-  const apiEndpoint = `${baseUrl}/api/v1/checkout/sessions`;
+  const apiBaseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+  const apiEndpoint = `${apiBaseUrl}/api/v1/checkout/sessions`;
 
   const curlExample = `curl -X POST ${apiEndpoint} \\
   -H "Content-Type: application/json" \\

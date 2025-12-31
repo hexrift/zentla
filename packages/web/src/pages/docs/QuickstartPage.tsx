@@ -1,6 +1,7 @@
 import { CodeBlock } from "../../components/CodeBlock";
 
-const API_DOCS_URL = "http://localhost:3002/docs";
+const API_DOCS_URL =
+  import.meta.env.VITE_API_DOCS_URL || "http://localhost:3002/docs";
 
 export function QuickstartPage() {
   return (

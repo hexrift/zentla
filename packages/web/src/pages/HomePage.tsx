@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
-const API_DOCS_URL = "http://localhost:3002/docs";
+const API_DOCS_URL =
+  import.meta.env.VITE_API_DOCS_URL || "http://localhost:3002/docs";
 
 const codeExample = `// 1. Create an offer
 const offer = await relay.offers.create({

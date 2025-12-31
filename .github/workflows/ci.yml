@@ -1,11 +1,9 @@
 # =============================================================================
-# CI Pipeline - Runs on all PRs and pushes
+# CI Pipeline - Runs on PRs only
 # =============================================================================
 name: CI
 
 on:
-  push:
-    branches: [main, develop]
   pull_request:
     branches: [main, develop]
 

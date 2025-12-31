@@ -313,7 +313,7 @@ export function SettingsPage() {
                     type="url"
                     value={stripeWebhookEndpoint}
                     onChange={(e) => setStripeWebhookEndpoint(e.target.value)}
-                    placeholder={`${window.location.origin}/api/v1/webhooks/stripe`}
+                    placeholder={`${import.meta.env.VITE_API_URL || window.location.origin}/api/v1/webhooks/stripe`}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                   <p className="mt-1 text-xs text-gray-500">
