@@ -1,11 +1,10 @@
 # =============================================================================
-# Deploy Pipeline - Deploys to AWS on merge to main
+# Deploy Pipeline - Deploys to AWS (disabled - use deploy-api.yml for Koyeb)
+# To use AWS, configure secrets and run manually via workflow_dispatch
 # =============================================================================
-name: Deploy
+name: Deploy (AWS)
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       environment:

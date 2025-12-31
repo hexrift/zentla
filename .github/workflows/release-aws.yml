@@ -1,12 +1,15 @@
 # =============================================================================
-# Release Pipeline - Creates releases and deploys to production
+# Release Pipeline - AWS production deployment (disabled)
+# To use AWS, configure secrets and run manually via workflow_dispatch
 # =============================================================================
-name: Release
+name: Release (AWS)
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to deploy"
+        required: true
 
 env:
   AWS_REGION: us-east-1
