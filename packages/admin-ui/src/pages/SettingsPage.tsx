@@ -81,12 +81,6 @@ export function SettingsPage() {
     });
   };
 
-  const _maskValue = (value: string) => {
-    if (!value) return '';
-    if (value.length <= 8) return '••••••••';
-    return value.slice(0, 7) + '••••••••••••' + value.slice(-4);
-  };
-
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>

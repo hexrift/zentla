@@ -29,16 +29,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: false,
   });
 
-  // Load user on mount if we have a session token
-  useEffect(() => {
-    const token = getSessionToken();
-    if (token) {
-      loadUser();
-    } else {
-      setState((s) => ({ ...s, isLoading: false }));
-    }
-  }, []);
-
   const loadUser = useCallback(async () => {
     try {
       const { user, workspaces } = await api.auth.me();
@@ -67,6 +57,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     }
   }, []);
+
+  // Load user on mount if we have a session token
+  useEffect(() => {
+    const token = getSessionToken();
+    if (token) {
+      loadUser();
+    } else {
+      setState((s) => ({ ...s, isLoading: false }));
+    }
+  }, [loadUser]);
 
   const login = useCallback(async (email: string, password: string) => {
     const response = await api.auth.login({ email, password });
@@ -153,6 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   if (!context) {
