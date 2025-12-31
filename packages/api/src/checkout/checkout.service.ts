@@ -119,6 +119,7 @@ export class CheckoutService {
     const sessions = await this.prisma.checkout.findMany({
       where: {
         workspaceId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(status && { status: status as any }),
       },
       include: {
@@ -154,6 +155,7 @@ export class CheckoutService {
     const intents = await this.prisma.checkoutIntent.findMany({
       where: {
         workspaceId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(status && { status: status as any }),
       },
       include: {
