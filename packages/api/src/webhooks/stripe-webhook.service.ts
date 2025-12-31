@@ -909,7 +909,7 @@ export class StripeWebhookService {
     const trialDays = checkoutIntent.trialDays;
 
     // Calculate period dates
-    let currentPeriodStart = now;
+    const currentPeriodStart = now;
     let currentPeriodEnd: Date;
     let trialStart: Date | null = null;
     let trialEnd: Date | null = null;

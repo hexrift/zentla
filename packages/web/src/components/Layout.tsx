@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Outlet, Link } from "react-router-dom";
 
-const DASHBOARD_URL = "http://localhost:3001";
-const API_DOCS_URL = "http://localhost:3002/docs";
-const FEEDBACK_URL = "https://github.com/your-org/relay/issues";
+const DASHBOARD_URL =
+  import.meta.env.VITE_DASHBOARD_URL || "http://localhost:3001";
+const API_DOCS_URL =
+  import.meta.env.VITE_API_DOCS_URL || "http://localhost:3002/docs";
+const FEEDBACK_URL = "https://github.com/PrimeCodeLabs/relay/issues";
 
 export function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

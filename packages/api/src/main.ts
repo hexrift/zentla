@@ -170,8 +170,6 @@ Use \`error.code\` for programmatic handling.
       )
       .setVersion("1.0")
       .addServer("http://localhost:3000", "Local Development")
-      .addServer("https://api.staging.relay.example.com", "Staging")
-      .addServer("https://api.relay.example.com", "Production")
       .addApiKey(
         {
           type: "apiKey",

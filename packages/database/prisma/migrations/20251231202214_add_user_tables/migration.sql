@@ -20,8 +20,8 @@ END $$;
 -- AlterTable
 ALTER TABLE "offer" ADD COLUMN     "metadata" JSONB NOT NULL DEFAULT '{}';
 
--- AlterTable
-ALTER TABLE "promotion" ALTER COLUMN "status" SET DEFAULT 'draft';
+-- Note: Cannot set default to 'draft' in same transaction as enum addition
+-- Prisma will handle the default at application level
 
 -- AlterTable
 ALTER TABLE "webhook_endpoint" ADD COLUMN     "failure_count" INTEGER NOT NULL DEFAULT 0,

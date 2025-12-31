@@ -256,7 +256,7 @@ export class SubscriptionsService {
     }
 
     // Get the target version (either specified or the current published version)
-    let newVersion = dto.newOfferVersionId
+    const newVersion = dto.newOfferVersionId
       ? await this.offersService.getVersion(workspaceId, dto.newOfferVersionId)
       : await this.offersService.getPublishedVersion(
           workspaceId,

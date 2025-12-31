@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { Outlet, Link, NavLink, useLocation } from "react-router-dom";
 import { clsx } from "clsx";
 
-const DASHBOARD_URL = "http://localhost:3001";
-const API_DOCS_URL = "http://localhost:3002/docs";
-const FEEDBACK_URL = "https://github.com/your-org/relay/issues";
+const DASHBOARD_URL =
+  import.meta.env.VITE_DASHBOARD_URL || "http://localhost:3001";
+const API_DOCS_URL =
+  import.meta.env.VITE_API_DOCS_URL || "http://localhost:3002/docs";
+const FEEDBACK_URL = "https://github.com/PrimeCodeLabs/relay/issues";
 
 const navigation = [
   {
