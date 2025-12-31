@@ -81,7 +81,7 @@ export function SettingsPage() {
     });
   };
 
-  const maskValue = (value: string) => {
+  const _maskValue = (value: string) => {
     if (!value) return '';
     if (value.length <= 8) return '••••••••';
     return value.slice(0, 7) + '••••••••••••' + value.slice(-4);

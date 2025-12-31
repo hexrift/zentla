@@ -8,7 +8,7 @@ interface Promotion {
   code: string;
   name: string;
   description?: string;
-  status: 'active' | 'archived';
+  status: 'draft' | 'active' | 'archived';
   currentVersion?: {
     id: string;
     version: number;

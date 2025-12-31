@@ -235,12 +235,18 @@ function PricingTab({ offer }: { offer: Offer }) {
   const config = activeVersion?.config;
   const existingPricing = config?.pricing;
 
-  const [pricing, setPricing] = useState({
+  const [pricing, setPricing] = useState<{
+    model: 'flat' | 'per_unit' | 'tiered' | 'volume';
+    currency: string;
+    amount: number;
+    interval: 'day' | 'week' | 'month' | 'year';
+    intervalCount: number;
+  }>({
     model: existingPricing?.model ?? 'flat',
     currency: existingPricing?.currency ?? 'USD',
     amount: existingPricing?.amount ?? 0,
     interval: existingPricing?.interval ?? 'month',
-    intervalCount: existingPricing?.intervalCount ?? 1,
+    intervalCount: (existingPricing as Record<string, unknown>)?.intervalCount as number ?? 1,
   });
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -270,7 +276,7 @@ function PricingTab({ offer }: { offer: Offer }) {
           <label className="block text-sm font-medium text-gray-700">Pricing Model</label>
           <select
             value={pricing.model}
-            onChange={(e) => setPricing({ ...pricing, model: e.target.value })}
+            onChange={(e) => setPricing({ ...pricing, model: e.target.value as 'flat' | 'per_unit' | 'tiered' | 'volume' })}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
           >
             <option value="flat">Flat</option>
@@ -302,7 +308,7 @@ function PricingTab({ offer }: { offer: Offer }) {
           <label className="block text-sm font-medium text-gray-700">Billing Interval</label>
           <select
             value={pricing.interval}
-            onChange={(e) => setPricing({ ...pricing, interval: e.target.value })}
+            onChange={(e) => setPricing({ ...pricing, interval: e.target.value as 'day' | 'week' | 'month' | 'year' })}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
           >
             <option value="day">Daily</option>

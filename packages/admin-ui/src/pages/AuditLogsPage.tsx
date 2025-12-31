@@ -68,7 +68,8 @@ export function AuditLogsPage() {
         limit: PAGE_SIZE,
       });
       // Reset allLogs when filters change
-      const logs = (result as PaginatedAuditLogs).data ?? (result as AuditLog[]);
+      const paginatedResult = result as PaginatedAuditLogs;
+      const logs = paginatedResult.data ?? [];
       setAllLogs(logs);
       setCursor((result as PaginatedAuditLogs).nextCursor);
       return result;
@@ -88,7 +89,8 @@ export function AuditLogsPage() {
         limit: PAGE_SIZE,
         cursor,
       });
-      const newLogs = (result as PaginatedAuditLogs).data ?? (result as AuditLog[]);
+      const paginatedResult = result as PaginatedAuditLogs;
+      const newLogs = paginatedResult.data ?? [];
       setAllLogs((prev) => [...prev, ...newLogs]);
       setCursor((result as PaginatedAuditLogs).nextCursor);
     } finally {

@@ -113,8 +113,13 @@ export interface PromotionVersion {
     discountValue: number;
     currency?: string;
     maxRedemptions?: number;
+    maxRedemptionsPerCustomer?: number;
+    minimumAmount?: number;
     validFrom?: string;
     validUntil?: string;
+    duration?: 'once' | 'repeating' | 'forever';
+    durationInMonths?: number;
+    applicableOfferIds?: string[];
   };
   publishedAt?: string;
   createdAt: string;
