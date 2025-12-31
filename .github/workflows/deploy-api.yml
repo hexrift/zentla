@@ -1,0 +1,77 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/api/**"
+      - "packages/core/**"
+      - "packages/database/**"
+      - "packages/sdk/**"
+      - "packages/adapters/**"
+      - "Dockerfile"
+      - ".github/workflows/deploy-api.yml"
+  workflow_dispatch:
+
+env:
+  KOYEB_APP: relay-api
+  KOYEB_SERVICE: api
+
+jobs:
+  deploy:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Koyeb CLI
+        uses: koyeb/koyeb-cli-action@v1
+        with:
+          api_token: ${{ secrets.KOYEB_API_TOKEN }}
+
+      - name: Deploy to Koyeb
+        run: |
+          koyeb service update ${{ env.KOYEB_APP }}/${{ env.KOYEB_SERVICE }} \
+            --git github.com/${{ github.repository }} \
+            --git-branch main \
+            --git-build-command "" \
+            --git-run-command "node packages/api/dist/main.js" \
+            --git-docker true \
+            --git-docker-dockerfile Dockerfile \
+            --instance-type free \
+            --regions fra \
+            --port 3000:http \
+            --route /:3000 \
+            --health-check path=/:3000 \
+            --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+            --env REDIS_URL="${{ secrets.REDIS_URL }}" \
+            --env JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            --env STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}" \
+            --env STRIPE_WEBHOOK_SECRET="${{ secrets.STRIPE_WEBHOOK_SECRET }}" \
+            --env CORS_ORIGINS="${{ vars.CORS_ORIGINS }}" \
+            --env NODE_ENV=production \
+          || koyeb service create ${{ env.KOYEB_SERVICE }} \
+            --app ${{ env.KOYEB_APP }} \
+            --git github.com/${{ github.repository }} \
+            --git-branch main \
+            --git-docker true \
+            --git-docker-dockerfile Dockerfile \
+            --instance-type free \
+            --regions fra \
+            --port 3000:http \
+            --route /:3000 \
+            --health-check path=/:3000 \
+            --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+            --env REDIS_URL="${{ secrets.REDIS_URL }}" \
+            --env JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            --env STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}" \
+            --env STRIPE_WEBHOOK_SECRET="${{ secrets.STRIPE_WEBHOOK_SECRET }}" \
+            --env CORS_ORIGINS="${{ vars.CORS_ORIGINS }}" \
+            --env NODE_ENV=production
+
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for deployment to complete..."
+          sleep 30
+          koyeb service describe ${{ env.KOYEB_APP }}/${{ env.KOYEB_SERVICE }}

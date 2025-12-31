@@ -1,0 +1,44 @@
+name: Deploy Admin UI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/admin-ui/**"
+      - ".github/workflows/deploy-admin-ui.yml"
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  deploy:
+    name: Deploy Admin UI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build Admin UI
+        run: yarn workspace @relay/admin-ui build
+        env:
+          VITE_API_URL: ${{ vars.API_URL }}
+
+      # Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy packages/admin-ui/dist --project-name=relay-admin

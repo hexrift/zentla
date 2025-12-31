@@ -1,0 +1,83 @@
+name: Database Migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/database/prisma/migrations/**"
+      - ".github/workflows/deploy-db.yml"
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Migration action"
+        type: choice
+        options:
+          - deploy
+          - status
+          - reset
+        default: deploy
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  migrate:
+    name: Run Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Generate Prisma Client
+        run: yarn db:generate
+
+      - name: Check migration status
+        if: github.event.inputs.action == 'status' || github.event.inputs.action == ''
+        run: yarn workspace @relay/database prisma migrate status
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Deploy migrations
+        if: github.event.inputs.action == 'deploy' || github.event_name == 'push'
+        run: yarn db:migrate:deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Reset database (dangerous!)
+        if: github.event.inputs.action == 'reset'
+        run: |
+          echo "⚠️ WARNING: This will reset the database!"
+          yarn workspace @relay/database prisma migrate reset --force
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  # Optional: Create branch database for PRs (Neon branching)
+  create-branch-db:
+    name: Create Branch Database
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Create Neon Branch
+        uses: neondatabase/create-branch-action@v5
+        id: create-branch
+        with:
+          project_id: ${{ secrets.NEON_PROJECT_ID }}
+          branch_name: pr-${{ github.event.pull_request.number }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+          username: ${{ secrets.NEON_DATABASE_USERNAME }}
+
+      - name: Output connection string
+        run: |
+          echo "Branch database created!"
+          echo "Connection string available in the PR environment"
