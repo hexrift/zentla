@@ -165,6 +165,58 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* How it Works */}
+      <section className="py-16 sm:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              How it works
+            </h2>
+            <p className="mt-4 text-gray-600 max-w-xl mx-auto">
+              Get up and running in three simple steps
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                1
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Create an Offer
+              </h3>
+              <p className="text-sm text-gray-600">
+                Define your pricing, trial periods, and feature entitlements.
+                Version and publish when ready.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                2
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Generate Checkout
+              </h3>
+              <p className="text-sm text-gray-600">
+                Create hosted or headless checkout sessions. Apply promotions
+                and track metadata.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                3
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Query Entitlements
+              </h3>
+              <p className="text-sm text-gray-600">
+                Check feature access in real-time. Gate features based on
+                subscription status.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -192,6 +244,60 @@ export function HomePage() {
                 <p className="text-sm text-gray-600">{feature.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Integrations */}
+      <section className="py-16 sm:py-24 bg-white border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Works with your billing provider
+            </h2>
+            <p className="mt-4 text-gray-600 max-w-xl mx-auto">
+              Connect Relay to your existing payment infrastructure
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-16">
+            {/* Stripe */}
+            <div className="flex flex-col items-center">
+              <div className="h-12 flex items-center">
+                <svg
+                  className="h-10 text-[#635BFF]"
+                  viewBox="0 0 60 25"
+                  fill="currentColor"
+                >
+                  <path d="M59.64 14.28h-8.06c.19 1.93 1.6 2.55 3.2 2.55 1.64 0 2.96-.37 4.05-.95v3.32a10.4 10.4 0 0 1-4.56.95c-4.01 0-6.83-2.5-6.83-7.28 0-4.19 2.39-7.34 6.42-7.34 3.89 0 5.84 2.96 5.84 6.84 0 .66-.06 1.43-.06 1.91zm-4.22-5.73c-1.27 0-2 .91-2.12 2.41h4.16c-.08-1.5-.72-2.41-2.04-2.41zM42.67 20.03V5.59h3.95l.21 1.85c.81-1.36 2.18-2.12 3.97-2.12.66 0 1.24.08 1.65.21v4.02c-.49-.13-1.11-.21-1.82-.21-1.65 0-3.23.87-3.23 3.32v7.37h-4.73zm-6.15 0h4.73V5.59h-4.73v14.44zm2.37-16.33c-1.44 0-2.61-1.11-2.61-2.55s1.17-2.55 2.61-2.55c1.44 0 2.61 1.11 2.61 2.55s-1.17 2.55-2.61 2.55zM30.4 20.36c-2.96 0-4.69-1.52-4.69-4.35V8.87h-2.12V5.59h2.12V2.18l4.73-1.04v4.45h3.4v3.28h-3.4v6.47c0 1.04.53 1.52 1.48 1.52.66 0 1.31-.13 1.82-.37v3.45c-.66.29-1.65.42-2.74.42h-.6zM18.92 20.36c-4.56 0-7.56-2.88-7.56-7.47s3-7.41 7.49-7.41c1.99 0 3.7.62 4.93 1.69l-1.82 2.88c-.81-.7-1.78-1.11-2.88-1.11-1.99 0-3.36 1.44-3.36 4.02s1.36 4.02 3.44 4.02c1.04 0 2.04-.42 2.88-1.11l1.82 2.88c-1.31 1.11-3.02 1.61-4.94 1.61zM4.98 15.3c.7.58 2.04 1.17 3.28 1.17 1.11 0 1.69-.42 1.69-1.04 0-.7-.7-1.04-2.12-1.44-2.59-.72-4.01-1.82-4.01-4.02 0-2.55 2.12-4.48 5.29-4.48 2.12 0 3.78.62 4.85 1.52l-1.82 2.88c-.62-.53-1.69-.99-2.88-.99-.91 0-1.44.37-1.44.91 0 .62.62.91 1.99 1.31 2.55.72 4.22 1.69 4.22 4.14 0 2.55-1.99 4.65-5.54 4.65-2.25 0-4.14-.66-5.37-1.82l1.86-2.79z" />
+                </svg>
+              </div>
+              <span className="mt-2 text-sm font-medium text-gray-900">
+                Stripe
+              </span>
+              <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                Available
+              </span>
+            </div>
+            {/* Zuora */}
+            <div className="flex flex-col items-center opacity-60">
+              <div className="h-12 flex items-center">
+                <svg
+                  className="h-8 text-gray-400"
+                  viewBox="0 0 100 24"
+                  fill="currentColor"
+                >
+                  <text x="0" y="18" fontSize="18" fontWeight="bold">
+                    ZUORA
+                  </text>
+                </svg>
+              </div>
+              <span className="mt-2 text-sm font-medium text-gray-500">
+                Zuora
+              </span>
+              <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                Coming Soon
+              </span>
+            </div>
           </div>
         </div>
       </section>
