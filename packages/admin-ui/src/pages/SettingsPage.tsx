@@ -19,6 +19,16 @@ export function SettingsPage() {
   const [stripeSaved, setStripeSaved] = useState(false);
   const [stripeError, setStripeError] = useState<string | null>(null);
 
+  // Zuora config state
+  const [zuoraClientId, setZuoraClientId] = useState("");
+  const [zuoraClientSecret, setZuoraClientSecret] = useState("");
+  const [zuoraBaseUrl, setZuoraBaseUrl] = useState("");
+  const [zuoraWebhookSecret, setZuoraWebhookSecret] = useState("");
+  const [showZuoraClientSecret, setShowZuoraClientSecret] = useState(false);
+  const [showZuoraWebhookSecret, setShowZuoraWebhookSecret] = useState(false);
+  const [zuoraSaved, setZuoraSaved] = useState(false);
+  const [zuoraError, setZuoraError] = useState<string | null>(null);
+
   useEffect(() => {
     const storedKey = localStorage.getItem("relay_api_key") ?? "";
     setApiKey(storedKey);
@@ -56,6 +66,18 @@ export function SettingsPage() {
     | undefined;
   const isStripeConnected = stripeProvider?.status === "connected";
 
+  const zuoraProvider = providerStatus?.providers?.find(
+    (p: { provider: string }) => p.provider === "zuora",
+  ) as
+    | {
+        provider: string;
+        status: string;
+        mode: string | null;
+        errors: string[];
+      }
+    | undefined;
+  const isZuoraConnected = zuoraProvider?.status === "connected";
+
   // Load Stripe config from workspace settings
   useEffect(() => {
     if (workspace?.settings) {
@@ -65,6 +87,18 @@ export function SettingsPage() {
       }
       if (settings.stripeWebhookSecret) {
         setStripeWebhookSecret(settings.stripeWebhookSecret as string);
+      }
+      if (settings.zuoraClientId) {
+        setZuoraClientId(settings.zuoraClientId as string);
+      }
+      if (settings.zuoraClientSecret) {
+        setZuoraClientSecret(settings.zuoraClientSecret as string);
+      }
+      if (settings.zuoraBaseUrl) {
+        setZuoraBaseUrl(settings.zuoraBaseUrl as string);
+      }
+      if (settings.zuoraWebhookSecret) {
+        setZuoraWebhookSecret(settings.zuoraWebhookSecret as string);
       }
     }
   }, [workspace]);
@@ -95,6 +129,27 @@ export function SettingsPage() {
       stripeSecretKey,
       stripeWebhookSecret,
     });
+  };
+
+  const handleSaveZuoraConfig = () => {
+    updateWorkspaceMutation.mutate(
+      {
+        zuoraClientId,
+        zuoraClientSecret,
+        zuoraBaseUrl,
+        zuoraWebhookSecret,
+      },
+      {
+        onSuccess: () => {
+          setZuoraSaved(true);
+          setZuoraError(null);
+          setTimeout(() => setZuoraSaved(false), 3000);
+        },
+        onError: (error: Error) => {
+          setZuoraError(error.message);
+        },
+      },
+    );
   };
 
   return (
@@ -356,55 +411,205 @@ export function SettingsPage() {
                     Enterprise subscription management
                   </p>
                 </div>
-                <span className="ml-auto px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
-                  Not Configured
+                <span
+                  className={`ml-auto px-2 py-1 text-xs font-medium rounded-full ${
+                    isZuoraConnected
+                      ? "bg-green-100 text-green-800"
+                      : zuoraProvider?.status === "error"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
+                  {isZuoraConnected
+                    ? `Connected${zuoraProvider?.mode ? ` (${zuoraProvider.mode})` : ""}`
+                    : zuoraProvider?.status === "error"
+                      ? "Connection Error"
+                      : "Not Configured"}
                 </span>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+              <div className="bg-gray-50 rounded-lg p-4 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Client ID
                   </label>
-                  <div className="mt-1 flex items-center gap-2">
-                    <code className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm font-mono text-gray-400 flex-1">
-                      Not configured
-                    </code>
-                    <span className="text-xs text-gray-500">
-                      Set via ZUORA_CLIENT_ID
-                    </span>
-                  </div>
+                  <input
+                    type="text"
+                    value={zuoraClientId}
+                    onChange={(e) => setZuoraClientId(e.target.value)}
+                    placeholder="your-client-id"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    OAuth Client ID from Zuora Admin → Settings → Administration
+                    → Manage OAuth Clients
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Client Secret
                   </label>
-                  <div className="mt-1 flex items-center gap-2">
-                    <code className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm font-mono text-gray-400 flex-1">
-                      Not configured
-                    </code>
-                    <span className="text-xs text-gray-500">
-                      Set via ZUORA_CLIENT_SECRET
-                    </span>
+                  <div className="relative">
+                    <input
+                      type={showZuoraClientSecret ? "text" : "password"}
+                      value={zuoraClientSecret}
+                      onChange={(e) => setZuoraClientSecret(e.target.value)}
+                      placeholder="your-client-secret"
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowZuoraClientSecret(!showZuoraClientSecret)
+                      }
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showZuoraClientSecret ? (
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
+                        </svg>
+                      )}
+                    </button>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     API Base URL
                   </label>
-                  <div className="mt-1 flex items-center gap-2">
-                    <code className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm font-mono text-gray-400 flex-1">
-                      Not configured
-                    </code>
-                    <span className="text-xs text-gray-500">
-                      Set via ZUORA_API_URL
-                    </span>
+                  <select
+                    value={zuoraBaseUrl}
+                    onChange={(e) => setZuoraBaseUrl(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select environment...</option>
+                    <option value="https://rest.apisandbox.zuora.com">
+                      Sandbox (rest.apisandbox.zuora.com)
+                    </option>
+                    <option value="https://rest.zuora.com">
+                      Production US (rest.zuora.com)
+                    </option>
+                    <option value="https://rest.eu.zuora.com">
+                      Production EU (rest.eu.zuora.com)
+                    </option>
+                    <option value="https://rest.sandbox.eu.zuora.com">
+                      Sandbox EU (rest.sandbox.eu.zuora.com)
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Webhook Secret (Optional)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showZuoraWebhookSecret ? "text" : "password"}
+                      value={zuoraWebhookSecret}
+                      onChange={(e) => setZuoraWebhookSecret(e.target.value)}
+                      placeholder="whsec_..."
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowZuoraWebhookSecret(!showZuoraWebhookSecret)
+                      }
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showZuoraWebhookSecret ? (
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
+                        </svg>
+                      )}
+                    </button>
                   </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Required for webhook signature verification
+                  </p>
+                </div>
+                <div className="pt-2 flex items-center gap-3">
+                  <button
+                    onClick={handleSaveZuoraConfig}
+                    disabled={
+                      updateWorkspaceMutation.isPending ||
+                      !zuoraClientId ||
+                      !zuoraClientSecret ||
+                      !zuoraBaseUrl
+                    }
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {updateWorkspaceMutation.isPending
+                      ? "Saving..."
+                      : "Save Zuora Config"}
+                  </button>
+                  {zuoraSaved && (
+                    <span className="text-sm text-green-600">
+                      Saved successfully!
+                    </span>
+                  )}
+                  {zuoraError && (
+                    <span className="text-sm text-red-600">{zuoraError}</span>
+                  )}
                 </div>
               </div>
-              <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-md">
-                Configure Zuora credentials in your environment variables to
-                enable this provider.
-              </p>
             </div>
           )}
         </div>

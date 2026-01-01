@@ -201,7 +201,7 @@ describe("BillingService", () => {
       const zuora = result.providers.find((p) => p.provider === "zuora");
       expect(zuora?.status).toBe("not_configured");
       expect(zuora?.errors).toContain(
-        "Zuora integration planned for future release",
+        "Add your Zuora API credentials in Settings to enable billing",
       );
     });
 

@@ -26,6 +26,10 @@ export interface WorkspaceSettings {
   defaultCurrency?: string;
   stripeSecretKey?: string;
   stripeWebhookSecret?: string;
+  zuoraClientId?: string;
+  zuoraClientSecret?: string;
+  zuoraBaseUrl?: string;
+  zuoraWebhookSecret?: string;
   webhookRetryPolicy?: {
     maxRetries: number;
     initialDelayMs: number;
@@ -112,6 +116,30 @@ export class WorkspacesService {
         this.billingService.configureProviderForWorkspace(id, "stripe", {
           secretKey: settings.stripeSecretKey,
           webhookSecret: settings.stripeWebhookSecret,
+        });
+      }
+    }
+
+    // Reconfigure billing service if Zuora credentials were updated
+    if (
+      dto.settings?.zuoraClientId ||
+      dto.settings?.zuoraClientSecret ||
+      dto.settings?.zuoraBaseUrl
+    ) {
+      // Clear any cached provider for this workspace
+      this.billingService.clearWorkspaceCache(id);
+
+      const settings = updated.settings as WorkspaceSettings;
+      if (
+        settings.zuoraClientId &&
+        settings.zuoraClientSecret &&
+        settings.zuoraBaseUrl
+      ) {
+        this.billingService.configureProviderForWorkspace(id, "zuora", {
+          clientId: settings.zuoraClientId,
+          clientSecret: settings.zuoraClientSecret,
+          baseUrl: settings.zuoraBaseUrl,
+          webhookSecret: settings.zuoraWebhookSecret,
         });
       }
     }

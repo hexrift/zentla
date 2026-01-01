@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { StripeAdapter } from "@relay/stripe-adapter";
+import { ZuoraAdapter } from "@relay/zuora-adapter";
 import type { BillingProvider } from "@relay/core";
 
 export type ProviderType = "stripe" | "zuora";
@@ -22,6 +23,10 @@ export interface ProviderStatus {
 export interface WorkspaceSettings {
   stripeSecretKey?: string;
   stripeWebhookSecret?: string;
+  zuoraClientId?: string;
+  zuoraClientSecret?: string;
+  zuoraBaseUrl?: string;
+  zuoraWebhookSecret?: string;
 }
 
 @Injectable()
@@ -86,6 +91,22 @@ export class BillingService implements OnModuleInit {
       return adapter;
     }
 
+    if (
+      provider === "zuora" &&
+      settings?.zuoraClientId &&
+      settings?.zuoraClientSecret &&
+      settings?.zuoraBaseUrl
+    ) {
+      const adapter = new ZuoraAdapter({
+        clientId: settings.zuoraClientId,
+        clientSecret: settings.zuoraClientSecret,
+        baseUrl: settings.zuoraBaseUrl,
+        webhookSecret: settings.zuoraWebhookSecret,
+      });
+      this.cacheWorkspaceProvider(workspaceId, provider, adapter);
+      return adapter;
+    }
+
     // Fall back to global provider
     const globalProvider = this.globalProviders.get(provider);
     if (globalProvider) {
@@ -120,6 +141,15 @@ export class BillingService implements OnModuleInit {
       return true;
     }
 
+    if (
+      provider === "zuora" &&
+      settings?.zuoraClientId &&
+      settings?.zuoraClientSecret &&
+      settings?.zuoraBaseUrl
+    ) {
+      return true;
+    }
+
     // Check global
     return this.globalProviders.has(provider);
   }
@@ -131,9 +161,21 @@ export class BillingService implements OnModuleInit {
   configureProviderForWorkspace(
     workspaceId: string,
     provider: ProviderType,
-    config: { secretKey: string; webhookSecret: string },
+    config:
+      | { secretKey: string; webhookSecret: string }
+      | {
+          clientId: string;
+          clientSecret: string;
+          baseUrl: string;
+          webhookSecret?: string;
+        },
   ): void {
-    if (provider === "stripe" && config.secretKey && config.webhookSecret) {
+    if (
+      provider === "stripe" &&
+      "secretKey" in config &&
+      config.secretKey &&
+      config.webhookSecret
+    ) {
       const adapter = new StripeAdapter({
         secretKey: config.secretKey,
         webhookSecret: config.webhookSecret,
@@ -142,6 +184,23 @@ export class BillingService implements OnModuleInit {
       this.logger.log(
         `Stripe provider configured for workspace ${workspaceId}`,
       );
+    }
+
+    if (
+      provider === "zuora" &&
+      "clientId" in config &&
+      config.clientId &&
+      config.clientSecret &&
+      config.baseUrl
+    ) {
+      const adapter = new ZuoraAdapter({
+        clientId: config.clientId,
+        clientSecret: config.clientSecret,
+        baseUrl: config.baseUrl,
+        webhookSecret: config.webhookSecret,
+      });
+      this.cacheWorkspaceProvider(workspaceId, provider, adapter);
+      this.logger.log(`Zuora provider configured for workspace ${workspaceId}`);
     }
   }
 
@@ -268,20 +327,8 @@ export class BillingService implements OnModuleInit {
       await this.getStripeStatusForWorkspace(workspaceId, settings),
     );
 
-    // Zuora placeholder
-    statuses.push({
-      provider: "zuora",
-      status: "not_configured",
-      mode: null,
-      lastVerifiedAt: null,
-      capabilities: {
-        subscriptions: false,
-        invoices: false,
-        customerPortal: false,
-        webhooksConfigured: false,
-      },
-      errors: ["Zuora integration planned for future release"],
-    });
+    // Check Zuora status for this workspace
+    statuses.push(await this.getZuoraStatusForWorkspace(workspaceId, settings));
 
     return { providers: statuses };
   }
@@ -376,6 +423,83 @@ export class BillingService implements OnModuleInit {
           error instanceof Error
             ? error.message
             : "Unknown error connecting to Stripe",
+        ],
+      };
+    }
+  }
+
+  private async getZuoraStatusForWorkspace(
+    workspaceId: string,
+    settings?: WorkspaceSettings,
+  ): Promise<ProviderStatus> {
+    // Check if workspace has Zuora credentials
+    const hasWorkspaceCredentials =
+      settings?.zuoraClientId &&
+      settings?.zuoraClientSecret &&
+      settings?.zuoraBaseUrl;
+
+    if (!hasWorkspaceCredentials) {
+      return {
+        provider: "zuora",
+        status: "not_configured",
+        mode: null,
+        lastVerifiedAt: null,
+        capabilities: {
+          subscriptions: false,
+          invoices: false,
+          customerPortal: false,
+          webhooksConfigured: false,
+        },
+        errors: [
+          "Add your Zuora API credentials in Settings to enable billing",
+        ],
+      };
+    }
+
+    // Try to get or create the workspace provider
+    try {
+      const adapter = this.getProviderForWorkspace(
+        workspaceId,
+        "zuora",
+        settings,
+      ) as ZuoraAdapter;
+
+      // Verify connection by getting account info (triggers OAuth)
+      await adapter.getAccountInfo();
+      const isSandbox = settings.zuoraBaseUrl?.includes("sandbox");
+
+      return {
+        provider: "zuora",
+        status: "connected",
+        mode: isSandbox ? "test" : "live",
+        lastVerifiedAt: new Date(),
+        capabilities: {
+          subscriptions: true,
+          invoices: true,
+          customerPortal: true,
+          webhooksConfigured: !!settings.zuoraWebhookSecret,
+        },
+        errors: [],
+      };
+    } catch (error) {
+      // Clear cache on error so next request tries fresh
+      this.clearWorkspaceCache(workspaceId);
+
+      return {
+        provider: "zuora",
+        status: "error",
+        mode: null,
+        lastVerifiedAt: null,
+        capabilities: {
+          subscriptions: false,
+          invoices: false,
+          customerPortal: false,
+          webhooksConfigured: false,
+        },
+        errors: [
+          error instanceof Error
+            ? error.message
+            : "Unknown error connecting to Zuora",
         ],
       };
     }

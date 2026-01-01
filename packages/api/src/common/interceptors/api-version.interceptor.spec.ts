@@ -32,7 +32,16 @@ describe("ApiVersionInterceptor", () => {
   it("should set X-API-Version header", async () => {
     await lastValueFrom(interceptor.intercept(mockContext, mockCallHandler));
 
-    expect(mockResponse.setHeader).toHaveBeenCalledWith("X-API-Version", "1");
+    expect(mockResponse.setHeader).toHaveBeenCalledWith("X-API-Version", "0");
+  });
+
+  it("should set X-Relay-Version header with full semver", async () => {
+    await lastValueFrom(interceptor.intercept(mockContext, mockCallHandler));
+
+    expect(mockResponse.setHeader).toHaveBeenCalledWith(
+      "X-Relay-Version",
+      "0.1.0",
+    );
   });
 
   it("should set X-Relay-API-Deprecated header to false", async () => {
