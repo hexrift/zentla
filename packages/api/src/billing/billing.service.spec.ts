@@ -169,4 +169,119 @@ describe("BillingService", () => {
       expect(service.isConfiguredForWorkspace("ws_456", "stripe")).toBe(true);
     });
   });
+
+  describe("getProviderStatusForWorkspace", () => {
+    it("should return connected status for workspace with credentials", async () => {
+      const settings = {
+        stripeSecretKey: "sk_test_ws",
+        stripeWebhookSecret: "whsec_ws",
+      };
+
+      const result = await service.getProviderStatusForWorkspace(
+        "ws_123",
+        settings,
+      );
+
+      expect(result.providers).toHaveLength(2);
+      const stripe = result.providers.find((p) => p.provider === "stripe");
+      expect(stripe?.status).toBe("connected");
+      expect(stripe?.capabilities.subscriptions).toBe(true);
+    });
+
+    it("should return not_configured for workspace without credentials", async () => {
+      const result = await service.getProviderStatusForWorkspace("ws_123", {});
+
+      const stripe = result.providers.find((p) => p.provider === "stripe");
+      expect(stripe?.status).toBe("not_configured");
+    });
+
+    it("should include zuora as not_configured", async () => {
+      const result = await service.getProviderStatusForWorkspace("ws_123", {});
+
+      const zuora = result.providers.find((p) => p.provider === "zuora");
+      expect(zuora?.status).toBe("not_configured");
+      expect(zuora?.errors).toContain(
+        "Zuora integration planned for future release",
+      );
+    });
+
+    it("should detect live mode from secret key", async () => {
+      const settings = {
+        stripeSecretKey: "sk_live_ws",
+        stripeWebhookSecret: "whsec_ws",
+      };
+
+      const result = await service.getProviderStatusForWorkspace(
+        "ws_123",
+        settings,
+      );
+
+      const stripe = result.providers.find((p) => p.provider === "stripe");
+      expect(stripe?.mode).toBe("live");
+    });
+
+    it("should detect test mode from secret key", async () => {
+      const settings = {
+        stripeSecretKey: "sk_test_ws",
+        stripeWebhookSecret: "whsec_ws",
+      };
+
+      const result = await service.getProviderStatusForWorkspace(
+        "ws_123",
+        settings,
+      );
+
+      const stripe = result.providers.find((p) => p.provider === "stripe");
+      expect(stripe?.mode).toBe("test");
+    });
+  });
+
+  describe("getProviderStatus (deprecated)", () => {
+    it("should return global provider status", async () => {
+      const result = await service.getProviderStatus();
+
+      expect(result.providers).toHaveLength(2);
+      const stripe = result.providers.find((p) => p.provider === "stripe");
+      expect(stripe?.status).toBe("connected");
+    });
+  });
+
+  describe("getDefaultProvider error handling", () => {
+    it("should throw when no providers configured", () => {
+      // Create a service with no config
+      const noConfigService = {
+        get: vi.fn(() => undefined),
+      };
+
+      const emptyService = new BillingService(
+        noConfigService as unknown as ConfigService,
+      );
+
+      expect(() => emptyService.getDefaultProvider()).toThrow(
+        "No billing provider configured",
+      );
+    });
+  });
+
+  describe("onModuleInit with missing config", () => {
+    it("should not throw when stripe keys are missing", () => {
+      const emptyConfigService = {
+        get: vi.fn(() => undefined),
+      };
+
+      const serviceWithoutConfig = new BillingService(
+        emptyConfigService as unknown as ConfigService,
+      );
+
+      expect(() => serviceWithoutConfig.onModuleInit()).not.toThrow();
+    });
+  });
+
+  describe("getDefaultProvider with preferred provider", () => {
+    it("should fall back to first configured when preferred not available", () => {
+      // When zuora is requested but not configured, falls back to stripe
+      const provider = service.getDefaultProvider("zuora");
+      expect(provider).toBeDefined();
+    });
+  });
 });

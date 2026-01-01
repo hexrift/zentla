@@ -316,4 +316,174 @@ describe("SubscriptionsService", () => {
       });
     });
   });
+
+  describe("change", () => {
+    let billingService: { isConfigured: ReturnType<typeof vi.fn>; getProvider: ReturnType<typeof vi.fn> };
+    let providerRefService: { findByEntity: ReturnType<typeof vi.fn>; getProviderPriceId: ReturnType<typeof vi.fn> };
+    let offersService: { findById: ReturnType<typeof vi.fn>; getVersion: ReturnType<typeof vi.fn>; getPublishedVersion: ReturnType<typeof vi.fn> };
+
+    beforeEach(async () => {
+      billingService = {
+        isConfigured: vi.fn().mockReturnValue(true),
+        getProvider: vi.fn().mockReturnValue({
+          changeSubscription: vi.fn().mockResolvedValue({
+            effectiveDate: new Date(),
+          }),
+        }),
+      };
+
+      providerRefService = {
+        findByEntity: vi.fn().mockResolvedValue({
+          id: "ref_123",
+          externalId: "sub_stripe_123",
+          metadata: {},
+        }),
+        getProviderPriceId: vi.fn().mockResolvedValue("price_stripe_456"),
+      };
+
+      offersService = {
+        findById: vi.fn().mockResolvedValue({ id: "new_offer", name: "Enterprise" }),
+        getVersion: vi.fn(),
+        getPublishedVersion: vi.fn().mockResolvedValue({
+          id: "new_ver_123",
+          status: "published",
+        }),
+      };
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          SubscriptionsService,
+          { provide: PrismaService, useValue: prisma },
+          { provide: BillingService, useValue: billingService },
+          { provide: ProviderRefService, useValue: providerRefService },
+          { provide: OffersService, useValue: offersService },
+          { provide: EntitlementsService, useValue: entitlementsService },
+        ],
+      }).compile();
+
+      service = module.get<SubscriptionsService>(SubscriptionsService);
+    });
+
+    it("should throw NotFoundException when subscription not found", async () => {
+      prisma.subscription.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.change("ws_123", "nonexistent", { newOfferId: "offer_new" }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it("should throw BadRequestException when subscription is canceled", async () => {
+      prisma.subscription.findFirst.mockResolvedValue({
+        ...mockSubscription,
+        status: "canceled",
+      });
+
+      await expect(
+        service.change("ws_123", "sub_123", { newOfferId: "offer_new" }),
+      ).rejects.toThrow("Only active or trialing subscriptions can be changed");
+    });
+
+    it("should throw NotFoundException when new offer not found", async () => {
+      prisma.subscription.findFirst.mockResolvedValue(mockSubscription);
+      offersService.findById.mockResolvedValue(null);
+
+      await expect(
+        service.change("ws_123", "sub_123", { newOfferId: "nonexistent" }),
+      ).rejects.toThrow("not found");
+    });
+
+    it("should throw BadRequestException when no published version", async () => {
+      prisma.subscription.findFirst.mockResolvedValue(mockSubscription);
+      offersService.getPublishedVersion.mockResolvedValue(null);
+
+      await expect(
+        service.change("ws_123", "sub_123", { newOfferId: "new_offer" }),
+      ).rejects.toThrow("has no published version");
+    });
+
+    it("should throw BadRequestException when version is not published", async () => {
+      prisma.subscription.findFirst.mockResolvedValue(mockSubscription);
+      offersService.getVersion.mockResolvedValue({
+        id: "draft_ver",
+        status: "draft",
+      });
+
+      await expect(
+        service.change("ws_123", "sub_123", {
+          newOfferId: "new_offer",
+          newOfferVersionId: "draft_ver",
+        }),
+      ).rejects.toThrow("only published versions can be used");
+    });
+
+    it("should throw BadRequestException when billing provider not configured", async () => {
+      prisma.subscription.findFirst.mockResolvedValue(mockSubscription);
+      billingService.isConfigured.mockReturnValue(false);
+
+      await expect(
+        service.change("ws_123", "sub_123", { newOfferId: "new_offer" }),
+      ).rejects.toThrow("not configured");
+    });
+
+    it("should throw BadRequestException when subscription not linked to provider", async () => {
+      prisma.subscription.findFirst.mockResolvedValue(mockSubscription);
+      providerRefService.findByEntity.mockResolvedValue(null);
+
+      await expect(
+        service.change("ws_123", "sub_123", { newOfferId: "new_offer" }),
+      ).rejects.toThrow("not linked to");
+    });
+
+    it("should throw BadRequestException when offer not synced to provider", async () => {
+      prisma.subscription.findFirst.mockResolvedValue(mockSubscription);
+      providerRefService.getProviderPriceId.mockResolvedValue(null);
+
+      await expect(
+        service.change("ws_123", "sub_123", { newOfferId: "new_offer" }),
+      ).rejects.toThrow("not synced");
+    });
+
+    it("should change subscription successfully", async () => {
+      prisma.subscription.findFirst.mockResolvedValue(mockSubscription);
+      prisma.subscription.update.mockResolvedValue({
+        ...mockSubscription,
+        offerId: "new_offer",
+        offerVersionId: "new_ver_123",
+      });
+
+      const result = await service.change("ws_123", "sub_123", {
+        newOfferId: "new_offer",
+      });
+
+      expect(result.offerId).toBe("new_offer");
+      expect(prisma.subscription.update).toHaveBeenCalledWith({
+        where: { id: "sub_123" },
+        data: expect.objectContaining({
+          offerId: "new_offer",
+          offerVersionId: "new_ver_123",
+        }),
+      });
+    });
+
+    it("should change subscription with specific version", async () => {
+      prisma.subscription.findFirst.mockResolvedValue(mockSubscription);
+      offersService.getVersion.mockResolvedValue({
+        id: "specific_ver",
+        status: "published",
+        config: { pricing: { amount: 5000, currency: "usd" } },
+      });
+      prisma.subscription.update.mockResolvedValue({
+        ...mockSubscription,
+        offerId: "new_offer",
+        offerVersionId: "specific_ver",
+      });
+
+      const result = await service.change("ws_123", "sub_123", {
+        newOfferId: "new_offer",
+        newOfferVersionId: "specific_ver",
+      });
+
+      expect(result.offerVersionId).toBe("specific_ver");
+    });
+  });
 });
