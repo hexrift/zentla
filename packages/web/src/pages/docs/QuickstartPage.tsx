@@ -66,7 +66,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_API_KEY" \\
   -d '{
-    "name": "Pro Plan",
+    "name": "Pro Offer",
     "config": {
       "pricing": {
         "model": "flat",

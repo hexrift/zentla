@@ -77,7 +77,7 @@ export function HeadlessCheckoutPage() {
   "status": "pending",
   "offer": {
     "id": "offer_...",
-    "name": "Pro Plan"
+    "name": "Pro Offer"
   },
   "pricing": {
     "subtotal": 2900,

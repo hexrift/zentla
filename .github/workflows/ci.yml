@@ -128,8 +128,22 @@ jobs:
       - name: Run database migrations
         run: yarn db:migrate:deploy
 
-      - name: Run tests
-        run: yarn test --coverage
+      - name: Run tests with coverage
+        run: yarn workspace @relay/api test:cov
+
+      - name: Check coverage threshold (70% minimum)
+        run: |
+          if [ -f packages/api/coverage/coverage-summary.json ]; then
+            COVERAGE=$(cat packages/api/coverage/coverage-summary.json | jq '.total.lines.pct')
+            echo "Current coverage: $COVERAGE%"
+            if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+              echo "::error::Coverage $COVERAGE% is below 70% threshold"
+              exit 1
+            fi
+            echo "::notice::Coverage check passed at $COVERAGE%"
+          else
+            echo "::warning::No coverage report found"
+          fi
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4

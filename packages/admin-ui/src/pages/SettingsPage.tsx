@@ -123,7 +123,7 @@ export function SettingsPage() {
             </div>
             <button
               onClick={handleSaveApiKey}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
             >
               {saved ? "Saved!" : "Save API Key"}
             </button>
@@ -463,7 +463,7 @@ export function SettingsPage() {
         </div>
 
         <div className="flex justify-end">
-          <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+          <button className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700">
             Save Changes
           </button>
         </div>

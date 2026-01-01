@@ -5,7 +5,7 @@ const API_DOCS_URL =
 
 const codeExample = `// 1. Create an offer
 const offer = await relay.offers.create({
-  name: 'Pro Plan',
+  name: 'Pro Offer',
   config: {
     pricing: { model: 'flat', amount: 2900, currency: 'USD', interval: 'month' },
     entitlements: [

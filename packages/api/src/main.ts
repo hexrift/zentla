@@ -6,6 +6,7 @@ import { ConfigService } from "@nestjs/config";
 import helmet from "helmet";
 import { AppModule } from "./app.module";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
+import { ApiVersionInterceptor } from "./common/interceptors/api-version.interceptor";
 import { LoggerService } from "./common/logger/logger.service";
 import { ALL_MODELS } from "./common/models";
 import type { NestExpressApplication } from "@nestjs/platform-express";
@@ -76,6 +77,9 @@ async function bootstrap(): Promise<void> {
 
   // Global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
+
+  // Global interceptors
+  app.useGlobalInterceptors(new ApiVersionInterceptor());
 
   // OpenAPI/Swagger with Scalar UI
   {

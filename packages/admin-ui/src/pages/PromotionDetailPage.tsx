@@ -259,7 +259,7 @@ export function PromotionDetailPage() {
             <button
               onClick={() => publishMutation.mutate(draftVersion.id)}
               disabled={publishMutation.isPending}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
             >
               {publishMutation.isPending ? "Publishing..." : "Publish"}
             </button>
@@ -349,7 +349,7 @@ export function PromotionDetailPage() {
                           );
                         }
                       }}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-primary-500"
                     />
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-900">
@@ -381,7 +381,7 @@ export function PromotionDetailPage() {
                 <button
                   onClick={() => updateOffersMutation.mutate(selectedOfferIds)}
                   disabled={updateOffersMutation.isPending}
-                  className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  className="px-3 py-1.5 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
                 >
                   {updateOffersMutation.isPending
                     ? "Saving..."

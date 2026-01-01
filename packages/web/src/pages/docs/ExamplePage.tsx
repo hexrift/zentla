@@ -74,12 +74,12 @@ curl -X POST ${API_BASE}/features \\
   }'`}</CodeBlock>
 
       <h2 id="step-2-offer">Step 2: Create and Publish Offer</h2>
-      <CodeBlock title="Terminal" language="bash">{`# Create the Pro Plan offer
+      <CodeBlock title="Terminal" language="bash">{`# Create the Pro Offer offer
 curl -X POST ${API_BASE}/offers \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: $API_KEY" \\
   -d '{
-    "name": "Pro Plan",
+    "name": "Pro Offer",
     "description": "Everything you need to scale your business",
     "config": {
       "pricing": {
@@ -268,7 +268,7 @@ app.listen(3000, () => console.log('Server running on :3000'));`}</CodeBlock>
       <CodeBlock title="PricingPage.tsx" language="tsx">{`// PricingPage.tsx
 import { useState, useEffect } from 'react';
 
-const OFFER_ID = 'offer_...';  // Your Pro Plan offer ID
+const OFFER_ID = 'offer_...';  // Your Pro Offer offer ID
 
 export function PricingPage() {
   const [loading, setLoading] = useState(false);
@@ -295,7 +295,7 @@ export function PricingPage() {
 
   return (
     <div className="pricing-card">
-      <h2>Pro Plan</h2>
+      <h2>Pro Offer</h2>
       <p className="price">$29/month</p>
       <p className="trial">14-day free trial</p>
 

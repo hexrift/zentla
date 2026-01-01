@@ -180,7 +180,7 @@ X-Relay-Migration: See https://relay.com/docs/migrations/v2`}</CodeBlock>
       >{`// Offer with versions
 {
   "id": "offer_abc123",
-  "name": "Pro Plan",
+  "name": "Pro Offer",
   "currentVersionId": "ov_v3",
   "versions": [
     { "id": "ov_v1", "status": "archived", "publishedAt": "2025-01-01" },

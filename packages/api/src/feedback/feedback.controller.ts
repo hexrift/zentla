@@ -20,6 +20,7 @@ import {
   IsString,
   IsEnum,
   IsOptional,
+  IsEmail,
   MinLength,
   MaxLength,
 } from "class-validator";
@@ -42,6 +43,14 @@ class CreateFeedbackDto {
   @MinLength(10)
   @MaxLength(5000)
   description!: string;
+
+  @ApiPropertyOptional({
+    description: "Email for follow-up (optional for anonymous users)",
+  })
+  @IsOptional()
+  @IsEmail()
+  @MaxLength(255)
+  email?: string;
 }
 
 class UpdateFeedbackDto {
@@ -81,7 +90,7 @@ export class FeedbackController {
       title: dto.title,
       description: dto.description,
       userId: user?.id,
-      userEmail: user?.email,
+      userEmail: user?.email ?? dto.email,
     });
   }
 

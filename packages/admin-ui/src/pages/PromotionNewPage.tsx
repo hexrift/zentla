@@ -122,7 +122,7 @@ export function PromotionNewPage() {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="e.g., Summer Sale 2025"
             />
           </div>
@@ -138,7 +138,7 @@ export function PromotionNewPage() {
               onChange={(e) =>
                 setFormData({ ...formData, code: e.target.value.toUpperCase() })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
               placeholder="e.g., SUMMER25"
             />
             <p className="mt-1 text-sm text-gray-500">
@@ -156,7 +156,7 @@ export function PromotionNewPage() {
                 setFormData({ ...formData, description: e.target.value })
               }
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="Internal notes about this promotion"
             />
           </div>
@@ -178,7 +178,7 @@ export function PromotionNewPage() {
                   discountValue: "",
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="percent">Percentage off</option>
               <option value="fixed_amount">Fixed amount off</option>
@@ -201,7 +201,7 @@ export function PromotionNewPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, discountValue: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder={getValuePlaceholder()}
               />
             </div>
@@ -216,7 +216,7 @@ export function PromotionNewPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, currency: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="GBP">GBP</option>
                   <option value="USD">USD</option>
@@ -243,7 +243,7 @@ export function PromotionNewPage() {
               onChange={(e) =>
                 setFormData({ ...formData, maxRedemptions: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="Leave empty for unlimited"
             />
           </div>
@@ -259,7 +259,7 @@ export function PromotionNewPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, validFrom: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <div>
@@ -272,7 +272,7 @@ export function PromotionNewPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, validUntil: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
           </div>
@@ -312,7 +312,7 @@ export function PromotionNewPage() {
                         );
                       }
                     }}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-primary-500"
                   />
                   <div className="flex-1">
                     <div className="text-sm font-medium text-gray-900">
@@ -356,7 +356,7 @@ export function PromotionNewPage() {
           <button
             type="submit"
             disabled={createMutation.isPending}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
           >
             {createMutation.isPending ? "Creating..." : "Create Promotion"}
           </button>

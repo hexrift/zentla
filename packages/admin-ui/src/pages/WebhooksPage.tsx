@@ -145,7 +145,7 @@ export function WebhooksPage() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+          className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
         >
           Add Endpoint
         </button>
@@ -299,7 +299,7 @@ export function WebhooksPage() {
                   </p>
                   <button
                     onClick={closeModal}
-                    className="mt-6 w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                    className="mt-6 w-full px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
                   >
                     Done
                   </button>
@@ -333,7 +333,7 @@ export function WebhooksPage() {
                           setFormData({ ...formData, url: e.target.value })
                         }
                         placeholder="https://api.example.com/webhooks/relay"
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-blue-500 text-sm"
                         required
                       />
                       <p className="mt-1 text-xs text-gray-500">
@@ -356,7 +356,7 @@ export function WebhooksPage() {
                           })
                         }
                         placeholder="e.g., Production - User provisioning"
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-blue-500 text-sm"
                       />
                     </div>
 
@@ -375,7 +375,7 @@ export function WebhooksPage() {
                               type="checkbox"
                               checked={formData.events.includes(event.value)}
                               onChange={() => toggleEvent(event.value)}
-                              className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                              className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-primary-500"
                             />
                             <div>
                               <span className="text-sm font-medium text-gray-900">
@@ -406,7 +406,7 @@ export function WebhooksPage() {
                     <button
                       type="submit"
                       disabled={createMutation.isPending}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                      className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
                     >
                       {createMutation.isPending
                         ? "Creating..."
