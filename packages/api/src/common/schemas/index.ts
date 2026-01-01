@@ -285,7 +285,7 @@ export const PromotionConfigSchema = {
   properties: {
     discountType: {
       type: "string",
-      enum: ["percentage", "fixed_amount"] as string[],
+      enum: ["percent", "fixed_amount", "free_trial_days"] as string[],
     },
     discountValue: {
       type: "integer",

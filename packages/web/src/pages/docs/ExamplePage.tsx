@@ -67,7 +67,7 @@ curl -X POST ${API_BASE}/features \\
   -d '{
     "name": "Launch Discount",
     "code": "LAUNCH20",
-    "discountType": "percentage",
+    "discountType": "percent",
     "discountValue": 20,
     "maxRedemptions": 100,
     "expiresAt": "2025-06-01T00:00:00Z"
