@@ -1,5 +1,4 @@
 import { CodeBlock } from "../../components/CodeBlock";
-import { RELAY_VERSION, API_VERSION } from "../../version";
 
 const API_DOCS_URL =
   import.meta.env.VITE_API_DOCS_URL || "http://localhost:3002/docs";
@@ -15,16 +14,11 @@ export function QuickstartPage() {
       </p>
 
       <div className="not-prose mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-amber-800">
-            <strong>Beta:</strong> Relay is in active development. APIs are
-            stable but may receive additive changes. Breaking changes will be
-            communicated in advance.
-          </p>
-          <span className="ml-4 px-2 py-1 text-xs font-mono bg-amber-100 text-amber-700 rounded">
-            {API_VERSION} · {RELAY_VERSION}
-          </span>
-        </div>
+        <p className="text-sm text-amber-800">
+          <strong>Beta:</strong> Relay is in active development. APIs are stable
+          but may receive additive changes. Breaking changes will be
+          communicated in advance.
+        </p>
       </div>
 
       <h2 id="prerequisites">Prerequisites</h2>

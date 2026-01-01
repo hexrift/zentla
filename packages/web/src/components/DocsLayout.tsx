@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet, Link, NavLink, useLocation } from "react-router-dom";
 import { clsx } from "clsx";
+import { RELAY_VERSION } from "../version";
 
 const DASHBOARD_URL =
   import.meta.env.VITE_DASHBOARD_URL || "http://localhost:3001";
@@ -171,7 +172,7 @@ export function DocsLayout() {
                 </div>
                 <span className="font-semibold text-gray-900">Relay</span>
                 <span className="ml-1 px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">
-                  Beta
+                  Beta · {RELAY_VERSION}
                 </span>
               </Link>
               <span className="hidden sm:block text-gray-300">|</span>
