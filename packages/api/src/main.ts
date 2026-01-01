@@ -9,6 +9,7 @@ import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { ApiVersionInterceptor } from "./common/interceptors/api-version.interceptor";
 import { LoggerService } from "./common/logger/logger.service";
 import { ALL_MODELS } from "./common/models";
+import { RELAY_VERSION } from "./common/version";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 
 async function bootstrap(): Promise<void> {
@@ -165,7 +166,7 @@ Idempotency-Key: unique-request-id-123
 Use \`error.code\` for programmatic handling.
 `,
       )
-      .setVersion("1.0")
+      .setVersion(RELAY_VERSION)
       .addServer(
         configService.get<string>("API_URL", `http://localhost:${port}`),
         nodeEnv === "production" ? "Production" : "Local Development",
@@ -242,6 +243,38 @@ Use \`error.code\` for programmatic handling.
           title: "Relay API Documentation",
           description:
             "Subscription management API for offers, customers, and entitlements",
+        },
+        customCss: `
+          :root {
+            --scalar-color-1: #9333ea;
+            --scalar-color-2: #7c3aed;
+            --scalar-color-3: #a855f7;
+            --scalar-color-accent: #9333ea;
+            --scalar-background-1: #0f0a1a;
+            --scalar-background-2: #1a1225;
+            --scalar-background-3: #241833;
+            --scalar-border-color: rgba(147, 51, 234, 0.2);
+          }
+          .light-mode {
+            --scalar-color-1: #7c3aed;
+            --scalar-color-2: #9333ea;
+            --scalar-color-3: #6b21a8;
+            --scalar-color-accent: #9333ea;
+            --scalar-background-1: #ffffff;
+            --scalar-background-2: #faf5ff;
+            --scalar-background-3: #f3e8ff;
+            --scalar-border-color: rgba(147, 51, 234, 0.15);
+          }
+          .sidebar-heading { font-weight: 600; }
+          .scalar-api-reference__header {
+            background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+          }
+        `,
+        hideDownloadButton: false,
+        hiddenClients: [],
+        defaultHttpClient: {
+          targetKey: "node",
+          clientKey: "fetch",
         },
       }),
     );
