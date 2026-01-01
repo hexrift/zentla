@@ -236,21 +236,21 @@ Changes take effect immediately and are reflected in all API responses.`,
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: "Sync offer to Stripe",
+    summary: "Sync offer to billing provider",
     description:
-      "Manually sync a published offer to Stripe. Use this to retry if the initial sync failed.",
+      "Manually sync a published offer to the billing provider. Use this to retry if the initial sync failed.",
   })
   @ApiResponse({ status: 200, description: "Offer synced successfully" })
   @ApiResponse({
     status: 400,
-    description: "No published version or Stripe not configured",
+    description: "No published version or billing provider not configured",
   })
   @ApiResponse({ status: 404, description: "Offer not found" })
-  async syncToStripe(
+  async syncToProvider(
     @WorkspaceId() workspaceId: string,
     @Param("id", ParseUUIDPipe) id: string,
   ) {
-    return this.offersService.syncOfferToStripe(workspaceId, id);
+    return this.offersService.syncOfferToProvider(workspaceId, id);
   }
 
   @Post(":id/archive")
@@ -469,8 +469,8 @@ Only one version can be \`published\` at a time.`,
 4. Version automatically becomes effective at the scheduled time
 
 **Side effects:**
-- Syncs to Stripe: Creates Product (first publish) or reuses existing, creates new Price
-- For scheduled publishes, both old and new prices exist in Stripe
+- Syncs to billing provider: Creates Product (first publish) or reuses existing, creates new Price
+- For scheduled publishes, both old and new prices exist in the billing provider
 - Existing subscriptions are NOT affected
 
 **Failures:**

@@ -8,7 +8,8 @@ import {
   forwardRef,
 } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
-import { BillingService } from "../billing/billing.service";
+import { BillingService, ProviderType } from "../billing/billing.service";
+import type { StripeAdapter } from "@relay/stripe-adapter";
 import { ProviderRefService } from "../billing/provider-ref.service";
 import { OffersService } from "../offers/offers.service";
 import type { Checkout, CheckoutIntent, Prisma } from "@prisma/client";
@@ -288,20 +289,22 @@ export class CheckoutService {
       offerVersionId = effectiveVersion.id;
     }
 
-    // Get the Stripe price ID for this offer version
-    const stripePriceId = await this.providerRefService.getStripePriceId(
+    // Get the provider price ID for this offer version
+    const provider: ProviderType = "stripe";
+    const providerPriceId = await this.providerRefService.getProviderPriceId(
       workspaceId,
       offerVersionId,
+      provider,
     );
 
-    if (!stripePriceId) {
+    if (!providerPriceId) {
       throw new BadRequestException(
-        "Offer not synced to Stripe. Please publish the offer first.",
+        `Offer not synced to ${provider}. Please publish the offer first.`,
       );
     }
 
-    // Get Stripe customer ID if customer provided
-    let stripeCustomerId: string | undefined;
+    // Get provider customer ID if customer provided
+    let providerCustomerId: string | undefined;
     if (dto.customerId) {
       const customer = await this.prisma.customer.findFirst({
         where: { id: dto.customerId, workspaceId },
@@ -309,10 +312,11 @@ export class CheckoutService {
       if (!customer) {
         throw new NotFoundException(`Customer ${dto.customerId} not found`);
       }
-      stripeCustomerId =
-        (await this.providerRefService.getStripeCustomerId(
+      providerCustomerId =
+        (await this.providerRefService.getProviderCustomerId(
           workspaceId,
           dto.customerId,
+          provider,
         )) ?? undefined;
     }
 
@@ -389,26 +393,28 @@ export class CheckoutService {
       }
     }
 
-    // Create Stripe Checkout Session
-    if (!this.billingService.isConfigured("stripe")) {
-      throw new BadRequestException("Stripe not configured");
+    // Create checkout session via billing provider
+    if (!this.billingService.isConfigured(provider)) {
+      throw new BadRequestException(`${provider} not configured`);
     }
 
-    const stripeAdapter = this.billingService.getStripeAdapter();
+    const billingProvider = this.billingService.getProvider(
+      provider,
+    ) as StripeAdapter;
 
     // Validate webhook is configured before allowing checkout
-    const hasWebhook = await stripeAdapter.hasWebhookConfigured("webhook");
+    const hasWebhook = await billingProvider.hasWebhookConfigured("webhook");
     if (!hasWebhook) {
       throw new BadRequestException(
-        "Stripe webhook not configured. Please configure a webhook endpoint in Stripe Dashboard pointing to your API before creating checkouts.",
+        `${provider} webhook not configured. Please configure a webhook endpoint in your billing provider dashboard pointing to your API before creating checkouts.`,
       );
     }
 
-    const stripeSession = await stripeAdapter.createCheckoutSession({
+    const providerSession = await billingProvider.createCheckoutSession({
       workspaceId,
       offerId: dto.offerId,
-      offerVersionId: stripePriceId, // This is the Stripe Price ID
-      customerId: stripeCustomerId,
+      offerVersionId: providerPriceId, // This is the provider Price ID
+      customerId: providerCustomerId,
       customerEmail: dto.customerEmail,
       successUrl: dto.successUrl,
       cancelUrl: dto.cancelUrl,
@@ -427,7 +433,7 @@ export class CheckoutService {
     await this.prisma.checkout.update({
       where: { id: checkout.id },
       data: {
-        sessionUrl: stripeSession.url,
+        sessionUrl: providerSession.url,
         status: "open",
       },
     });
@@ -437,18 +443,18 @@ export class CheckoutService {
       workspaceId,
       entityType: "checkout",
       entityId: checkout.id,
-      provider: "stripe",
-      externalId: stripeSession.id,
+      provider,
+      externalId: providerSession.id,
     });
 
     this.logger.log(
-      `Created checkout session ${checkout.id} with Stripe session ${stripeSession.id}`,
+      `Created checkout session ${checkout.id} with ${provider} session ${providerSession.id}`,
     );
 
     return {
       id: checkout.id,
-      url: stripeSession.url,
-      expiresAt: stripeSession.expiresAt,
+      url: providerSession.url,
+      expiresAt: providerSession.expiresAt,
     };
   }
 
@@ -741,19 +747,23 @@ export class CheckoutService {
       },
     });
 
-    // Create Stripe PaymentIntent or SetupIntent
+    // Create billing provider PaymentIntent or SetupIntent
     let clientSecret: string | null = null;
+    const intentProvider: ProviderType = "stripe";
 
-    if (this.billingService.isConfigured("stripe")) {
-      const stripeAdapter = this.billingService.getStripeAdapter();
+    if (this.billingService.isConfigured(intentProvider)) {
+      const billingProvider = this.billingService.getProvider(
+        intentProvider,
+      ) as StripeAdapter;
 
-      // Get or create Stripe customer
-      let stripeCustomerId: string | undefined;
+      // Get or create provider customer
+      let providerCustomerId: string | undefined;
       if (dto.customerId) {
-        stripeCustomerId =
-          (await this.providerRefService.getStripeCustomerId(
+        providerCustomerId =
+          (await this.providerRefService.getProviderCustomerId(
             workspaceId,
             dto.customerId,
+            intentProvider,
           )) ?? undefined;
       }
 
@@ -763,10 +773,10 @@ export class CheckoutService {
 
       if (needsImmediatePayment && quote.total > 0) {
         // Create PaymentIntent for immediate charge
-        const paymentIntent = await stripeAdapter.createPaymentIntent({
+        const paymentIntent = await billingProvider.createPaymentIntent({
           amount: quote.total,
           currency: quote.currency.toLowerCase(),
-          customerId: stripeCustomerId,
+          customerId: providerCustomerId,
           metadata: {
             checkoutIntentId: intent.id,
             workspaceId,
@@ -787,8 +797,8 @@ export class CheckoutService {
         });
       } else {
         // Create SetupIntent for future payments (trials)
-        const setupIntent = await stripeAdapter.createSetupIntent({
-          customerId: stripeCustomerId,
+        const setupIntent = await billingProvider.createSetupIntent({
+          customerId: providerCustomerId,
           metadata: {
             checkoutIntentId: intent.id,
             workspaceId,

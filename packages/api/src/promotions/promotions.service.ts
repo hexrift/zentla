@@ -5,7 +5,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
-import { BillingService } from "../billing/billing.service";
+import { BillingService, ProviderType } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
 import type {
   Promotion,
@@ -303,10 +303,11 @@ export class PromotionsService {
       );
     }
 
-    // Validate Stripe is configured
-    if (!this.billingService.isConfigured("stripe")) {
+    // Validate billing provider is configured
+    const provider: ProviderType = "stripe";
+    if (!this.billingService.isConfigured(provider)) {
       throw new BadRequestException(
-        "Cannot publish: Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in Settings.",
+        `Cannot publish: ${provider} is not configured. Check your billing settings.`,
       );
     }
 
@@ -347,12 +348,17 @@ export class PromotionsService {
       },
     );
 
-    // Sync to Stripe - if this fails, rollback database changes
+    // Sync to billing provider - if this fails, rollback database changes
     try {
-      await this.syncToStripe(workspaceId, promotion, publishedVersion);
+      await this.syncToProvider(
+        workspaceId,
+        promotion,
+        publishedVersion,
+        provider,
+      );
     } catch (error) {
       this.logger.error(
-        `Stripe sync failed, rolling back publish for promotion ${promotionId}:`,
+        `Provider sync failed, rolling back publish for promotion ${promotionId}:`,
         error,
       );
 
@@ -389,28 +395,29 @@ export class PromotionsService {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
       throw new BadRequestException(
-        `Failed to sync to Stripe: ${errorMessage}. Changes have been rolled back.`,
+        `Failed to sync to billing provider: ${errorMessage}. Changes have been rolled back.`,
       );
     }
 
     return publishedVersion;
   }
 
-  private async syncToStripe(
+  private async syncToProvider(
     workspaceId: string,
     promotion: Promotion,
     version: PromotionVersion,
+    provider: ProviderType = "stripe",
   ): Promise<void> {
-    if (!this.billingService.isConfigured("stripe")) {
-      this.logger.warn("Stripe not configured, skipping promotion sync");
+    if (!this.billingService.isConfigured(provider)) {
+      this.logger.warn(`${provider} not configured, skipping promotion sync`);
       return;
     }
 
     try {
-      const stripeAdapter = this.billingService.getStripeAdapter();
+      const billingProvider = this.billingService.getProvider(provider);
 
-      if (!stripeAdapter.syncPromotion) {
-        this.logger.warn("Stripe adapter does not support syncPromotion");
+      if (!billingProvider.syncPromotion) {
+        this.logger.warn(`${provider} adapter does not support syncPromotion`);
         return;
       }
 
@@ -419,11 +426,11 @@ export class PromotionsService {
         workspaceId,
         "coupon",
         promotion.id,
-        "stripe",
+        provider,
       );
 
-      // Sync to Stripe
-      const result = await stripeAdapter.syncPromotion(
+      // Sync to billing provider
+      const result = await billingProvider.syncPromotion(
         {
           id: promotion.id,
           workspaceId: promotion.workspaceId,
@@ -453,7 +460,7 @@ export class PromotionsService {
           workspaceId,
           entityType: "coupon",
           entityId: promotion.id,
-          provider: "stripe",
+          provider,
           externalId: result.couponRef.externalId,
         });
       }
@@ -463,16 +470,16 @@ export class PromotionsService {
         workspaceId,
         entityType: "promotion_code",
         entityId: version.id,
-        provider: "stripe",
+        provider,
         externalId: result.promotionCodeRef.externalId,
       });
 
       this.logger.log(
-        `Synced promotion ${promotion.id} version ${version.id} to Stripe: coupon=${result.couponRef.externalId}, promo_code=${result.promotionCodeRef.externalId}`,
+        `Synced promotion ${promotion.id} version ${version.id} to ${provider}: coupon=${result.couponRef.externalId}, promo_code=${result.promotionCodeRef.externalId}`,
       );
     } catch (error) {
-      this.logger.error(`Failed to sync promotion to Stripe: ${error}`);
-      // Don't throw - promotion is published in our DB even if Stripe sync fails
+      this.logger.error(`Failed to sync promotion to ${provider}: ${error}`);
+      // Don't throw - promotion is published in our DB even if provider sync fails
     }
   }
 

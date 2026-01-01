@@ -3,169 +3,144 @@ import { ConfigService } from "@nestjs/config";
 import { StripeAdapter } from "@relay/stripe-adapter";
 import type { BillingProvider } from "@relay/core";
 
+export type ProviderType = "stripe" | "zuora";
+
+export interface ProviderStatus {
+  provider: ProviderType;
+  status: "connected" | "disconnected" | "error" | "not_configured";
+  mode: "live" | "test" | null;
+  lastVerifiedAt: Date | null;
+  capabilities: {
+    subscriptions: boolean;
+    invoices: boolean;
+    customerPortal: boolean;
+    webhooksConfigured: boolean;
+  };
+  errors: string[];
+}
+
 @Injectable()
 export class BillingService implements OnModuleInit {
   private readonly logger = new Logger(BillingService.name);
-  private stripeAdapter: StripeAdapter | null = null;
+  private readonly providers = new Map<ProviderType, BillingProvider>();
 
   constructor(private readonly config: ConfigService) {}
 
   onModuleInit() {
-    const stripeSecretKey = this.config.get<string>("stripe.secretKey");
-    const stripeWebhookSecret = this.config.get<string>("stripe.webhookSecret");
+    this.initializeStripe();
+    // Future: this.initializeZuora();
+  }
 
-    if (stripeSecretKey && stripeWebhookSecret) {
-      this.stripeAdapter = new StripeAdapter({
-        secretKey: stripeSecretKey,
-        webhookSecret: stripeWebhookSecret,
-      });
-      this.logger.log("Stripe adapter initialized from environment variables");
+  private initializeStripe(): void {
+    const secretKey = this.config.get<string>("stripe.secretKey");
+    const webhookSecret = this.config.get<string>("stripe.webhookSecret");
+
+    if (secretKey && webhookSecret) {
+      const adapter = new StripeAdapter({ secretKey, webhookSecret });
+      this.providers.set("stripe", adapter);
+      this.logger.log("Stripe provider initialized");
     }
   }
 
   /**
-   * Configure Stripe adapter with credentials from workspace settings.
+   * Configure a provider with credentials.
    * Called when workspace settings are updated.
    */
-  configureStripe(secretKey: string, webhookSecret: string): void {
-    if (secretKey && webhookSecret) {
-      this.stripeAdapter = new StripeAdapter({
-        secretKey,
-        webhookSecret,
+  configureProvider(
+    provider: ProviderType,
+    config: { secretKey: string; webhookSecret: string },
+  ): void {
+    if (provider === "stripe" && config.secretKey && config.webhookSecret) {
+      const adapter = new StripeAdapter({
+        secretKey: config.secretKey,
+        webhookSecret: config.webhookSecret,
       });
-      this.logger.log("Stripe adapter reconfigured from workspace settings");
+      this.providers.set("stripe", adapter);
+      this.logger.log("Stripe provider reconfigured");
     }
-  }
-
-  getProvider(provider: "stripe" | "zuora"): BillingProvider {
-    if (provider === "stripe") {
-      if (!this.stripeAdapter) {
-        throw new Error(
-          "Stripe adapter not configured. Check STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET.",
-        );
-      }
-      return this.stripeAdapter;
-    }
-
-    throw new Error(`Provider ${provider} not implemented`);
-  }
-
-  getStripeAdapter(): StripeAdapter {
-    if (!this.stripeAdapter) {
-      throw new Error("Stripe adapter not configured");
-    }
-    return this.stripeAdapter;
-  }
-
-  isConfigured(provider: "stripe" | "zuora"): boolean {
-    if (provider === "stripe") {
-      return this.stripeAdapter !== null;
-    }
-    return false;
+    // Future: handle zuora configuration
   }
 
   /**
-   * Get status of all configured billing providers.
-   * Used for onboarding and connection health checks.
+   * @deprecated Use configureProvider() instead
    */
-  async getProviderStatus(): Promise<{
-    providers: Array<{
-      provider: "stripe" | "zuora";
-      status: "connected" | "disconnected" | "error" | "not_configured";
-      mode: "live" | "test" | null;
-      lastVerifiedAt: Date | null;
-      capabilities: {
-        subscriptions: boolean;
-        invoices: boolean;
-        customerPortal: boolean;
-        webhooksConfigured: boolean;
-      };
-      errors: string[];
-    }>;
-  }> {
-    const providers: Array<{
-      provider: "stripe" | "zuora";
-      status: "connected" | "disconnected" | "error" | "not_configured";
-      mode: "live" | "test" | null;
-      lastVerifiedAt: Date | null;
-      capabilities: {
-        subscriptions: boolean;
-        invoices: boolean;
-        customerPortal: boolean;
-        webhooksConfigured: boolean;
-      };
-      errors: string[];
-    }> = [];
+  configureStripe(secretKey: string, webhookSecret: string): void {
+    this.configureProvider("stripe", { secretKey, webhookSecret });
+  }
 
-    // Check Stripe status
-    if (this.stripeAdapter) {
-      try {
-        // Verify connection by fetching account info
-        await this.stripeAdapter.getAccountInfo();
-        const isLiveMode = !this.config
-          .get<string>("stripe.secretKey")
-          ?.startsWith("sk_test");
+  /**
+   * Get a billing provider by type.
+   * Throws if provider is not configured.
+   */
+  getProvider(provider: ProviderType): BillingProvider {
+    const adapter = this.providers.get(provider);
+    if (!adapter) {
+      throw new Error(
+        `${provider} provider not configured. Check environment variables.`,
+      );
+    }
+    return adapter;
+  }
 
-        providers.push({
-          provider: "stripe",
-          status: "connected",
-          mode: isLiveMode ? "live" : "test",
-          lastVerifiedAt: new Date(),
-          capabilities: {
-            subscriptions: true,
-            invoices: true,
-            customerPortal: true,
-            webhooksConfigured: !!this.config.get<string>(
-              "stripe.webhookSecret",
-            ),
-          },
-          errors: [],
-        });
-      } catch (error) {
-        providers.push({
-          provider: "stripe",
-          status: "error",
-          mode: null,
-          lastVerifiedAt: null,
-          capabilities: {
-            subscriptions: false,
-            invoices: false,
-            customerPortal: false,
-            webhooksConfigured: false,
-          },
-          errors: [
-            error instanceof Error
-              ? error.message
-              : "Unknown error connecting to Stripe",
-          ],
-        });
-      }
-    } else {
-      const errors: string[] = [];
-      if (!this.config.get<string>("stripe.secretKey")) {
-        errors.push("STRIPE_SECRET_KEY environment variable not set");
-      }
-      if (!this.config.get<string>("stripe.webhookSecret")) {
-        errors.push("STRIPE_WEBHOOK_SECRET environment variable not set");
-      }
+  /**
+   * Get a billing provider if configured, null otherwise.
+   * Use this for optional provider operations.
+   */
+  getProviderOrNull(provider: ProviderType): BillingProvider | null {
+    return this.providers.get(provider) ?? null;
+  }
 
-      providers.push({
-        provider: "stripe",
-        status: "not_configured",
-        mode: null,
-        lastVerifiedAt: null,
-        capabilities: {
-          subscriptions: false,
-          invoices: false,
-          customerPortal: false,
-          webhooksConfigured: false,
-        },
-        errors,
-      });
+  /**
+   * @deprecated Use getProvider("stripe") instead
+   */
+  getStripeAdapter(): StripeAdapter {
+    const adapter = this.providers.get("stripe");
+    if (!adapter) {
+      throw new Error("Stripe provider not configured");
+    }
+    return adapter as StripeAdapter;
+  }
+
+  /**
+   * Check if a provider is configured.
+   */
+  isConfigured(provider: ProviderType): boolean {
+    return this.providers.has(provider);
+  }
+
+  /**
+   * Get the default provider for a workspace.
+   * Falls back to first configured provider if workspace default not available.
+   */
+  getDefaultProvider(workspaceDefaultProvider?: ProviderType): BillingProvider {
+    // Try workspace default first
+    if (
+      workspaceDefaultProvider &&
+      this.isConfigured(workspaceDefaultProvider)
+    ) {
+      return this.getProvider(workspaceDefaultProvider);
     }
 
-    // Zuora placeholder (not yet implemented)
-    providers.push({
+    // Fall back to first configured provider
+    for (const [type] of this.providers) {
+      return this.getProvider(type);
+    }
+
+    throw new Error("No billing provider configured");
+  }
+
+  /**
+   * Get status of all billing providers.
+   * Used for onboarding and connection health checks.
+   */
+  async getProviderStatus(): Promise<{ providers: ProviderStatus[] }> {
+    const statuses: ProviderStatus[] = [];
+
+    // Check Stripe status
+    statuses.push(await this.getStripeStatus());
+
+    // Zuora placeholder
+    statuses.push({
       provider: "zuora",
       status: "not_configured",
       mode: null,
@@ -179,6 +154,73 @@ export class BillingService implements OnModuleInit {
       errors: ["Zuora integration planned for future release"],
     });
 
-    return { providers };
+    return { providers: statuses };
+  }
+
+  private async getStripeStatus(): Promise<ProviderStatus> {
+    const adapter = this.providers.get("stripe") as StripeAdapter | undefined;
+
+    if (!adapter) {
+      const errors: string[] = [];
+      if (!this.config.get<string>("stripe.secretKey")) {
+        errors.push("STRIPE_SECRET_KEY not set");
+      }
+      if (!this.config.get<string>("stripe.webhookSecret")) {
+        errors.push("STRIPE_WEBHOOK_SECRET not set");
+      }
+
+      return {
+        provider: "stripe",
+        status: "not_configured",
+        mode: null,
+        lastVerifiedAt: null,
+        capabilities: {
+          subscriptions: false,
+          invoices: false,
+          customerPortal: false,
+          webhooksConfigured: false,
+        },
+        errors,
+      };
+    }
+
+    try {
+      await adapter.getAccountInfo();
+      const isLiveMode = !this.config
+        .get<string>("stripe.secretKey")
+        ?.startsWith("sk_test");
+
+      return {
+        provider: "stripe",
+        status: "connected",
+        mode: isLiveMode ? "live" : "test",
+        lastVerifiedAt: new Date(),
+        capabilities: {
+          subscriptions: true,
+          invoices: true,
+          customerPortal: true,
+          webhooksConfigured: !!this.config.get<string>("stripe.webhookSecret"),
+        },
+        errors: [],
+      };
+    } catch (error) {
+      return {
+        provider: "stripe",
+        status: "error",
+        mode: null,
+        lastVerifiedAt: null,
+        capabilities: {
+          subscriptions: false,
+          invoices: false,
+          customerPortal: false,
+          webhooksConfigured: false,
+        },
+        errors: [
+          error instanceof Error
+            ? error.message
+            : "Unknown error connecting to Stripe",
+        ],
+      };
+    }
   }
 }

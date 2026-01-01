@@ -1,8 +1,11 @@
 import { Injectable, Logger, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
-import { BillingService } from "../billing/billing.service";
+import { BillingService, ProviderType } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
+import type { StripeAdapter } from "@relay/stripe-adapter";
 import type Stripe from "stripe";
+
+const PROVIDER: ProviderType = "stripe";
 
 export interface SyncResult {
   customersImported: number;
@@ -27,11 +30,13 @@ export class StripeSyncService {
    * This imports existing Stripe data that was created before webhook was configured.
    */
   async syncFromStripe(workspaceId: string): Promise<SyncResult> {
-    if (!this.billingService.isConfigured("stripe")) {
-      throw new BadRequestException("Stripe not configured");
+    if (!this.billingService.isConfigured(PROVIDER)) {
+      throw new BadRequestException(`${PROVIDER} not configured`);
     }
 
-    const stripeAdapter = this.billingService.getStripeAdapter();
+    const stripeAdapter = this.billingService.getProvider(
+      PROVIDER,
+    ) as StripeAdapter;
     const result: SyncResult = {
       customersImported: 0,
       customersSkipped: 0,

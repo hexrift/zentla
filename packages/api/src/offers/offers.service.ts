@@ -5,10 +5,12 @@ import {
   Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
-import { BillingService } from "../billing/billing.service";
+import { BillingService, ProviderType } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
 import type { Offer, OfferVersion, OfferStatus, Prisma } from "@prisma/client";
 import type { PaginatedResult } from "@relay/database";
+
+const DEFAULT_PROVIDER: ProviderType = "stripe";
 
 export interface OfferWithVersions extends Offer {
   versions: OfferVersion[];
@@ -219,33 +221,50 @@ export class OffersService {
       throw new NotFoundException(`Offer ${id} not found`);
     }
 
-    // Archive in Stripe if product exists
-    try {
-      if (this.billingService.isConfigured("stripe")) {
-        const productRef = await this.providerRefService.findByEntity(
-          workspaceId,
-          "product",
-          id,
-          "stripe",
-        );
-
-        if (productRef) {
-          const stripeAdapter = this.billingService.getStripeAdapter();
-          await stripeAdapter.archiveProduct(productRef.externalId);
-          this.logger.log(
-            `Archived offer ${id} in Stripe: product=${productRef.externalId}`,
-          );
-        }
-      }
-    } catch (error) {
-      this.logger.warn(`Failed to archive offer ${id} in Stripe:`, error);
-      // Continue with local archive even if Stripe fails
-    }
+    // Archive in billing provider if product exists
+    await this.archiveInProvider(workspaceId, id);
 
     return this.prisma.offer.update({
       where: { id },
       data: { status: "archived", version: { increment: 1 } },
     });
+  }
+
+  private async archiveInProvider(
+    workspaceId: string,
+    offerId: string,
+    provider: ProviderType = DEFAULT_PROVIDER,
+  ): Promise<void> {
+    if (!this.billingService.isConfigured(provider)) {
+      return;
+    }
+
+    try {
+      const productRef = await this.providerRefService.findByEntity(
+        workspaceId,
+        "product",
+        offerId,
+        provider,
+      );
+
+      if (productRef) {
+        const billingProvider = this.billingService.getProvider(provider);
+        if (billingProvider.archiveProduct) {
+          await billingProvider.archiveProduct(productRef.externalId);
+          this.logger.log(
+            `Archived offer ${offerId} in ${provider}: product=${productRef.externalId}`,
+          );
+        } else {
+          this.logger.warn(`${provider} does not support archiveProduct`);
+        }
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to archive offer ${offerId} in ${provider}:`,
+        error,
+      );
+      // Continue with local archive even if provider fails
+    }
   }
 
   async createVersion(
@@ -434,10 +453,10 @@ export class OffersService {
       );
     }
 
-    // Validate Stripe is configured
-    if (!this.billingService.isConfigured("stripe")) {
+    // Validate billing provider is configured
+    if (!this.billingService.isConfigured(DEFAULT_PROVIDER)) {
       throw new BadRequestException(
-        "Cannot publish: Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in Settings.",
+        `Cannot publish: ${DEFAULT_PROVIDER} is not configured. Check your billing settings.`,
       );
     }
 
@@ -486,12 +505,12 @@ export class OffersService {
       },
     );
 
-    // Sync to Stripe - if this fails, rollback database changes
+    // Sync to billing provider - if this fails, rollback database changes
     try {
-      await this.syncToStripe(workspaceId, offer, publishedVersion);
+      await this.syncToProvider(workspaceId, offer, publishedVersion);
     } catch (error) {
       this.logger.error(
-        `Stripe sync failed, rolling back publish for offer ${offerId}:`,
+        `Provider sync failed, rolling back publish for offer ${offerId}:`,
         error,
       );
 
@@ -531,21 +550,22 @@ export class OffersService {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
       throw new BadRequestException(
-        `Failed to sync to Stripe: ${errorMessage}. Changes have been rolled back.`,
+        `Failed to sync to billing provider: ${errorMessage}. Changes have been rolled back.`,
       );
     }
 
     return publishedVersion;
   }
 
-  private async syncToStripe(
+  private async syncToProvider(
     workspaceId: string,
     offer: Offer,
     version: OfferVersion,
+    provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
-    if (!this.billingService.isConfigured("stripe")) {
+    if (!this.billingService.isConfigured(provider)) {
       throw new BadRequestException(
-        "Stripe is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET environment variables.",
+        `${provider} is not configured. Check your billing settings.`,
       );
     }
 
@@ -553,35 +573,35 @@ export class OffersService {
     const config = version.config as Record<string, unknown>;
     if (!config?.pricing) {
       throw new BadRequestException(
-        "Cannot sync to Stripe: Offer version has no pricing configuration. Configure pricing in the Pricing tab first.",
+        `Cannot sync to ${provider}: Offer version has no pricing configuration. Configure pricing in the Pricing tab first.`,
       );
     }
 
     const pricing = config.pricing as Record<string, unknown>;
     if (!pricing.currency) {
       throw new BadRequestException(
-        "Cannot sync to Stripe: Pricing is missing currency. Configure pricing in the Pricing tab first.",
+        `Cannot sync to ${provider}: Pricing is missing currency. Configure pricing in the Pricing tab first.`,
       );
     }
 
     if (pricing.amount === undefined || pricing.amount === null) {
       throw new BadRequestException(
-        "Cannot sync to Stripe: Pricing is missing amount. Configure pricing in the Pricing tab first.",
+        `Cannot sync to ${provider}: Pricing is missing amount. Configure pricing in the Pricing tab first.`,
       );
     }
 
-    const stripeAdapter = this.billingService.getStripeAdapter();
+    const billingProvider = this.billingService.getProvider(provider);
 
     // Check if we have an existing product ref
     const existingProductRef = await this.providerRefService.findByEntity(
       workspaceId,
       "product",
       offer.id,
-      "stripe",
+      provider,
     );
 
-    // Sync to Stripe
-    const result = await stripeAdapter.syncOffer(
+    // Sync to provider
+    const result = await billingProvider.syncOffer(
       offer as never, // Type cast for interface compatibility
       version as never,
       existingProductRef as never,
@@ -593,7 +613,7 @@ export class OffersService {
         workspaceId,
         entityType: "product",
         entityId: offer.id,
-        provider: "stripe",
+        provider,
         externalId: result.productRef.externalId,
       });
     }
@@ -603,18 +623,19 @@ export class OffersService {
       workspaceId,
       entityType: "price",
       entityId: version.id,
-      provider: "stripe",
+      provider,
       externalId: result.priceRef.externalId,
     });
 
     this.logger.log(
-      `Synced offer ${offer.id} version ${version.id} to Stripe: product=${result.productRef.externalId}, price=${result.priceRef.externalId}`,
+      `Synced offer ${offer.id} version ${version.id} to ${provider}: product=${result.productRef.externalId}, price=${result.priceRef.externalId}`,
     );
   }
 
-  async syncOfferToStripe(
+  async syncOfferToProvider(
     workspaceId: string,
     offerId: string,
+    provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<{ success: boolean; message: string }> {
     const offer = await this.prisma.offer.findFirst({
       where: { id: offerId, workspaceId },
@@ -647,15 +668,26 @@ export class OffersService {
     }
 
     try {
-      await this.syncToStripe(workspaceId, offer, offer.currentVersion);
-      return { success: true, message: "Offer synced to Stripe successfully" };
+      await this.syncToProvider(
+        workspaceId,
+        offer,
+        offer.currentVersion,
+        provider,
+      );
+      return {
+        success: true,
+        message: `Offer synced to ${provider} successfully`,
+      };
     } catch (error) {
-      this.logger.error(`Failed to sync offer ${offerId} to Stripe:`, error);
+      this.logger.error(
+        `Failed to sync offer ${offerId} to ${provider}:`,
+        error,
+      );
       if (error instanceof BadRequestException) {
         throw error;
       }
       throw new BadRequestException(
-        `Failed to sync to Stripe: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to sync to ${provider}: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }

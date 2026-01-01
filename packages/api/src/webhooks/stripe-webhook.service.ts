@@ -1,11 +1,14 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
-import { BillingService } from "../billing/billing.service";
+import { BillingService, ProviderType } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
 import { OutboxService } from "./outbox.service";
 import { EntitlementsService } from "../entitlements/entitlements.service";
+import type { StripeAdapter } from "@relay/stripe-adapter";
 import type Stripe from "stripe";
 import type { Prisma } from "@prisma/client";
+
+const PROVIDER: ProviderType = "stripe";
 
 @Injectable()
 export class StripeWebhookService {
@@ -23,7 +26,9 @@ export class StripeWebhookService {
     rawBody: Buffer,
     signature: string,
   ): Promise<{ received: boolean; eventId?: string }> {
-    const stripeAdapter = this.billingService.getStripeAdapter();
+    const stripeAdapter = this.billingService.getProvider(
+      PROVIDER,
+    ) as StripeAdapter;
 
     // Verify and parse the webhook
     if (!stripeAdapter.verifyWebhook(rawBody, signature)) {

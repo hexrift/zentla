@@ -5,10 +5,12 @@ import {
   Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
-import { BillingService } from "../billing/billing.service";
+import { BillingService, ProviderType } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
 import type { Customer, Prisma } from "@prisma/client";
 import type { PaginatedResult } from "@relay/database";
+
+const DEFAULT_PROVIDER: ProviderType = "stripe";
 
 export interface CreateCustomerDto {
   email: string;
@@ -130,24 +132,25 @@ export class CustomersService {
       },
     });
 
-    // Sync to Stripe
-    await this.syncToStripe(workspaceId, customer);
+    // Sync to billing provider
+    await this.syncToProvider(workspaceId, customer);
 
     return customer;
   }
 
-  private async syncToStripe(
+  private async syncToProvider(
     workspaceId: string,
     customer: Customer,
+    provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
-    if (!this.billingService.isConfigured("stripe")) {
-      this.logger.warn("Stripe not configured, skipping customer sync");
+    if (!this.billingService.isConfigured(provider)) {
+      this.logger.warn(`${provider} not configured, skipping customer sync`);
       return;
     }
 
     try {
-      const stripeAdapter = this.billingService.getStripeAdapter();
-      const result = await stripeAdapter.createCustomer({
+      const billingProvider = this.billingService.getProvider(provider);
+      const result = await billingProvider.createCustomer({
         workspaceId,
         customerId: customer.id,
         email: customer.email,
@@ -159,16 +162,16 @@ export class CustomersService {
         workspaceId,
         entityType: "customer",
         entityId: customer.id,
-        provider: "stripe",
+        provider,
         externalId: result.externalId,
       });
 
       this.logger.log(
-        `Synced customer ${customer.id} to Stripe as ${result.externalId}`,
+        `Synced customer ${customer.id} to ${provider} as ${result.externalId}`,
       );
     } catch (error) {
       this.logger.error(
-        `Failed to sync customer ${customer.id} to Stripe: ${error}`,
+        `Failed to sync customer ${customer.id} to ${provider}: ${error}`,
       );
       // Don't throw - customer is created locally, sync can be retried
     }
@@ -237,45 +240,47 @@ export class CustomersService {
       },
     });
 
-    // Sync update to Stripe
-    await this.updateInStripe(workspaceId, id, dto);
+    // Sync update to billing provider
+    await this.updateInProvider(workspaceId, id, dto);
 
     return updatedCustomer;
   }
 
-  private async updateInStripe(
+  private async updateInProvider(
     workspaceId: string,
     customerId: string,
     dto: UpdateCustomerDto,
+    provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
-    if (!this.billingService.isConfigured("stripe")) {
+    if (!this.billingService.isConfigured(provider)) {
       return;
     }
 
     try {
-      const stripeCustomerId =
-        await this.providerRefService.getStripeCustomerId(
+      const providerCustomerId =
+        await this.providerRefService.getProviderCustomerId(
           workspaceId,
           customerId,
+          provider,
         );
 
-      if (!stripeCustomerId) {
+      if (!providerCustomerId) {
         this.logger.warn(
-          `No Stripe customer ID found for customer ${customerId}`,
+          `No ${provider} customer ID found for customer ${customerId}`,
         );
         return;
       }
 
-      const stripeAdapter = this.billingService.getStripeAdapter();
-      await stripeAdapter.updateCustomer(stripeCustomerId, {
+      const billingProvider = this.billingService.getProvider(provider);
+      await billingProvider.updateCustomer(providerCustomerId, {
         email: dto.email,
         name: dto.name,
       });
 
-      this.logger.log(`Updated Stripe customer ${stripeCustomerId}`);
+      this.logger.log(`Updated ${provider} customer ${providerCustomerId}`);
     } catch (error) {
       this.logger.error(
-        `Failed to update customer ${customerId} in Stripe: ${error}`,
+        `Failed to update customer ${customerId} in ${provider}: ${error}`,
       );
     }
   }
@@ -286,48 +291,50 @@ export class CustomersService {
       throw new NotFoundException(`Customer ${id} not found`);
     }
 
-    // Delete from Stripe first
-    await this.deleteFromStripe(workspaceId, id);
+    // Delete from billing provider first
+    await this.deleteFromProvider(workspaceId, id);
 
     await this.prisma.customer.delete({
       where: { id },
     });
   }
 
-  private async deleteFromStripe(
+  private async deleteFromProvider(
     workspaceId: string,
     customerId: string,
+    provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
-    if (!this.billingService.isConfigured("stripe")) {
+    if (!this.billingService.isConfigured(provider)) {
       return;
     }
 
     try {
-      const stripeCustomerId =
-        await this.providerRefService.getStripeCustomerId(
+      const providerCustomerId =
+        await this.providerRefService.getProviderCustomerId(
           workspaceId,
           customerId,
+          provider,
         );
 
-      if (!stripeCustomerId) {
+      if (!providerCustomerId) {
         return;
       }
 
-      const stripeAdapter = this.billingService.getStripeAdapter();
-      await stripeAdapter.deleteCustomer(stripeCustomerId);
+      const billingProvider = this.billingService.getProvider(provider);
+      await billingProvider.deleteCustomer(providerCustomerId);
 
       // Delete the provider ref
       await this.providerRefService.delete(
         workspaceId,
         "customer",
         customerId,
-        "stripe",
+        provider,
       );
 
-      this.logger.log(`Deleted Stripe customer ${stripeCustomerId}`);
+      this.logger.log(`Deleted ${provider} customer ${providerCustomerId}`);
     } catch (error) {
       this.logger.error(
-        `Failed to delete customer ${customerId} from Stripe: ${error}`,
+        `Failed to delete customer ${customerId} from ${provider}: ${error}`,
       );
     }
   }
@@ -349,6 +356,7 @@ export class CustomersService {
     workspaceId: string,
     customerId: string,
     returnUrl: string,
+    provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<{ id: string; url: string }> {
     // Verify customer exists
     const customer = await this.findById(workspaceId, customerId);
@@ -356,27 +364,31 @@ export class CustomersService {
       throw new NotFoundException(`Customer ${customerId} not found`);
     }
 
-    // Get Stripe customer ID
-    const stripeCustomerId = await this.providerRefService.getStripeCustomerId(
-      workspaceId,
-      customerId,
-    );
+    // Get provider customer ID
+    const providerCustomerId =
+      await this.providerRefService.getProviderCustomerId(
+        workspaceId,
+        customerId,
+        provider,
+      );
 
-    if (!stripeCustomerId) {
+    if (!providerCustomerId) {
       throw new NotFoundException(
-        `Customer ${customerId} is not linked to Stripe. Customer must have an active subscription.`,
+        `Customer ${customerId} is not linked to ${provider}. Customer must have an active subscription.`,
       );
     }
 
-    // Create portal session via Stripe
-    const stripeAdapter = this.billingService.getStripeAdapter();
-    const session = await stripeAdapter.createPortalSession({
+    // Create portal session via billing provider
+    const billingProvider = this.billingService.getProvider(provider);
+    const session = await billingProvider.createPortalSession({
       workspaceId,
-      customerId: stripeCustomerId,
+      customerId: providerCustomerId,
       returnUrl,
     });
 
-    this.logger.log(`Created portal session for customer ${customerId}`);
+    this.logger.log(
+      `Created ${provider} portal session for customer ${customerId}`,
+    );
 
     return {
       id: session.id,

@@ -5,7 +5,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
-import { BillingService } from "../billing/billing.service";
+import { BillingService, ProviderType } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
 import { OffersService } from "../offers/offers.service";
 import { EntitlementsService } from "../entitlements/entitlements.service";
@@ -277,57 +277,59 @@ export class SubscriptionsService {
       );
     }
 
-    // 3. Check if Stripe is configured
-    if (!this.billingService.isConfigured("stripe")) {
+    // 3. Check if billing provider is configured
+    const provider: ProviderType = "stripe";
+    if (!this.billingService.isConfigured(provider)) {
       throw new BadRequestException(
-        "Stripe billing provider is not configured",
+        `${provider} billing provider is not configured`,
       );
     }
 
-    // 4. Get the Stripe subscription ID
-    const stripeSubscriptionRef = await this.providerRefService.findByEntity(
+    // 4. Get the provider subscription ID
+    const providerSubscriptionRef = await this.providerRefService.findByEntity(
       workspaceId,
       "subscription",
       id,
-      "stripe",
+      provider,
     );
 
-    if (!stripeSubscriptionRef) {
+    if (!providerSubscriptionRef) {
       throw new BadRequestException(
-        `Subscription ${id} is not linked to Stripe. Cannot change plan.`,
+        `Subscription ${id} is not linked to ${provider}. Cannot change plan.`,
       );
     }
 
-    // 5. Get the new Stripe price ID
-    const newStripePriceId = await this.providerRefService.getStripePriceId(
+    // 5. Get the new provider price ID
+    const newPriceId = await this.providerRefService.getProviderPriceId(
       workspaceId,
       newVersion.id,
+      provider,
     );
 
-    if (!newStripePriceId) {
+    if (!newPriceId) {
       throw new BadRequestException(
-        `Offer version ${newVersion.id} is not synced to Stripe. Please sync the offer first.`,
+        `Offer version ${newVersion.id} is not synced to ${provider}. Please sync the offer first.`,
       );
     }
 
-    // 6. Change the subscription in Stripe
-    const stripeAdapter = this.billingService.getStripeAdapter();
-    const result = await stripeAdapter.changeSubscription(
+    // 6. Change the subscription in billing provider
+    const billingProvider = this.billingService.getProvider(provider);
+    const result = await billingProvider.changeSubscription(
       {
-        ...stripeSubscriptionRef,
-        metadata: stripeSubscriptionRef.metadata as
+        ...providerSubscriptionRef,
+        metadata: providerSubscriptionRef.metadata as
           | Record<string, unknown>
           | undefined,
       },
       {
         newOfferId: dto.newOfferId,
-        newOfferVersionId: newStripePriceId, // Pass the Stripe price ID
+        newOfferVersionId: newPriceId, // Pass the provider price ID
         prorationBehavior: dto.prorationBehavior,
       },
     );
 
     this.logger.log(
-      `Changed subscription ${id} from offer ${subscription.offerId} to ${dto.newOfferId} (Stripe: ${stripeSubscriptionRef.externalId})`,
+      `Changed subscription ${id} from offer ${subscription.offerId} to ${dto.newOfferId} (${provider}: ${providerSubscriptionRef.externalId})`,
     );
 
     // 7. Update the local subscription record
