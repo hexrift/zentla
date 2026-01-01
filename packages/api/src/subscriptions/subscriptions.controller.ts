@@ -130,7 +130,7 @@ class CancelSubscriptionDto {
 - "Too expensive"
 - "Missing features"
 - "Account violation"`,
-    example: "Customer requested - switching to annual plan",
+    example: "Customer requested - switching to annual offer",
     maxLength: 500,
   })
   @IsOptional()
@@ -142,7 +142,7 @@ class ChangeSubscriptionDto {
   @ApiProperty({
     description: `The new offer ID to switch this subscription to. The offer must have a published version.
 
-**Plan changes:**
+**Offer changes:**
 - Customer's subscription moves to the new offer's pricing and entitlements
 - Entitlements are updated immediately (old revoked, new granted)
 - Billing adjusts based on \`prorationBehavior\``,
@@ -165,7 +165,7 @@ class ChangeSubscriptionDto {
   @ApiPropertyOptional({
     description: `How to handle billing when changing plans:
 
-- **create_prorations** (default): Customer is credited for unused time on old plan and charged for new plan. Results in a prorated invoice.
+- **create_prorations** (default): Customer is credited for unused time on old offer and charged for new offer. Results in a prorated invoice.
 - **none**: No proration. Customer continues on old billing until next renewal, then new price applies.
 - **always_invoice**: Generate an invoice immediately for the price difference.
 
@@ -200,7 +200,7 @@ export class SubscriptionsController {
 - Display all subscriptions in your admin dashboard
 - Find subscriptions for a specific customer
 - Monitor subscriptions by status (active, trialing, canceled, etc.)
-- Filter subscriptions by offer/plan
+- Filter subscriptions by offer
 
 **Pagination:** Results are returned in pages of up to 100 items. Use the \`nextCursor\` from the response to fetch subsequent pages.
 
@@ -364,13 +364,13 @@ export class SubscriptionsController {
   @AdminOnly()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: "Change subscription plan",
+    summary: "Change subscription offer",
     description: `Changes a subscription to a different offer (upgrade, downgrade, or lateral move).
 
 **Use this to:**
-- Upgrade customers to higher-tier plans
-- Downgrade to lower-tier plans
-- Switch between plans with different billing intervals (monthly to annual)
+- Upgrade customers to higher-tier offers
+- Downgrade to lower-tier offers
+- Switch between offers with different billing intervals (monthly to annual)
 
 **What happens:**
 1. Subscription moves to the new offer and version
@@ -379,17 +379,17 @@ export class SubscriptionsController {
 4. Stripe subscription is updated
 
 **Proration options:**
-- \`create_prorations\`: Credit for unused time + charge for new plan
+- \`create_prorations\`: Credit for unused time + charge for new offer
 - \`none\`: No immediate billing change, new price at next renewal
 - \`always_invoice\`: Generate invoice immediately
 
 **Example - Upgrade:**
-Customer on $29/mo plan upgrades to $99/mo mid-cycle.
+Customer on $29/mo offer upgrades to $99/mo mid-cycle.
 With \`create_prorations\`: They're credited ~$15 (unused days) and charged ~$50 (remaining days at new rate).
 
 **Example - Downgrade:**
 Customer on $99/mo downgrades to $29/mo.
-With \`none\`: They keep $99 plan until renewal, then switch to $29.
+With \`none\`: They keep $99 offer until renewal, then switch to $29.
 
 **Side effects:**
 - Updates subscription record with new offer
@@ -404,7 +404,7 @@ With \`none\`: They keep $99 plan until renewal, then switch to $29.
   })
   @ApiResponse({
     status: 200,
-    description: "Subscription plan changed successfully",
+    description: "Subscription offer changed successfully",
     schema: SubscriptionSchema,
   })
   @ApiResponse({

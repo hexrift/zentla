@@ -21,7 +21,7 @@ export function ExamplePage() {
       <h2 id="scenario">Scenario</h2>
       <p>We'll build a complete subscription flow for a SaaS app with:</p>
       <ul>
-        <li>A "Pro" plan at $29/month with a 14-day trial</li>
+        <li>A "Pro" offer at $29/month with a 14-day trial</li>
         <li>Access to 5 seats and API access</li>
         <li>A 20% launch discount</li>
         <li>Webhook handling for subscription events</li>
@@ -30,7 +30,7 @@ export function ExamplePage() {
       <h2 id="step-1-setup">Step 1: Initial Setup</h2>
 
       <h3>Create Features</h3>
-      <p>Define the features your plans will include:</p>
+      <p>Define the features your offers will include:</p>
       <CodeBlock
         title="Terminal"
         language="bash"
@@ -408,8 +408,8 @@ New subscription for customer cust_xyz789`}</CodeBlock>
           <div className="p-4 bg-gray-50 rounded-lg">
             <h4 className="font-semibold text-gray-900 mb-2">Next Steps</h4>
             <ul className="text-sm text-gray-600 space-y-1">
-              <li>Add more plans (Free, Enterprise)</li>
-              <li>Implement plan upgrades/downgrades</li>
+              <li>Add more offers (Free, Enterprise)</li>
+              <li>Implement offer upgrades/downgrades</li>
               <li>Add usage-based billing</li>
               <li>Build customer portal</li>
               <li>Set up analytics dashboards</li>

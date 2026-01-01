@@ -211,7 +211,7 @@ export class OfferConfigDto {
 
   @ApiPropertyOptional({
     description:
-      "Optional trial period configuration. When set, new subscribers start with a free trial before being charged.",
+      "Optional trial period configuration. When set, new customers start with a free trial before being charged.",
     type: TrialConfigDto,
   })
   @IsOptional()
@@ -221,7 +221,7 @@ export class OfferConfigDto {
 
   @ApiProperty({
     description:
-      "List of entitlements (features/quotas) granted to subscribers of this offer. These are provisioned when a subscription becomes active and revoked when it ends.",
+      "List of entitlements (features/quotas) granted to customers of this offer. These are provisioned when a subscription becomes active and revoked when it ends.",
     type: [EntitlementConfigDto],
     example: [
       { featureKey: "seats", value: 5, valueType: "number" },
@@ -304,7 +304,7 @@ export class CreateOfferRequestDto {
 export class CreateVersionRequestDto {
   @ApiProperty({
     description:
-      "New configuration for this version. Changes take effect only after publishing. Existing subscribers remain on their current version.",
+      "New configuration for this version. Changes take effect only after publishing. Existing customers remain on their current version.",
     type: OfferConfigDto,
   })
   @ValidateNested()

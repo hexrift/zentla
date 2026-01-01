@@ -106,7 +106,7 @@ export class OffersController {
 **Version lifecycle:**
 - \`draft\`: Can be edited, not usable for checkouts
 - \`published\`: Active version used for new subscriptions
-- \`archived\`: Previously published, preserved for existing subscribers`,
+- \`archived\`: Previously published, preserved for existing customers`,
   })
   @ApiParam({
     name: "id",
@@ -157,7 +157,7 @@ export class OffersController {
 - Creates version 1 in \`draft\` status
 - Does NOT sync to billing provider until published
 
-**The offer cannot be used for checkouts until published.** New subscribers always use the currently published version.
+**The offer cannot be used for checkouts until published.** New customers always use the currently published version.
 
 **Entitlements:** Features defined in \`config.entitlements\` will be provisioned to customers when their subscription becomes active.`,
   })
@@ -261,7 +261,7 @@ Changes take effect immediately and are reflected in all API responses.`,
     description: `Archives an offer, hiding it from listings and preventing new subscriptions.
 
 **Use this when:**
-- Discontinuing a plan
+- Discontinuing an offer
 - Replacing an offer with a new one
 - Cleaning up test offers
 
@@ -317,7 +317,7 @@ Changes take effect immediately and are reflected in all API responses.`,
 **Version statuses:**
 - \`draft\`: Work in progress, editable, not synced to billing provider
 - \`published\`: Currently active version for new subscriptions
-- \`archived\`: Previously published version, preserved for existing subscribers
+- \`archived\`: Previously published version, preserved for existing customers
 
 Only one version can be \`published\` at a time.`,
   })
@@ -369,7 +369,7 @@ Only one version can be \`published\` at a time.`,
 **Constraints:**
 - Only one draft version can exist at a time
 - Must publish or delete existing draft before creating another
-- Existing subscribers are NOT affected until they change plans
+- Existing customers are NOT affected until they change offers
 
 **Side effects:**
 - Creates new version record in database

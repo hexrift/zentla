@@ -51,7 +51,7 @@ const offer = await relay.offers.get("offer_abc");
 
 // Create offer
 const newOffer = await relay.offers.create({
-  name: "Pro Plan",
+  name: "Pro Offer",
   description: "Everything you need",
   config: {
     pricing: {
