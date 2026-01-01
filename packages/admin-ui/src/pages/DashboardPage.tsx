@@ -272,13 +272,13 @@ export function DashboardPage() {
         <h2 className="text-lg font-medium text-gray-900">Setup Checklist</h2>
 
         <ChecklistItem
-          title="Configure Stripe"
+          title="Configure Billing"
           description={
             isStripeConfigured
-              ? `Stripe API connected (${stripeProvider?.mode ?? "test"} mode)`
+              ? `Billing provider connected (${stripeProvider?.mode ?? "test"} mode)`
               : stripeHasError
                 ? `Connection error: ${stripeProvider?.errors?.[0] ?? "Unknown error"}`
-                : "Add your Stripe API keys to enable payment processing"
+                : "Add your billing provider credentials to enable payment processing"
           }
           isComplete={isStripeConfigured}
           isLoading={providersLoading}
