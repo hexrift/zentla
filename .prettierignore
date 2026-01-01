@@ -1,0 +1,15 @@
+# Auto-generated files
+CHANGELOG.md
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Dependencies
+node_modules/
+
+# Package manager
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
