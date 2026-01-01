@@ -24,31 +24,24 @@ async function bootstrap(): Promise<void> {
   const port = configService.get<number>("PORT", 3000);
   const nodeEnv = configService.get<string>("NODE_ENV", "development");
 
-  // Security - configure CSP to allow Scalar docs in development
+  // Security - configure CSP to allow Scalar API docs
   app.use(
     helmet({
-      contentSecurityPolicy:
-        nodeEnv === "production"
-          ? undefined // Use default strict CSP in production
-          : {
-              directives: {
-                defaultSrc: ["'self'"],
-                scriptSrc: [
-                  "'self'",
-                  "'unsafe-inline'",
-                  "https://cdn.jsdelivr.net",
-                ],
-                styleSrc: [
-                  "'self'",
-                  "'unsafe-inline'",
-                  "https://cdn.jsdelivr.net",
-                  "https://fonts.googleapis.com",
-                ],
-                fontSrc: ["'self'", "https://fonts.gstatic.com"],
-                imgSrc: ["'self'", "data:", "https:"],
-                connectSrc: ["'self'", "https://cdn.jsdelivr.net"],
-              },
-            },
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+          styleSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            "https://cdn.jsdelivr.net",
+            "https://fonts.googleapis.com",
+          ],
+          fontSrc: ["'self'", "https://fonts.gstatic.com"],
+          imgSrc: ["'self'", "data:", "https:"],
+          connectSrc: ["'self'", "https://cdn.jsdelivr.net"],
+        },
+      },
     }),
   );
   app.enableCors({
