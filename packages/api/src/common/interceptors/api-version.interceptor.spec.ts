@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ExecutionContext, CallHandler } from "@nestjs/common";
 import { of, lastValueFrom } from "rxjs";
 import { ApiVersionInterceptor } from "./api-version.interceptor";
+import { API_VERSION, RELAY_VERSION } from "../version";
 
 describe("ApiVersionInterceptor", () => {
   let interceptor: ApiVersionInterceptor;
@@ -32,7 +33,10 @@ describe("ApiVersionInterceptor", () => {
   it("should set X-API-Version header", async () => {
     await lastValueFrom(interceptor.intercept(mockContext, mockCallHandler));
 
-    expect(mockResponse.setHeader).toHaveBeenCalledWith("X-API-Version", "0");
+    expect(mockResponse.setHeader).toHaveBeenCalledWith(
+      "X-API-Version",
+      API_VERSION,
+    );
   });
 
   it("should set X-Relay-Version header with full semver", async () => {
@@ -40,7 +44,7 @@ describe("ApiVersionInterceptor", () => {
 
     expect(mockResponse.setHeader).toHaveBeenCalledWith(
       "X-Relay-Version",
-      "0.1.0",
+      RELAY_VERSION,
     );
   });
 

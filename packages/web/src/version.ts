@@ -1,10 +1,10 @@
 // Central version information for Relay
-// Keep in sync with packages/api/src/common/version.ts
+// Auto-updated by release-please - do not edit manually
 
 export const VERSION = {
-  major: 0,
-  minor: 1,
-  patch: 0,
+  major: 1, // x-release-please-major
+  minor: 0, // x-release-please-minor
+  patch: 0, // x-release-please-patch
   get full(): string {
     return `${this.major}.${this.minor}.${this.patch}`;
   },
@@ -13,5 +13,8 @@ export const VERSION = {
   },
 };
 
+// API version for routing (e.g., /api/v1/)
+export const API_VERSION = VERSION.major.toString();
+
+// Full semver version
 export const RELAY_VERSION = VERSION.full;
-export const API_VERSION = VERSION.api;

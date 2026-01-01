@@ -6,6 +6,9 @@ describe("Version", () => {
     expect(typeof VERSION.major).toBe("number");
     expect(typeof VERSION.minor).toBe("number");
     expect(typeof VERSION.patch).toBe("number");
+    expect(VERSION.major).toBeGreaterThanOrEqual(0);
+    expect(VERSION.minor).toBeGreaterThanOrEqual(0);
+    expect(VERSION.patch).toBeGreaterThanOrEqual(0);
   });
 
   it("should have full version as semver string", () => {
@@ -13,6 +16,7 @@ describe("Version", () => {
       `${VERSION.major}.${VERSION.minor}.${VERSION.patch}`,
     );
     expect(RELAY_VERSION).toBe(VERSION.full);
+    expect(RELAY_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
   it("should have api version as major version string", () => {
@@ -20,10 +24,11 @@ describe("Version", () => {
     expect(API_VERSION).toBe(VERSION.major.toString());
   });
 
-  it("should currently be version 0.1.0", () => {
-    expect(VERSION.major).toBe(0);
-    expect(VERSION.minor).toBe(1);
-    expect(VERSION.patch).toBe(0);
-    expect(RELAY_VERSION).toBe("0.1.0");
+  it("should match root package.json version", async () => {
+    const fs = await import("fs");
+    const path = await import("path");
+    const packageJsonPath = path.join(__dirname, "../../../../package.json");
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+    expect(RELAY_VERSION).toBe(packageJson.version);
   });
 });

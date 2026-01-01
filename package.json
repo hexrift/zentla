@@ -1,6 +1,6 @@
 {
   "name": "relay",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Provider-agnostic subscription commerce orchestration platform",
   "workspaces": [
@@ -8,6 +8,10 @@
     "packages/adapters/*"
   ],
   "scripts": {
+    "version:sync": "node scripts/sync-version.js",
+    "version:patch": "npm version patch --no-git-tag-version && yarn version:sync",
+    "version:minor": "npm version minor --no-git-tag-version && yarn version:sync",
+    "version:major": "npm version major --no-git-tag-version && yarn version:sync",
     "build": "yarn workspaces foreach -A -t run build",
     "dev": "yarn workspace @relay/api dev",
     "dev:ui": "yarn workspace @relay/admin-ui dev",
