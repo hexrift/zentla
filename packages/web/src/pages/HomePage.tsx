@@ -206,12 +206,17 @@ export function HomePage() {
             Follow our quickstart guide to set up offers, checkout, and
             entitlements in minutes.
           </p>
-          <Link
-            to="/docs/quickstart"
-            className="btn-primary text-base px-8 py-3"
-          >
-            Start Building
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              to="/docs/quickstart"
+              className="btn-primary text-base px-8 py-3"
+            >
+              Start Building
+            </Link>
+            <Link to="/contact" className="btn-secondary text-base px-8 py-3">
+              Contact Sales
+            </Link>
+          </div>
         </div>
       </section>
     </div>
