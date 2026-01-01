@@ -66,6 +66,7 @@ jobs:
             --env STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}" \
             --env STRIPE_WEBHOOK_SECRET="${{ secrets.STRIPE_WEBHOOK_SECRET }}" \
             --env CORS_ORIGINS="${{ vars.CORS_ORIGINS }}" \
+            --env API_URL="${{ vars.API_URL }}" \
             --env API_KEY_SECRET="${{ secrets.API_KEY_SECRET }}" \
             --env WEBHOOK_SIGNING_SECRET="${{ secrets.WEBHOOK_SIGNING_SECRET }}" \
             --env NODE_ENV=production \
@@ -86,6 +87,7 @@ jobs:
             --env STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}" \
             --env STRIPE_WEBHOOK_SECRET="${{ secrets.STRIPE_WEBHOOK_SECRET }}" \
             --env CORS_ORIGINS="${{ vars.CORS_ORIGINS }}" \
+            --env API_URL="${{ vars.API_URL }}" \
             --env API_KEY_SECRET="${{ secrets.API_KEY_SECRET }}" \
             --env WEBHOOK_SIGNING_SECRET="${{ secrets.WEBHOOK_SIGNING_SECRET }}" \
             --env NODE_ENV=production
