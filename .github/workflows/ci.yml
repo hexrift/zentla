@@ -6,6 +6,15 @@ name: CI
 on:
   pull_request:
     branches: [main, develop]
+  push:
+    branches:
+      - 'release-please--**'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch to run CI on'
+        required: false
+        default: ''
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
