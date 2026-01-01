@@ -47,9 +47,7 @@ describe("ETag utilities", () => {
 
   describe("validateIfMatch", () => {
     it("should pass when versions match", () => {
-      expect(() =>
-        validateIfMatch('W/"id-5"', 5, "Customer"),
-      ).not.toThrow();
+      expect(() => validateIfMatch('W/"id-5"', 5, "Customer")).not.toThrow();
     });
 
     it("should pass when If-Match is not provided", () => {
@@ -57,15 +55,15 @@ describe("ETag utilities", () => {
     });
 
     it("should throw when versions do not match", () => {
-      expect(() =>
-        validateIfMatch('W/"id-3"', 5, "Customer"),
-      ).toThrow(PreconditionFailedException);
+      expect(() => validateIfMatch('W/"id-3"', 5, "Customer")).toThrow(
+        PreconditionFailedException,
+      );
     });
 
     it("should throw when ETag format is invalid", () => {
-      expect(() =>
-        validateIfMatch("invalid", 5, "Customer"),
-      ).toThrow(PreconditionFailedException);
+      expect(() => validateIfMatch("invalid", 5, "Customer")).toThrow(
+        PreconditionFailedException,
+      );
     });
   });
 });

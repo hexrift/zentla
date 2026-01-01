@@ -29,10 +29,12 @@ describe("ApiKeyGuard", () => {
     environment: "live",
   };
 
-  const createMockContext = (overrides: {
-    headers?: Record<string, string>;
-    sessionContext?: object | null;
-  } = {}): ExecutionContext => {
+  const createMockContext = (
+    overrides: {
+      headers?: Record<string, string>;
+      sessionContext?: object | null;
+    } = {},
+  ): ExecutionContext => {
     const request = {
       headers: overrides.headers || {},
       sessionContext: overrides.sessionContext,

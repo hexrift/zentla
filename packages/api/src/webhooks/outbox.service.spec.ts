@@ -44,10 +44,7 @@ describe("OutboxService", () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        OutboxService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [OutboxService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get<OutboxService>(OutboxService);

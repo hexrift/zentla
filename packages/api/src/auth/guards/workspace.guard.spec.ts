@@ -36,10 +36,7 @@ describe("WorkspaceGuard", () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        WorkspaceGuard,
-        { provide: Reflector, useValue: reflector },
-      ],
+      providers: [WorkspaceGuard, { provide: Reflector, useValue: reflector }],
     }).compile();
 
     guard = module.get<WorkspaceGuard>(WorkspaceGuard);

@@ -32,10 +32,7 @@ describe("RolesGuard", () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        RolesGuard,
-        { provide: Reflector, useValue: reflector },
-      ],
+      providers: [RolesGuard, { provide: Reflector, useValue: reflector }],
     }).compile();
 
     guard = module.get<RolesGuard>(RolesGuard);

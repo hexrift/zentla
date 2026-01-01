@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
-import { NotFoundException, BadRequestException, ConflictException } from "@nestjs/common";
+import { NotFoundException, BadRequestException } from "@nestjs/common";
 import { CheckoutService } from "./checkout.service";
 import { PrismaService } from "../database/prisma.service";
 import { BillingService } from "../billing/billing.service";
@@ -24,6 +24,7 @@ describe("CheckoutService", () => {
       findUnique: ReturnType<typeof vi.fn>;
       create: ReturnType<typeof vi.fn>;
       update: ReturnType<typeof vi.fn>;
+      updateMany: ReturnType<typeof vi.fn>;
       groupBy: ReturnType<typeof vi.fn>;
     };
     offer: {
@@ -599,9 +600,7 @@ describe("CheckoutService", () => {
         promotionCode: "INACTIVE",
       });
 
-      expect(result.validationErrors).toContain(
-        "Promotion is not published",
-      );
+      expect(result.validationErrors).toContain("Promotion is not published");
     });
 
     it("should validate promotion valid from date", async () => {
@@ -626,9 +625,7 @@ describe("CheckoutService", () => {
         promotionCode: "FUTURE",
       });
 
-      expect(result.validationErrors).toContain(
-        "Promotion is not yet active",
-      );
+      expect(result.validationErrors).toContain("Promotion is not yet active");
     });
 
     it("should validate promotion valid until date", async () => {
@@ -653,9 +650,7 @@ describe("CheckoutService", () => {
         promotionCode: "EXPIRED",
       });
 
-      expect(result.validationErrors).toContain(
-        "Promotion has expired",
-      );
+      expect(result.validationErrors).toContain("Promotion has expired");
     });
 
     it("should validate promotion applicable offers", async () => {
@@ -766,7 +761,11 @@ describe("CheckoutService", () => {
       });
 
       await expect(
-        service.createIntent("ws_123", { offerId: "offer_123" }, "idempotency_123"),
+        service.createIntent(
+          "ws_123",
+          { offerId: "offer_123" },
+          "idempotency_123",
+        ),
       ).rejects.toThrow("Idempotency key already used");
     });
 

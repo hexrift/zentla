@@ -23,9 +23,11 @@ describe("SessionGuard", () => {
     getAllAndOverride: ReturnType<typeof vi.fn>;
   };
 
-  const createMockContext = (overrides: {
-    headers?: Record<string, string>;
-  } = {}): ExecutionContext => {
+  const createMockContext = (
+    overrides: {
+      headers?: Record<string, string>;
+    } = {},
+  ): ExecutionContext => {
     const request = {
       headers: overrides.headers || {},
       sessionContext: undefined,
@@ -140,8 +142,12 @@ describe("SessionGuard", () => {
 
       const request: {
         headers: Record<string, string>;
-        sessionContext: { userId: string; sessionId: string; expiresAt: Date } | undefined;
-        apiKeyContext: { workspaceId: string; role: string; mode: string } | undefined;
+        sessionContext:
+          | { userId: string; sessionId: string; expiresAt: Date }
+          | undefined;
+        apiKeyContext:
+          | { workspaceId: string; role: string; mode: string }
+          | undefined;
       } = {
         headers: { authorization: "Bearer relay_session_abc123" },
         sessionContext: undefined,

@@ -119,7 +119,11 @@ describe("UsersController", () => {
       });
 
       await controller.signup(
-        { email: "test@example.com", password: "password123", name: "Jane Doe" },
+        {
+          email: "test@example.com",
+          password: "password123",
+          name: "Jane Doe",
+        },
         mockRequest as never,
       );
 
@@ -218,7 +222,7 @@ describe("UsersController", () => {
         expiresAt: new Date(),
       });
 
-      expect(result.user.email).toBe("test@example.com");
+      expect(result.user?.email).toBe("test@example.com");
       expect(result.workspaces).toHaveLength(1);
     });
 

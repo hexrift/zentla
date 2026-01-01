@@ -282,7 +282,9 @@ describe("WorkspacesService", () => {
       });
 
       expect(billingService.clearWorkspaceCache).toHaveBeenCalled();
-      expect(billingService.configureProviderForWorkspace).not.toHaveBeenCalled();
+      expect(
+        billingService.configureProviderForWorkspace,
+      ).not.toHaveBeenCalled();
     });
   });
 

@@ -94,9 +94,9 @@ describe("WebhookEndpointsController", () => {
     it("should throw NotFoundException when not found", async () => {
       webhooksService.findEndpointById.mockResolvedValue(null);
 
-      await expect(
-        controller.findOne("ws_123", "nonexistent"),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.findOne("ws_123", "nonexistent")).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

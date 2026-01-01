@@ -105,10 +105,7 @@ describe("FeedbackService", () => {
 
   describe("list", () => {
     it("should return paginated feedback list", async () => {
-      const feedbackList = [
-        mockFeedback,
-        { ...mockFeedback, id: "fb_456" },
-      ];
+      const feedbackList = [mockFeedback, { ...mockFeedback, id: "fb_456" }];
       prisma.feedback.findMany.mockResolvedValue(feedbackList);
 
       const result = await service.list({ limit: 10 });

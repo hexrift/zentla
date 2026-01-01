@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
 import { NotFoundException } from "@nestjs/common";
+import { createHmac } from "crypto";
 import { WebhooksService } from "./webhooks.service";
 import { PrismaService } from "../database/prisma.service";
 
@@ -159,7 +160,9 @@ describe("WebhooksService", () => {
       prisma.webhookEndpoint.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.updateEndpoint("ws_123", "nonexistent", { url: "https://new.url" }),
+        service.updateEndpoint("ws_123", "nonexistent", {
+          url: "https://new.url",
+        }),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -343,7 +346,6 @@ describe("WebhooksService", () => {
 
       // Create a valid signature
       const timestamp = Math.floor(Date.now() / 1000);
-      const { createHmac } = require("crypto");
       const signedPayload = `${timestamp}.${payload}`;
       const signature = createHmac("sha256", secret)
         .update(signedPayload)

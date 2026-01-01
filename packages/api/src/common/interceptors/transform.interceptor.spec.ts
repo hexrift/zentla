@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { ExecutionContext, CallHandler } from "@nestjs/common";
-import { of } from "rxjs";
+import { of, lastValueFrom } from "rxjs";
 import { TransformInterceptor } from "./transform.interceptor";
 
 describe("TransformInterceptor", () => {
@@ -24,37 +24,35 @@ describe("TransformInterceptor", () => {
     } as unknown as ExecutionContext;
   });
 
-  it("should wrap response with success and data", (done) => {
+  it("should wrap response with success and data", async () => {
     const mockCallHandler: CallHandler = {
       handle: () => of({ name: "test" }),
     };
 
-    interceptor.intercept(mockContext, mockCallHandler).subscribe({
-      next: (result) => {
-        expect(result.success).toBe(true);
-        expect(result.data).toEqual({ name: "test" });
-        expect(result.meta?.timestamp).toBeDefined();
-      },
-      complete: () => done(),
-    });
+    const result = await lastValueFrom(
+      interceptor.intercept(mockContext, mockCallHandler),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({ name: "test" });
+    expect(result.meta?.timestamp).toBeDefined();
   });
 
-  it("should include requestId in meta when present", (done) => {
+  it("should include requestId in meta when present", async () => {
     mockRequest.headers = { "x-request-id": "req_123" };
 
     const mockCallHandler: CallHandler = {
       handle: () => of({ name: "test" }),
     };
 
-    interceptor.intercept(mockContext, mockCallHandler).subscribe({
-      next: (result) => {
-        expect(result.meta?.requestId).toBe("req_123");
-      },
-      complete: () => done(),
-    });
+    const result = await lastValueFrom(
+      interceptor.intercept(mockContext, mockCallHandler),
+    );
+
+    expect(result.meta?.requestId).toBe("req_123");
   });
 
-  it("should transform paginated response with pagination meta", (done) => {
+  it("should transform paginated response with pagination meta", async () => {
     const paginatedData = {
       data: [{ id: 1 }, { id: 2 }],
       hasMore: true,
@@ -66,21 +64,20 @@ describe("TransformInterceptor", () => {
       handle: () => of(paginatedData),
     };
 
-    interceptor.intercept(mockContext, mockCallHandler).subscribe({
-      next: (result) => {
-        expect(result.success).toBe(true);
-        expect(result.data).toEqual([{ id: 1 }, { id: 2 }]);
-        expect(result.meta?.pagination).toEqual({
-          hasMore: true,
-          nextCursor: "cursor_abc",
-          total: 100,
-        });
-      },
-      complete: () => done(),
+    const result = await lastValueFrom(
+      interceptor.intercept(mockContext, mockCallHandler),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual([{ id: 1 }, { id: 2 }]);
+    expect(result.meta?.pagination).toEqual({
+      hasMore: true,
+      nextCursor: "cursor_abc",
+      total: 100,
     });
   });
 
-  it("should handle paginated response without total", (done) => {
+  it("should handle paginated response without total", async () => {
     const paginatedData = {
       data: [{ id: 1 }],
       hasMore: false,
@@ -90,48 +87,45 @@ describe("TransformInterceptor", () => {
       handle: () => of(paginatedData),
     };
 
-    interceptor.intercept(mockContext, mockCallHandler).subscribe({
-      next: (result) => {
-        expect(result.meta?.pagination).toEqual({
-          hasMore: false,
-          nextCursor: undefined,
-          total: undefined,
-        });
-      },
-      complete: () => done(),
+    const result = await lastValueFrom(
+      interceptor.intercept(mockContext, mockCallHandler),
+    );
+
+    expect(result.meta?.pagination).toEqual({
+      hasMore: false,
+      nextCursor: undefined,
+      total: undefined,
     });
   });
 
-  it("should handle null data", (done) => {
+  it("should handle null data", async () => {
     const mockCallHandler: CallHandler = {
       handle: () => of(null),
     };
 
-    interceptor.intercept(mockContext, mockCallHandler).subscribe({
-      next: (result) => {
-        expect(result.success).toBe(true);
-        expect(result.data).toBeNull();
-        expect(result.meta?.pagination).toBeUndefined();
-      },
-      complete: () => done(),
-    });
+    const result = await lastValueFrom(
+      interceptor.intercept(mockContext, mockCallHandler),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.data).toBeNull();
+    expect(result.meta?.pagination).toBeUndefined();
   });
 
-  it("should handle primitive data", (done) => {
+  it("should handle primitive data", async () => {
     const mockCallHandler: CallHandler = {
       handle: () => of("simple string"),
     };
 
-    interceptor.intercept(mockContext, mockCallHandler).subscribe({
-      next: (result) => {
-        expect(result.success).toBe(true);
-        expect(result.data).toBe("simple string");
-      },
-      complete: () => done(),
-    });
+    const result = await lastValueFrom(
+      interceptor.intercept(mockContext, mockCallHandler),
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.data).toBe("simple string");
   });
 
-  it("should not treat object with only data property as paginated", (done) => {
+  it("should not treat object with only data property as paginated", async () => {
     const dataOnly = {
       data: [{ id: 1 }],
     };
@@ -140,29 +134,25 @@ describe("TransformInterceptor", () => {
       handle: () => of(dataOnly),
     };
 
-    interceptor.intercept(mockContext, mockCallHandler).subscribe({
-      next: (result) => {
-        // This should NOT be treated as paginated since hasMore is missing
-        expect(result.data).toEqual({ data: [{ id: 1 }] });
-        expect(result.meta?.pagination).toBeUndefined();
-      },
-      complete: () => done(),
-    });
+    const result = await lastValueFrom(
+      interceptor.intercept(mockContext, mockCallHandler),
+    );
+
+    // This should NOT be treated as paginated since hasMore is missing
+    expect(result.data).toEqual({ data: [{ id: 1 }] });
+    expect(result.meta?.pagination).toBeUndefined();
   });
 
-  it("should include timestamp in ISO format", (done) => {
+  it("should include timestamp in ISO format", async () => {
     const mockCallHandler: CallHandler = {
       handle: () => of({}),
     };
 
-    interceptor.intercept(mockContext, mockCallHandler).subscribe({
-      next: (result) => {
-        const timestamp = result.meta?.timestamp;
-        expect(timestamp).toMatch(
-          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/,
-        );
-      },
-      complete: () => done(),
-    });
+    const result = await lastValueFrom(
+      interceptor.intercept(mockContext, mockCallHandler),
+    );
+
+    const timestamp = result.meta?.timestamp;
+    expect(timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/);
   });
 });

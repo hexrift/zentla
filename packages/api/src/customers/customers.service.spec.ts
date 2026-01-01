@@ -58,9 +58,10 @@ describe("CustomersService", () => {
           .mockResolvedValue({ externalId: "stripe_cust_123" }),
         updateCustomer: vi.fn().mockResolvedValue({}),
         deleteCustomer: vi.fn().mockResolvedValue({}),
-        createPortalSession: vi
-          .fn()
-          .mockResolvedValue({ id: "ps_123", url: "https://portal.stripe.com" }),
+        createPortalSession: vi.fn().mockResolvedValue({
+          id: "ps_123",
+          url: "https://portal.stripe.com",
+        }),
       }),
     };
 
@@ -357,7 +358,6 @@ describe("CustomersService", () => {
       expect(result.id).toBe("ps_123");
       expect(result.url).toBe("https://portal.stripe.com");
     });
-
   });
 
   describe("update with provider sync", () => {
@@ -373,7 +373,12 @@ describe("CustomersService", () => {
 
       await service.update("ws_123", "cust_123", { name: "Updated Name" });
 
-      const provider = billingService.getProvider();
+      const provider = (
+        billingService.getProvider as () => Record<
+          string,
+          ReturnType<typeof vi.fn>
+        >
+      )();
       expect(provider.updateCustomer).toHaveBeenCalledWith(
         "stripe_cust_123",
         expect.objectContaining({ name: "Updated Name" }),

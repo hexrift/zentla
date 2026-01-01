@@ -121,7 +121,7 @@ describe("PromotionsController", () => {
       promotionsService.findById.mockResolvedValue(null);
 
       await expect(controller.findOne("ws_123", "nonexistent")).rejects.toThrow(
-        NotFoundException
+        NotFoundException,
       );
     });
   });
@@ -265,7 +265,7 @@ describe("PromotionsController", () => {
         "SUMMER25",
         "123e4567-e89b-12d3-a456-426614174000",
         "123e4567-e89b-12d3-a456-426614174001",
-        9900
+        9900,
       );
     });
   });
@@ -291,7 +291,7 @@ describe("PromotionsController", () => {
       promotionsService.findById.mockResolvedValue(null);
 
       await expect(
-        controller.getUsage("ws_123", "nonexistent")
+        controller.getUsage("ws_123", "nonexistent"),
       ).rejects.toThrow(NotFoundException);
     });
   });

@@ -126,7 +126,7 @@ describe("OffersController", () => {
       offersService.findById.mockResolvedValue(null);
 
       await expect(controller.findOne("ws_123", "nonexistent")).rejects.toThrow(
-        NotFoundException
+        NotFoundException,
       );
     });
   });
@@ -174,7 +174,7 @@ describe("OffersController", () => {
       expect(result).toEqual({ synced: true });
       expect(offersService.syncOfferToProvider).toHaveBeenCalledWith(
         "ws_123",
-        "offer_123"
+        "offer_123",
       );
     });
   });
@@ -237,7 +237,7 @@ describe("OffersController", () => {
             currency: "usd",
             interval: "month",
           },
-        } as any
+        } as any,
       );
 
       expect(result.status).toBe("draft");
@@ -274,7 +274,7 @@ describe("OffersController", () => {
         "ws_123",
         "offer_123",
         "ver_456",
-        expect.any(Date)
+        expect.any(Date),
       );
     });
   });
@@ -289,7 +289,7 @@ describe("OffersController", () => {
 
       const result = await controller.getScheduledVersions(
         "ws_123",
-        "offer_123"
+        "offer_123",
       );
 
       expect(result).toHaveLength(1);
@@ -310,7 +310,7 @@ describe("OffersController", () => {
       expect(offersService.rollbackToVersion).toHaveBeenCalledWith(
         "ws_123",
         "offer_123",
-        "ver_123"
+        "ver_123",
       );
     });
   });

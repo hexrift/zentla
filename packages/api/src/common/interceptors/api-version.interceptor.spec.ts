@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ExecutionContext, CallHandler } from "@nestjs/common";
-import { of } from "rxjs";
+import { of, lastValueFrom } from "rxjs";
 import { ApiVersionInterceptor } from "./api-version.interceptor";
 
 describe("ApiVersionInterceptor", () => {
@@ -29,36 +29,26 @@ describe("ApiVersionInterceptor", () => {
     };
   });
 
-  it("should set X-API-Version header", (done) => {
-    interceptor.intercept(mockContext, mockCallHandler).subscribe({
-      next: () => {
-        expect(mockResponse.setHeader).toHaveBeenCalledWith(
-          "X-API-Version",
-          "1",
-        );
-      },
-      complete: () => done(),
-    });
+  it("should set X-API-Version header", async () => {
+    await lastValueFrom(interceptor.intercept(mockContext, mockCallHandler));
+
+    expect(mockResponse.setHeader).toHaveBeenCalledWith("X-API-Version", "1");
   });
 
-  it("should set X-Relay-API-Deprecated header to false", (done) => {
-    interceptor.intercept(mockContext, mockCallHandler).subscribe({
-      next: () => {
-        expect(mockResponse.setHeader).toHaveBeenCalledWith(
-          "X-Relay-API-Deprecated",
-          "false",
-        );
-      },
-      complete: () => done(),
-    });
+  it("should set X-Relay-API-Deprecated header to false", async () => {
+    await lastValueFrom(interceptor.intercept(mockContext, mockCallHandler));
+
+    expect(mockResponse.setHeader).toHaveBeenCalledWith(
+      "X-Relay-API-Deprecated",
+      "false",
+    );
   });
 
-  it("should pass through the response data unchanged", (done) => {
-    interceptor.intercept(mockContext, mockCallHandler).subscribe({
-      next: (result) => {
-        expect(result).toEqual({ data: "test" });
-      },
-      complete: () => done(),
-    });
+  it("should pass through the response data unchanged", async () => {
+    const result = await lastValueFrom(
+      interceptor.intercept(mockContext, mockCallHandler),
+    );
+
+    expect(result).toEqual({ data: "test" });
   });
 });

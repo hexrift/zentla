@@ -77,14 +77,24 @@ describe("WorkspacesController", () => {
             provider: "stripe",
             status: "connected",
             mode: "test",
-            capabilities: { subscriptions: true, invoices: true, customerPortal: true, webhooksConfigured: true },
+            capabilities: {
+              subscriptions: true,
+              invoices: true,
+              customerPortal: true,
+              webhooksConfigured: true,
+            },
             errors: [],
           },
           {
             provider: "zuora",
             status: "not_configured",
             mode: null,
-            capabilities: { subscriptions: false, invoices: false, customerPortal: false, webhooksConfigured: false },
+            capabilities: {
+              subscriptions: false,
+              invoices: false,
+              customerPortal: false,
+              webhooksConfigured: false,
+            },
             errors: ["Zuora integration planned for future release"],
           },
         ],
@@ -93,8 +103,12 @@ describe("WorkspacesController", () => {
       const result = await controller.getProviderStatus("ws_123");
 
       expect(result.defaultProvider).toBe("stripe");
-      const stripe = result.providers.find((p: { provider: string }) => p.provider === "stripe");
-      const zuora = result.providers.find((p: { provider: string }) => p.provider === "zuora");
+      const stripe = result.providers.find(
+        (p: { provider: string }) => p.provider === "stripe",
+      );
+      const zuora = result.providers.find(
+        (p: { provider: string }) => p.provider === "zuora",
+      );
       expect(stripe?.status).toBe("connected");
       expect(zuora?.status).toBe("not_configured");
     });
@@ -110,7 +124,12 @@ describe("WorkspacesController", () => {
             provider: "stripe",
             status: "not_configured",
             mode: null,
-            capabilities: { subscriptions: false, invoices: false, customerPortal: false, webhooksConfigured: false },
+            capabilities: {
+              subscriptions: false,
+              invoices: false,
+              customerPortal: false,
+              webhooksConfigured: false,
+            },
             errors: [],
           },
         ],
@@ -118,7 +137,9 @@ describe("WorkspacesController", () => {
 
       const result = await controller.getProviderStatus("ws_123");
 
-      const stripe = result.providers.find((p: { provider: string }) => p.provider === "stripe");
+      const stripe = result.providers.find(
+        (p: { provider: string }) => p.provider === "stripe",
+      );
       expect(stripe?.status).toBe("not_configured");
     });
 
@@ -133,7 +154,12 @@ describe("WorkspacesController", () => {
             provider: "stripe",
             status: "connected",
             mode: "test",
-            capabilities: { subscriptions: true, invoices: true, customerPortal: true, webhooksConfigured: true },
+            capabilities: {
+              subscriptions: true,
+              invoices: true,
+              customerPortal: true,
+              webhooksConfigured: true,
+            },
             errors: [],
           },
         ],

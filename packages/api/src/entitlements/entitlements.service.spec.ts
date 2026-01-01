@@ -127,7 +127,12 @@ describe("EntitlementsService", () => {
     it("should check multiple feature keys", async () => {
       prisma.entitlement.findMany.mockResolvedValue([
         mockEntitlement,
-        { ...mockEntitlement, featureKey: "seats", value: "10", valueType: "number" },
+        {
+          ...mockEntitlement,
+          featureKey: "seats",
+          value: "10",
+          valueType: "number",
+        },
       ]);
 
       const result = await service.checkMultipleEntitlements(
@@ -157,7 +162,10 @@ describe("EntitlementsService", () => {
       prisma.subscription.findMany.mockResolvedValue([{ id: "sub_123" }]);
       prisma.entitlement.findMany.mockResolvedValue([mockEntitlement]);
 
-      const result = await service.getCustomerEntitlements("ws_123", "cust_123");
+      const result = await service.getCustomerEntitlements(
+        "ws_123",
+        "cust_123",
+      );
 
       expect(result.customerId).toBe("cust_123");
       expect(result.entitlements).toHaveLength(1);
@@ -253,10 +261,7 @@ describe("EntitlementsService", () => {
 
   describe("checkEntitlement with expired entitlement", () => {
     it("should return hasAccess false for expired entitlement", async () => {
-      const expiredEntitlement = {
-        ...mockEntitlement,
-        expiresAt: new Date(Date.now() - 86400000), // Expired yesterday
-      };
+      // Query filters out expired entitlements, so findFirst returns null
       prisma.entitlement.findFirst.mockResolvedValue(null);
 
       const result = await service.checkEntitlement(
@@ -304,7 +309,6 @@ describe("EntitlementsService", () => {
     });
   });
 
-
   describe("checkEntitlement with string value type", () => {
     it("should return string value as-is", async () => {
       prisma.entitlement.findFirst.mockResolvedValue({
@@ -329,7 +333,10 @@ describe("EntitlementsService", () => {
       prisma.subscription.findMany.mockResolvedValue([]);
       prisma.entitlement.findMany.mockResolvedValue([]);
 
-      const result = await service.getCustomerEntitlements("ws_123", "cust_123");
+      const result = await service.getCustomerEntitlements(
+        "ws_123",
+        "cust_123",
+      );
 
       expect(result.entitlements).toHaveLength(0);
       expect(result.activeSubscriptionIds).toHaveLength(0);

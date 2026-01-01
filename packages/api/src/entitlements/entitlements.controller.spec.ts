@@ -107,11 +107,13 @@ describe("EntitlementsController", () => {
       );
 
       expect(result).toHaveLength(3);
-      expect(entitlementsService.checkMultipleEntitlements).toHaveBeenCalledWith(
-        "ws_123",
-        "cust_123",
-        ["api_access", "seats", "premium"],
-      );
+      expect(
+        entitlementsService.checkMultipleEntitlements,
+      ).toHaveBeenCalledWith("ws_123", "cust_123", [
+        "api_access",
+        "seats",
+        "premium",
+      ]);
     });
   });
 });

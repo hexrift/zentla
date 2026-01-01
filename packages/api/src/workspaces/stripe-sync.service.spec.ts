@@ -193,9 +193,7 @@ describe("StripeSyncService", () => {
       const result = await service.syncFromStripe("ws_123");
 
       expect(result.customersSkipped).toBe(1);
-      expect(result.errors).toContainEqual(
-        expect.stringContaining("No email"),
-      );
+      expect(result.errors).toContainEqual(expect.stringContaining("No email"));
     });
 
     it("should use existing customer if email matches", async () => {
@@ -432,9 +430,7 @@ describe("StripeSyncService", () => {
 
       const result = await service.syncFromStripe("ws_123");
 
-      expect(result.errors).toContainEqual(
-        expect.stringContaining("DB error"),
-      );
+      expect(result.errors).toContainEqual(expect.stringContaining("DB error"));
     });
   });
 });

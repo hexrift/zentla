@@ -302,7 +302,10 @@ describe("ProviderRefService", () => {
         externalId: "sub_stripe123",
       });
 
-      const result = await service.getProviderSubscriptionId("ws_123", "sub_123");
+      const result = await service.getProviderSubscriptionId(
+        "ws_123",
+        "sub_123",
+      );
 
       expect(result).toBe("sub_stripe123");
       expect(prisma.providerRef.findFirst).toHaveBeenCalledWith({

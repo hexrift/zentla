@@ -114,8 +114,7 @@ describe("SubscriptionInvalidStateException", () => {
 
     expect(exception.getStatus()).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
     expect(exception.getResponse()).toMatchObject({
-      message:
-        "Subscription is canceled, but must be one of: active, trialing",
+      message: "Subscription is canceled, but must be one of: active, trialing",
       details: {
         subscriptionId: "sub_123",
         currentState: "canceled",

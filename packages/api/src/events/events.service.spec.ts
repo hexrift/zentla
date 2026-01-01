@@ -51,10 +51,7 @@ describe("EventsService", () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        EventsService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [EventsService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get<EventsService>(EventsService);
@@ -193,7 +190,9 @@ describe("EventsService", () => {
       ];
       prisma.deadLetterEvent.findMany.mockResolvedValue(events);
 
-      const result = await service.listDeadLetterEvents("ws_123", { limit: 10 });
+      const result = await service.listDeadLetterEvents("ws_123", {
+        limit: 10,
+      });
 
       expect(result.data).toHaveLength(2);
       expect(result.hasMore).toBe(false);
@@ -205,7 +204,9 @@ describe("EventsService", () => {
         .map((_, i) => ({ ...mockDeadLetterEvent, id: `dle_${i}` }));
       prisma.deadLetterEvent.findMany.mockResolvedValue(events);
 
-      const result = await service.listDeadLetterEvents("ws_123", { limit: 10 });
+      const result = await service.listDeadLetterEvents("ws_123", {
+        limit: 10,
+      });
 
       expect(result.data).toHaveLength(10);
       expect(result.hasMore).toBe(true);
@@ -232,7 +233,9 @@ describe("EventsService", () => {
     it("should include endpoint url in response", async () => {
       prisma.deadLetterEvent.findMany.mockResolvedValue([mockDeadLetterEvent]);
 
-      const result = await service.listDeadLetterEvents("ws_123", { limit: 10 });
+      const result = await service.listDeadLetterEvents("ws_123", {
+        limit: 10,
+      });
 
       expect(result.data[0].endpointUrl).toBe(
         "https://webhook.example.com/events",
@@ -249,7 +252,9 @@ describe("EventsService", () => {
     it("should format dead letter event data correctly", async () => {
       prisma.deadLetterEvent.findMany.mockResolvedValue([mockDeadLetterEvent]);
 
-      const result = await service.listDeadLetterEvents("ws_123", { limit: 10 });
+      const result = await service.listDeadLetterEvents("ws_123", {
+        limit: 10,
+      });
 
       expect(result.data[0]).toEqual({
         id: mockDeadLetterEvent.id,
@@ -270,7 +275,9 @@ describe("EventsService", () => {
         { ...mockDeadLetterEvent, lastAttemptAt: null },
       ]);
 
-      const result = await service.listDeadLetterEvents("ws_123", { limit: 10 });
+      const result = await service.listDeadLetterEvents("ws_123", {
+        limit: 10,
+      });
 
       expect(result.data[0].lastAttemptAt).toBeNull();
     });
@@ -280,7 +287,9 @@ describe("EventsService", () => {
         { ...mockDeadLetterEvent, endpoint: null },
       ]);
 
-      const result = await service.listDeadLetterEvents("ws_123", { limit: 10 });
+      const result = await service.listDeadLetterEvents("ws_123", {
+        limit: 10,
+      });
 
       expect(result.data[0].endpointUrl).toBeUndefined();
     });

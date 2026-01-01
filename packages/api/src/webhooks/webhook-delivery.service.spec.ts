@@ -147,7 +147,10 @@ describe("WebhookDeliveryService", () => {
     });
 
     it("should continue processing on fan out error", async () => {
-      const events = [mockOutboxEvent, { ...mockOutboxEvent, id: "outbox_456" }];
+      const events = [
+        mockOutboxEvent,
+        { ...mockOutboxEvent, id: "outbox_456" },
+      ];
       outboxService.getPendingEvents.mockResolvedValue(events);
       prisma.webhookEndpoint.findMany
         .mockRejectedValueOnce(new Error("DB error"))

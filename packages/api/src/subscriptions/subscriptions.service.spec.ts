@@ -318,9 +318,19 @@ describe("SubscriptionsService", () => {
   });
 
   describe("change", () => {
-    let billingService: { isConfigured: ReturnType<typeof vi.fn>; getProvider: ReturnType<typeof vi.fn> };
-    let providerRefService: { findByEntity: ReturnType<typeof vi.fn>; getProviderPriceId: ReturnType<typeof vi.fn> };
-    let offersService: { findById: ReturnType<typeof vi.fn>; getVersion: ReturnType<typeof vi.fn>; getPublishedVersion: ReturnType<typeof vi.fn> };
+    let billingService: {
+      isConfigured: ReturnType<typeof vi.fn>;
+      getProvider: ReturnType<typeof vi.fn>;
+    };
+    let providerRefService: {
+      findByEntity: ReturnType<typeof vi.fn>;
+      getProviderPriceId: ReturnType<typeof vi.fn>;
+    };
+    let offersService: {
+      findById: ReturnType<typeof vi.fn>;
+      getVersion: ReturnType<typeof vi.fn>;
+      getPublishedVersion: ReturnType<typeof vi.fn>;
+    };
 
     beforeEach(async () => {
       billingService = {
@@ -342,7 +352,9 @@ describe("SubscriptionsService", () => {
       };
 
       offersService = {
-        findById: vi.fn().mockResolvedValue({ id: "new_offer", name: "Enterprise" }),
+        findById: vi
+          .fn()
+          .mockResolvedValue({ id: "new_offer", name: "Enterprise" }),
         getVersion: vi.fn(),
         getPublishedVersion: vi.fn().mockResolvedValue({
           id: "new_ver_123",

@@ -148,12 +148,9 @@ describe("CustomersController", () => {
         version: 2,
       });
 
-      const result = await controller.update(
-        "ws_123",
-        "cust_123",
-        undefined,
-        { name: "Updated Name" },
-      );
+      const result = await controller.update("ws_123", "cust_123", undefined, {
+        name: "Updated Name",
+      });
 
       expect(result.name).toBe("Updated Name");
       expect(customersService.update).toHaveBeenCalledWith(
@@ -170,12 +167,9 @@ describe("CustomersController", () => {
         version: 2,
       });
 
-      await controller.update(
-        "ws_123",
-        "cust_123",
-        'W/"cust_123-1"',
-        { name: "Updated Name" },
-      );
+      await controller.update("ws_123", "cust_123", 'W/"cust_123-1"', {
+        name: "Updated Name",
+      });
 
       expect(customersService.update).toHaveBeenCalledWith(
         "ws_123",
@@ -192,7 +186,10 @@ describe("CustomersController", () => {
 
       await controller.delete("ws_123", "cust_123");
 
-      expect(customersService.delete).toHaveBeenCalledWith("ws_123", "cust_123");
+      expect(customersService.delete).toHaveBeenCalledWith(
+        "ws_123",
+        "cust_123",
+      );
     });
   });
 
@@ -206,9 +203,13 @@ describe("CustomersController", () => {
       };
       customersService.createPortalSession.mockResolvedValue(mockPortalSession);
 
-      const result = await controller.createPortalSession("ws_123", "cust_123", {
-        returnUrl: "https://app.example.com/billing",
-      });
+      const result = await controller.createPortalSession(
+        "ws_123",
+        "cust_123",
+        {
+          returnUrl: "https://app.example.com/billing",
+        },
+      );
 
       expect(result).toEqual(mockPortalSession);
       expect(customersService.createPortalSession).toHaveBeenCalledWith(

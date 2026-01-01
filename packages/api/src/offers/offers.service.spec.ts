@@ -265,7 +265,9 @@ describe("OffersService", () => {
         metadata: { existing: "value", new: "data" },
       });
 
-      await service.update("ws_123", "offer_123", { metadata: { new: "data" } });
+      await service.update("ws_123", "offer_123", {
+        metadata: { new: "data" },
+      });
 
       expect(prisma.offer.update).toHaveBeenCalledWith({
         where: { id: "offer_123" },
@@ -876,7 +878,12 @@ describe("OffersService", () => {
 
       await service.archive("ws_123", "offer_123");
 
-      const provider = billingService.getProvider();
+      const provider = (
+        billingService.getProvider as () => Record<
+          string,
+          ReturnType<typeof vi.fn>
+        >
+      )();
       expect(provider.archiveProduct).toHaveBeenCalledWith("prod_123");
     });
 

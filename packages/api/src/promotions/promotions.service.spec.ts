@@ -196,7 +196,7 @@ describe("PromotionsService", () => {
       expect(prisma.promotion.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({ status: "active" }),
-        })
+        }),
       );
     });
 
@@ -214,7 +214,7 @@ describe("PromotionsService", () => {
               { description: { contains: "save", mode: "insensitive" } },
             ],
           }),
-        })
+        }),
       );
     });
   });
@@ -228,7 +228,7 @@ describe("PromotionsService", () => {
           code: "SAVE20",
           name: "New Promo",
           config: { discountType: "percent", discountValue: 10 },
-        })
+        }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -280,7 +280,7 @@ describe("PromotionsService", () => {
       prisma.promotion.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.update("ws_123", "nonexistent", { name: "New Name" })
+        service.update("ws_123", "nonexistent", { name: "New Name" }),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -308,7 +308,7 @@ describe("PromotionsService", () => {
       prisma.promotion.findFirst.mockResolvedValue(null);
 
       await expect(service.archive("ws_123", "nonexistent")).rejects.toThrow(
-        NotFoundException
+        NotFoundException,
       );
     });
 
@@ -337,7 +337,7 @@ describe("PromotionsService", () => {
         service.createVersion("ws_123", "nonexistent", {
           discountType: "percent",
           discountValue: 10,
-        })
+        }),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -355,7 +355,7 @@ describe("PromotionsService", () => {
         service.createVersion("ws_123", "promo_123", {
           discountType: "percent",
           discountValue: 25,
-        })
+        }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -386,7 +386,7 @@ describe("PromotionsService", () => {
       prisma.promotion.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.publishVersion("ws_123", "nonexistent")
+        service.publishVersion("ws_123", "nonexistent"),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -395,7 +395,7 @@ describe("PromotionsService", () => {
       prisma.promotionVersion.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.publishVersion("ws_123", "promo_123")
+        service.publishVersion("ws_123", "promo_123"),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -407,7 +407,7 @@ describe("PromotionsService", () => {
       });
 
       await expect(
-        service.publishVersion("ws_123", "promo_123")
+        service.publishVersion("ws_123", "promo_123"),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -420,7 +420,7 @@ describe("PromotionsService", () => {
       });
 
       await expect(
-        service.publishVersion("ws_123", "promo_123")
+        service.publishVersion("ws_123", "promo_123"),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -433,7 +433,7 @@ describe("PromotionsService", () => {
       billingService.isConfigured.mockReturnValue(false);
 
       await expect(
-        service.publishVersion("ws_123", "promo_123")
+        service.publishVersion("ws_123", "promo_123"),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -466,7 +466,7 @@ describe("PromotionsService", () => {
       prisma.promotion.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.getVersions("ws_123", "nonexistent")
+        service.getVersions("ws_123", "nonexistent"),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -604,7 +604,7 @@ describe("PromotionsService", () => {
         "SAVE20",
         "offer_123",
         undefined,
-        5000
+        5000,
       );
 
       expect(result.isValid).toBe(false);
@@ -641,7 +641,7 @@ describe("PromotionsService", () => {
         "ws_123",
         "SAVE20",
         "offer_123",
-        "cust_123"
+        "cust_123",
       );
 
       expect(result.isValid).toBe(false);
