@@ -145,7 +145,7 @@ export function WebhooksPage() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
+          className="btn-primary"
         >
           Add Endpoint
         </button>
@@ -399,14 +399,14 @@ export function WebhooksPage() {
                     <button
                       type="button"
                       onClick={closeModal}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                      className="btn-secondary"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={createMutation.isPending}
-                      className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
+                      className="btn-primary"
                     >
                       {createMutation.isPending
                         ? "Creating..."

@@ -168,14 +168,14 @@ export function PromotionDetailPage() {
                 }
               }}
               disabled={archiveMutation.isPending}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              className="btn-secondary"
             >
               Archive
             </button>
           )}
           <button
             onClick={() => navigate("/promotions")}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="btn-secondary"
           >
             Back
           </button>
@@ -259,7 +259,7 @@ export function PromotionDetailPage() {
             <button
               onClick={() => publishMutation.mutate(draftVersion.id)}
               disabled={publishMutation.isPending}
-              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
+              className="btn-primary"
             >
               {publishMutation.isPending ? "Publishing..." : "Publish"}
             </button>

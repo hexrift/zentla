@@ -121,10 +121,7 @@ export function SettingsPage() {
                 Enter your API key to authenticate requests
               </p>
             </div>
-            <button
-              onClick={handleSaveApiKey}
-              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
-            >
+            <button onClick={handleSaveApiKey} className="btn-primary">
               {saved ? "Saved!" : "Save API Key"}
             </button>
           </div>
@@ -463,9 +460,7 @@ export function SettingsPage() {
         </div>
 
         <div className="flex justify-end">
-          <button className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700">
-            Save Changes
-          </button>
+          <button className="btn-primary">Save Changes</button>
         </div>
       </div>
     </div>
