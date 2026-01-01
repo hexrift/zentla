@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/PrimeCodeLabs/relay/compare/v1.1.0...v1.2.0) (2026-01-01)
+
+
+### Features
+
+* **seo:** improve SEO to 9-10/10 rating ([1123297](https://github.com/PrimeCodeLabs/relay/commit/1123297ecaaad729b5bb99087ec4bd332159a8bc))
+
+
+### Bug Fixes
+
+* ignore CHANGELOG.md in Prettier checks ([b728cc1](https://github.com/PrimeCodeLabs/relay/commit/b728cc1f56334a67f3c5f326029e4853fe56a29e))
+* ignore CHANGELOG.md in Prettier checks ([7057612](https://github.com/PrimeCodeLabs/relay/commit/70576129af026c91e99589d0397f61f85cf0c2b8))
+
 ## [1.1.0](https://github.com/PrimeCodeLabs/relay/compare/v1.0.0...v1.1.0) (2026-01-01)
 
 
