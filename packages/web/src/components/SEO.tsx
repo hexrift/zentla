@@ -51,6 +51,7 @@ export function SEO({
       <title>{fullTitle}</title>
       <meta name="title" content={fullTitle} />
       <meta name="description" content={description} />
+      <meta name="google-site-verification" content="QRMefrxdUSOnBxTieShmRdDeZg49CpLks5lU_1JUufM" />
       <link rel="canonical" href={url} />
 
       {/* Open Graph / Facebook */}
