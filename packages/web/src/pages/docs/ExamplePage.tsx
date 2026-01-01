@@ -10,6 +10,11 @@ export function ExamplePage() {
         title="End-to-End Example"
         description="A complete walkthrough of the Relay subscription lifecycle: from creating an offer to handling webhooks when a customer subscribes."
         path="/docs/example"
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          { name: "Docs", path: "/docs" },
+          { name: "Example", path: "/docs/example" },
+        ]}
       />
       <h1>End-to-End Example</h1>
       <p className="lead text-lg text-gray-600 mb-8">

@@ -8,6 +8,11 @@ export function WebhooksPage() {
         title="Webhooks"
         description="Receive real-time notifications when subscriptions change, payments succeed or fail, and entitlements are granted or revoked."
         path="/docs/webhooks"
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          { name: "Docs", path: "/docs" },
+          { name: "Webhooks", path: "/docs/webhooks" },
+        ]}
       />
       <h1>Webhooks</h1>
       <p className="lead text-lg text-gray-600 mb-8">

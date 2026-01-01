@@ -11,6 +11,11 @@ export function QuickstartPage() {
         title="Quickstart"
         description="Get up and running with Relay in under 10 minutes. Create offers, generate checkout links, and verify entitlements."
         path="/docs/quickstart"
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          { name: "Docs", path: "/docs" },
+          { name: "Quickstart", path: "/docs/quickstart" },
+        ]}
       />
       <h1>Quickstart</h1>
       <p className="lead text-lg text-gray-600 mb-8">

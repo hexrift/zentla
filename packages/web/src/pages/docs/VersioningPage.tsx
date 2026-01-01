@@ -8,6 +8,11 @@ export function VersioningPage() {
         title="Versioning & Stability"
         description="Our commitment to API stability and how we handle changes during beta and beyond."
         path="/docs/versioning"
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          { name: "Docs", path: "/docs" },
+          { name: "Versioning", path: "/docs/versioning" },
+        ]}
       />
       <h1>Versioning & Stability</h1>
       <p className="lead text-lg text-gray-600 mb-8">

@@ -1,11 +1,17 @@
 import { Helmet } from "react-helmet-async";
 
+interface BreadcrumbItem {
+  name: string;
+  path: string;
+}
+
 interface SEOProps {
   title?: string;
   description?: string;
   path?: string;
   type?: "website" | "article";
   image?: string;
+  breadcrumbs?: BreadcrumbItem[];
 }
 
 const BASE_URL = "https://relay-web.pages.dev";
@@ -20,9 +26,24 @@ export function SEO({
   path = "/",
   type = "website",
   image = DEFAULT_IMAGE,
+  breadcrumbs,
 }: SEOProps) {
   const fullTitle = title ? `${title} | Relay` : DEFAULT_TITLE;
   const url = `${BASE_URL}${path}`;
+
+  // Generate BreadcrumbList JSON-LD schema
+  const breadcrumbSchema = breadcrumbs
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: breadcrumbs.map((item, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: item.name,
+          item: `${BASE_URL}${item.path}`,
+        })),
+      }
+    : null;
 
   return (
     <Helmet>
@@ -45,6 +66,13 @@ export function SEO({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
+
+      {/* Breadcrumb Schema */}
+      {breadcrumbSchema && (
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
+      )}
     </Helmet>
   );
 }

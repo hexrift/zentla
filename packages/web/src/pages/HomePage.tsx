@@ -39,6 +39,7 @@ const features = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -59,6 +60,7 @@ const features = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -79,6 +81,7 @@ const features = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -99,6 +102,7 @@ const features = [
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path
           strokeLinecap="round"
@@ -271,9 +275,12 @@ export function HomePage() {
             >
               <div className="h-12 flex items-center">
                 <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg"
+                  src="/logos/stripe.svg"
                   alt="Stripe - Payment processing platform"
                   className="h-10 object-contain group-hover:opacity-80 transition-opacity"
+                  width="82"
+                  height="34"
+                  loading="lazy"
                 />
               </div>
               <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
@@ -289,9 +296,12 @@ export function HomePage() {
             >
               <div className="h-12 flex items-center">
                 <img
-                  src="https://nav-assets.zuora.life/img/zuora-wordmark-v2.svg"
+                  src="/logos/zuora.svg"
                   alt="Zuora - Subscription management platform"
                   className="h-8 object-contain group-hover:opacity-80 transition-opacity"
+                  width="100"
+                  height="32"
+                  loading="lazy"
                 />
               </div>
               <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">

@@ -8,6 +8,11 @@ export function HeadlessCheckoutPage() {
         title="Headless Checkout"
         description="Build fully custom checkout experiences while Relay handles pricing logic, entitlements, and provider integration."
         path="/docs/headless-checkout"
+        breadcrumbs={[
+          { name: "Home", path: "/" },
+          { name: "Docs", path: "/docs" },
+          { name: "Headless Checkout", path: "/docs/headless-checkout" },
+        ]}
       />
       <h1>Headless Checkout</h1>
       <p className="lead text-lg text-gray-600 mb-8">
