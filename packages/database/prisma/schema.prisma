@@ -842,6 +842,7 @@ model Feedback {
 enum FeedbackType {
   bug
   feature
+  contact
   other
 
   @@map("feedback_type")

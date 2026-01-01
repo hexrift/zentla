@@ -289,7 +289,7 @@ export function HomePage() {
             >
               <div className="h-12 flex items-center">
                 <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Zuora_logo_navy.svg"
+                  src="https://nav-assets.zuora.life/img/zuora-wordmark-v2.svg"
                   alt="Zuora - Subscription management platform"
                   className="h-8 object-contain group-hover:opacity-80 transition-opacity"
                 />

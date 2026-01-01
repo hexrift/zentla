@@ -69,6 +69,8 @@ jobs:
             --env API_URL="${{ vars.API_URL }}" \
             --env API_KEY_SECRET="${{ secrets.API_KEY_SECRET }}" \
             --env WEBHOOK_SIGNING_SECRET="${{ secrets.WEBHOOK_SIGNING_SECRET }}" \
+            --env GH_PAT="${{ secrets.GH_PAT }}" \
+            --env GH_FEEDBACK_REPO="${{ vars.GH_FEEDBACK_REPO }}" \
             --env NODE_ENV=production \
           || koyeb service create ${{ env.KOYEB_SERVICE }} \
             --app ${{ env.KOYEB_APP }} \
@@ -90,6 +92,8 @@ jobs:
             --env API_URL="${{ vars.API_URL }}" \
             --env API_KEY_SECRET="${{ secrets.API_KEY_SECRET }}" \
             --env WEBHOOK_SIGNING_SECRET="${{ secrets.WEBHOOK_SIGNING_SECRET }}" \
+            --env GH_PAT="${{ secrets.GH_PAT }}" \
+            --env GH_FEEDBACK_REPO="${{ vars.GH_FEEDBACK_REPO }}" \
             --env NODE_ENV=production
 
       - name: Wait for deployment

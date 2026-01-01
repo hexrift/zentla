@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
 import { NotFoundException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { FeedbackService } from "./feedback.service";
 import { PrismaService } from "../database/prisma.service";
 
@@ -43,6 +44,12 @@ describe("FeedbackService", () => {
       providers: [
         FeedbackService,
         { provide: PrismaService, useValue: prisma },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: vi.fn().mockReturnValue(undefined),
+          },
+        },
       ],
     }).compile();
 
@@ -100,6 +107,200 @@ describe("FeedbackService", () => {
           status: "pending",
         },
       });
+    });
+
+    it("should create feedback with contact type", async () => {
+      prisma.feedback.create.mockResolvedValue({
+        ...mockFeedback,
+        type: "contact",
+      });
+
+      const result = await service.create({
+        type: "contact",
+        title: "Business inquiry",
+        description: "I want to discuss partnership opportunities",
+        userEmail: "business@example.com",
+      });
+
+      expect(result.success).toBe(true);
+      expect(prisma.feedback.create).toHaveBeenCalledWith({
+        data: {
+          type: "contact",
+          title: "Business inquiry",
+          description: "I want to discuss partnership opportunities",
+          userId: undefined,
+          userEmail: "business@example.com",
+          status: "pending",
+        },
+      });
+    });
+
+    it("should create feedback with other type", async () => {
+      prisma.feedback.create.mockResolvedValue({
+        ...mockFeedback,
+        type: "other",
+      });
+
+      const result = await service.create({
+        type: "other",
+        title: "General question",
+        description: "How does this work?",
+      });
+
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe("create with GitHub integration", () => {
+    let serviceWithGitHub: FeedbackService;
+    let mockFetch: ReturnType<typeof vi.fn>;
+
+    beforeEach(async () => {
+      mockFetch = vi.fn();
+      global.fetch = mockFetch as unknown as typeof fetch;
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          FeedbackService,
+          { provide: PrismaService, useValue: prisma },
+          {
+            provide: ConfigService,
+            useValue: {
+              get: vi
+                .fn()
+                .mockImplementation((key: string, defaultValue?: string) => {
+                  if (key === "GH_PAT") return "ghp_test_token";
+                  if (key === "GH_FEEDBACK_REPO")
+                    return defaultValue || "test/repo";
+                  return undefined;
+                }),
+            },
+          },
+        ],
+      }).compile();
+
+      serviceWithGitHub = module.get<FeedbackService>(FeedbackService);
+    });
+
+    it("should create GitHub issue when configured", async () => {
+      prisma.feedback.create.mockResolvedValue(mockFeedback);
+      prisma.feedback.update.mockResolvedValue(mockFeedback);
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          number: 42,
+          html_url: "https://github.com/test/repo/issues/42",
+        }),
+      });
+
+      const result = await serviceWithGitHub.create({
+        type: "bug",
+        title: "Test bug",
+        description: "Test description",
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.githubIssue).toBe("https://github.com/test/repo/issues/42");
+      expect(mockFetch).toHaveBeenCalled();
+      const [url, options] = mockFetch.mock.calls[0];
+      expect(url).toBe(
+        "https://api.github.com/repos/PrimeCodeLabs/relay/issues",
+      );
+      expect(options.method).toBe("POST");
+      expect(options.headers.Authorization).toBe("Bearer ghp_test_token");
+    });
+
+    it("should still succeed when GitHub API fails", async () => {
+      prisma.feedback.create.mockResolvedValue(mockFeedback);
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 401,
+        text: async () => "Unauthorized",
+      });
+
+      const result = await serviceWithGitHub.create({
+        type: "bug",
+        title: "Test bug",
+        description: "Test description",
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.githubIssue).toBeUndefined();
+    });
+
+    it("should use correct labels for feature type", async () => {
+      prisma.feedback.create.mockResolvedValue({
+        ...mockFeedback,
+        type: "feature",
+      });
+      prisma.feedback.update.mockResolvedValue(mockFeedback);
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          number: 1,
+          html_url: "https://github.com/test/repo/issues/1",
+        }),
+      });
+
+      await serviceWithGitHub.create({
+        type: "feature",
+        title: "New feature",
+        description: "Feature description",
+      });
+
+      const fetchCall = mockFetch.mock.calls[0];
+      const body = JSON.parse(fetchCall[1].body);
+      expect(body.labels).toContain("feedback");
+      expect(body.labels).toContain("enhancement");
+    });
+
+    it("should use correct labels for contact type", async () => {
+      prisma.feedback.create.mockResolvedValue({
+        ...mockFeedback,
+        type: "contact",
+      });
+      prisma.feedback.update.mockResolvedValue(mockFeedback);
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          number: 1,
+          html_url: "https://github.com/test/repo/issues/1",
+        }),
+      });
+
+      await serviceWithGitHub.create({
+        type: "contact",
+        title: "Contact request",
+        description: "Contact description",
+      });
+
+      const fetchCall = mockFetch.mock.calls[0];
+      const body = JSON.parse(fetchCall[1].body);
+      expect(body.labels).toContain("feedback");
+      expect(body.labels).toContain("contact");
+    });
+
+    it("should include email in issue body when provided", async () => {
+      prisma.feedback.create.mockResolvedValue(mockFeedback);
+      prisma.feedback.update.mockResolvedValue(mockFeedback);
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          number: 1,
+          html_url: "https://github.com/test/repo/issues/1",
+        }),
+      });
+
+      await serviceWithGitHub.create({
+        type: "bug",
+        title: "Bug report",
+        description: "Bug description",
+        userEmail: "user@example.com",
+      });
+
+      const fetchCall = mockFetch.mock.calls[0];
+      const body = JSON.parse(fetchCall[1].body);
+      expect(body.body).toContain("user@example.com");
     });
   });
 

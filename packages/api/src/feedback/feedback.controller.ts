@@ -28,9 +28,9 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { SessionUser, OptionalAuth } from "../common/decorators";
 
 class CreateFeedbackDto {
-  @ApiProperty({ enum: ["bug", "feature", "other"] })
-  @IsEnum(["bug", "feature", "other"])
-  type!: "bug" | "feature" | "other";
+  @ApiProperty({ enum: ["bug", "feature", "contact", "other"] })
+  @IsEnum(["bug", "feature", "contact", "other"])
+  type!: "bug" | "feature" | "contact" | "other";
 
   @ApiProperty()
   @IsString()

@@ -1,17 +1,32 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../database/prisma.service";
 
 @Injectable()
 export class FeedbackService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(FeedbackService.name);
+  private readonly githubToken: string | undefined;
+  private readonly githubRepo: string | undefined;
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {
+    this.githubToken = this.configService.get<string>("GH_PAT");
+    this.githubRepo = this.configService.get<string>(
+      "GH_FEEDBACK_REPO",
+      "PrimeCodeLabs/relay",
+    );
+  }
 
   async create(data: {
-    type: "bug" | "feature" | "other";
+    type: "bug" | "feature" | "contact" | "other";
     title: string;
     description: string;
     userId?: string;
     userEmail?: string;
   }) {
+    // Store in database for tracking
     const feedback = await this.prisma.feedback.create({
       data: {
         type: data.type,
@@ -23,16 +38,137 @@ export class FeedbackService {
       },
     });
 
+    // Create GitHub issue if configured
+    let githubIssueUrl: string | undefined;
+    if (this.githubToken && this.githubRepo) {
+      try {
+        githubIssueUrl = await this.createGitHubIssue(data, feedback.id);
+
+        // Update feedback record with GitHub issue URL
+        await this.prisma.feedback.update({
+          where: { id: feedback.id },
+          data: { response: `GitHub Issue: ${githubIssueUrl}` },
+        });
+      } catch (error) {
+        this.logger.error("Failed to create GitHub issue", error);
+        // Don't fail the request if GitHub issue creation fails
+      }
+    }
+
     return {
       success: true,
       id: feedback.id,
       message: "Thank you for your feedback!",
+      githubIssue: githubIssueUrl,
     };
+  }
+
+  private async createGitHubIssue(
+    data: {
+      type: "bug" | "feature" | "contact" | "other";
+      title: string;
+      description: string;
+      userEmail?: string;
+    },
+    feedbackId: string,
+  ): Promise<string> {
+    const labels = this.getLabelsForType(data.type);
+
+    const body = this.formatIssueBody(data, feedbackId);
+
+    const response = await fetch(
+      `https://api.github.com/repos/${this.githubRepo}/issues`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.githubToken}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: `[${data.type.toUpperCase()}] ${data.title}`,
+          body,
+          labels,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`GitHub API error: ${response.status} - ${error}`);
+    }
+
+    const issue = (await response.json()) as {
+      number: number;
+      html_url: string;
+    };
+    this.logger.log(`Created GitHub issue #${issue.number}: ${issue.html_url}`);
+
+    return issue.html_url;
+  }
+
+  private getLabelsForType(
+    type: "bug" | "feature" | "contact" | "other",
+  ): string[] {
+    const labels = ["feedback"];
+
+    switch (type) {
+      case "bug":
+        labels.push("bug");
+        break;
+      case "feature":
+        labels.push("enhancement");
+        break;
+      case "contact":
+        labels.push("contact");
+        break;
+      case "other":
+        labels.push("question");
+        break;
+    }
+
+    return labels;
+  }
+
+  private formatIssueBody(
+    data: {
+      type: "bug" | "feature" | "contact" | "other";
+      title: string;
+      description: string;
+      userEmail?: string;
+    },
+    feedbackId: string,
+  ): string {
+    const sections = [
+      "## Feedback Details",
+      "",
+      data.description,
+      "",
+      "---",
+      "",
+      "### Metadata",
+      "",
+      `- **Type:** ${data.type}`,
+      `- **Feedback ID:** \`${feedbackId}\``,
+    ];
+
+    if (data.userEmail) {
+      sections.push(`- **Contact:** ${data.userEmail}`);
+    }
+
+    sections.push(
+      "",
+      "---",
+      "*This issue was automatically created from user feedback.*",
+    );
+
+    return sections.join("\n");
   }
 
   async list(params: {
     status?: "pending" | "reviewed" | "accepted" | "rejected" | "resolved";
-    type?: "bug" | "feature" | "other";
+    type?: "bug" | "feature" | "contact" | "other";
     limit?: number;
     cursor?: string;
   }) {
