@@ -123,7 +123,15 @@ export class WorkspacesController {
   })
   async getProviderStatus(@WorkspaceId() workspaceId: string) {
     const workspace = await this.workspacesService.findById(workspaceId);
-    const providerStatus = await this.billingService.getProviderStatus();
+    const settings = workspace?.settings as Record<string, unknown> | undefined;
+
+    const providerStatus =
+      await this.billingService.getProviderStatusForWorkspace(workspaceId, {
+        stripeSecretKey: settings?.stripeSecretKey as string | undefined,
+        stripeWebhookSecret: settings?.stripeWebhookSecret as
+          | string
+          | undefined,
+      });
 
     return {
       defaultProvider: workspace?.defaultProvider ?? "stripe",

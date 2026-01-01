@@ -104,12 +104,15 @@ export class WorkspacesService {
 
     // Reconfigure billing service if Stripe credentials were updated
     if (dto.settings?.stripeSecretKey || dto.settings?.stripeWebhookSecret) {
+      // Clear any cached provider for this workspace
+      this.billingService.clearWorkspaceCache(id);
+
       const settings = updated.settings as WorkspaceSettings;
       if (settings.stripeSecretKey && settings.stripeWebhookSecret) {
-        this.billingService.configureStripe(
-          settings.stripeSecretKey,
-          settings.stripeWebhookSecret,
-        );
+        this.billingService.configureProviderForWorkspace(id, "stripe", {
+          secretKey: settings.stripeSecretKey,
+          webhookSecret: settings.stripeWebhookSecret,
+        });
       }
     }
 
