@@ -120,7 +120,9 @@ describe("ZuoraAdapter", () => {
       expect(normalized?.type).toBe("subscription.created");
       expect(normalized?.aggregateType).toBe("subscription");
       expect(normalized?.aggregateId).toBe("sub_123");
-      expect((normalized?.data as Record<string, unknown>).subscriptionId).toBe("sub_123");
+      expect((normalized?.data as Record<string, unknown>).subscriptionId).toBe(
+        "sub_123",
+      );
       expect(normalized?.metadata.provider).toBe("zuora");
     });
 
@@ -134,7 +136,9 @@ describe("ZuoraAdapter", () => {
       const normalized = adapter.normalizeEvent(event);
 
       expect(normalized?.type).toBe("subscription.canceled");
-      expect((normalized?.data as Record<string, unknown>).status).toBe("canceled");
+      expect((normalized?.data as Record<string, unknown>).status).toBe(
+        "canceled",
+      );
     });
 
     it("should normalize PaymentSuccess event", () => {
@@ -149,7 +153,9 @@ describe("ZuoraAdapter", () => {
 
       expect(normalized?.type).toBe("invoice.paid");
       expect(normalized?.aggregateType).toBe("invoice");
-      expect((normalized?.data as Record<string, unknown>).invoiceId).toBe("inv_123");
+      expect((normalized?.data as Record<string, unknown>).invoiceId).toBe(
+        "inv_123",
+      );
     });
 
     it("should normalize PaymentFailed event", () => {
