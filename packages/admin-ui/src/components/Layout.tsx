@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, Link } from "react-router-dom";
 import { clsx } from "clsx";
 import { useAuth } from "../lib/auth-context";
-import { FeedbackModal } from "./FeedbackModal";
 
 const DOCS_URL = `${import.meta.env.VITE_DASHBOARD_URL || ""}/docs`;
 const API_DOCS_URL = `${import.meta.env.VITE_API_URL || ""}/docs`;
@@ -286,7 +285,6 @@ function LogoutIcon({ className }: { className?: string }) {
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const { user, logout } = useAuth();
 
   return (
@@ -402,11 +400,9 @@ export function Layout() {
                 </svg>
                 API Reference
               </a>
-              <button
-                onClick={() => {
-                  setSidebarOpen(false);
-                  setFeedbackOpen(true);
-                }}
+              <Link
+                to="/feedback"
+                onClick={() => setSidebarOpen(false)}
                 className="flex items-center gap-3 w-full px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
               >
                 <svg
@@ -423,7 +419,7 @@ export function Layout() {
                   />
                 </svg>
                 Give Feedback
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -558,8 +554,8 @@ export function Layout() {
                 </svg>
                 API Reference
               </a>
-              <button
-                onClick={() => setFeedbackOpen(true)}
+              <Link
+                to="/feedback"
                 className="flex items-center gap-3 w-full px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
               >
                 <svg
@@ -576,7 +572,7 @@ export function Layout() {
                   />
                 </svg>
                 Give Feedback
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -645,12 +641,6 @@ export function Layout() {
           <Outlet />
         </main>
       </div>
-
-      {/* Feedback Modal */}
-      <FeedbackModal
-        isOpen={feedbackOpen}
-        onClose={() => setFeedbackOpen(false)}
-      />
     </div>
   );
 }

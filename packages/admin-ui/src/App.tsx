@@ -20,6 +20,7 @@ import { EventsPage } from "./pages/EventsPage";
 import { AuditLogsPage } from "./pages/AuditLogsPage";
 import { ApiKeysPage } from "./pages/ApiKeysPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { FeedbackPage } from "./pages/FeedbackPage";
 
 export default function App() {
   return (
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="audit-logs" element={<AuditLogsPage />} />
           <Route path="api-keys" element={<ApiKeysPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="feedback" element={<FeedbackPage />} />
         </Route>
       </Routes>
     </AuthProvider>
