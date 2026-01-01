@@ -7,7 +7,7 @@ import {
 import { Reflector } from "@nestjs/core";
 import type { Request } from "express";
 import { ApiKeyService } from "../services/api-key.service";
-import { IS_PUBLIC_KEY } from "../../common/decorators";
+import { IS_PUBLIC_KEY, IS_OPTIONAL_AUTH_KEY } from "../../common/decorators";
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
@@ -27,6 +27,12 @@ export class ApiKeyGuard implements CanActivate {
       return true;
     }
 
+    // Check if auth is optional
+    const isOptionalAuth = this.reflector.getAllAndOverride<boolean>(
+      IS_OPTIONAL_AUTH_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
     const request = context.switchToHttp().getRequest<Request>();
 
     // Skip if already authenticated via session
@@ -37,6 +43,10 @@ export class ApiKeyGuard implements CanActivate {
     const authHeader = request.headers.authorization;
 
     if (!authHeader) {
+      // Allow through if auth is optional
+      if (isOptionalAuth) {
+        return true;
+      }
       throw new UnauthorizedException("Missing Authorization header");
     }
 

@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import { clsx } from "clsx";
 import { useAuth } from "../lib/auth-context";
+import { FeedbackModal } from "./FeedbackModal";
 
 const DOCS_URL = `${import.meta.env.VITE_DASHBOARD_URL || ""}/docs`;
 const API_DOCS_URL = `${import.meta.env.VITE_API_URL || ""}/docs`;
-const FEEDBACK_URL = "https://github.com/PrimeCodeLabs/relay/issues";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
@@ -286,6 +286,7 @@ function LogoutIcon({ className }: { className?: string }) {
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const { user, logout } = useAuth();
 
   return (
@@ -401,11 +402,12 @@ export function Layout() {
                 </svg>
                 API Reference
               </a>
-              <a
-                href={FEEDBACK_URL}
-                target="_blank"
-                rel="noopener"
-                className="flex items-center gap-3 px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+              <button
+                onClick={() => {
+                  setSidebarOpen(false);
+                  setFeedbackOpen(true);
+                }}
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
               >
                 <svg
                   className="w-5 h-5"
@@ -421,7 +423,7 @@ export function Layout() {
                   />
                 </svg>
                 Give Feedback
-              </a>
+              </button>
             </div>
           </div>
 
@@ -556,11 +558,9 @@ export function Layout() {
                 </svg>
                 API Reference
               </a>
-              <a
-                href={FEEDBACK_URL}
-                target="_blank"
-                rel="noopener"
-                className="flex items-center gap-3 px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+              <button
+                onClick={() => setFeedbackOpen(true)}
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
               >
                 <svg
                   className="w-5 h-5"
@@ -576,7 +576,7 @@ export function Layout() {
                   />
                 </svg>
                 Give Feedback
-              </a>
+              </button>
             </div>
           </div>
 
@@ -645,6 +645,12 @@ export function Layout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+      />
     </div>
   );
 }

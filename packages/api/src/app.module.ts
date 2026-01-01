@@ -24,6 +24,7 @@ import { ApiKeysModule } from "./api-keys/api-keys.module";
 import { HealthModule } from "./health/health.module";
 import { EventsModule } from "./events/events.module";
 import { AuditModule } from "./audit/audit.module";
+import { FeedbackModule } from "./feedback/feedback.module";
 
 // Guards
 import { ApiKeyGuard } from "./auth/guards/api-key.guard";
@@ -96,6 +97,7 @@ import { configuration, validationSchema } from "./config/configuration";
     ApiKeysModule,
     EventsModule,
     AuditModule,
+    FeedbackModule,
   ],
   providers: [
     // Global interceptors

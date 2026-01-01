@@ -816,3 +816,43 @@ model ProcessedStripeEvent {
   @@index([processedAt])
   @@map("processed_stripe_event")
 }
+
+// ============================================================================
+// FEEDBACK
+// ============================================================================
+
+model Feedback {
+  id          String         @id @default(uuid()) @db.Uuid
+  userId      String?        @map("user_id") @db.Uuid
+  userEmail   String?        @map("user_email") @db.VarChar(255)
+  type        FeedbackType
+  title       String         @db.VarChar(200)
+  description String         @db.Text
+  status      FeedbackStatus @default(pending)
+  response    String?        @db.Text
+  respondedAt DateTime?      @map("responded_at") @db.Timestamptz
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("feedback")
+}
+
+enum FeedbackType {
+  bug
+  feature
+  other
+
+  @@map("feedback_type")
+}
+
+enum FeedbackStatus {
+  pending
+  reviewed
+  accepted
+  rejected
+  resolved
+
+  @@map("feedback_status")
+}

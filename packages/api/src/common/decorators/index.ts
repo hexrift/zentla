@@ -17,3 +17,8 @@ export {
 } from "./roles.decorator";
 export { Public, IS_PUBLIC_KEY } from "./public.decorator";
 export { SkipWorkspace, SKIP_WORKSPACE_KEY } from "./skip-workspace.decorator";
+export {
+  OptionalAuth,
+  SessionUser,
+  IS_OPTIONAL_AUTH_KEY,
+} from "./optional-auth.decorator";

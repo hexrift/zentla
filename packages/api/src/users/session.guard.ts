@@ -77,6 +77,15 @@ export class SessionGuard implements CanActivate {
     };
     request.sessionContext = sessionContext;
 
+    // Get user info for SessionUser decorator
+    const user = await this.prisma.user.findUnique({
+      where: { id: validationResult.userId },
+      select: { id: true, email: true, name: true },
+    });
+    if (user) {
+      (request as any).sessionUser = user;
+    }
+
     // Get user's first workspace and set apiKeyContext for compatibility
     // This allows session-authenticated users to use regular API endpoints
     const membership = await this.prisma.workspaceMembership.findFirst({

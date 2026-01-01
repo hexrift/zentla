@@ -169,7 +169,9 @@ export function DashboardPage() {
   const queryClient = useQueryClient();
   const [syncResult, setSyncResult] = useState<{
     customersImported: number;
+    customersSkipped: number;
     subscriptionsImported: number;
+    subscriptionsSkipped: number;
     errors: string[];
   } | null>(null);
 
@@ -209,8 +211,16 @@ export function DashboardPage() {
 
   const stripeProvider = providerStatus?.providers?.find(
     (p: { provider: string }) => p.provider === "stripe",
-  );
+  ) as
+    | {
+        provider: string;
+        status: string;
+        mode: string | null;
+        errors: string[];
+      }
+    | undefined;
   const isStripeConfigured = stripeProvider?.status === "connected";
+  const stripeHasError = stripeProvider?.status === "error";
   const hasOffers = (offers?.data?.length ?? 0) > 0;
   const hasWebhooks = (webhooks?.data?.length ?? 0) > 0;
   const hasCustomers = (customers?.data?.length ?? 0) > 0;
@@ -265,13 +275,15 @@ export function DashboardPage() {
           title="Configure Stripe"
           description={
             isStripeConfigured
-              ? "Stripe API is connected and working"
-              : "Add your Stripe API keys to enable payment processing"
+              ? `Stripe API connected (${stripeProvider?.mode ?? "test"} mode)`
+              : stripeHasError
+                ? `Connection error: ${stripeProvider?.errors?.[0] ?? "Unknown error"}`
+                : "Add your Stripe API keys to enable payment processing"
           }
           isComplete={isStripeConfigured}
           isLoading={providersLoading}
           linkTo="/settings"
-          linkText="Configure"
+          linkText={stripeHasError ? "Fix" : "Configure"}
         />
 
         <ChecklistItem
@@ -330,25 +342,50 @@ export function DashboardPage() {
                 Sync Results
               </h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-500">Customers imported:</span>{" "}
-                  <span className="font-medium">
-                    {syncResult.customersImported}
-                  </span>
+                <div className="space-y-1">
+                  <div>
+                    <span className="text-gray-500">Customers imported:</span>{" "}
+                    <span className="font-medium text-green-600">
+                      {syncResult.customersImported}
+                    </span>
+                  </div>
+                  {syncResult.customersSkipped > 0 && (
+                    <div>
+                      <span className="text-gray-500">Already synced:</span>{" "}
+                      <span className="font-medium text-gray-600">
+                        {syncResult.customersSkipped}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <span className="text-gray-500">Subscriptions imported:</span>{" "}
-                  <span className="font-medium">
-                    {syncResult.subscriptionsImported}
-                  </span>
+                <div className="space-y-1">
+                  <div>
+                    <span className="text-gray-500">
+                      Subscriptions imported:
+                    </span>{" "}
+                    <span className="font-medium text-green-600">
+                      {syncResult.subscriptionsImported}
+                    </span>
+                  </div>
+                  {syncResult.subscriptionsSkipped > 0 && (
+                    <div>
+                      <span className="text-gray-500">Already synced:</span>{" "}
+                      <span className="font-medium text-gray-600">
+                        {syncResult.subscriptionsSkipped}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               {syncResult.errors.length > 0 && (
                 <div className="mt-3">
-                  <h4 className="text-sm font-medium text-red-700">
-                    Errors ({syncResult.errors.length})
+                  <h4 className="text-sm font-medium text-amber-700">
+                    Warnings ({syncResult.errors.length})
                   </h4>
-                  <ul className="mt-1 text-sm text-red-600 list-disc list-inside">
+                  <p className="text-xs text-gray-500 mb-1">
+                    These items were skipped due to missing requirements
+                  </p>
+                  <ul className="mt-1 text-sm text-amber-600 list-disc list-inside">
                     {syncResult.errors.slice(0, 5).map((error, i) => (
                       <li key={i}>{error}</li>
                     ))}
