@@ -1,8 +1,14 @@
 import { CodeBlock } from "../../components/CodeBlock";
+import { SEO } from "../../components/SEO";
 
 export function WebhooksPage() {
   return (
     <article className="prose-docs">
+      <SEO
+        title="Webhooks"
+        description="Receive real-time notifications when subscriptions change, payments succeed or fail, and entitlements are granted or revoked."
+        path="/docs/webhooks"
+      />
       <h1>Webhooks</h1>
       <p className="lead text-lg text-gray-600 mb-8">
         Receive real-time notifications when subscriptions change, payments

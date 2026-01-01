@@ -1,10 +1,16 @@
 import { CodeBlock } from "../../components/CodeBlock";
+import { SEO } from "../../components/SEO";
 
 const API_BASE = "http://localhost:3002/api/v1";
 
 export function ExamplePage() {
   return (
     <article className="prose-docs">
+      <SEO
+        title="End-to-End Example"
+        description="A complete walkthrough of the Relay subscription lifecycle: from creating an offer to handling webhooks when a customer subscribes."
+        path="/docs/example"
+      />
       <h1>End-to-End Example</h1>
       <p className="lead text-lg text-gray-600 mb-8">
         A complete walkthrough of the Relay subscription lifecycle: from

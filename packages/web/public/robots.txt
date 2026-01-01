@@ -1,0 +1,11 @@
+# Relay Web - robots.txt
+# https://relay-web.pages.dev/
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://relay-web.pages.dev/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1

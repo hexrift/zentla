@@ -1,4 +1,5 @@
 import { CodeBlock } from "../../components/CodeBlock";
+import { SEO } from "../../components/SEO";
 
 const API_DOCS_URL =
   import.meta.env.VITE_API_DOCS_URL || "http://localhost:3002/docs";
@@ -6,6 +7,11 @@ const API_DOCS_URL =
 export function QuickstartPage() {
   return (
     <article className="prose-docs">
+      <SEO
+        title="Quickstart"
+        description="Get up and running with Relay in under 10 minutes. Create offers, generate checkout links, and verify entitlements."
+        path="/docs/quickstart"
+      />
       <h1>Quickstart</h1>
       <p className="lead text-lg text-gray-600 mb-8">
         Get up and running with Relay in under 10 minutes. This guide walks you

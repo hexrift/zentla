@@ -1,0 +1,39 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#faf5ff"/>
+      <stop offset="100%" stop-color="#f3e8ff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+
+  <!-- Logo -->
+  <rect x="80" y="80" width="64" height="64" rx="16" fill="#9333ea"/>
+  <text x="112" y="126" font-family="system-ui, -apple-system, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">R</text>
+
+  <!-- Title -->
+  <text x="80" y="250" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="bold" fill="#111827">Relay</text>
+
+  <!-- Subtitle -->
+  <text x="80" y="330" font-family="system-ui, -apple-system, sans-serif" font-size="42" fill="#4b5563">Subscription Management API</text>
+
+  <!-- Description -->
+  <text x="80" y="420" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#6b7280">Manage offers, customers, entitlements,</text>
+  <text x="80" y="460" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#6b7280">and checkouts with a simple API.</text>
+
+  <!-- Features -->
+  <rect x="80" y="510" width="200" height="40" rx="8" fill="#9333ea" fill-opacity="0.1"/>
+  <text x="180" y="538" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" fill="#9333ea" text-anchor="middle">Stripe Integration</text>
+
+  <rect x="300" y="510" width="160" height="40" rx="8" fill="#9333ea" fill-opacity="0.1"/>
+  <text x="380" y="538" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" fill="#9333ea" text-anchor="middle">Entitlements</text>
+
+  <rect x="480" y="510" width="140" height="40" rx="8" fill="#9333ea" fill-opacity="0.1"/>
+  <text x="550" y="538" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" fill="#9333ea" text-anchor="middle">Webhooks</text>
+
+  <!-- Decorative elements -->
+  <circle cx="1050" cy="200" r="150" fill="#9333ea" fill-opacity="0.1"/>
+  <circle cx="1100" cy="450" r="100" fill="#4f46e5" fill-opacity="0.1"/>
+</svg>

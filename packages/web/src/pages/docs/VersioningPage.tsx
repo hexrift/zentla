@@ -1,8 +1,14 @@
 import { CodeBlock } from "../../components/CodeBlock";
+import { SEO } from "../../components/SEO";
 
 export function VersioningPage() {
   return (
     <article className="prose-docs">
+      <SEO
+        title="Versioning & Stability"
+        description="Our commitment to API stability and how we handle changes during beta and beyond."
+        path="/docs/versioning"
+      />
       <h1>Versioning & Stability</h1>
       <p className="lead text-lg text-gray-600 mb-8">
         Our commitment to API stability and how we handle changes during beta

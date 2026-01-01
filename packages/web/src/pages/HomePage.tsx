@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { SEO } from "../components/SEO";
 
 const API_DOCS_URL =
   import.meta.env.VITE_API_DOCS_URL || "http://localhost:3002/docs";
@@ -113,6 +114,7 @@ const features = [
 export function HomePage() {
   return (
     <div>
+      <SEO path="/" />
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary-50/50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">

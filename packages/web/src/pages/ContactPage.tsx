@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { SEO } from "../components/SEO";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3002";
 
@@ -131,6 +132,11 @@ export function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO
+        title="Contact Sales"
+        description="Get in touch with our team to learn how Relay can help manage your subscriptions."
+        path="/contact"
+      />
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -1,8 +1,14 @@
 import { CodeBlock } from "../../components/CodeBlock";
+import { SEO } from "../../components/SEO";
 
 export function HeadlessCheckoutPage() {
   return (
     <article className="prose-docs">
+      <SEO
+        title="Headless Checkout"
+        description="Build fully custom checkout experiences while Relay handles pricing logic, entitlements, and provider integration."
+        path="/docs/headless-checkout"
+      />
       <h1>Headless Checkout</h1>
       <p className="lead text-lg text-gray-600 mb-8">
         Build fully custom checkout experiences while Relay handles pricing
