@@ -37,6 +37,25 @@ export function SettingsPage() {
     enabled: !!localStorage.getItem("relay_api_key"),
   });
 
+  // Get actual provider status from API
+  const { data: providerStatus } = useQuery({
+    queryKey: ["providerStatus"],
+    queryFn: () => api.workspace.getProviderStatus(),
+    enabled: !!localStorage.getItem("relay_api_key"),
+  });
+
+  const stripeProvider = providerStatus?.providers?.find(
+    (p: { provider: string }) => p.provider === "stripe",
+  ) as
+    | {
+        provider: string;
+        status: string;
+        mode: string | null;
+        errors: string[];
+      }
+    | undefined;
+  const isStripeConnected = stripeProvider?.status === "connected";
+
   // Load Stripe config from workspace settings
   useEffect(() => {
     if (workspace?.settings) {
@@ -61,6 +80,7 @@ export function SettingsPage() {
       api.workspace.update({ settings }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workspace"] });
+      queryClient.invalidateQueries({ queryKey: ["providerStatus"] });
       setStripeSaved(true);
       setStripeError(null);
       setTimeout(() => setStripeSaved(false), 3000);
@@ -165,14 +185,18 @@ export function SettingsPage() {
                 </div>
                 <span
                   className={`ml-auto px-2 py-1 text-xs font-medium rounded-full ${
-                    stripeSecretKey && stripeWebhookSecret
+                    isStripeConnected
                       ? "bg-green-100 text-green-800"
-                      : "bg-yellow-100 text-yellow-800"
+                      : stripeProvider?.status === "error"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
                   }`}
                 >
-                  {stripeSecretKey && stripeWebhookSecret
-                    ? "Configured"
-                    : "Not Configured"}
+                  {isStripeConnected
+                    ? `Connected${stripeProvider?.mode ? ` (${stripeProvider.mode})` : ""}`
+                    : stripeProvider?.status === "error"
+                      ? "Connection Error"
+                      : "Not Configured"}
                 </span>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 space-y-4">
