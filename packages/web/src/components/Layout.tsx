@@ -5,7 +5,6 @@ const DASHBOARD_URL =
   import.meta.env.VITE_DASHBOARD_URL || "http://localhost:3001";
 const API_DOCS_URL =
   import.meta.env.VITE_API_DOCS_URL || "http://localhost:3002/docs";
-const FEEDBACK_URL = "https://github.com/PrimeCodeLabs/relay/issues";
 
 export function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -43,14 +42,12 @@ export function Layout() {
               >
                 API Reference
               </a>
-              <a
-                href={FEEDBACK_URL}
-                target="_blank"
-                rel="noopener"
+              <Link
+                to="/feedback"
                 className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
               >
                 Feedback
-              </a>
+              </Link>
             </div>
 
             {/* CTA */}
@@ -119,14 +116,13 @@ export function Layout() {
                 >
                   API Reference
                 </a>
-                <a
-                  href={FEEDBACK_URL}
-                  target="_blank"
-                  rel="noopener"
+                <Link
+                  to="/feedback"
+                  onClick={() => setMobileMenuOpen(false)}
                   className="text-sm font-medium text-gray-600"
                 >
                   Feedback
-                </a>
+                </Link>
                 <div className="flex flex-col gap-3 pt-4 border-t border-gray-100">
                   <a href={DASHBOARD_URL} className="btn-secondary text-center">
                     Dashboard
@@ -216,14 +212,12 @@ export function Layout() {
                   </Link>
                 </li>
                 <li>
-                  <a
-                    href={FEEDBACK_URL}
-                    target="_blank"
-                    rel="noopener"
+                  <Link
+                    to="/feedback"
                     className="text-sm text-gray-500 hover:text-gray-700"
                   >
                     Feedback
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

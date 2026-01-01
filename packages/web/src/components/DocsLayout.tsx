@@ -6,7 +6,6 @@ const DASHBOARD_URL =
   import.meta.env.VITE_DASHBOARD_URL || "http://localhost:3001";
 const API_DOCS_URL =
   import.meta.env.VITE_API_DOCS_URL || "http://localhost:3002/docs";
-const FEEDBACK_URL = "https://github.com/PrimeCodeLabs/relay/issues";
 
 const navigation = [
   {
@@ -191,10 +190,8 @@ export function DocsLayout() {
               >
                 API Reference
               </a>
-              <a
-                href={FEEDBACK_URL}
-                target="_blank"
-                rel="noopener"
+              <Link
+                to="/feedback"
                 className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700"
               >
                 <svg
@@ -211,7 +208,7 @@ export function DocsLayout() {
                   />
                 </svg>
                 Feedback
-              </a>
+              </Link>
               <a
                 href={DASHBOARD_URL}
                 className="btn-primary text-xs py-1.5 px-3"
@@ -327,10 +324,8 @@ export function DocsLayout() {
               <p className="text-sm text-gray-500 mb-3">
                 Help us improve Relay during beta.
               </p>
-              <a
-                href={FEEDBACK_URL}
-                target="_blank"
-                rel="noopener"
+              <Link
+                to="/feedback"
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 hover:text-primary-700"
               >
                 Share feedback
@@ -347,7 +342,7 @@ export function DocsLayout() {
                     d="M14 5l7 7m0 0l-7 7m7-7H3"
                   />
                 </svg>
-              </a>
+              </Link>
             </div>
           </div>
         </aside>
@@ -436,10 +431,8 @@ export function DocsLayout() {
                       </a>
                     </li>
                     <li>
-                      <a
-                        href={FEEDBACK_URL}
-                        target="_blank"
-                        rel="noopener"
+                      <Link
+                        to="/feedback"
                         className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900"
                       >
                         <svg
@@ -456,7 +449,7 @@ export function DocsLayout() {
                           />
                         </svg>
                         Send Feedback
-                      </a>
+                      </Link>
                     </li>
                   </ul>
                 </div>

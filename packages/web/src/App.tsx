@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { DocsLayout } from "./components/DocsLayout";
 import { HomePage } from "./pages/HomePage";
+import { FeedbackPage } from "./pages/FeedbackPage";
 import { QuickstartPage } from "./pages/docs/QuickstartPage";
 import { HeadlessCheckoutPage } from "./pages/docs/HeadlessCheckoutPage";
 import { WebhooksPage } from "./pages/docs/WebhooksPage";
@@ -11,6 +12,7 @@ import { ExamplePage } from "./pages/docs/ExamplePage";
 function App() {
   return (
     <Routes>
+      <Route path="/feedback" element={<FeedbackPage />} />
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
       </Route>
