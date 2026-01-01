@@ -23,15 +23,8 @@ jobs:
         id: release
         uses: googleapis/release-please-action@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-
-      - name: Auto-merge release PR
-        if: ${{ steps.release.outputs.pr }}
-        run: gh pr merge ${{ steps.release.outputs.pr }} --merge --admin
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
 
   # Build and publish on release
   publish:
