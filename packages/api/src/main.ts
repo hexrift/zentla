@@ -231,12 +231,12 @@ Use \`error.code\` for programmatic handling.
       },
     );
 
-    // Scalar API Reference - beautiful Stripe-like documentation
+    // Scalar API Reference - clean, professional documentation
     app.use(
       "/docs",
       apiReference({
         content: document,
-        theme: "purple",
+        theme: "default",
         layout: "modern",
         darkMode: true,
         metaData: {
@@ -246,28 +246,10 @@ Use \`error.code\` for programmatic handling.
         },
         customCss: `
           :root {
-            --scalar-color-1: #9333ea;
-            --scalar-color-2: #7c3aed;
-            --scalar-color-3: #a855f7;
-            --scalar-color-accent: #9333ea;
-            --scalar-background-1: #0f0a1a;
-            --scalar-background-2: #1a1225;
-            --scalar-background-3: #241833;
-            --scalar-border-color: rgba(147, 51, 234, 0.2);
+            --scalar-color-accent: #7c3aed;
           }
           .light-mode {
-            --scalar-color-1: #7c3aed;
-            --scalar-color-2: #9333ea;
-            --scalar-color-3: #6b21a8;
-            --scalar-color-accent: #9333ea;
-            --scalar-background-1: #ffffff;
-            --scalar-background-2: #faf5ff;
-            --scalar-background-3: #f3e8ff;
-            --scalar-border-color: rgba(147, 51, 234, 0.15);
-          }
-          .sidebar-heading { font-weight: 600; }
-          .scalar-api-reference__header {
-            background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+            --scalar-color-accent: #7c3aed;
           }
         `,
         hideDownloadButton: false,
