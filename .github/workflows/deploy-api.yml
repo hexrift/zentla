@@ -14,8 +14,8 @@ on:
   workflow_dispatch:
 
 env:
-  KOYEB_APP: relay-api
-  KOYEB_SERVICE: api
+  KOYEB_APP: relay
+  KOYEB_SERVICE: relay-api
 
 jobs:
   deploy:
