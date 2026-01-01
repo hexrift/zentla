@@ -317,7 +317,7 @@ export function PromotionDetailPage() {
                 setSelectedOfferIds(currentIds);
                 setEditingOffers(true);
               }}
-              className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-800"
+              className="px-3 py-1.5 text-sm font-medium text-primary-600 hover:text-primary-800"
             >
               Edit
             </button>
@@ -349,7 +349,7 @@ export function PromotionDetailPage() {
                           );
                         }
                       }}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-primary-500"
+                      className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                     />
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-900">
@@ -412,7 +412,7 @@ export function PromotionDetailPage() {
                   return (
                     <span
                       key={offerId}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
                     >
                       {offer?.name ?? offerId.slice(0, 8) + "..."}
                     </span>

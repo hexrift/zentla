@@ -165,7 +165,7 @@ export function SubscriptionDetailPage() {
               className={clsx(
                 "py-4 px-1 text-sm font-medium border-b-2",
                 activeTab === tab.id
-                  ? "border-blue-500 text-blue-600"
+                  ? "border-primary-500 text-primary-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
               )}
             >
@@ -197,7 +197,7 @@ export function SubscriptionDetailPage() {
                     type="radio"
                     checked={cancelAtPeriodEnd}
                     onChange={() => setCancelAtPeriodEnd(true)}
-                    className="h-4 w-4 text-blue-600"
+                    className="h-4 w-4 text-primary-600"
                   />
                   <span className="text-sm text-gray-700">
                     Cancel at end of billing period (
@@ -214,7 +214,7 @@ export function SubscriptionDetailPage() {
                     type="radio"
                     checked={!cancelAtPeriodEnd}
                     onChange={() => setCancelAtPeriodEnd(false)}
-                    className="h-4 w-4 text-blue-600"
+                    className="h-4 w-4 text-primary-600"
                   />
                   <span className="text-sm text-gray-700">
                     Cancel immediately
@@ -234,7 +234,7 @@ export function SubscriptionDetailPage() {
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                   placeholder="Why is this subscription being canceled?"
                 />
               </div>
