@@ -24,15 +24,16 @@ function parseVersion(versionString) {
 
 function generateVersionFile(version, isApi = false) {
   const comment = isApi
-    ? "// Central version information for the Zentla API\n// Auto-generated from root package.json - do not edit manually"
-    : "// Central version information for Zentla\n// Auto-generated from root package.json - do not edit manually";
+    ? "// Central version information for the Zentla API\n// Auto-updated by release-please - do not edit manually"
+    : "// Central version information for Zentla\n// Auto-updated by release-please - do not edit manually";
 
+  // Include x-release-please comments so release-please can update these files
   return `${comment}
 
 export const VERSION = {
-  major: ${version.major},
-  minor: ${version.minor},
-  patch: ${version.patch},
+  major: ${version.major}, // x-release-please-major
+  minor: ${version.minor}, // x-release-please-minor
+  patch: ${version.patch}, // x-release-please-patch
   get full(): string {
     return \`\${this.major}.\${this.minor}.\${this.patch}\`;
   },

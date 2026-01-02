@@ -1,6 +1,17 @@
 # =============================================================================
 # Release Please - Automated versioning and changelog generation
 # =============================================================================
+#
+# This workflow creates release PRs automatically based on conventional commits.
+# When a release PR is merged, it creates a GitHub release with the changelog.
+#
+# Commit prefixes:
+#   feat:     -> minor version bump
+#   fix:      -> patch version bump
+#   chore:    -> no version bump (unless breaking)
+#   feat!:    -> major version bump (breaking change)
+#
+# =============================================================================
 name: Release Please
 
 on:
@@ -14,6 +25,10 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
     steps:
       - name: Release Please
         id: release
@@ -22,9 +37,8 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-      - name: Auto-merge release PR
-        if: ${{ steps.release.outputs.pr }}
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Log release info
+        if: ${{ steps.release.outputs.release_created }}
         run: |
-          gh pr merge ${{ steps.release.outputs.pr }} --merge
+          echo "Release created: ${{ steps.release.outputs.tag_name }}"
+          echo "Version: ${{ steps.release.outputs.version }}"
