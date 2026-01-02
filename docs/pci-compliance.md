@@ -49,7 +49,7 @@ Zentla is designed to maintain PCI DSS compliance by minimizing the PCI scope an
 
 Zentla never stores, processes, or transmits cardholder data:
 
-| Data Type         | Zentla Storage  | Provider Storage |
+| Data Type         | Zentla Storage | Provider Storage |
 | ----------------- | -------------- | ---------------- |
 | Card Number (PAN) | Never          | Tokenized        |
 | CVV/CVC           | Never          | Never (per PCI)  |
@@ -151,7 +151,7 @@ Zentla qualifies for SAQ-A (the simplest self-assessment questionnaire) because:
 
 ## Provider Responsibility Matrix
 
-| Responsibility        | Zentla              | Stripe                   |
+| Responsibility        | Zentla             | Stripe                   |
 | --------------------- | ------------------ | ------------------------ |
 | Card collection UI    | -                  | Stripe Checkout/Elements |
 | Card data encryption  | -                  | Yes                      |

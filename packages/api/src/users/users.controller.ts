@@ -236,7 +236,7 @@ export class UsersController {
 **Session token usage:**
 Include the token in the \`Authorization\` header for dashboard API calls:
 \`\`\`
-Authorization: Bearer relay_session_...
+Authorization: Bearer zentla_session_...
 \`\`\`
 
 **Session duration:**
@@ -467,7 +467,7 @@ Sessions are valid for 30 days by default.`,
   })
   @ApiHeader({
     name: "Authorization",
-    description: "Session token: Bearer relay_session_...",
+    description: "Session token: Bearer zentla_session_...",
   })
   @ApiResponse({
     status: 200,

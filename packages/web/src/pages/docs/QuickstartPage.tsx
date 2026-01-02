@@ -26,8 +26,8 @@ export function QuickstartPage() {
 
       <div className="not-prose mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
         <p className="text-sm text-amber-800">
-          <strong>Beta:</strong> Zentla is in active development. APIs are stable
-          but may receive additive changes. Breaking changes will be
+          <strong>Beta:</strong> Zentla is in active development. APIs are
+          stable but may receive additive changes. Breaking changes will be
           communicated in advance.
         </p>
       </div>

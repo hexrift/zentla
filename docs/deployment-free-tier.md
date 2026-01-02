@@ -92,9 +92,9 @@ Add these secrets to your repository (Settings → Secrets → Actions):
 
 Add these as repository variables (Settings → Secrets → Variables):
 
-| Variable       | Description           | Example                                                     |
-| -------------- | --------------------- | ----------------------------------------------------------- |
-| `API_URL`      | API URL for frontends | `https://relay-api-xxx.koyeb.app`                           |
+| Variable       | Description           | Example                                            |
+| -------------- | --------------------- | -------------------------------------------------- |
+| `API_URL`      | API URL for frontends | `https://relay-api-xxx.koyeb.app`                  |
 | `CORS_ORIGINS` | Allowed CORS origins  | `https://relay-admin.pages.dev,https://zentla.dev` |
 
 ## Initial Setup

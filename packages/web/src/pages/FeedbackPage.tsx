@@ -115,7 +115,9 @@ export function FeedbackPage() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <span className="text-lg font-semibold text-gray-900">Zentla</span>
+              <span className="text-lg font-semibold text-gray-900">
+                Zentla
+              </span>
             </Link>
             <Link to="/" className="text-sm text-gray-500 hover:text-gray-700">
               Back to Home

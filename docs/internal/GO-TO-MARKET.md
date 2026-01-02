@@ -28,7 +28,7 @@
 
 ### Use Cases
 
-| Use Case            | Pain Point                   | Zentla Solution       |
+| Use Case            | Pain Point                   | Zentla Solution      |
 | ------------------- | ---------------------------- | -------------------- |
 | Pricing experiments | Hard to A/B test pricing     | Offer versioning     |
 | Provider migration  | Vendor lock-in               | Provider abstraction |
@@ -70,7 +70,7 @@
 
 ### vs. Direct Stripe Integration
 
-| Aspect           | Stripe Direct  | Zentla           |
+| Aspect           | Stripe Direct  | Zentla          |
 | ---------------- | -------------- | --------------- |
 | Offer versioning | Manual         | Built-in        |
 | Provider lock-in | Yes            | No              |
@@ -79,7 +79,7 @@
 
 ### vs. Existing Billing Platforms
 
-| Aspect      | Others             | Zentla       |
+| Aspect      | Others             | Zentla      |
 | ----------- | ------------------ | ----------- |
 | Setup time  | Days/weeks         | Hours       |
 | Pricing     | Per-seat/revenue % | Usage-based |

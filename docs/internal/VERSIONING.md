@@ -20,9 +20,9 @@ All API endpoints use URI-based versioning with the format `/api/v{n}/`:
 
 Every API response includes:
 
-| Header                   | Example | Description                        |
-| ------------------------ | ------- | ---------------------------------- |
-| `X-API-Version`          | `1`     | Current API version                |
+| Header                    | Example | Description                        |
+| ------------------------- | ------- | ---------------------------------- |
+| `X-API-Version`           | `1`     | Current API version                |
 | `X-Zentla-API-Deprecated` | `false` | Whether this version is deprecated |
 
 ### When to Create a New Version

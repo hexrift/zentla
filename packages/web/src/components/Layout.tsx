@@ -20,7 +20,9 @@ export function Layout() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <span className="text-lg font-semibold text-gray-900">Zentla</span>
+              <span className="text-lg font-semibold text-gray-900">
+                Zentla
+              </span>
               <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
                 Beta
               </span>

@@ -14,7 +14,7 @@ import {
   type ApiKeyContext,
 } from "../common/decorators";
 
-const SESSION_PREFIX = "relay_session_";
+const SESSION_PREFIX = "zentla_session_";
 
 interface SessionValidationResult {
   userId: string;

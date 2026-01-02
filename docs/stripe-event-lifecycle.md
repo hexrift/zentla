@@ -4,7 +4,7 @@ This document maps Stripe webhook events to Zentla domain events and state trans
 
 ## Event Mapping Table
 
-| Stripe Event                           | Zentla Domain Event          | State Transition                                        | Idempotency Rule                                                                                   |
+| Stripe Event                           | Zentla Domain Event         | State Transition                                        | Idempotency Rule                                                                                   |
 | -------------------------------------- | --------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `checkout.session.completed`           | `checkout.completed`        | Checkout: `open` → `complete`                           | Process once per `checkout.session.id`. Create subscription only if none exists for this checkout. |
 | `checkout.session.expired`             | `checkout.expired`          | Checkout: `open` → `expired`                            | Idempotent by nature (terminal state)                                                              |

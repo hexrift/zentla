@@ -22,9 +22,9 @@ export function VersioningPage() {
 
       <div className="not-prose mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
         <p className="text-sm text-amber-800">
-          <strong>Beta Status:</strong> Zentla is currently in beta. While we aim
-          for stability, some breaking changes may occur with advance notice.
-          We'll communicate all changes through our changelog and email
+          <strong>Beta Status:</strong> Zentla is currently in beta. While we
+          aim for stability, some breaking changes may occur with advance
+          notice. We'll communicate all changes through our changelog and email
           notifications.
         </p>
       </div>
