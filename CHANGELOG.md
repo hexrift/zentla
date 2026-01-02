@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.4](https://github.com/PrimeCodeLabs/zentla/compare/v1.5.3...v1.5.4) (2026-01-02)
+
+
+### Bug Fixes
+
+* add robots.txt to block admin-ui from search engines ([fb88a73](https://github.com/PrimeCodeLabs/zentla/commit/fb88a73fac76ba43b179bdf80a78efd194fb4566))
+* remove remaining relay references from codebase ([77a53b2](https://github.com/PrimeCodeLabs/zentla/commit/77a53b235f409e495330b2f91801ca61552b8ce6))
+* update canonical URLs to zentla-web.pages.dev ([f899e5c](https://github.com/PrimeCodeLabs/zentla/commit/f899e5c6613e0a415df4783537fbf111ff1fa200))
+
 ## [1.5.3](https://github.com/PrimeCodeLabs/zentla/compare/v1.5.2...v1.5.3) (2026-01-02)
 
 

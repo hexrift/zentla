@@ -1,6 +1,6 @@
 {
   "name": "zentla",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "private": true,
   "description": "Provider-agnostic subscription commerce orchestration platform",
   "workspaces": [
