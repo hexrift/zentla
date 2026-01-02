@@ -144,7 +144,7 @@ function ChecklistItem({
       {!isComplete && linkTo && (
         <Link
           to={linkTo}
-          className="flex-shrink-0 inline-flex items-center gap-1 text-sm font-medium text-purple-600 hover:text-purple-700"
+          className="flex-shrink-0 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
         >
           {linkText}
           <ArrowRightIcon className="w-4 h-4" />
@@ -155,7 +155,7 @@ function ChecklistItem({
           href={externalLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-shrink-0 inline-flex items-center gap-1 text-sm font-medium text-purple-600 hover:text-purple-700"
+          className="flex-shrink-0 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
         >
           {linkText}
           <ArrowRightIcon className="w-4 h-4" />
@@ -256,7 +256,7 @@ export function DashboardPage() {
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
-            className={`h-2 rounded-full transition-all duration-300 ${isSetupComplete ? "bg-green-500" : "bg-purple-600"}`}
+            className={`h-2 rounded-full transition-all duration-300 ${isSetupComplete ? "bg-green-500" : "bg-primary-600"}`}
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -327,7 +327,7 @@ export function DashboardPage() {
             <button
               onClick={() => syncMutation.mutate()}
               disabled={syncMutation.isPending}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
             >
               <RefreshIcon
                 className={`w-4 h-4 ${syncMutation.isPending ? "animate-spin" : ""}`}
@@ -410,18 +410,18 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link
           to="/customers"
-          className="p-6 bg-white rounded-lg border border-gray-200 hover:border-purple-300 hover:shadow-sm transition-all"
+          className="p-6 bg-white rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-sm transition-all"
         >
           <h3 className="text-sm font-medium text-gray-500">Customers</h3>
           <p className="mt-2 text-3xl font-semibold text-gray-900">
             {hasCustomers ? (customers?.data?.length ?? 0) : 0}
           </p>
-          <p className="mt-1 text-sm text-purple-600">View all</p>
+          <p className="mt-1 text-sm text-primary-600">View all</p>
         </Link>
 
         <Link
           to="/subscriptions"
-          className="p-6 bg-white rounded-lg border border-gray-200 hover:border-purple-300 hover:shadow-sm transition-all"
+          className="p-6 bg-white rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-sm transition-all"
         >
           <h3 className="text-sm font-medium text-gray-500">
             Active Subscriptions
@@ -429,18 +429,18 @@ export function DashboardPage() {
           <p className="mt-2 text-3xl font-semibold text-gray-900">
             {hasSubscriptions ? (subscriptions?.data?.length ?? 0) : 0}
           </p>
-          <p className="mt-1 text-sm text-purple-600">View all</p>
+          <p className="mt-1 text-sm text-primary-600">View all</p>
         </Link>
 
         <Link
           to="/offers"
-          className="p-6 bg-white rounded-lg border border-gray-200 hover:border-purple-300 hover:shadow-sm transition-all"
+          className="p-6 bg-white rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-sm transition-all"
         >
           <h3 className="text-sm font-medium text-gray-500">Offers</h3>
           <p className="mt-2 text-3xl font-semibold text-gray-900">
             {hasOffers ? (offers?.data?.length ?? 0) : 0}
           </p>
-          <p className="mt-1 text-sm text-purple-600">View all</p>
+          <p className="mt-1 text-sm text-primary-600">View all</p>
         </Link>
       </div>
     </div>

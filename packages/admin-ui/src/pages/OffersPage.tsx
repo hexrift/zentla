@@ -65,7 +65,7 @@ export function OffersPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Link
                       to={`/offers/${offer.id}`}
-                      className="text-sm font-medium text-gray-900 hover:text-purple-600"
+                      className="text-sm font-medium text-gray-900 hover:text-primary-600"
                     >
                       {offer.name}
                     </Link>
@@ -105,7 +105,7 @@ export function OffersPage() {
                     </Link>
                     <Link
                       to={`/offers/${offer.id}?tab=checkout`}
-                      className="text-purple-600 hover:text-purple-900"
+                      className="text-primary-600 hover:text-primary-900"
                     >
                       Preview
                     </Link>

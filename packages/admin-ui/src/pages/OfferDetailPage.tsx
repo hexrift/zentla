@@ -202,7 +202,7 @@ export function OfferDetailPage() {
               className={clsx(
                 "py-4 px-1 text-sm font-medium border-b-2",
                 activeTab === tab.id
-                  ? "border-purple-600 text-purple-600"
+                  ? "border-primary-600 text-primary-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
               )}
             >
@@ -233,7 +233,7 @@ function DetailsTab({ offer }: { offer: Offer }) {
         <input
           type="text"
           defaultValue={offer.name}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
       <div>
@@ -243,7 +243,7 @@ function DetailsTab({ offer }: { offer: Offer }) {
         <textarea
           defaultValue={offer.description ?? ""}
           rows={3}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
     </div>
@@ -313,7 +313,7 @@ function PricingTab({ offer }: { offer: Offer }) {
                   | "volume",
               })
             }
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="flat">Flat</option>
             <option value="per_unit">Per Unit</option>
@@ -331,7 +331,7 @@ function PricingTab({ offer }: { offer: Offer }) {
             onChange={(e) =>
               setPricing({ ...pricing, currency: e.target.value.toUpperCase() })
             }
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
         <div>
@@ -344,7 +344,7 @@ function PricingTab({ offer }: { offer: Offer }) {
             onChange={(e) =>
               setPricing({ ...pricing, amount: parseInt(e.target.value) || 0 })
             }
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
           />
           <p className="mt-1 text-xs text-gray-500">e.g., 1999 = $19.99</p>
         </div>
@@ -360,7 +360,7 @@ function PricingTab({ offer }: { offer: Offer }) {
                 interval: e.target.value as "day" | "week" | "month" | "year",
               })
             }
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="day">Daily</option>
             <option value="week">Weekly</option>
@@ -387,7 +387,7 @@ function PricingTab({ offer }: { offer: Offer }) {
       <button
         onClick={handleSavePricing}
         disabled={updateDraftMutation.isPending}
-        className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 disabled:opacity-50"
+        className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
       >
         {updateDraftMutation.isPending ? "Saving..." : "Save Pricing"}
       </button>
@@ -416,7 +416,7 @@ function TrialsTab({ offer }: { offer: Offer }) {
             <input
               type="number"
               defaultValue={trial.days ?? 14}
-              className="mt-1 block w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+              className="mt-1 block w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
             />
           </div>
           <div className="flex items-center space-x-4">
@@ -588,7 +588,7 @@ function EntitlementsTab({ offer }: { offer: Offer }) {
                   })
                 }
                 placeholder="e.g., api_requests"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm"
               />
             </div>
             <div>
@@ -607,7 +607,7 @@ function EntitlementsTab({ offer }: { offer: Offer }) {
                     value: e.target.value === "boolean" ? "true" : "",
                   })
                 }
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm"
               >
                 <option value="boolean">Boolean</option>
                 <option value="number">Number</option>
@@ -627,7 +627,7 @@ function EntitlementsTab({ offer }: { offer: Offer }) {
                       value: e.target.value,
                     })
                   }
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 text-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm"
                 >
                   <option value="true">true</option>
                   <option value="false">false</option>
@@ -647,7 +647,7 @@ function EntitlementsTab({ offer }: { offer: Offer }) {
                   placeholder={
                     newEntitlement.valueType === "number" ? "100" : "value"
                   }
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 text-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm"
                 />
               )}
             </div>
@@ -671,7 +671,7 @@ function EntitlementsTab({ offer }: { offer: Offer }) {
               disabled={
                 !newEntitlement.featureKey || updateDraftMutation.isPending
               }
-              className="px-3 py-1.5 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 disabled:opacity-50"
+              className="px-3 py-1.5 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
             >
               {updateDraftMutation.isPending ? "Saving..." : "Add"}
             </button>
@@ -685,7 +685,7 @@ function EntitlementsTab({ offer }: { offer: Offer }) {
       ) : (
         <button
           onClick={() => setIsAdding(true)}
-          className="text-sm text-purple-600 hover:text-purple-800"
+          className="text-sm text-primary-600 hover:text-primary-800"
         >
           + Add Entitlement
         </button>
@@ -862,7 +862,7 @@ function CheckoutTab({ offer }: { offer: Offer }) {
                   id="promotion"
                   value={selectedPromoId}
                   onChange={(e) => setSelectedPromoId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                 >
                   <option value="">No promotion</option>
                   {applicablePromotions.map((promo) => {
@@ -892,7 +892,7 @@ function CheckoutTab({ offer }: { offer: Offer }) {
               <button
                 onClick={handlePreviewCheckout}
                 disabled={isCreating || isSyncing}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
               >
                 {isCreating ? (
                   <>
@@ -975,7 +975,7 @@ function CheckoutTab({ offer }: { offer: Offer }) {
                     href={sessionUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-purple-600 hover:text-purple-800"
+                    className="text-sm text-primary-600 hover:text-primary-800"
                   >
                     Open →
                   </a>
@@ -1044,7 +1044,7 @@ function CheckoutTab({ offer }: { offer: Offer }) {
                 </code>
                 <span className="text-gray-600">
                   The offer ID:{" "}
-                  <code className="text-purple-600">{offer.id}</code>
+                  <code className="text-primary-600">{offer.id}</code>
                 </span>
               </div>
               <div className="flex items-start gap-2">
@@ -1147,7 +1147,7 @@ function JsonTab({ offer }: { offer: Offer }) {
       <textarea
         defaultValue={JSON.stringify(config, null, 2)}
         rows={20}
-        className="w-full px-3 py-2 font-mono text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+        className="w-full px-3 py-2 font-mono text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
       />
     </div>
   );

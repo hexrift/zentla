@@ -226,8 +226,8 @@ export function SettingsPage() {
           {selectedProvider === "stripe" && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <span className="text-purple-600 font-bold text-sm">S</span>
+                <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                  <span className="text-primary-600 font-bold text-sm">S</span>
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">Stripe</h3>
@@ -263,7 +263,7 @@ export function SettingsPage() {
                         value={stripeSecretKey}
                         onChange={(e) => setStripeSecretKey(e.target.value)}
                         placeholder="sk_test_..."
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       />
                       <button
                         type="button"
@@ -323,7 +323,7 @@ export function SettingsPage() {
                         value={stripeWebhookSecret}
                         onChange={(e) => setStripeWebhookSecret(e.target.value)}
                         placeholder="whsec_..."
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       />
                       <button
                         type="button"
@@ -380,7 +380,7 @@ export function SettingsPage() {
                   <button
                     onClick={handleSaveStripeConfig}
                     disabled={updateWorkspaceMutation.isPending}
-                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 disabled:opacity-50"
+                    className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
                   >
                     {updateWorkspaceMutation.isPending
                       ? "Saving..."

@@ -308,7 +308,7 @@ export function Layout() {
           {/* Logo with close button */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200/80">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-primary-600 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
               <span className="text-lg font-semibold text-gray-900">
@@ -337,7 +337,7 @@ export function Layout() {
                   clsx(
                     "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all",
                     isActive
-                      ? "bg-purple-50 text-purple-700"
+                      ? "bg-primary-50 text-primary-700"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
                   )
                 }
@@ -347,7 +347,7 @@ export function Layout() {
                     <item.icon
                       className={clsx(
                         "w-5 h-5 flex-shrink-0",
-                        isActive ? "text-purple-600" : "text-gray-400",
+                        isActive ? "text-primary-600" : "text-gray-400",
                       )}
                     />
                     {item.name}
@@ -405,7 +405,7 @@ export function Layout() {
               <Link
                 to="/feedback"
                 onClick={() => setSidebarOpen(false)}
-                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
               >
                 <svg
                   className="w-5 h-5"
@@ -429,8 +429,8 @@ export function Layout() {
           <div className="px-3 py-4 border-t border-gray-200/80">
             <div className="flex items-center justify-between px-3 py-2 mb-2">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-purple-700 font-medium text-sm">
+                <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-primary-700 font-medium text-sm">
                     {user?.name?.[0]?.toUpperCase() ??
                       user?.email?.[0]?.toUpperCase() ??
                       "?"}
@@ -471,7 +471,7 @@ export function Layout() {
           {/* Logo */}
           <div className="flex items-center h-16 px-6 border-b border-gray-200/80">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-primary-600 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
               <span className="text-lg font-semibold text-gray-900">
@@ -493,7 +493,7 @@ export function Layout() {
                   clsx(
                     "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all",
                     isActive
-                      ? "bg-purple-50 text-purple-700"
+                      ? "bg-primary-50 text-primary-700"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
                   )
                 }
@@ -503,7 +503,7 @@ export function Layout() {
                     <item.icon
                       className={clsx(
                         "w-5 h-5 flex-shrink-0",
-                        isActive ? "text-purple-600" : "text-gray-400",
+                        isActive ? "text-primary-600" : "text-gray-400",
                       )}
                     />
                     {item.name}
@@ -560,7 +560,7 @@ export function Layout() {
               </a>
               <Link
                 to="/feedback"
-                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                className="flex items-center gap-3 w-full px-3 py-2 text-sm text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
               >
                 <svg
                   className="w-5 h-5"
@@ -584,8 +584,8 @@ export function Layout() {
           <div className="px-3 py-4 border-t border-gray-200/80">
             <div className="flex items-center justify-between px-3 py-2 mb-2">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-purple-700 font-medium text-sm">
+                <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-primary-700 font-medium text-sm">
                     {user?.name?.[0]?.toUpperCase() ??
                       user?.email?.[0]?.toUpperCase() ??
                       "?"}
@@ -631,7 +631,7 @@ export function Layout() {
             <MenuIcon className="w-6 h-6" />
           </button>
           <div className="flex items-center gap-2 ml-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-600 to-primary-600 flex items-center justify-center">
               <span className="text-white font-bold text-xs">R</span>
             </div>
             <span className="text-base font-semibold text-gray-900">

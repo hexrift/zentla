@@ -109,7 +109,7 @@ export function PromotionsPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Link
                       to={`/promotions/${promotion.id}`}
-                      className="text-sm font-medium text-gray-900 hover:text-purple-600"
+                      className="text-sm font-medium text-gray-900 hover:text-primary-600"
                     >
                       {promotion.name}
                     </Link>
@@ -146,7 +146,7 @@ export function PromotionsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Link
                       to={`/promotions/${promotion.id}`}
-                      className="text-purple-600 hover:text-purple-900"
+                      className="text-primary-600 hover:text-primary-900"
                     >
                       View
                     </Link>

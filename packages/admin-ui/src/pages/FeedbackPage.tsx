@@ -140,14 +140,14 @@ export function FeedbackPage() {
                   onClick={() => setType(option.value as typeof type)}
                   className={`flex-1 p-4 text-left rounded-lg border-2 transition-colors ${
                     type === option.value
-                      ? "bg-purple-50 border-purple-300"
+                      ? "bg-primary-50 border-primary-300"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   <span
                     className={`block text-sm font-medium ${
                       type === option.value
-                        ? "text-purple-700"
+                        ? "text-primary-700"
                         : "text-gray-900"
                     }`}
                   >
@@ -156,7 +156,7 @@ export function FeedbackPage() {
                   <span
                     className={`block text-xs mt-0.5 ${
                       type === option.value
-                        ? "text-purple-600"
+                        ? "text-primary-600"
                         : "text-gray-500"
                     }`}
                   >
@@ -187,7 +187,7 @@ export function FeedbackPage() {
                     ? "What feature would you like?"
                     : "Subject"
               }
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               required
             />
           </div>
@@ -212,7 +212,7 @@ export function FeedbackPage() {
                     : "Tell us more..."
               }
               rows={6}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
               required
             />
           </div>
@@ -237,7 +237,7 @@ export function FeedbackPage() {
               disabled={
                 mutation.isPending || !title.trim() || !description.trim()
               }
-              className="flex-1 px-6 py-3 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {mutation.isPending ? "Submitting..." : "Submit Feedback"}
             </button>

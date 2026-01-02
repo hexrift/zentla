@@ -14,7 +14,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-4">
           <svg
-            className="animate-spin h-10 w-10 text-indigo-600"
+            className="animate-spin h-10 w-10 text-primary-600"
             fill="none"
             viewBox="0 0 24 24"
           >

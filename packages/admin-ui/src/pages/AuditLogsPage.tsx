@@ -32,7 +32,7 @@ const actorTypeLabels: Record<string, string> = {
 
 const actorTypeColors: Record<string, string> = {
   api_key: "bg-blue-100 text-blue-800",
-  user: "bg-purple-100 text-purple-800",
+  user: "bg-primary-100 text-primary-800",
   system: "bg-gray-100 text-gray-800",
   webhook: "bg-orange-100 text-orange-800",
 };
@@ -41,7 +41,7 @@ const actionColors: Record<string, string> = {
   create: "text-green-600",
   update: "text-blue-600",
   delete: "text-red-600",
-  publish: "text-purple-600",
+  publish: "text-primary-600",
   archive: "text-gray-600",
   cancel: "text-orange-600",
 };
@@ -168,7 +168,7 @@ export function AuditLogsPage() {
             placeholder="Search by action, resource ID, actor ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent sm:text-sm"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent sm:text-sm"
           />
         </div>
 
@@ -180,7 +180,7 @@ export function AuditLogsPage() {
               setActorTypeFilter(e.target.value);
               handleFilterChange();
             }}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="">All Actors</option>
             <option value="api_key">API Key</option>
@@ -195,7 +195,7 @@ export function AuditLogsPage() {
               setResourceTypeFilter(e.target.value);
               handleFilterChange();
             }}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="">All Resources</option>
             <option value="offer">Offer</option>
@@ -212,7 +212,7 @@ export function AuditLogsPage() {
               setActionFilter(e.target.value);
               handleFilterChange();
             }}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="">All Actions</option>
             <option value="create">Create</option>
@@ -328,7 +328,7 @@ export function AuditLogsPage() {
                       {hasActiveFilters && (
                         <button
                           onClick={clearFilters}
-                          className="text-purple-600 hover:text-purple-800 text-sm"
+                          className="text-primary-600 hover:text-primary-800 text-sm"
                         >
                           Clear filters
                         </button>
@@ -448,7 +448,7 @@ export function AuditLogsPage() {
             <button
               onClick={loadMore}
               disabled={isLoadingMore || !cursor}
-              className="px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isLoadingMore ? (
                 <>

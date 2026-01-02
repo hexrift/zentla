@@ -73,7 +73,7 @@ function StatCard({
     blue: "bg-blue-50 border-blue-200",
     yellow: "bg-amber-50 border-amber-200",
     red: "bg-red-50 border-red-200",
-    purple: "bg-purple-50 border-purple-200",
+    purple: "bg-primary-50 border-primary-200",
   };
 
   const valueColorClasses = {
@@ -82,7 +82,7 @@ function StatCard({
     blue: "text-blue-700",
     yellow: "text-amber-700",
     red: "text-red-700",
-    purple: "text-purple-700",
+    purple: "text-primary-700",
   };
 
   return (
@@ -194,7 +194,7 @@ function StripeLink({
       href={`${baseUrl}/${path}/${id}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-purple-600 transition-colors"
+      className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-primary-600 transition-colors"
       title="View in Stripe"
     >
       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
@@ -318,7 +318,7 @@ export function CheckoutsPage() {
             className={clsx(
               "whitespace-nowrap border-b-2 py-3 px-1 text-sm font-medium transition-colors",
               activeTab === "intents"
-                ? "border-purple-600 text-purple-600"
+                ? "border-primary-600 text-primary-600"
                 : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
             )}
           >
@@ -334,7 +334,7 @@ export function CheckoutsPage() {
             className={clsx(
               "whitespace-nowrap border-b-2 py-3 px-1 text-sm font-medium transition-colors",
               activeTab === "sessions"
-                ? "border-purple-600 text-purple-600"
+                ? "border-primary-600 text-primary-600"
                 : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
             )}
           >
@@ -359,7 +359,7 @@ export function CheckoutsPage() {
               setIntentStatus(e.target.value);
             }
           }}
-          className="flex-1 sm:flex-none rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1"
+          className="flex-1 sm:flex-none rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1"
         >
           <option value="">All statuses</option>
           {(activeTab === "sessions" ? sessionStatuses : intentStatuses).map(
@@ -374,7 +374,7 @@ export function CheckoutsPage() {
         <select
           value={offerFilter}
           onChange={(e) => setOfferFilter(e.target.value)}
-          className="flex-1 sm:flex-none rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1"
+          className="flex-1 sm:flex-none rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1"
         >
           <option value="">All offers</option>
           {((offers?.data as Offer[]) || []).map((offer) => (
@@ -443,7 +443,7 @@ export function CheckoutsPage() {
                         {session.customer ? (
                           <Link
                             to={`/customers/${session.customer.id}`}
-                            className="text-sm font-medium text-purple-600 hover:text-purple-800"
+                            className="text-sm font-medium text-primary-600 hover:text-primary-800"
                           >
                             {session.customer.email}
                           </Link>
@@ -461,7 +461,7 @@ export function CheckoutsPage() {
                       <td className="px-6 py-4">
                         <Link
                           to={`/offers/${session.offer.id}`}
-                          className="text-sm text-purple-600 hover:text-purple-800"
+                          className="text-sm text-primary-600 hover:text-primary-800"
                         >
                           {session.offer.name}
                         </Link>
@@ -547,7 +547,7 @@ export function CheckoutsPage() {
                       {intent.customer ? (
                         <Link
                           to={`/customers/${intent.customer.id}`}
-                          className="text-sm font-medium text-purple-600 hover:text-purple-800"
+                          className="text-sm font-medium text-primary-600 hover:text-primary-800"
                         >
                           {intent.customer.email}
                         </Link>
@@ -565,7 +565,7 @@ export function CheckoutsPage() {
                     <td className="px-6 py-4">
                       <Link
                         to={`/offers/${intent.offer.id}`}
-                        className="text-sm text-purple-600 hover:text-purple-800"
+                        className="text-sm text-primary-600 hover:text-primary-800"
                       >
                         {intent.offer.name}
                       </Link>
@@ -575,7 +575,7 @@ export function CheckoutsPage() {
                         </div>
                       )}
                       {intent.promotion && (
-                        <div className="text-xs text-purple-600">
+                        <div className="text-xs text-primary-600">
                           {intent.promotion.name}
                         </div>
                       )}
@@ -605,7 +605,7 @@ export function CheckoutsPage() {
                         <div className="mt-1">
                           <Link
                             to={`/subscriptions/${intent.subscription.id}`}
-                            className="text-xs text-purple-600 hover:text-purple-800"
+                            className="text-xs text-primary-600 hover:text-primary-800"
                           >
                             → Subscription
                           </Link>
