@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/PrimeCodeLabs/relay/compare/v1.3.0...v1.3.1) (2026-01-02)
+
+
+### Bug Fixes
+
+* add Google verification to static HTML ([dec6653](https://github.com/PrimeCodeLabs/relay/commit/dec66531ba787dddef98d97389a9dffae587d09b))
+* add Google verification to static HTML ([3473ba4](https://github.com/PrimeCodeLabs/relay/commit/3473ba4e7cd3eb3df9e384e73b0bb152996171e1))
+
 ## [1.3.0](https://github.com/PrimeCodeLabs/relay/compare/v1.2.0...v1.3.0) (2026-01-02)
 
 
