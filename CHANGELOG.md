@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/PrimeCodeLabs/zentla/compare/v1.5.4...v1.6.0) (2026-01-02)
+
+
+### Features
+
+* **seo:** add FAQ structured data for rich snippets ([165287f](https://github.com/PrimeCodeLabs/zentla/commit/165287f04eae0ee6db4355658c89e54473f2aea9))
+
 ## [1.5.4](https://github.com/PrimeCodeLabs/zentla/compare/v1.5.3...v1.5.4) (2026-01-02)
 
 
