@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.2](https://github.com/PrimeCodeLabs/zentla/compare/v1.5.1...v1.5.2) (2026-01-02)
+
+
+### Bug Fixes
+
+* update admin-ui theme to use primary (emerald) colors ([8b650bd](https://github.com/PrimeCodeLabs/zentla/commit/8b650bdc2b0246737f9e7f0d321e4a2d6bc929b0))
+* update sitemap.xml and robots.txt URLs to zentla.dev ([e2a02af](https://github.com/PrimeCodeLabs/zentla/commit/e2a02af59b99243294b07837d906a6fccc07f129))
+
 ## [1.5.1](https://github.com/PrimeCodeLabs/zentla/compare/v1.5.0...v1.5.1) (2026-01-02)
 
 
