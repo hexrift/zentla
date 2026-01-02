@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/PrimeCodeLabs/zentla/compare/v1.5.0...v1.5.1) (2026-01-02)
+
+
+### Bug Fixes
+
+* update Cloudflare Pages project names to zentla ([20a11e3](https://github.com/PrimeCodeLabs/zentla/commit/20a11e3169fbd344b169982112164a6bd7d8796b))
+
 ## [1.5.0](https://github.com/PrimeCodeLabs/zentla/compare/v1.4.0...v1.5.0) (2026-01-02)
 
 
