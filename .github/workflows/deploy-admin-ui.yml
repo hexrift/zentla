@@ -46,4 +46,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy packages/admin-ui/dist --project-name=relay-admin
+          command: pages deploy packages/admin-ui/dist --project-name=zentla-admin
