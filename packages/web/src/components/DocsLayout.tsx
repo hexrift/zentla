@@ -170,7 +170,7 @@ export function DocsLayout() {
                 </svg>
               </button>
               <Link to="/" className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center">
                   <span className="text-white font-bold text-xs">Z</span>
                 </div>
                 <span className="font-semibold text-gray-900">Zentla</span>

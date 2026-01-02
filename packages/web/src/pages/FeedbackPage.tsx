@@ -112,7 +112,7 @@ export function FeedbackPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">Z</span>
               </div>
               <span className="text-lg font-semibold text-gray-900">
@@ -210,14 +210,14 @@ export function FeedbackPage() {
                     onClick={() => setType(option.value as typeof type)}
                     className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
                       type === option.value
-                        ? "bg-purple-50 border-purple-300 text-purple-700"
+                        ? "bg-primary-50 border-primary-300 text-primary-700"
                         : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50"
                     }`}
                   >
                     <span
                       className={
                         type === option.value
-                          ? "text-purple-600"
+                          ? "text-primary-600"
                           : "text-gray-400"
                       }
                     >
@@ -244,7 +244,7 @@ export function FeedbackPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
               <p className="mt-1.5 text-xs text-gray-400">
                 Include your email if you'd like us to follow up
@@ -271,7 +271,7 @@ export function FeedbackPage() {
                       ? "What feature would you like?"
                       : "Subject"
                 }
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 required
               />
             </div>
@@ -296,7 +296,7 @@ export function FeedbackPage() {
                       : "Tell us more..."
                 }
                 rows={5}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
                 required
               />
             </div>
@@ -319,7 +319,7 @@ export function FeedbackPage() {
               <button
                 type="submit"
                 disabled={isSubmitting || !title.trim() || !description.trim()}
-                className="flex-1 px-6 py-3 text-sm font-medium text-white bg-purple-600 rounded-xl hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 px-6 py-3 text-sm font-medium text-white bg-primary-600 rounded-xl hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {isSubmitting ? "Submitting..." : "Submit Feedback"}
               </button>

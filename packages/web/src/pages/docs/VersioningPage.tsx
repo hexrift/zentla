@@ -247,7 +247,7 @@ X-Zentla-Migration: See https://zentla.dev/docs/migrations/v2`}</CodeBlock>
             </tr>
             <tr>
               <td className="py-2 pr-4">
-                <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 rounded">
+                <span className="px-2 py-0.5 text-xs font-medium bg-primary-100 text-primary-700 rounded">
                   Preview
                 </span>
               </td>
