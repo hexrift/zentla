@@ -53,7 +53,7 @@ export function SEO({
       <meta name="description" content={description} />
       <meta
         name="google-site-verification"
-        content="QRMefrxdUSOnBxTieShmRdDeZg49CpLks5lU_1JUufM"
+        content="pEPgBadgZez9E_3FVsKPcXGFT-t88reFWw7hOESDt7A"
       />
       <link rel="canonical" href={url} />
 
