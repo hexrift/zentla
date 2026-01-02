@@ -1,0 +1,5 @@
+# Zentla Admin - robots.txt
+# Block all search engine crawling for admin dashboard
+
+User-agent: *
+Disallow: /
