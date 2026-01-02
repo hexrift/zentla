@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://github.com/PrimeCodeLabs/relay/compare/v1.3.2...v1.4.0) (2026-01-02)
+
+
+### Features
+
+* add favicon and apple-touch-icon ([0802f24](https://github.com/PrimeCodeLabs/relay/commit/0802f24d2d191e1f64001828afdb6f7386e05082))
+* add favicon and apple-touch-icon ([4512ee8](https://github.com/PrimeCodeLabs/relay/commit/4512ee8db1b4c7b91a445ae55efd553fb6228693))
+
 ## [1.3.2](https://github.com/PrimeCodeLabs/relay/compare/v1.3.1...v1.3.2) (2026-01-02)
 
 

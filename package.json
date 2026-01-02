@@ -1,6 +1,6 @@
 {
   "name": "relay",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "private": true,
   "description": "Provider-agnostic subscription commerce orchestration platform",
   "workspaces": [
