@@ -54,12 +54,12 @@ COPY packages/api ./packages/api
 RUN yarn db:generate
 
 # Build API-related packages only (exclude admin-ui)
-RUN yarn workspace @relay/core build && \
-    yarn workspace @relay/database build && \
-    yarn workspace @relay/sdk build && \
-    yarn workspace @relay/stripe-adapter build && \
-    yarn workspace @relay/zuora-adapter build && \
-    yarn workspace @relay/api build
+RUN yarn workspace @zentla/core build && \
+    yarn workspace @zentla/database build && \
+    yarn workspace @zentla/sdk build && \
+    yarn workspace @zentla/stripe-adapter build && \
+    yarn workspace @zentla/zuora-adapter build && \
+    yarn workspace @zentla/api build
 
 # -----------------------------------------------------------------------------
 # Stage 3: Production
@@ -91,7 +91,7 @@ COPY packages/adapters/stripe/package.json ./packages/adapters/stripe/
 COPY packages/adapters/zuora/package.json ./packages/adapters/zuora/
 
 # Install production dependencies only
-RUN yarn workspaces focus --production @relay/api && \
+RUN yarn workspaces focus --production @zentla/api && \
     yarn cache clean
 
 # Copy built artifacts
