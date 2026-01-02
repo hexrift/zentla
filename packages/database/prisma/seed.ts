@@ -12,7 +12,7 @@ function generateApiKey(environment: "live" | "test"): {
   prefix: string;
   hash: string;
 } {
-  const prefix = `relay_${environment}_`;
+  const prefix = `zentla_${environment}_`;
   const randomPart = crypto.randomBytes(24).toString("base64url");
   const fullKey = `${prefix}${randomPart}`;
   // Hash must include the secret, matching api-key.service.ts

@@ -2,7 +2,7 @@ import { Controller, Get, HttpException, HttpStatus } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { Public } from "../common/decorators";
 import { PrismaService } from "../database/prisma.service";
-import { RELAY_VERSION } from "../common/version";
+import { ZENTLA_VERSION } from "../common/version";
 
 interface HealthResponse {
   status: "healthy" | "unhealthy";
@@ -43,7 +43,7 @@ export class HealthController {
     const response: HealthResponse = {
       status: dbHealthy ? "healthy" : "unhealthy",
       timestamp: new Date().toISOString(),
-      version: RELAY_VERSION,
+      version: ZENTLA_VERSION,
       uptime: this.getUptime(),
       services: {
         database: dbHealthy ? "up" : "down",

@@ -137,7 +137,7 @@ describe("StripeSyncService", () => {
       providerRefService.findByExternalId.mockResolvedValue(null);
       prisma.customer.findFirst.mockResolvedValue(null);
       prisma.customer.create.mockResolvedValue({
-        id: "cust_relay_123",
+        id: "cust_zentla_123",
         email: "test@example.com",
       });
 
@@ -170,7 +170,7 @@ describe("StripeSyncService", () => {
       });
       providerRefService.findByExternalId.mockResolvedValue({
         id: "ref_123",
-        entityId: "cust_relay_123",
+        entityId: "cust_zentla_123",
       });
 
       const result = await service.syncFromStripe("ws_123");
@@ -207,7 +207,7 @@ describe("StripeSyncService", () => {
       });
       providerRefService.findByExternalId.mockResolvedValue(null);
       prisma.customer.findFirst.mockResolvedValue({
-        id: "cust_relay_existing",
+        id: "cust_zentla_existing",
         email: "test@example.com",
       });
 
@@ -217,7 +217,7 @@ describe("StripeSyncService", () => {
       expect(prisma.customer.create).not.toHaveBeenCalled();
       expect(providerRefService.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          entityId: "cust_relay_existing",
+          entityId: "cust_zentla_existing",
         }),
       );
     });
@@ -258,7 +258,7 @@ describe("StripeSyncService", () => {
       // Subscription not yet synced
       providerRefService.findByExternalId
         .mockResolvedValueOnce(null) // subscription check
-        .mockResolvedValueOnce({ entityId: "cust_relay_123" }) // customer ref
+        .mockResolvedValueOnce({ entityId: "cust_zentla_123" }) // customer ref
         .mockResolvedValueOnce({ entityId: "ver_123" }); // price ref
 
       prisma.offerVersion.findUnique.mockResolvedValue({
@@ -267,7 +267,7 @@ describe("StripeSyncService", () => {
         config: {},
       });
       prisma.subscription.create.mockResolvedValue({
-        id: "sub_relay_123",
+        id: "sub_zentla_123",
       });
 
       const result = await service.syncFromStripe("ws_123");
@@ -326,7 +326,7 @@ describe("StripeSyncService", () => {
       });
       providerRefService.findByExternalId
         .mockResolvedValueOnce(null) // subscription check
-        .mockResolvedValueOnce({ entityId: "cust_relay_123" }) // customer ref
+        .mockResolvedValueOnce({ entityId: "cust_zentla_123" }) // customer ref
         .mockResolvedValueOnce(null); // price ref
 
       const result = await service.syncFromStripe("ws_123");
@@ -348,7 +348,7 @@ describe("StripeSyncService", () => {
       });
       providerRefService.findByExternalId
         .mockResolvedValueOnce(null) // subscription check
-        .mockResolvedValueOnce({ entityId: "cust_relay_123" }) // customer ref
+        .mockResolvedValueOnce({ entityId: "cust_zentla_123" }) // customer ref
         .mockResolvedValueOnce({ entityId: "ver_123" }); // price ref
 
       prisma.offerVersion.findUnique.mockResolvedValue({
@@ -361,7 +361,7 @@ describe("StripeSyncService", () => {
         },
       });
       prisma.subscription.create.mockResolvedValue({
-        id: "sub_relay_123",
+        id: "sub_zentla_123",
       });
 
       await service.syncFromStripe("ws_123");
@@ -393,7 +393,7 @@ describe("StripeSyncService", () => {
       });
       providerRefService.findByExternalId
         .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({ entityId: "cust_relay_123" })
+        .mockResolvedValueOnce({ entityId: "cust_zentla_123" })
         .mockResolvedValueOnce({ entityId: "ver_123" });
 
       prisma.offerVersion.findUnique.mockResolvedValue({
@@ -402,7 +402,7 @@ describe("StripeSyncService", () => {
         config: {},
       });
       prisma.subscription.create.mockResolvedValue({
-        id: "sub_relay_123",
+        id: "sub_zentla_123",
       });
 
       await service.syncFromStripe("ws_123");

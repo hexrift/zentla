@@ -17,4 +17,4 @@ export const VERSION = {
 export const API_VERSION = VERSION.major.toString();
 
 // Full semver version
-export const RELAY_VERSION = VERSION.full;
+export const ZENTLA_VERSION = VERSION.full;

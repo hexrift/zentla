@@ -1,10 +1,10 @@
 # Stripe Event Lifecycle Mapping
 
-This document maps Stripe webhook events to Relay domain events and state transitions.
+This document maps Stripe webhook events to Zentla domain events and state transitions.
 
 ## Event Mapping Table
 
-| Stripe Event                           | Relay Domain Event          | State Transition                                        | Idempotency Rule                                                                                   |
+| Stripe Event                           | Zentla Domain Event          | State Transition                                        | Idempotency Rule                                                                                   |
 | -------------------------------------- | --------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `checkout.session.completed`           | `checkout.completed`        | Checkout: `open` → `complete`                           | Process once per `checkout.session.id`. Create subscription only if none exists for this checkout. |
 | `checkout.session.expired`             | `checkout.expired`          | Checkout: `open` → `expired`                            | Idempotent by nature (terminal state)                                                              |

@@ -15,7 +15,7 @@ describe("ApiKeysController", () => {
     id: "key_123",
     workspaceId: "ws_123",
     name: "Production API Key",
-    keyPrefix: "relay_live_abc",
+    keyPrefix: "zentla_live_abc",
     keyHash: "hashedvalue",
     role: "admin" as const,
     environment: "live" as const,
@@ -75,8 +75,8 @@ describe("ApiKeysController", () => {
     it("should create API key and return secret", async () => {
       apiKeyService.generateApiKey.mockResolvedValue({
         id: "key_new",
-        secret: "relay_live_fullsecret123",
-        prefix: "relay_live_full",
+        secret: "zentla_live_fullsecret123",
+        prefix: "zentla_live_full",
       });
 
       const result = await controller.create("ws_123", {
@@ -86,8 +86,8 @@ describe("ApiKeysController", () => {
       });
 
       expect(result.id).toBe("key_new");
-      expect(result.secret).toBe("relay_live_fullsecret123");
-      expect(result.prefix).toBe("relay_live_full");
+      expect(result.secret).toBe("zentla_live_fullsecret123");
+      expect(result.prefix).toBe("zentla_live_full");
       expect(result.message).toContain("Store this secret securely");
       expect(apiKeyService.generateApiKey).toHaveBeenCalledWith(
         "ws_123",
@@ -101,8 +101,8 @@ describe("ApiKeysController", () => {
     it("should pass expiration date when provided", async () => {
       apiKeyService.generateApiKey.mockResolvedValue({
         id: "key_new",
-        secret: "relay_test_secret",
-        prefix: "relay_test_",
+        secret: "zentla_test_secret",
+        prefix: "zentla_test_",
       });
 
       await controller.create("ws_123", {

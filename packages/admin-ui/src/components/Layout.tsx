@@ -311,7 +311,7 @@ export function Layout() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <span className="text-lg font-semibold text-gray-900">Relay</span>
+              <span className="text-lg font-semibold text-gray-900">Zentla</span>
               <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">
                 Beta
               </span>
@@ -472,7 +472,7 @@ export function Layout() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <span className="text-lg font-semibold text-gray-900">Relay</span>
+              <span className="text-lg font-semibold text-gray-900">Zentla</span>
               <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">
                 Beta
               </span>
@@ -630,7 +630,7 @@ export function Layout() {
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
               <span className="text-white font-bold text-xs">R</span>
             </div>
-            <span className="text-base font-semibold text-gray-900">Relay</span>
+            <span className="text-base font-semibold text-gray-900">Zentla</span>
             <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">
               Beta
             </span>

@@ -1,5 +1,5 @@
 {
-  "name": "@relay/sdk",
+  "name": "@zentla/sdk",
   "version": "0.1.0",
   "private": true,
   "main": "./dist/index.js",
@@ -11,7 +11,7 @@
     "generate": "openapi-typescript ../api/openapi.yaml -o src/generated/api.ts"
   },
   "dependencies": {
-    "@relay/core": "workspace:*"
+    "@zentla/core": "workspace:*"
   },
   "devDependencies": {
     "openapi-typescript": "^6.7.0",

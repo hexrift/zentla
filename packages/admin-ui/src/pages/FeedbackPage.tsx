@@ -9,7 +9,7 @@ async function submitFeedback(data: {
   title: string;
   description: string;
 }): Promise<{ success: boolean }> {
-  const token = localStorage.getItem("relay_session_token");
+  const token = localStorage.getItem("zentla_session_token");
   const response = await fetch(`${API_BASE}/feedback`, {
     method: "POST",
     headers: {
@@ -80,7 +80,7 @@ export function FeedbackPage() {
             Thank you for your feedback!
           </h2>
           <p className="text-gray-500">
-            We appreciate you taking the time to help us improve Relay.
+            We appreciate you taking the time to help us improve Zentla.
           </p>
           <p className="text-sm text-gray-400 mt-4">
             Redirecting to dashboard...
@@ -105,7 +105,7 @@ export function FeedbackPage() {
         <div className="px-6 py-5 border-b border-gray-200">
           <h1 className="text-xl font-semibold text-gray-900">Send Feedback</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Help us improve Relay by sharing your thoughts, reporting bugs, or
+            Help us improve Zentla by sharing your thoughts, reporting bugs, or
             requesting new features.
           </p>
         </div>

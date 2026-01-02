@@ -13,9 +13,9 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: relay-api
+  ECR_REPOSITORY: zentla-api
   ECS_CLUSTER: relay-cluster-prod
-  ECS_SERVICE: relay-api-prod
+  ECS_SERVICE: zentla-api-prod
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -142,7 +142,7 @@ jobs:
       - name: Download task definition
         run: |
           aws ecs describe-task-definition \
-            --task-definition relay-api-prod \
+            --task-definition zentla-api-prod \
             --query taskDefinition > task-definition.json
 
       - name: Update task definition

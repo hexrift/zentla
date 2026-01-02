@@ -31,7 +31,7 @@ jobs:
         run: yarn install --immutable
 
       - name: Build Web
-        run: yarn workspace @relay/web build
+        run: yarn workspace @zentla/web build
         env:
           VITE_API_URL: ${{ vars.API_URL }}
           VITE_DASHBOARD_URL: ${{ vars.DASHBOARD_URL }}

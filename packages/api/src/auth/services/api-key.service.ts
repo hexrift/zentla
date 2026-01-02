@@ -3,10 +3,10 @@ import { ConfigService } from "@nestjs/config";
 import { createHash, randomBytes, timingSafeEqual } from "crypto";
 import type { ApiKeyContext } from "../../common/decorators";
 import { PrismaService } from "../../database/prisma.service";
-import type { ApiKey, ApiKeyRole, ApiKeyEnvironment } from "@relay/database";
+import type { ApiKey, ApiKeyRole, ApiKeyEnvironment } from "@zentla/database";
 
-const API_KEY_PREFIX_LIVE = "relay_live_";
-const API_KEY_PREFIX_TEST = "relay_test_";
+const API_KEY_PREFIX_LIVE = "zentla_live_";
+const API_KEY_PREFIX_TEST = "zentla_test_";
 const API_KEY_LENGTH = 32;
 
 export interface GeneratedApiKey {

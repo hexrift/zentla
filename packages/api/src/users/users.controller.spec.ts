@@ -73,7 +73,7 @@ describe("UsersController", () => {
     it("should create user and return session", async () => {
       usersService.signup.mockResolvedValue({ user: mockUser });
       sessionService.createSession.mockResolvedValue({
-        token: "relay_session_abc123",
+        token: "zentla_session_abc123",
         session: mockSession,
       });
 
@@ -83,7 +83,7 @@ describe("UsersController", () => {
       );
 
       expect(result.user.email).toBe("test@example.com");
-      expect(result.session.token).toBe("relay_session_abc123");
+      expect(result.session.token).toBe("zentla_session_abc123");
       expect(result.workspaces).toHaveLength(1);
     });
 
@@ -92,12 +92,12 @@ describe("UsersController", () => {
         user: mockUser,
         initialApiKey: {
           id: "key_123",
-          secret: "relay_live_secret",
+          secret: "zentla_live_secret",
           prefix: "relay_live",
         },
       });
       sessionService.createSession.mockResolvedValue({
-        token: "relay_session_abc123",
+        token: "zentla_session_abc123",
         session: mockSession,
       });
 
@@ -114,7 +114,7 @@ describe("UsersController", () => {
     it("should include optional name in signup", async () => {
       usersService.signup.mockResolvedValue({ user: mockUser });
       sessionService.createSession.mockResolvedValue({
-        token: "relay_session_abc123",
+        token: "zentla_session_abc123",
         session: mockSession,
       });
 
@@ -139,7 +139,7 @@ describe("UsersController", () => {
     it("should authenticate user and return session", async () => {
       usersService.login.mockResolvedValue(mockUser);
       sessionService.createSession.mockResolvedValue({
-        token: "relay_session_abc123",
+        token: "zentla_session_abc123",
         session: mockSession,
       });
 
@@ -149,13 +149,13 @@ describe("UsersController", () => {
       );
 
       expect(result.user.email).toBe("test@example.com");
-      expect(result.session.token).toBe("relay_session_abc123");
+      expect(result.session.token).toBe("zentla_session_abc123");
     });
 
     it("should capture IP and user agent", async () => {
       usersService.login.mockResolvedValue(mockUser);
       sessionService.createSession.mockResolvedValue({
-        token: "relay_session_abc123",
+        token: "zentla_session_abc123",
         session: mockSession,
       });
 

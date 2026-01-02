@@ -54,7 +54,7 @@ export function createDomainEvent<T>(
     data,
     metadata: {
       version: 1,
-      source: "relay",
+      source: "zentla",
       ...metadata,
     },
     occurredAt: new Date(),

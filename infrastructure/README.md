@@ -1,6 +1,6 @@
-# Relay Infrastructure
+# Zentla Infrastructure
 
-Terraform configuration for deploying Relay to AWS.
+Terraform configuration for deploying Zentla to AWS.
 
 ## Architecture
 

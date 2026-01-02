@@ -91,7 +91,7 @@ export function FeedbackPage() {
             Thank you!
           </h2>
           <p className="text-gray-500 mb-6">
-            Your feedback helps us make Relay better. We appreciate you taking
+            Your feedback helps us make Zentla better. We appreciate you taking
             the time to share your thoughts.
           </p>
           <p className="text-sm text-gray-400">Redirecting to home page...</p>
@@ -104,7 +104,7 @@ export function FeedbackPage() {
     <div className="min-h-screen bg-gray-50">
       <SEO
         title="Feedback"
-        description="Share your feedback with the Relay team. Help us improve our subscription management API."
+        description="Share your feedback with the Zentla team. Help us improve our subscription management API."
         path="/feedback"
       />
       {/* Header */}
@@ -115,7 +115,7 @@ export function FeedbackPage() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <span className="text-lg font-semibold text-gray-900">Relay</span>
+              <span className="text-lg font-semibold text-gray-900">Zentla</span>
             </Link>
             <Link to="/" className="text-sm text-gray-500 hover:text-gray-700">
               Back to Home
@@ -131,7 +131,7 @@ export function FeedbackPage() {
             Send us Feedback
           </h1>
           <p className="text-lg text-gray-500">
-            Help us improve Relay during beta. We read every piece of feedback.
+            Help us improve Zentla during beta. We read every piece of feedback.
           </p>
         </div>
 
@@ -326,7 +326,7 @@ export function FeedbackPage() {
         </div>
 
         <p className="text-center text-sm text-gray-400 mt-6">
-          Your feedback helps shape the future of Relay
+          Your feedback helps shape the future of Zentla
         </p>
       </main>
     </div>

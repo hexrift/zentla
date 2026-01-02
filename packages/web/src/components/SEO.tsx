@@ -14,10 +14,10 @@ interface SEOProps {
   breadcrumbs?: BreadcrumbItem[];
 }
 
-const BASE_URL = "https://relay-web.pages.dev";
-const DEFAULT_TITLE = "Relay - Subscription Management API";
+const BASE_URL = "https://zentla.dev";
+const DEFAULT_TITLE = "Zentla - Subscription Management API";
 const DEFAULT_DESCRIPTION =
-  "Relay is a subscription management API for modern apps. Manage offers, customers, entitlements, and checkouts with a simple, provider-agnostic API.";
+  "Zentla is a subscription management API for modern apps. Manage offers, customers, entitlements, and checkouts with a simple, provider-agnostic API.";
 const DEFAULT_IMAGE = `${BASE_URL}/og-image.svg`;
 
 export function SEO({
@@ -28,7 +28,7 @@ export function SEO({
   image = DEFAULT_IMAGE,
   breadcrumbs,
 }: SEOProps) {
-  const fullTitle = title ? `${title} | Relay` : DEFAULT_TITLE;
+  const fullTitle = title ? `${title} | Zentla` : DEFAULT_TITLE;
   const url = `${BASE_URL}${path}`;
 
   // Generate BreadcrumbList JSON-LD schema

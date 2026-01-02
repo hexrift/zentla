@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { randomBytes, createHash } from "crypto";
 import { PrismaService } from "../database/prisma.service";
-import type { UserSession } from "@relay/database";
+import type { UserSession } from "@zentla/database";
 
 const SESSION_TOKEN_LENGTH = 32;
 const SESSION_PREFIX = "relay_session_";

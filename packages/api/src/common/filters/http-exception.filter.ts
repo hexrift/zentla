@@ -7,7 +7,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import type { Request, Response } from "express";
-import { ErrorCode } from "@relay/core";
+import { ErrorCode } from "@zentla/core";
 
 /**
  * Standardized API error response format.

@@ -30,12 +30,12 @@ export function SettingsPage() {
   const [zuoraError, setZuoraError] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedKey = localStorage.getItem("relay_api_key") ?? "";
+    const storedKey = localStorage.getItem("zentla_api_key") ?? "";
     setApiKey(storedKey);
   }, []);
 
   const handleSaveApiKey = () => {
-    localStorage.setItem("relay_api_key", apiKey);
+    localStorage.setItem("zentla_api_key", apiKey);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
     window.location.reload();
@@ -44,14 +44,14 @@ export function SettingsPage() {
   const { data: workspace } = useQuery({
     queryKey: ["workspace"],
     queryFn: () => api.workspace.get(),
-    enabled: !!localStorage.getItem("relay_api_key"),
+    enabled: !!localStorage.getItem("zentla_api_key"),
   });
 
   // Get actual provider status from API
   const { data: providerStatus } = useQuery({
     queryKey: ["providerStatus"],
     queryFn: () => api.workspace.getProviderStatus(),
-    enabled: !!localStorage.getItem("relay_api_key"),
+    enabled: !!localStorage.getItem("zentla_api_key"),
   });
 
   const stripeProvider = providerStatus?.providers?.find(
@@ -169,7 +169,7 @@ export function SettingsPage() {
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder="relay_test_..."
+                placeholder="zentla_test_..."
                 className="mt-1 block w-full max-w-md px-3 py-2 border border-gray-300 rounded-md font-mono"
               />
               <p className="mt-1 text-sm text-gray-500">

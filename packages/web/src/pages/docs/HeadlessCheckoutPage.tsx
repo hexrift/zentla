@@ -6,7 +6,7 @@ export function HeadlessCheckoutPage() {
     <article className="prose-docs">
       <SEO
         title="Headless Checkout"
-        description="Build fully custom checkout experiences while Relay handles pricing logic, entitlements, and provider integration."
+        description="Build fully custom checkout experiences while Zentla handles pricing logic, entitlements, and provider integration."
         path="/docs/headless-checkout"
         breadcrumbs={[
           { name: "Home", path: "/" },
@@ -16,13 +16,13 @@ export function HeadlessCheckoutPage() {
       />
       <h1>Headless Checkout</h1>
       <p className="lead text-lg text-gray-600 mb-8">
-        Build fully custom checkout experiences while Relay handles pricing
+        Build fully custom checkout experiences while Zentla handles pricing
         logic, entitlements, and provider integration behind the scenes.
       </p>
 
       <h2 id="overview">Overview</h2>
       <p>
-        Headless checkout lets you create your own payment UI while Relay
+        Headless checkout lets you create your own payment UI while Zentla
         manages:
       </p>
       <ul>
@@ -59,7 +59,7 @@ export function HeadlessCheckoutPage() {
               3. Confirm Intent
             </div>
             <div className="text-gray-600">
-              Relay provisions the subscription
+              Zentla provisions the subscription
             </div>
           </div>
         </div>
@@ -152,7 +152,7 @@ function App() {
 
       <h2 id="step-3-confirm-intent">Step 3: Confirm the Intent</h2>
       <p>
-        After Stripe confirms the payment, call Relay to provision the
+        After Stripe confirms the payment, call Zentla to provision the
         subscription:
       </p>
       <CodeBlock
@@ -356,7 +356,7 @@ function PaymentForm({ intentId }) {
       return;
     }
 
-    // Confirm with Relay
+    // Confirm with Zentla
     const res = await fetch(\`\${API_BASE}/checkout/intents/\${intentId}/confirm\`, {
       method: 'POST',
       headers: { 'x-api-key': API_KEY },

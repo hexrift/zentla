@@ -13,8 +13,8 @@ import type {
   PromotionStatus,
   Prisma,
 } from "@prisma/client";
-import type { PaginatedResult } from "@relay/database";
-import type { PromotionConfig, PromotionValidationResult } from "@relay/core";
+import type { PaginatedResult } from "@zentla/database";
+import type { PromotionConfig, PromotionValidationResult } from "@zentla/core";
 
 export interface PromotionWithVersions extends Promotion {
   versions: PromotionVersion[];

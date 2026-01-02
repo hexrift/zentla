@@ -10,7 +10,7 @@ import { ProviderRefService } from "../billing/provider-ref.service";
 import { OffersService } from "../offers/offers.service";
 import { EntitlementsService } from "../entitlements/entitlements.service";
 import type { Subscription, SubscriptionStatus, Prisma } from "@prisma/client";
-import type { PaginatedResult } from "@relay/database";
+import type { PaginatedResult } from "@zentla/database";
 
 export interface SubscriptionWithRelations extends Subscription {
   customer: {

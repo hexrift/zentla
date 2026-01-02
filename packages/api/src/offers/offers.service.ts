@@ -8,7 +8,7 @@ import { PrismaService } from "../database/prisma.service";
 import { BillingService, ProviderType } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
 import type { Offer, OfferVersion, OfferStatus, Prisma } from "@prisma/client";
-import type { PaginatedResult } from "@relay/database";
+import type { PaginatedResult } from "@zentla/database";
 
 const DEFAULT_PROVIDER: ProviderType = "stripe";
 

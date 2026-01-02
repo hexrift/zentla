@@ -27,7 +27,7 @@ import type {
   ApiKeyRole,
   ApiKeyEnvironment,
   WorkspaceRole,
-} from "@relay/database";
+} from "@zentla/database";
 
 // ============================================================================
 // REQUEST DTOs

@@ -18,9 +18,9 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: relay-api
+  ECR_REPOSITORY: zentla-api
   ECS_CLUSTER: relay-cluster
-  ECS_SERVICE: relay-api
+  ECS_SERVICE: zentla-api
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -175,7 +175,7 @@ jobs:
       - name: Download task definition
         run: |
           aws ecs describe-task-definition \
-            --task-definition relay-api \
+            --task-definition zentla-api \
             --query taskDefinition > task-definition.json
 
       - name: Update task definition with new image
@@ -230,7 +230,7 @@ jobs:
         run: yarn install --immutable
 
       - name: Build Admin UI
-        run: yarn workspace @relay/admin-ui build
+        run: yarn workspace @zentla/admin-ui build
         env:
           VITE_API_URL: ${{ secrets.API_URL }}
 

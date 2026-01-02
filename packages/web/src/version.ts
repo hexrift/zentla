@@ -1,4 +1,4 @@
-// Central version information for Relay
+// Central version information for Zentla
 // Auto-updated by release-please - do not edit manually
 
 export const VERSION = {
@@ -17,4 +17,4 @@ export const VERSION = {
 export const API_VERSION = VERSION.major.toString();
 
 // Full semver version
-export const RELAY_VERSION = VERSION.full;
+export const ZENTLA_VERSION = VERSION.full;

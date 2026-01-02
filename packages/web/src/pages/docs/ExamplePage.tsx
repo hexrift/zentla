@@ -8,7 +8,7 @@ export function ExamplePage() {
     <article className="prose-docs">
       <SEO
         title="End-to-End Example"
-        description="A complete walkthrough of the Relay subscription lifecycle: from creating an offer to handling webhooks when a customer subscribes."
+        description="A complete walkthrough of the Zentla subscription lifecycle: from creating an offer to handling webhooks when a customer subscribes."
         path="/docs/example"
         breadcrumbs={[
           { name: "Home", path: "/" },
@@ -18,7 +18,7 @@ export function ExamplePage() {
       />
       <h1>End-to-End Example</h1>
       <p className="lead text-lg text-gray-600 mb-8">
-        A complete walkthrough of the Relay subscription lifecycle: from
+        A complete walkthrough of the Zentla subscription lifecycle: from
         creating an offer to handling webhooks when a customer subscribes.
       </p>
 
@@ -157,7 +157,7 @@ const API_BASE = '${API_BASE}';
 const API_KEY = process.env.RELAY_API_KEY;
 const WEBHOOK_SECRET = process.env.RELAY_WEBHOOK_SECRET;
 
-// Helper for Relay API calls
+// Helper for Zentla API calls
 async function relayApi(method, path, body) {
   const res = await fetch(\`\${API_BASE}\${path}\`, {
     method,
@@ -170,7 +170,7 @@ async function relayApi(method, path, body) {
   return res.json();
 }
 
-// Create or get Relay customer for your user
+// Create or get Zentla customer for your user
 app.post('/api/subscribe', express.json(), async (req, res) => {
   const { userId, email, name, offerId, promotionCode } = req.body;
 
@@ -360,7 +360,7 @@ function App() {
       <ol>
         <li>
           <strong>Start your servers</strong>
-          <CodeBlock title="Terminal" language="bash">{`# Terminal 1: Relay API
+          <CodeBlock title="Terminal" language="bash">{`# Terminal 1: Zentla API
 cd packages/api && yarn dev
 
 # Terminal 2: Your backend

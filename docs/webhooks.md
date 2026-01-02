@@ -1,11 +1,11 @@
 # Webhooks
 
-Relay uses webhooks to notify your application of events in real-time.
+Zentla uses webhooks to notify your application of events in real-time.
 
 ## Event Flow
 
 ```
-Provider (Stripe) -> Relay Inbound Webhook -> Normalize Event -> Outbox -> Your Webhook Endpoint
+Provider (Stripe) -> Zentla Inbound Webhook -> Normalize Event -> Outbox -> Your Webhook Endpoint
 ```
 
 ## Setting Up Webhooks
@@ -102,7 +102,7 @@ function verifySignature(
 
 ## Entitlement Lifecycle
 
-Relay automatically manages entitlements based on subscription events:
+Zentla automatically manages entitlements based on subscription events:
 
 | Event                                 | Entitlement Action                                      |
 | ------------------------------------- | ------------------------------------------------------- |
@@ -112,7 +112,7 @@ Relay automatically manages entitlements based on subscription events:
 | Subscription canceled (at period end) | Entitlements remain until period end, then revoked      |
 | Subscription deleted                  | All entitlements revoked                                |
 
-This means your application can simply query the entitlements API to check access - Relay handles the lifecycle automatically.
+This means your application can simply query the entitlements API to check access - Zentla handles the lifecycle automatically.
 
 ## Event Types
 
@@ -292,7 +292,7 @@ Fired when an invoice payment attempt fails.
 Webhook signatures use HMAC-SHA256 and include a timestamp:
 
 ```
-Relay-Signature: t=1705315800,v1=abc123def456...
+Zentla-Signature: t=1705315800,v1=abc123def456...
 ```
 
 - `t`: Unix timestamp when the webhook was sent

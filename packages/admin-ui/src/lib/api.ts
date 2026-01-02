@@ -20,8 +20,8 @@ import type {
 const API_BASE = `${import.meta.env.VITE_API_URL || ""}/api/v1`;
 
 // Storage keys
-const SESSION_TOKEN_KEY = "relay_session_token";
-const CURRENT_WORKSPACE_KEY = "relay_current_workspace";
+const SESSION_TOKEN_KEY = "zentla_session_token";
+const CURRENT_WORKSPACE_KEY = "zentla_current_workspace";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -136,7 +136,7 @@ async function fetchApi<T>(
 ): Promise<T> {
   // Prefer session token, fall back to API key for backwards compatibility
   const sessionToken = getSessionToken();
-  const apiKey = localStorage.getItem("relay_api_key") ?? "";
+  const apiKey = localStorage.getItem("zentla_api_key") ?? "";
   const token = sessionToken || apiKey;
 
   if (!token) {

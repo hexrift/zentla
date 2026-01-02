@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet, Link, NavLink, useLocation } from "react-router-dom";
 import { clsx } from "clsx";
-import { RELAY_VERSION } from "../version";
+import { ZENTLA_VERSION } from "../version";
 
 const DASHBOARD_URL =
   import.meta.env.VITE_DASHBOARD_URL || "http://localhost:3001";
@@ -173,9 +173,9 @@ export function DocsLayout() {
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center">
                   <span className="text-white font-bold text-xs">R</span>
                 </div>
-                <span className="font-semibold text-gray-900">Relay</span>
+                <span className="font-semibold text-gray-900">Zentla</span>
                 <span className="ml-1 px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">
-                  Beta · {RELAY_VERSION}
+                  Beta · {ZENTLA_VERSION}
                 </span>
               </Link>
               <span className="hidden sm:block text-gray-300">|</span>
@@ -330,7 +330,7 @@ export function DocsLayout() {
             <div className="mt-8 p-4 bg-gray-50 rounded-xl">
               <h5 className="font-medium text-gray-900 mb-1">Have feedback?</h5>
               <p className="text-sm text-gray-500 mb-3">
-                Help us improve Relay during beta.
+                Help us improve Zentla during beta.
               </p>
               <Link
                 to="/feedback"

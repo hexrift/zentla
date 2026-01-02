@@ -7,7 +7,7 @@ import {
 import { Observable } from "rxjs";
 import { tap } from "rxjs/operators";
 import type { Response } from "express";
-import { API_VERSION, RELAY_VERSION } from "../version";
+import { API_VERSION, ZENTLA_VERSION } from "../version";
 
 const API_DEPRECATED = false;
 
@@ -19,8 +19,8 @@ export class ApiVersionInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => {
         response.setHeader("X-API-Version", API_VERSION);
-        response.setHeader("X-Relay-Version", RELAY_VERSION);
-        response.setHeader("X-Relay-API-Deprecated", String(API_DEPRECATED));
+        response.setHeader("X-Zentla-Version", ZENTLA_VERSION);
+        response.setHeader("X-Zentla-API-Deprecated", String(API_DEPRECATED));
       }),
     );
   }

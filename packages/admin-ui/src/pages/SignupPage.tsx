@@ -72,7 +72,7 @@ export default function SignupPage() {
               </div>
             </div>
             <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-              Welcome to Relay!
+              Welcome to Zentla!
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
               Your account and workspace have been created.

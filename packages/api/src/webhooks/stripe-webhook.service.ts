@@ -4,7 +4,7 @@ import { BillingService, ProviderType } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
 import { OutboxService } from "./outbox.service";
 import { EntitlementsService } from "../entitlements/entitlements.service";
-import type { StripeAdapter } from "@relay/stripe-adapter";
+import type { StripeAdapter } from "@zentla/stripe-adapter";
 import type Stripe from "stripe";
 import type { Prisma } from "@prisma/client";
 
@@ -102,8 +102,8 @@ export class StripeWebhookService {
   private async handleCheckoutCompleted(event: Stripe.Event): Promise<void> {
     const session = event.data.object as Stripe.Checkout.Session;
     const metadata = session.metadata ?? {};
-    const workspaceId = metadata.relay_workspace_id;
-    const checkoutId = metadata.relay_checkout_id;
+    const workspaceId = metadata.zentla_workspace_id;
+    const checkoutId = metadata.zentla_checkout_id;
 
     if (!workspaceId) {
       this.logger.warn("No workspace ID in checkout session metadata");
@@ -178,7 +178,7 @@ export class StripeWebhookService {
   private async handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
     const stripeSubscription = event.data.object as Stripe.Subscription;
     const metadata = stripeSubscription.metadata ?? {};
-    const workspaceId = metadata.relay_workspace_id;
+    const workspaceId = metadata.zentla_workspace_id;
 
     if (!workspaceId) {
       // Try to infer workspace from customer

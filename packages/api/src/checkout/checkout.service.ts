@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
 import { BillingService, ProviderType } from "../billing/billing.service";
-import type { StripeAdapter } from "@relay/stripe-adapter";
+import type { StripeAdapter } from "@zentla/stripe-adapter";
 import { ProviderRefService } from "../billing/provider-ref.service";
 import { OffersService } from "../offers/offers.service";
 import type { Checkout, CheckoutIntent, Prisma } from "@prisma/client";

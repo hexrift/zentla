@@ -128,7 +128,7 @@ export function HomePage() {
               <span className="block text-primary-600">for modern apps</span>
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-              Relay manages offers, customers, entitlements, and checkouts.
+              Zentla manages offers, customers, entitlements, and checkouts.
               Connect to Stripe with a simple API.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -262,7 +262,7 @@ export function HomePage() {
               Works with your billing provider
             </h2>
             <p className="mt-4 text-gray-600 max-w-xl mx-auto">
-              Connect Relay to your existing payment infrastructure
+              Connect Zentla to your existing payment infrastructure
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-16">

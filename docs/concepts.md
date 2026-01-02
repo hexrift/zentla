@@ -1,16 +1,16 @@
 # Core Concepts
 
-## What is Relay?
+## What is Zentla?
 
-Relay manages subscriptions, customers, entitlements, and checkouts. It connects your application to billing providers like Stripe, handling the complexity so you don't have to.
+Zentla manages subscriptions, customers, entitlements, and checkouts. It connects your application to billing providers like Stripe, handling the complexity so you don't have to.
 
 ### ProviderRef Mapping
 
-Every entity in Relay can be mapped to external provider IDs via the `ProviderRef` table:
+Every entity in Zentla can be mapped to external provider IDs via the `ProviderRef` table:
 
 ```
-Relay Offer (id: abc-123) <-> Stripe Product (id: prod_xyz)
-Relay Subscription <-> Stripe Subscription
+Zentla Offer (id: abc-123) <-> Stripe Product (id: prod_xyz)
+Zentla Subscription <-> Stripe Subscription
 ```
 
 This allows:
@@ -85,31 +85,31 @@ Workspace A
 ├── Offers
 ├── Customers
 ├── Subscriptions
-└── API Keys (relay_live_aaa..., relay_test_aaa...)
+└── API Keys (zentla_live_aaa..., zentla_test_aaa...)
 
 Workspace B
 ├── Offers
 ├── Customers
 ├── Subscriptions
-└── API Keys (relay_live_bbb..., relay_test_bbb...)
+└── API Keys (zentla_live_bbb..., zentla_test_bbb...)
 ```
 
 ### Environment Separation
 
-- `relay_live_*` - Production environment
-- `relay_test_*` - Test environment
+- `zentla_live_*` - Production environment
+- `zentla_test_*` - Test environment
 
 Test keys interact with test data and Stripe test mode.
 
 ## Webhooks
 
-### Inbound (Provider -> Relay)
+### Inbound (Provider -> Zentla)
 
 ```
 Stripe Webhook -> /webhooks/stripe -> Verify Signature -> Normalize -> Outbox
 ```
 
-### Outbound (Relay -> Your App)
+### Outbound (Zentla -> Your App)
 
 ```
 Outbox Event -> Fan-out to Endpoints -> Sign Payload -> Deliver with Retry
@@ -137,7 +137,7 @@ Outbox Event -> Fan-out to Endpoints -> Sign Payload -> Deliver with Retry
 5. Redirect customer to provider checkout (Stripe Checkout)
 6. Customer completes payment
 7. Webhook received (checkout.session.completed)
-8. Relay creates Customer, Subscription, Entitlements
+8. Zentla creates Customer, Subscription, Entitlements
 9. Redirect to successUrl
 ```
 

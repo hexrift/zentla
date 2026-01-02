@@ -1,6 +1,6 @@
 # Golden Path Analysis
 
-End-to-end walkthrough of the Relay subscription flow with gap analysis.
+End-to-end walkthrough of the Zentla subscription flow with gap analysis.
 
 ## The Golden Path
 
@@ -86,7 +86,7 @@ POST /api/v1/offers/:id/publish
 
 ### Step 3: Create Checkout Session
 
-**Action**: Developer's app calls Relay to start checkout
+**Action**: Developer's app calls Zentla to start checkout
 
 **API Call**:
 
@@ -153,14 +153,14 @@ POST /api/v1/checkout/sessions
 
 ### Step 5: Subscription Created
 
-**Action**: Relay creates subscription from webhook
+**Action**: Zentla creates subscription from webhook
 
 **Expected**:
 
 1. Parse `checkout.session.completed` event
 2. Extract `subscription` ID from event
 3. Fetch full subscription from Stripe
-4. Create Relay Subscription record
+4. Create Zentla Subscription record
 5. Create `provider_ref` mapping
 6. Emit `subscription.created` domain event
 

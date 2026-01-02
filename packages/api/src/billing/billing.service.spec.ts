@@ -4,7 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { BillingService } from "./billing.service";
 
 // Mock the StripeAdapter module
-vi.mock("@relay/stripe-adapter", () => {
+vi.mock("@zentla/stripe-adapter", () => {
   return {
     StripeAdapter: class MockStripeAdapter {
       getAccountInfo = vi.fn().mockResolvedValue({ id: "acct_123" });
