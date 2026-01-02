@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.2](https://github.com/PrimeCodeLabs/zentla/compare/v1.7.1...v1.7.2) (2026-01-02)
+
+
+### Bug Fixes
+
+* resolve release-please workflow JSON parsing error ([7756853](https://github.com/PrimeCodeLabs/zentla/commit/775685392d3de2fff763a463c38acb1001b22ddd))
+* resolve release-please workflow JSON parsing error ([9dd6a09](https://github.com/PrimeCodeLabs/zentla/commit/9dd6a096b7c6850c83c672e0923fe130a6d40780))
+
 ## [1.7.1](https://github.com/PrimeCodeLabs/zentla/compare/v1.7.0...v1.7.1) (2026-01-02)
 
 
