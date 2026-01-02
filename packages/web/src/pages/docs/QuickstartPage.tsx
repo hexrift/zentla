@@ -197,7 +197,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
           to hear from you.
         </p>
         <a
-          href="https://github.com/your-org/relay/issues"
+          href="https://github.com/PrimeCodeLabs/zentla/issues"
           target="_blank"
           rel="noopener"
           className="text-sm font-medium text-primary-600 hover:text-primary-700"

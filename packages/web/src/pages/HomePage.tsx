@@ -5,7 +5,7 @@ const API_DOCS_URL =
   import.meta.env.VITE_API_DOCS_URL || "http://localhost:3002/docs";
 
 const codeExample = `// 1. Create an offer
-const offer = await relay.offers.create({
+const offer = await zentla.offers.create({
   name: 'Pro Offer',
   config: {
     pricing: { model: 'flat', amount: 2900, currency: 'USD', interval: 'month' },
@@ -17,7 +17,7 @@ const offer = await relay.offers.create({
 });
 
 // 2. Create a checkout session
-const checkout = await relay.checkout.createSession({
+const checkout = await zentla.checkout.createSession({
   offerId: offer.id,
   successUrl: 'https://yourapp.com/success',
   cancelUrl: 'https://yourapp.com/cancel'
@@ -25,7 +25,7 @@ const checkout = await relay.checkout.createSession({
 
 // 3. Redirect customer to checkout.url
 // After payment, check entitlements:
-const access = await relay.customers.checkEntitlement(customerId, 'api_access');
+const access = await zentla.customers.checkEntitlement(customerId, 'api_access');
 // { featureKey: 'api_access', hasAccess: true }`;
 
 const features = [

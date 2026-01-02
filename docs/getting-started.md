@@ -15,7 +15,7 @@ Get from zero to your first Stripe test checkout in under 10 minutes.
 
 ```bash
 git clone https://github.com/PrimeCodeLabs/zentla.git
-cd relay
+cd zentla
 yarn install
 ```
 

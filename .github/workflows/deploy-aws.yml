@@ -19,7 +19,7 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: zentla-api
-  ECS_CLUSTER: relay-cluster
+  ECS_CLUSTER: zentla-cluster
   ECS_SERVICE: zentla-api
 
 jobs:
@@ -122,7 +122,7 @@ jobs:
           # Run migration task
           TASK_ARN=$(aws ecs run-task \
             --cluster ${{ env.ECS_CLUSTER }} \
-            --task-definition relay-migrate \
+            --task-definition zentla-migrate \
             --launch-type FARGATE \
             --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.SUBNET_IDS }}],securityGroups=[${{ secrets.SECURITY_GROUP_ID }}],assignPublicIp=DISABLED}" \
             --query 'tasks[0].taskArn' \

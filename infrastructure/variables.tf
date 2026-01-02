@@ -8,7 +8,7 @@
 variable "project" {
   description = "Project name used for resource naming"
   type        = string
-  default     = "relay"
+  default     = "zentla"
 }
 
 variable "environment" {
@@ -48,7 +48,7 @@ variable "availability_zones" {
 variable "database_name" {
   description = "Name of the PostgreSQL database"
   type        = string
-  default     = "relay"
+  default     = "zentla"
 }
 
 variable "database_username" {

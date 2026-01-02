@@ -37,9 +37,9 @@ export function VersioningPage() {
       <CodeBlock
         title="API endpoints"
         language="text"
-      >{`https://api.relay.com/api/v1/offers
-https://api.relay.com/api/v1/customers
-https://api.relay.com/api/v1/subscriptions`}</CodeBlock>
+      >{`https://api.zentla.dev/api/v1/offers
+https://api.zentla.dev/api/v1/customers
+https://api.zentla.dev/api/v1/subscriptions`}</CodeBlock>
 
       <h3>Version Lifecycle</h3>
       <div className="not-prose my-6 overflow-x-auto">
@@ -140,7 +140,7 @@ https://api.relay.com/api/v1/subscriptions`}</CodeBlock>
       >{`# Example deprecation header
 X-Zentla-Deprecated: true
 X-Zentla-Sunset: 2025-06-01
-X-Zentla-Migration: See https://relay.com/docs/migrations/v2`}</CodeBlock>
+X-Zentla-Migration: See https://zentla.dev/docs/migrations/v2`}</CodeBlock>
 
       <h2 id="beta-considerations">Beta Considerations</h2>
       <p>
@@ -267,7 +267,7 @@ X-Zentla-Migration: See https://relay.com/docs/migrations/v2`}</CodeBlock>
       <ul>
         <li>
           <a
-            href="https://github.com/your-org/relay/releases"
+            href="https://github.com/PrimeCodeLabs/zentla/releases"
             target="_blank"
             rel="noopener"
           >
@@ -285,14 +285,14 @@ X-Zentla-Migration: See https://relay.com/docs/migrations/v2`}</CodeBlock>
       <ul>
         <li>
           <a
-            href="https://github.com/your-org/relay/issues"
+            href="https://github.com/PrimeCodeLabs/zentla/issues"
             target="_blank"
             rel="noopener"
           >
             Open an issue on GitHub
           </a>
         </li>
-        <li>Email us at support@relay.com</li>
+        <li>Email us at support@zentla.dev</li>
         <li>Join our Discord community (coming soon)</li>
       </ul>
 

@@ -24,7 +24,7 @@ export class RelayClient {
 
   constructor(config: RelayClientConfig) {
     this.apiKey = config.apiKey;
-    this.baseUrl = config.baseUrl ?? "https://api.relay.com/api/v1";
+    this.baseUrl = config.baseUrl ?? "https://api.zentla.dev/api/v1";
   }
 
   private async request<T>(

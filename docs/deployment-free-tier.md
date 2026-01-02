@@ -8,7 +8,7 @@ Deploy Zentla using free-tier services for beta testing and development.
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Cloudflare Pages                          │
 │  ┌─────────────────────┐    ┌─────────────────────┐             │
-│  │   zentla-admin       │    │    relay-web        │             │
+│  │   zentla-admin       │    │    zentla-web        │             │
 │  │   (Admin Dashboard) │    │    (Checkout UI)    │             │
 │  └─────────────────────┘    └─────────────────────┘             │
 └─────────────────────────────────────────────────────────────────┘
@@ -71,7 +71,7 @@ Add these secrets to your repository (Settings → Secrets → Actions):
 
 | Secret                  | Description                       | Example                                                         |
 | ----------------------- | --------------------------------- | --------------------------------------------------------------- |
-| `DATABASE_URL`          | Neon PostgreSQL connection string | `postgresql://user:pass@ep-xyz.neon.tech/relay?sslmode=require` |
+| `DATABASE_URL`          | Neon PostgreSQL connection string | `postgresql://user:pass@ep-xyz.neon.tech/zentla?sslmode=require` |
 | `REDIS_URL`             | Upstash Redis URL                 | `rediss://default:xxx@us1-xxx.upstash.io:6379`                  |
 | `CLOUDFLARE_API_TOKEN`  | Cloudflare API token              | `xxxxxxxx`                                                      |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID             | `abc123def456`                                                  |
@@ -110,7 +110,7 @@ wrangler login
 
 # Create projects (do this once)
 wrangler pages project create zentla-admin
-wrangler pages project create relay-web
+wrangler pages project create zentla-web
 ```
 
 ### 2. Create Koyeb App

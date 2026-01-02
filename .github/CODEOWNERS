@@ -8,7 +8,7 @@
 # =============================================================================
 
 # Default owners for everything
-*                                   @your-org/relay-team
+*                                   @your-org/zentla-team
 
 # API and backend
 /packages/api/                      @your-org/backend-team

@@ -129,7 +129,7 @@ curl -X POST ${API_BASE}/offers/$OFFER_ID/publish \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: $API_KEY" \\
   -d '{
-    "url": "https://yourapp.com/webhooks/relay",
+    "url": "https://yourapp.com/webhooks/zentla",
     "events": [
       "subscription.created",
       "subscription.updated",
@@ -225,8 +225,8 @@ app.get('/api/check-access/:featureKey', async (req, res) => {
 });
 
 // Webhook handler
-app.post('/webhooks/relay', express.raw({ type: 'application/json' }), (req, res) => {
-  const signature = req.headers['x-relay-signature'];
+app.post('/webhooks/zentla', express.raw({ type: 'application/json' }), (req, res) => {
+  const signature = req.headers['x-zentla-signature'];
   const payload = req.body.toString();
 
   // Verify signature

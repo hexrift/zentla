@@ -84,7 +84,7 @@ All payment references use provider tokens:
 Card collection happens entirely on the provider's domain:
 
 ```
-1. Your app calls Zentla SDK: relay.checkout.createSession()
+1. Your app calls Zentla SDK: zentla.checkout.createSession()
 2. Zentla creates session, gets Stripe Checkout URL
 3. Customer redirected to checkout.stripe.com
 4. Card entered directly on Stripe (never touches Zentla)

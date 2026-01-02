@@ -42,7 +42,7 @@ export function WebhooksPage() {
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_API_KEY" \\
   -d '{
-    "url": "https://yourapp.com/webhooks/relay",
+    "url": "https://yourapp.com/webhooks/zentla",
     "events": [
       "subscription.created",
       "subscription.updated",
@@ -55,7 +55,7 @@ export function WebhooksPage() {
 # Response
 {
   "id": "we_...",
-  "url": "https://yourapp.com/webhooks/relay",
+  "url": "https://yourapp.com/webhooks/zentla",
   "events": ["subscription.created", ...],
   "secret": "whsec_...",
   "status": "active"
@@ -107,8 +107,8 @@ function verifyWebhookSignature(payload, signature, secret) {
 }
 
 // Express example
-app.post('/webhooks/relay', express.raw({ type: 'application/json' }), (req, res) => {
-  const signature = req.headers['x-relay-signature'];
+app.post('/webhooks/zentla', express.raw({ type: 'application/json' }), (req, res) => {
+  const signature = req.headers['x-zentla-signature'];
   const payload = req.body.toString();
 
   if (!verifyWebhookSignature(payload, signature, process.env.WEBHOOK_SECRET)) {
@@ -379,7 +379,7 @@ curl -X POST http://localhost:3002/api/v1/webhook-endpoints \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_API_KEY" \\
   -d '{
-    "url": "https://abc123.ngrok.io/webhooks/relay",
+    "url": "https://abc123.ngrok.io/webhooks/zentla",
     "events": ["*"]
   }'`}</CodeBlock>
 
