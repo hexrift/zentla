@@ -29,6 +29,7 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
       version: ${{ steps.release.outputs.version }}
+      pr_number: ${{ steps.release.outputs.pr && fromJSON(steps.release.outputs.pr).number || '' }}
     steps:
       - name: Release Please
         id: release
@@ -36,6 +37,24 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      # Auto-merge release PR (only updates version/changelog, code already passed CI)
+      # Uses RELEASE_TOKEN (PAT with admin rights) to bypass branch protection
+      # If not set, enables auto-merge which waits for checks
+      - name: Auto-merge release PR
+        if: ${{ steps.release.outputs.pr }}
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ fromJSON(steps.release.outputs.pr).number }}
+        run: |
+          echo "Merging PR #$PR_NUMBER"
+          if [ -n "${{ secrets.RELEASE_TOKEN }}" ]; then
+            # PAT available - merge immediately (bypasses checks)
+            gh pr merge $PR_NUMBER --merge --repo ${{ github.repository }}
+          else
+            # No PAT - enable auto-merge (waits for checks)
+            gh pr merge $PR_NUMBER --auto --merge --repo ${{ github.repository }}
+          fi
 
       - name: Log release info
         if: ${{ steps.release.outputs.release_created }}
