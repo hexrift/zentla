@@ -90,7 +90,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       ) {
         const responseObj = exceptionResponse as Record<string, unknown>;
 
-        // Check if this is a RelayException with a code
+        // Check if this is a ZentlaException with a code
         if (responseObj.code && typeof responseObj.code === "string") {
           code = responseObj.code as ErrorCode;
         } else {

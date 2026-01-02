@@ -171,7 +171,7 @@ export function DocsLayout() {
               </button>
               <Link to="/" className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">R</span>
+                  <span className="text-white font-bold text-xs">Z</span>
                 </div>
                 <span className="font-semibold text-gray-900">Zentla</span>
                 <span className="ml-1 px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">

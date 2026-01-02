@@ -18,7 +18,7 @@ export function Layout() {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">R</span>
+                <span className="text-white font-bold text-sm">Z</span>
               </div>
               <span className="text-lg font-semibold text-gray-900">
                 Zentla
@@ -159,7 +159,7 @@ export function Layout() {
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">R</span>
+                  <span className="text-white font-bold text-xs">Z</span>
                 </div>
                 <span className="font-semibold text-gray-900">Zentla</span>
               </div>

@@ -1,4 +1,4 @@
-// Central version information for the Relay API
+// Central version information for the Zentla API
 // Auto-updated by release-please - do not edit manually
 
 export const VERSION = {

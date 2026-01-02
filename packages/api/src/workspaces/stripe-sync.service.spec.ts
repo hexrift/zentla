@@ -238,7 +238,7 @@ describe("StripeSyncService", () => {
       });
       providerRefService.findByExternalId.mockResolvedValue(null);
       prisma.customer.findFirst.mockResolvedValue(null);
-      prisma.customer.create.mockResolvedValue({ id: "cust_relay" });
+      prisma.customer.create.mockResolvedValue({ id: "cust_zentla" });
 
       await service.syncFromStripe("ws_123");
 
@@ -333,7 +333,7 @@ describe("StripeSyncService", () => {
 
       expect(result.subscriptionsSkipped).toBe(1);
       expect(result.errors).toContainEqual(
-        expect.stringContaining("not linked to Relay offer"),
+        expect.stringContaining("not linked to Zentla offer"),
       );
     });
 

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { HttpStatus } from "@nestjs/common";
 import {
-  RelayException,
+  ZentlaException,
   ResourceNotFoundException,
   ResourceConflictException,
   ResourceExpiredException,
@@ -21,9 +21,9 @@ import {
 } from "./index";
 import { ErrorCode } from "@zentla/core";
 
-describe("RelayException", () => {
+describe("ZentlaException", () => {
   it("should create exception with code and message", () => {
-    const exception = new RelayException(
+    const exception = new ZentlaException(
       ErrorCode.RESOURCE_NOT_FOUND,
       "Not found",
     );
@@ -36,7 +36,7 @@ describe("RelayException", () => {
   });
 
   it("should use provided status", () => {
-    const exception = new RelayException(
+    const exception = new ZentlaException(
       ErrorCode.RESOURCE_NOT_FOUND,
       "Custom",
       HttpStatus.BAD_REQUEST,
@@ -46,7 +46,7 @@ describe("RelayException", () => {
   });
 
   it("should include details in response", () => {
-    const exception = new RelayException(
+    const exception = new ZentlaException(
       ErrorCode.RESOURCE_NOT_FOUND,
       "Not found",
       HttpStatus.NOT_FOUND,

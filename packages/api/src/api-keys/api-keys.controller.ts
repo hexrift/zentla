@@ -152,7 +152,7 @@ export class ApiKeysController {
   @OwnerOnly()
   @ApiOperation({
     summary: "Create API key",
-    description: `Creates a new API key for authenticating with the Relay API.
+    description: `Creates a new API key for authenticating with the Zentla API.
 
 **Important:** The secret is only returned once in this response. Store it securely immediately.
 

@@ -93,7 +93,7 @@ describe("UsersController", () => {
         initialApiKey: {
           id: "key_123",
           secret: "zentla_live_secret",
-          prefix: "relay_live",
+          prefix: "zentla_live",
         },
       });
       sessionService.createSession.mockResolvedValue({

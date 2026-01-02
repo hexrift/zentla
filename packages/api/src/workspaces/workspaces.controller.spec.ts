@@ -248,7 +248,7 @@ describe("WorkspacesController", () => {
         customersSkipped: 0,
         subscriptionsImported: 3,
         subscriptionsSkipped: 2,
-        errors: ["Price price_123 not found in Relay"],
+        errors: ["Price price_123 not found in Zentla"],
       };
       stripeSyncService.syncFromStripe.mockResolvedValue(syncResult);
 

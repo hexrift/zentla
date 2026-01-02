@@ -22,7 +22,7 @@ export interface CreateCheckoutDto {
   successUrl: string;
   cancelUrl: string;
   allowPromotionCodes?: boolean;
-  promotionCode?: string; // Pre-validated Relay promotion code
+  promotionCode?: string; // Pre-validated Zentla promotion code
   trialDays?: number;
   metadata?: Record<string, unknown>;
 }
@@ -353,7 +353,7 @@ export class CheckoutService {
     let promotionVersionId: string | undefined;
 
     if (dto.promotionCode) {
-      // Look up the Relay promotion by code
+      // Look up the Zentla promotion by code
       const promotion = await this.prisma.promotion.findFirst({
         where: {
           workspaceId,

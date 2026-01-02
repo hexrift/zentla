@@ -170,8 +170,8 @@ Use this to recover from:
 - Missing subscriptions due to webhook failures
 
 **What gets synced:**
-- Customers: Created in Relay and linked to Stripe customer ID
-- Subscriptions: Matched to Relay offers via Stripe price IDs
+- Customers: Created in Zentla and linked to Stripe customer ID
+- Subscriptions: Matched to Zentla offers via Stripe price IDs
 
 **Prerequisites:**
 - Offers must be synced to Stripe first (prices must exist)

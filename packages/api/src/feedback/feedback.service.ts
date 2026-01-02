@@ -15,7 +15,7 @@ export class FeedbackService {
     this.githubToken = this.configService.get<string>("GH_PAT");
     this.githubRepo = this.configService.get<string>(
       "GH_FEEDBACK_REPO",
-      "PrimeCodeLabs/relay",
+      "PrimeCodeLabs/zentla",
     );
   }
 

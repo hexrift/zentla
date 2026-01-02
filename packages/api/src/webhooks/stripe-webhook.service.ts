@@ -193,7 +193,7 @@ export class StripeWebhookService {
 
       if (!customerRef) {
         throw new Error(
-          `No workspace found for subscription ${stripeSubscription.id} - customer ${stripeCustomerId} not linked to Relay. Ensure webhook is configured before first checkout.`,
+          `No workspace found for subscription ${stripeSubscription.id} - customer ${stripeCustomerId} not linked to Zentla. Ensure webhook is configured before first checkout.`,
         );
       }
 
@@ -255,7 +255,7 @@ export class StripeWebhookService {
 
     if (!priceRef) {
       throw new Error(
-        `Price ref not found for Stripe price ${priceId}. This price may not have been synced from Relay.`,
+        `Price ref not found for Stripe price ${priceId}. This price may not have been synced from Zentla.`,
       );
     }
 
