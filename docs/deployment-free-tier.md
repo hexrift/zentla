@@ -69,16 +69,16 @@ Add these secrets to your repository (Settings → Secrets → Actions):
 
 ### Required Secrets
 
-| Secret                  | Description                       | Example                                                         |
-| ----------------------- | --------------------------------- | --------------------------------------------------------------- |
+| Secret                  | Description                       | Example                                                          |
+| ----------------------- | --------------------------------- | ---------------------------------------------------------------- |
 | `DATABASE_URL`          | Neon PostgreSQL connection string | `postgresql://user:pass@ep-xyz.neon.tech/zentla?sslmode=require` |
-| `REDIS_URL`             | Upstash Redis URL                 | `rediss://default:xxx@us1-xxx.upstash.io:6379`                  |
-| `CLOUDFLARE_API_TOKEN`  | Cloudflare API token              | `xxxxxxxx`                                                      |
-| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID             | `abc123def456`                                                  |
-| `KOYEB_API_TOKEN`       | Koyeb API token                   | `xxxxxxxx`                                                      |
-| `JWT_SECRET`            | JWT signing secret (32+ chars)    | Generate: `openssl rand -hex 32`                                |
-| `STRIPE_SECRET_KEY`     | Stripe secret key                 | `sk_test_xxx`                                                   |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret     | `whsec_xxx`                                                     |
+| `REDIS_URL`             | Upstash Redis URL                 | `rediss://default:xxx@us1-xxx.upstash.io:6379`                   |
+| `CLOUDFLARE_API_TOKEN`  | Cloudflare API token              | `xxxxxxxx`                                                       |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID             | `abc123def456`                                                   |
+| `KOYEB_API_TOKEN`       | Koyeb API token                   | `xxxxxxxx`                                                       |
+| `JWT_SECRET`            | JWT signing secret (32+ chars)    | Generate: `openssl rand -hex 32`                                 |
+| `STRIPE_SECRET_KEY`     | Stripe secret key                 | `sk_test_xxx`                                                    |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret     | `whsec_xxx`                                                      |
 
 ### Optional Secrets (for Neon branching)
 
@@ -92,8 +92,8 @@ Add these secrets to your repository (Settings → Secrets → Actions):
 
 Add these as repository variables (Settings → Secrets → Variables):
 
-| Variable       | Description           | Example                                            |
-| -------------- | --------------------- | -------------------------------------------------- |
+| Variable       | Description           | Example                                             |
+| -------------- | --------------------- | --------------------------------------------------- |
 | `API_URL`      | API URL for frontends | `https://zentla-api-xxx.koyeb.app`                  |
 | `CORS_ORIGINS` | Allowed CORS origins  | `https://zentla-admin.pages.dev,https://zentla.dev` |
 

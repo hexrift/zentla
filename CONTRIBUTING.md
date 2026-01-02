@@ -126,6 +126,7 @@ type(scope): description
 ```
 
 Types:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -135,6 +136,7 @@ Types:
 - `chore`: Maintenance tasks
 
 Examples:
+
 ```
 feat(api): add promotion code validation
 fix(checkout): handle expired sessions gracefully
