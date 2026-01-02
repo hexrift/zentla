@@ -42,18 +42,20 @@ jobs:
       # Uses RELEASE_TOKEN (PAT with admin rights) to bypass branch protection
       # If not set, enables auto-merge which waits for checks
       - name: Auto-merge release PR
-        if: ${{ steps.release.outputs.pr }}
+        if: steps.release.outputs.pr != ''
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ fromJSON(steps.release.outputs.pr).number }}
+          PR_JSON: ${{ steps.release.outputs.pr }}
+          HAS_RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN != '' }}
         run: |
+          PR_NUMBER=$(echo "$PR_JSON" | jq -r '.number')
           echo "Merging PR #$PR_NUMBER"
-          if [ -n "${{ secrets.RELEASE_TOKEN }}" ]; then
+          if [ "$HAS_RELEASE_TOKEN" = "true" ]; then
             # PAT available - merge immediately (bypasses checks)
-            gh pr merge $PR_NUMBER --merge --repo ${{ github.repository }}
+            gh pr merge "$PR_NUMBER" --merge --repo ${{ github.repository }}
           else
             # No PAT - enable auto-merge (waits for checks)
-            gh pr merge $PR_NUMBER --auto --merge --repo ${{ github.repository }}
+            gh pr merge "$PR_NUMBER" --auto --merge --repo ${{ github.repository }}
           fi
 
       - name: Log release info

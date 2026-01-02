@@ -36,26 +36,34 @@ Zentla is a **provider-agnostic subscription management API** that sits between 
 ```typescript
 // Create an offer with pricing and entitlements
 const offer = await zentla.offers.create({
-  name: 'Pro Plan',
+  name: "Pro Plan",
   config: {
-    pricing: { model: 'flat', amount: 2900, currency: 'USD', interval: 'month' },
+    pricing: {
+      model: "flat",
+      amount: 2900,
+      currency: "USD",
+      interval: "month",
+    },
     trial: { days: 14 },
     entitlements: [
-      { featureKey: 'seats', value: 10, valueType: 'number' },
-      { featureKey: 'api_access', value: true, valueType: 'boolean' }
-    ]
-  }
+      { featureKey: "seats", value: 10, valueType: "number" },
+      { featureKey: "api_access", value: true, valueType: "boolean" },
+    ],
+  },
 });
 
 // Create a checkout session
 const checkout = await zentla.checkout.createSession({
   offerId: offer.id,
   customerId: customer.id,
-  successUrl: 'https://yourapp.com/success'
+  successUrl: "https://yourapp.com/success",
 });
 
 // Check entitlements at runtime
-const access = await zentla.customers.checkEntitlement(customerId, 'api_access');
+const access = await zentla.customers.checkEntitlement(
+  customerId,
+  "api_access",
+);
 // { hasAccess: true, value: true }
 ```
 
@@ -183,6 +191,7 @@ docker run -p 3002:3002 \
 ### Cloud Deployment
 
 See our deployment guides:
+
 - [Free Tier (Cloudflare + Koyeb + Neon)](docs/deployment-free-tier.md)
 - [AWS (Terraform)](infrastructure/README.md)
 

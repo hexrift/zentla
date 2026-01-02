@@ -230,10 +230,10 @@ do {
 
 ## Configuration
 
-| Option  | Type   | Default                         | Description          |
-| ------- | ------ | ------------------------------- | -------------------- |
-| apiKey  | string | required                        | Your Zentla API key  |
-| baseUrl | string | `https://api.zentla.dev/api/v1` | API base URL         |
+| Option  | Type   | Default                         | Description         |
+| ------- | ------ | ------------------------------- | ------------------- |
+| apiKey  | string | required                        | Your Zentla API key |
+| baseUrl | string | `https://api.zentla.dev/api/v1` | API base URL        |
 
 ## License
 
