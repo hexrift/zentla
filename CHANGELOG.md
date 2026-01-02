@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.7.1](https://github.com/PrimeCodeLabs/zentla/compare/v1.7.0...v1.7.1) (2026-01-02)
+
+
+### Bug Fixes
+
+* improve release-please auto-merge with optional bypass ([7ff169e](https://github.com/PrimeCodeLabs/zentla/commit/7ff169ed0aeacb119c9359e223ff2d52ab8c85bb))
+* improve SEO and UX ([f0c5fe8](https://github.com/PrimeCodeLabs/zentla/commit/f0c5fe89652a5d0d94ecf689211e1aa61ad5dddd))
+* remove buggy auto-merge from release-please workflow ([05e046a](https://github.com/PrimeCodeLabs/zentla/commit/05e046a971c1ba7686560c7f8aa6543e44fa3b42))
+* remove non-existent contact options from versioning page ([9c724ce](https://github.com/PrimeCodeLabs/zentla/commit/9c724cec5ee23801a297904eb2b56ec3f688da15))
+* update docs and make wording more provider-agnostic ([db0837b](https://github.com/PrimeCodeLabs/zentla/commit/db0837b817aed465d1d05c79640b9e5ce03c55ff))
+
 ## [1.7.0](https://github.com/PrimeCodeLabs/zentla/compare/v1.6.0...v1.7.0) (2026-01-02)
 
 
