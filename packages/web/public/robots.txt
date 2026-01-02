@@ -1,11 +1,11 @@
-# Relay Web - robots.txt
-# https://relay-web.pages.dev/
+# Zentla Web - robots.txt
+# https://zentla.dev/
 
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://relay-web.pages.dev/sitemap.xml
+Sitemap: https://zentla.dev/sitemap.xml
 
 # Crawl-delay for polite crawling
 Crawl-delay: 1
