@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.2](https://github.com/PrimeCodeLabs/relay/compare/v1.3.1...v1.3.2) (2026-01-02)
+
+
+### Bug Fixes
+
+* update Google verification tag ([b6fd112](https://github.com/PrimeCodeLabs/relay/commit/b6fd1124eb989d104fe27ce0120a0e903e071844))
+* update Google verification tag ([fb97b66](https://github.com/PrimeCodeLabs/relay/commit/fb97b669ecd8ec80918276f3088c0ee279d5310d))
+
 ## [1.3.1](https://github.com/PrimeCodeLabs/relay/compare/v1.3.0...v1.3.1) (2026-01-02)
 
 
