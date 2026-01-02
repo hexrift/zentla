@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.3](https://github.com/PrimeCodeLabs/zentla/compare/v1.7.2...v1.7.3) (2026-01-02)
+
+
+### Bug Fixes
+
+* use --admin flag for release PR merge ([b5e4f20](https://github.com/PrimeCodeLabs/zentla/commit/b5e4f203d3531b11567fb96a967c21dc753873d4))
+
 ## [1.7.2](https://github.com/PrimeCodeLabs/zentla/compare/v1.7.1...v1.7.2) (2026-01-02)
 
 
