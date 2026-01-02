@@ -123,9 +123,9 @@ const faqs = [
       "Zentla is a subscription management API that helps developers build and manage subscription-based products. It provides a provider-agnostic layer over payment processors like Stripe, handling offers, customers, subscriptions, and entitlements.",
   },
   {
-    question: "How does Zentla integrate with Stripe?",
+    question: "How does Zentla integrate with billing providers?",
     answer:
-      "Zentla syncs with your Stripe account to manage customers, subscriptions, and payments. You connect your Stripe API keys, and Zentla handles the complexity of subscription lifecycle, webhooks, and entitlement management automatically.",
+      "Zentla connects to your billing provider to sync customers, subscriptions, and payments. Currently Stripe is supported, with more providers coming soon. You connect your API keys, and Zentla handles the complexity of subscription lifecycle, webhooks, and entitlement management automatically.",
   },
   {
     question: "What are entitlements in Zentla?",
@@ -135,7 +135,7 @@ const faqs = [
   {
     question: "Does Zentla support headless checkout?",
     answer:
-      "Yes, Zentla provides headless checkout APIs that let you build custom checkout experiences. You get a client secret to use with Stripe.js for payment collection while Zentla handles the subscription provisioning.",
+      "Yes, Zentla provides headless checkout APIs that let you build custom checkout experiences. You get a client secret for secure payment collection while Zentla handles the subscription provisioning.",
   },
   {
     question: "Is Zentla free to use?",
@@ -203,7 +203,7 @@ export function HomePage() {
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
               Zentla manages offers, customers, entitlements, and checkouts.
-              Connect to Stripe with a simple API.
+              Connect your billing provider with a simple API.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link

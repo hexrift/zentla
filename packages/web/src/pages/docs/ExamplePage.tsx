@@ -154,11 +154,11 @@ import crypto from 'crypto';
 
 const app = express();
 const API_BASE = '${API_BASE}';
-const API_KEY = process.env.RELAY_API_KEY;
-const WEBHOOK_SECRET = process.env.RELAY_WEBHOOK_SECRET;
+const API_KEY = process.env.ZENTLA_API_KEY;
+const WEBHOOK_SECRET = process.env.ZENTLA_WEBHOOK_SECRET;
 
 // Helper for Zentla API calls
-async function relayApi(method, path, body) {
+async function zentlaApi(method, path, body) {
   const res = await fetch(\`\${API_BASE}\${path}\`, {
     method,
     headers: {
@@ -175,14 +175,14 @@ app.post('/api/subscribe', express.json(), async (req, res) => {
   const { userId, email, name, offerId, promotionCode } = req.body;
 
   // 1. Create or find customer
-  let customer = await relayApi('POST', '/customers', {
+  let customer = await zentlaApi('POST', '/customers', {
     email,
     name,
     externalId: userId,  // Your user ID
   });
 
   // 2. Create checkout session
-  const checkout = await relayApi('POST', '/checkout/sessions', {
+  const checkout = await zentlaApi('POST', '/checkout/sessions', {
     customerId: customer.id,
     offerId,
     promotionCode,
@@ -203,13 +203,13 @@ app.get('/api/check-access/:featureKey', async (req, res) => {
   const userId = req.user.id;  // From your auth middleware
 
   // Find customer by externalId
-  const customers = await relayApi('GET', \`/customers?externalId=\${userId}\`);
+  const customers = await zentlaApi('GET', \`/customers?externalId=\${userId}\`);
   if (!customers.data?.length) {
     return res.json({ hasAccess: false });
   }
 
   // Check entitlement
-  const entitlements = await relayApi(
+  const entitlements = await zentlaApi(
     'GET',
     \`/customers/\${customers.data[0].id}/entitlements\`
   );
