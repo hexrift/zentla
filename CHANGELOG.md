@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0](https://github.com/PrimeCodeLabs/relay/compare/v1.2.0...v1.3.0) (2026-01-02)
+
+
+### Features
+
+* add Google Search Console verification ([5820f4b](https://github.com/PrimeCodeLabs/relay/commit/5820f4b4342775fe12762d71becb28cb4086a0aa))
+
+
+### Bug Fixes
+
+* add prisma generate before build in release workflow ([58a1d30](https://github.com/PrimeCodeLabs/relay/commit/58a1d3061bfbc92f7a4b130bcd24448abc51487d))
+* format SEO.tsx ([2e7b599](https://github.com/PrimeCodeLabs/relay/commit/2e7b599438517c5ff1326d33bf5092444c11f2e7))
+* simplify release-please to versioning only ([de0d2e1](https://github.com/PrimeCodeLabs/relay/commit/de0d2e1d5015376bb38ec360ac195626577cf909))
+
 ## [1.2.0](https://github.com/PrimeCodeLabs/relay/compare/v1.1.0...v1.2.0) (2026-01-01)
 
 
