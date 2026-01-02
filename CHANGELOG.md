@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.3](https://github.com/PrimeCodeLabs/zentla/compare/v1.5.2...v1.5.3) (2026-01-02)
+
+
+### Bug Fixes
+
+* complete Relay → Zentla rebrand across codebase ([f093a02](https://github.com/PrimeCodeLabs/zentla/commit/f093a0245e0b9e2b134ca6a147829cacb69e7507))
+
 ## [1.5.2](https://github.com/PrimeCodeLabs/zentla/compare/v1.5.1...v1.5.2) (2026-01-02)
 
 
