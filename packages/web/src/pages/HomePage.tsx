@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SEO } from "../components/SEO";
 
@@ -115,7 +116,80 @@ const features = [
   },
 ];
 
+const faqs = [
+  {
+    question: "What is Zentla?",
+    answer:
+      "Zentla is a subscription management API that helps developers build and manage subscription-based products. It provides a provider-agnostic layer over payment processors like Stripe, handling offers, customers, subscriptions, and entitlements.",
+  },
+  {
+    question: "How does Zentla integrate with Stripe?",
+    answer:
+      "Zentla syncs with your Stripe account to manage customers, subscriptions, and payments. You connect your Stripe API keys, and Zentla handles the complexity of subscription lifecycle, webhooks, and entitlement management automatically.",
+  },
+  {
+    question: "What are entitlements in Zentla?",
+    answer:
+      "Entitlements are feature access controls tied to subscriptions. When a customer subscribes to an offer, they receive entitlements that define what features they can access. You can check entitlements via API to control feature access in your app.",
+  },
+  {
+    question: "Does Zentla support headless checkout?",
+    answer:
+      "Yes, Zentla provides headless checkout APIs that let you build custom checkout experiences. You get a client secret to use with Stripe.js for payment collection while Zentla handles the subscription provisioning.",
+  },
+  {
+    question: "Is Zentla free to use?",
+    answer:
+      "Zentla offers a free tier for startups and small projects. This includes core features like subscription management, customer sync, and entitlements. Contact us for enterprise pricing and additional features.",
+  },
+];
+
+function FAQItem({
+  question,
+  answer,
+  isOpen,
+  onToggle,
+}: {
+  question: string;
+  answer: string;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="border-b border-gray-200">
+      <button
+        onClick={onToggle}
+        className="w-full py-5 flex items-center justify-between text-left"
+        aria-expanded={isOpen}
+      >
+        <span className="font-medium text-gray-900">{question}</span>
+        <svg
+          className={`w-5 h-5 text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+      {isOpen && (
+        <div className="pb-5">
+          <p className="text-gray-600">{answer}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function HomePage() {
+  const [openFAQ, setOpenFAQ] = useState<number | null>(0);
+
   return (
     <div>
       <SEO path="/" />
@@ -308,6 +382,31 @@ export function HomePage() {
                 Coming Soon
               </span>
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16 sm:py-24 bg-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Frequently asked questions
+            </h2>
+            <p className="mt-4 text-gray-600">
+              Everything you need to know about Zentla
+            </p>
+          </div>
+          <div className="border-t border-gray-200">
+            {faqs.map((faq, index) => (
+              <FAQItem
+                key={index}
+                question={faq.question}
+                answer={faq.answer}
+                isOpen={openFAQ === index}
+                onToggle={() => setOpenFAQ(openFAQ === index ? null : index)}
+              />
+            ))}
           </div>
         </div>
       </section>
