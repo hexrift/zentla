@@ -23,7 +23,7 @@ describe("ApiKeyService", () => {
     id: "key_123",
     workspaceId: "ws_123",
     name: "Production API Key",
-    keyPrefix: "relay_live_12345678",
+    keyPrefix: "zentla_live_12345678",
     keyHash: "abc123def456", // This would be an actual hash
     role: "admin" as const,
     environment: "live" as const,
@@ -91,8 +91,8 @@ describe("ApiKeyService", () => {
       );
 
       expect(result.id).toBe("key_new");
-      expect(result.secret).toMatch(/^relay_live_/);
-      expect(result.prefix).toMatch(/^relay_live_/);
+      expect(result.secret).toMatch(/^zentla_live_/);
+      expect(result.prefix).toMatch(/^zentla_live_/);
       expect(prisma.apiKey.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           workspaceId: "ws_123",
@@ -116,8 +116,8 @@ describe("ApiKeyService", () => {
         "test",
       );
 
-      expect(result.secret).toMatch(/^relay_test_/);
-      expect(result.prefix).toMatch(/^relay_test_/);
+      expect(result.secret).toMatch(/^zentla_test_/);
+      expect(result.prefix).toMatch(/^zentla_test_/);
     });
 
     it("should store expiration date if provided", async () => {
@@ -155,7 +155,7 @@ describe("ApiKeyService", () => {
       prisma.apiKey.findFirst.mockResolvedValue(null);
 
       const result = await service.validateApiKey(
-        "relay_live_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "zentla_live_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       );
 
       expect(result).toBeNull();
@@ -194,11 +194,11 @@ describe("ApiKeyService", () => {
     it("should validate live key prefix", async () => {
       prisma.apiKey.findFirst.mockResolvedValue(null);
 
-      await service.validateApiKey("relay_live_12345678abcdef");
+      await service.validateApiKey("zentla_live_12345678abcdef");
 
       expect(prisma.apiKey.findFirst).toHaveBeenCalledWith({
         where: {
-          keyPrefix: "relay_live_12345678",
+          keyPrefix: "zentla_live_12345678",
           revokedAt: null,
         },
       });
@@ -207,11 +207,11 @@ describe("ApiKeyService", () => {
     it("should validate test key prefix", async () => {
       prisma.apiKey.findFirst.mockResolvedValue(null);
 
-      await service.validateApiKey("relay_test_12345678abcdef");
+      await service.validateApiKey("zentla_test_12345678abcdef");
 
       expect(prisma.apiKey.findFirst).toHaveBeenCalledWith({
         where: {
-          keyPrefix: "relay_test_12345678",
+          keyPrefix: "zentla_test_12345678",
           revokedAt: null,
         },
       });

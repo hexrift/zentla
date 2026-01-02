@@ -644,7 +644,7 @@ export const ApiKeySchema = {
     name: { type: "string" },
     keyPrefix: {
       type: "string",
-      description: "Visible prefix for identification (e.g., relay_live_abc)",
+      description: "Visible prefix for identification (e.g., zentla_live_abc)",
     },
     role: {
       type: "string",

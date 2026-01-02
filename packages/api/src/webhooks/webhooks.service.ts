@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { createHmac, randomBytes } from "crypto";
 import { PrismaService } from "../database/prisma.service";
 import type { WebhookEndpoint, Prisma } from "@prisma/client";
-import type { PaginatedResult } from "@relay/database";
+import type { PaginatedResult } from "@zentla/database";
 
 export interface CreateWebhookEndpointDto {
   url: string;

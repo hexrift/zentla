@@ -1,6 +1,6 @@
 # Free Tier Deployment Guide
 
-Deploy Relay using free-tier services for beta testing and development.
+Deploy Zentla using free-tier services for beta testing and development.
 
 ## Architecture
 
@@ -92,10 +92,10 @@ Add these secrets to your repository (Settings → Secrets → Actions):
 
 Add these as repository variables (Settings → Secrets → Variables):
 
-| Variable       | Description           | Example                                                     |
-| -------------- | --------------------- | ----------------------------------------------------------- |
-| `API_URL`      | API URL for frontends | `https://relay-api-xxx.koyeb.app`                           |
-| `CORS_ORIGINS` | Allowed CORS origins  | `https://relay-admin.pages.dev,https://relay-web.pages.dev` |
+| Variable       | Description           | Example                                            |
+| -------------- | --------------------- | -------------------------------------------------- |
+| `API_URL`      | API URL for frontends | `https://relay-api-xxx.koyeb.app`                  |
+| `CORS_ORIGINS` | Allowed CORS origins  | `https://relay-admin.pages.dev,https://zentla.dev` |
 
 ## Initial Setup
 
@@ -172,7 +172,7 @@ gh workflow run deploy-db.yml
 
 - API: `https://your-koyeb-app.koyeb.app/api/health`
 - Admin: `https://relay-admin.pages.dev`
-- Web: `https://relay-web.pages.dev`
+- Web: `https://zentla.dev`
 
 ### Logs
 

@@ -239,7 +239,7 @@ export function DashboardPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Welcome to Relay. Complete the setup checklist to start accepting
+          Welcome to Zentla. Complete the setup checklist to start accepting
           payments.
         </p>
       </div>
@@ -321,7 +321,7 @@ export function DashboardPage() {
               </h2>
               <p className="mt-1 text-sm text-gray-500">
                 Import existing customers and subscriptions from Stripe that
-                were created outside of Relay.
+                were created outside of Zentla.
               </p>
             </div>
             <button

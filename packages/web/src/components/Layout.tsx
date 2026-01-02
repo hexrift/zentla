@@ -20,7 +20,9 @@ export function Layout() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <span className="text-lg font-semibold text-gray-900">Relay</span>
+              <span className="text-lg font-semibold text-gray-900">
+                Zentla
+              </span>
               <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
                 Beta
               </span>
@@ -159,7 +161,7 @@ export function Layout() {
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center">
                   <span className="text-white font-bold text-xs">R</span>
                 </div>
-                <span className="font-semibold text-gray-900">Relay</span>
+                <span className="font-semibold text-gray-900">Zentla</span>
               </div>
               <p className="text-sm text-gray-500">
                 Subscription management for modern apps.
@@ -249,7 +251,7 @@ export function Layout() {
           </div>
           <div className="mt-12 pt-8 border-t border-gray-200">
             <p className="text-sm text-gray-400 text-center">
-              Relay is currently in beta. We'd love your feedback!
+              Zentla is currently in beta. We'd love your feedback!
             </p>
           </div>
         </div>

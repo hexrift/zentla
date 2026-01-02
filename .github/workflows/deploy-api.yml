@@ -15,7 +15,7 @@ on:
 
 env:
   KOYEB_APP: relay
-  KOYEB_SERVICE: relay-api
+  KOYEB_SERVICE: zentla-api
 
 jobs:
   deploy:
@@ -39,7 +39,7 @@ jobs:
       - name: Run database migrations
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: yarn workspace @relay/database prisma migrate deploy
+        run: yarn workspace @zentla/database prisma migrate deploy
 
       - name: Install Koyeb CLI
         run: |

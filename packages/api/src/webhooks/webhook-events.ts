@@ -251,7 +251,7 @@ export const WEBHOOK_RETRY_SCHEDULE = {
  * Webhook signature verification.
  * All webhooks are signed using HMAC-SHA256.
  *
- * Header: X-Relay-Signature
+ * Header: X-Zentla-Signature
  * Format: t=<timestamp>,v1=<signature>
  *
  * To verify:
@@ -261,7 +261,7 @@ export const WEBHOOK_RETRY_SCHEDULE = {
  * 4. Compare signatures using timing-safe comparison
  * 5. Reject if timestamp is older than 5 minutes
  */
-export const WEBHOOK_SIGNATURE_HEADER = "X-Relay-Signature";
+export const WEBHOOK_SIGNATURE_HEADER = "X-Zentla-Signature";
 export const WEBHOOK_SIGNATURE_TOLERANCE_SECONDS = 300; // 5 minutes
 
 /**

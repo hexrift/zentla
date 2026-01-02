@@ -1,6 +1,6 @@
 # Idempotency Requirements
 
-This document outlines where idempotency is required in Relay, how retries should behave, and testing requirements.
+This document outlines where idempotency is required in Zentla, how retries should behave, and testing requirements.
 
 ## What is Idempotency?
 

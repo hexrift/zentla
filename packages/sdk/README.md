@@ -16,7 +16,7 @@ yarn add @relay/sdk
 import { RelayClient } from "@relay/sdk";
 
 const relay = new RelayClient({
-  apiKey: "relay_live_xxxxx",
+  apiKey: "zentla_live_xxxxx",
   baseUrl: "https://api.relay.com/api/v1", // optional
 });
 

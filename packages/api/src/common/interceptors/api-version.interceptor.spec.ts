@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ExecutionContext, CallHandler } from "@nestjs/common";
 import { of, lastValueFrom } from "rxjs";
 import { ApiVersionInterceptor } from "./api-version.interceptor";
-import { API_VERSION, RELAY_VERSION } from "../version";
+import { API_VERSION, ZENTLA_VERSION } from "../version";
 
 describe("ApiVersionInterceptor", () => {
   let interceptor: ApiVersionInterceptor;
@@ -39,20 +39,20 @@ describe("ApiVersionInterceptor", () => {
     );
   });
 
-  it("should set X-Relay-Version header with full semver", async () => {
+  it("should set X-Zentla-Version header with full semver", async () => {
     await lastValueFrom(interceptor.intercept(mockContext, mockCallHandler));
 
     expect(mockResponse.setHeader).toHaveBeenCalledWith(
-      "X-Relay-Version",
-      RELAY_VERSION,
+      "X-Zentla-Version",
+      ZENTLA_VERSION,
     );
   });
 
-  it("should set X-Relay-API-Deprecated header to false", async () => {
+  it("should set X-Zentla-API-Deprecated header to false", async () => {
     await lastValueFrom(interceptor.intercept(mockContext, mockCallHandler));
 
     expect(mockResponse.setHeader).toHaveBeenCalledWith(
-      "X-Relay-API-Deprecated",
+      "X-Zentla-API-Deprecated",
       "false",
     );
   });

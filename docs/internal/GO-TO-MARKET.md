@@ -1,4 +1,4 @@
-# Relay Go-to-Market Plan
+# Zentla Go-to-Market Plan
 
 **Internal Document** - Strategy for acquiring first clients and building momentum.
 
@@ -28,7 +28,7 @@
 
 ### Use Cases
 
-| Use Case            | Pain Point                   | Relay Solution       |
+| Use Case            | Pain Point                   | Zentla Solution      |
 | ------------------- | ---------------------------- | -------------------- |
 | Pricing experiments | Hard to A/B test pricing     | Offer versioning     |
 | Provider migration  | Vendor lock-in               | Provider abstraction |
@@ -70,7 +70,7 @@
 
 ### vs. Direct Stripe Integration
 
-| Aspect           | Stripe Direct  | Relay           |
+| Aspect           | Stripe Direct  | Zentla          |
 | ---------------- | -------------- | --------------- |
 | Offer versioning | Manual         | Built-in        |
 | Provider lock-in | Yes            | No              |
@@ -79,7 +79,7 @@
 
 ### vs. Existing Billing Platforms
 
-| Aspect      | Others             | Relay       |
+| Aspect      | Others             | Zentla      |
 | ----------- | ------------------ | ----------- |
 | Setup time  | Days/weeks         | Hours       |
 | Pricing     | Per-seat/revenue % | Usage-based |
@@ -124,7 +124,7 @@
 1. **Blog Posts**
    - "The Hidden Complexity of Subscription Billing"
    - "Why We Built Offer Versioning"
-   - "Migrating from Stripe Billing to Relay"
+   - "Migrating from Stripe Billing to Zentla"
 
 2. **Documentation as Marketing**
    - Exceptional docs drive adoption

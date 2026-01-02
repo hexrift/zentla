@@ -9,7 +9,7 @@ export function QuickstartPage() {
     <article className="prose-docs">
       <SEO
         title="Quickstart"
-        description="Get up and running with Relay in under 10 minutes. Create offers, generate checkout links, and verify entitlements."
+        description="Get up and running with Zentla in under 10 minutes. Create offers, generate checkout links, and verify entitlements."
         path="/docs/quickstart"
         breadcrumbs={[
           { name: "Home", path: "/" },
@@ -19,15 +19,15 @@ export function QuickstartPage() {
       />
       <h1>Quickstart</h1>
       <p className="lead text-lg text-gray-600 mb-8">
-        Get up and running with Relay in under 10 minutes. This guide walks you
+        Get up and running with Zentla in under 10 minutes. This guide walks you
         through creating an offer, generating a checkout link, and verifying
         entitlements.
       </p>
 
       <div className="not-prose mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
         <p className="text-sm text-amber-800">
-          <strong>Beta:</strong> Relay is in active development. APIs are stable
-          but may receive additive changes. Breaking changes will be
+          <strong>Beta:</strong> Zentla is in active development. APIs are
+          stable but may receive additive changes. Breaking changes will be
           communicated in advance.
         </p>
       </div>
@@ -36,12 +36,12 @@ export function QuickstartPage() {
       <ul>
         <li>A Stripe account with API keys</li>
         <li>Node.js 18+ (for SDK usage)</li>
-        <li>Your Relay API key (from the Dashboard)</li>
+        <li>Your Zentla API key (from the Dashboard)</li>
       </ul>
 
       <h2 id="step-1-configure-stripe">Step 1: Configure Stripe</h2>
       <p>
-        Connect your Stripe account to Relay. In the Dashboard, navigate to{" "}
+        Connect your Stripe account to Zentla. In the Dashboard, navigate to{" "}
         <strong>Settings → Providers</strong> and add your Stripe secret key.
       </p>
       <CodeBlock title=".env" language="bash">{`# Environment variables
@@ -193,7 +193,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
       <div className="not-prose mt-12 p-6 bg-gray-50 rounded-xl">
         <h3 className="font-semibold text-gray-900 mb-2">Need help?</h3>
         <p className="text-sm text-gray-600 mb-4">
-          Relay is in beta. If you run into issues or have feedback, we'd love
+          Zentla is in beta. If you run into issues or have feedback, we'd love
           to hear from you.
         </p>
         <a

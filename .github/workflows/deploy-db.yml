@@ -44,7 +44,7 @@ jobs:
 
       - name: Check migration status
         if: github.event.inputs.action == 'status' || github.event.inputs.action == ''
-        run: yarn workspace @relay/database prisma migrate status
+        run: yarn workspace @zentla/database prisma migrate status
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
@@ -58,7 +58,7 @@ jobs:
         if: github.event.inputs.action == 'reset'
         run: |
           echo "⚠️ WARNING: This will reset the database!"
-          yarn workspace @relay/database prisma migrate reset --force
+          yarn workspace @zentla/database prisma migrate reset --force
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 

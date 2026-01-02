@@ -151,7 +151,7 @@ describe("ApiKeyGuard", () => {
       apiKeyService.validateApiKey.mockResolvedValue(null);
 
       const context = createMockContext({
-        headers: { authorization: "Bearer relay_live_invalidkey123" },
+        headers: { authorization: "Bearer zentla_live_invalidkey123" },
       });
 
       await expect(guard.canActivate(context)).rejects.toThrow(
@@ -166,7 +166,7 @@ describe("ApiKeyGuard", () => {
       apiKeyService.validateApiKey.mockResolvedValue(mockValidatedKey);
 
       const request = {
-        headers: { authorization: "Bearer relay_live_validkey123" },
+        headers: { authorization: "Bearer zentla_live_validkey123" },
         sessionContext: undefined,
         apiKeyContext: undefined,
       };
@@ -183,7 +183,7 @@ describe("ApiKeyGuard", () => {
 
       expect(result).toBe(true);
       expect(apiKeyService.validateApiKey).toHaveBeenCalledWith(
-        "relay_live_validkey123",
+        "zentla_live_validkey123",
       );
       expect(apiKeyService.toApiKeyContext).toHaveBeenCalledWith(
         mockValidatedKey,

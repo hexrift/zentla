@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { VERSION, API_VERSION, RELAY_VERSION } from "./version";
+import { VERSION, API_VERSION, ZENTLA_VERSION } from "./version";
 
 describe("Version", () => {
   it("should have major, minor, and patch numbers", () => {
@@ -15,8 +15,8 @@ describe("Version", () => {
     expect(VERSION.full).toBe(
       `${VERSION.major}.${VERSION.minor}.${VERSION.patch}`,
     );
-    expect(RELAY_VERSION).toBe(VERSION.full);
-    expect(RELAY_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(ZENTLA_VERSION).toBe(VERSION.full);
+    expect(ZENTLA_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
   it("should have api version as major version string", () => {
@@ -29,6 +29,6 @@ describe("Version", () => {
     const path = await import("path");
     const packageJsonPath = path.join(__dirname, "../../../../package.json");
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
-    expect(RELAY_VERSION).toBe(packageJson.version);
+    expect(ZENTLA_VERSION).toBe(packageJson.version);
   });
 });

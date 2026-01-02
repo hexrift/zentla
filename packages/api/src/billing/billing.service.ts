@@ -1,8 +1,8 @@
 import { Injectable, OnModuleInit, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { StripeAdapter } from "@relay/stripe-adapter";
-import { ZuoraAdapter } from "@relay/zuora-adapter";
-import type { BillingProvider } from "@relay/core";
+import { StripeAdapter } from "@zentla/stripe-adapter";
+import { ZuoraAdapter } from "@zentla/zuora-adapter";
+import type { BillingProvider } from "@zentla/core";
 
 export type ProviderType = "stripe" | "zuora";
 

@@ -102,7 +102,7 @@ describe("SessionGuard", () => {
 
     it("should allow non-session tokens", async () => {
       const context = createMockContext({
-        headers: { authorization: "Bearer relay_live_abc123" },
+        headers: { authorization: "Bearer zentla_live_abc123" },
       });
 
       const result = await guard.canActivate(context);
@@ -115,7 +115,7 @@ describe("SessionGuard", () => {
       sessionService.validateSession.mockResolvedValue(null);
 
       const context = createMockContext({
-        headers: { authorization: "Bearer relay_session_abc123" },
+        headers: { authorization: "Bearer zentla_session_abc123" },
       });
 
       await expect(guard.canActivate(context)).rejects.toThrow(
@@ -149,7 +149,7 @@ describe("SessionGuard", () => {
           | { workspaceId: string; role: string; mode: string }
           | undefined;
       } = {
-        headers: { authorization: "Bearer relay_session_abc123" },
+        headers: { authorization: "Bearer zentla_session_abc123" },
         sessionContext: undefined,
         apiKeyContext: undefined,
       };

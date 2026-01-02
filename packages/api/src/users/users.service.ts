@@ -11,7 +11,7 @@ import {
   ApiKeyService,
   type GeneratedApiKey,
 } from "../auth/services/api-key.service";
-import type { User, WorkspaceRole, WorkspaceMode } from "@relay/database";
+import type { User, WorkspaceRole, WorkspaceMode } from "@zentla/database";
 
 const scryptAsync = promisify(scrypt);
 

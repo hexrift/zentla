@@ -81,7 +81,7 @@ jobs:
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
-          POSTGRES_DB: relay_test
+          POSTGRES_DB: zentla_test
         ports:
           - 5432:5432
         options: >-
@@ -101,7 +101,7 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: postgresql://test:test@localhost:5432/relay_test?schema=public
+      DATABASE_URL: postgresql://test:test@localhost:5432/zentla_test?schema=public
       REDIS_URL: redis://localhost:6379
       NODE_ENV: test
       API_KEY_SECRET: test-api-key-secret-minimum-32-chars
@@ -132,7 +132,7 @@ jobs:
         run: yarn db:migrate:deploy
 
       - name: Run tests with coverage
-        run: yarn workspace @relay/api test:cov
+        run: yarn workspace @zentla/api test:cov
 
       - name: Check coverage threshold (70% minimum)
         run: |
@@ -210,7 +210,7 @@ jobs:
         with:
           context: .
           push: false
-          tags: relay-api:test
+          tags: zentla-api:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

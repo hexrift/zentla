@@ -22,7 +22,7 @@ export function WebhooksPage() {
 
       <h2 id="overview">Overview</h2>
       <p>
-        Relay sends webhook events to your application when important changes
+        Zentla sends webhook events to your application when important changes
         occur. Use webhooks to:
       </p>
       <ul>
@@ -87,7 +87,7 @@ export function WebhooksPage() {
 }`}</CodeBlock>
 
       <h3>3. Verify Signatures</h3>
-      <p>Always verify webhook signatures to ensure events are from Relay:</p>
+      <p>Always verify webhook signatures to ensure events are from Zentla:</p>
       <CodeBlock
         title="webhook-handler.ts"
         language="typescript"
@@ -122,7 +122,7 @@ app.post('/webhooks/relay', express.raw({ type: 'application/json' }), (req, res
 });`}</CodeBlock>
 
       <h2 id="events">Event Types</h2>
-      <p>Relay sends the following event types:</p>
+      <p>Zentla sends the following event types:</p>
 
       <h3>Subscription Events</h3>
       <div className="not-prose my-6 overflow-x-auto">
@@ -330,7 +330,7 @@ await handleEvent(event);
 await db.processedEvents.create({ data: { eventId: event.id } });`}</CodeBlock>
 
       <h3>Retry Logic</h3>
-      <p>Relay retries failed deliveries with exponential backoff:</p>
+      <p>Zentla retries failed deliveries with exponential backoff:</p>
       <ul>
         <li>Attempt 1: Immediate</li>
         <li>Attempt 2: After 1 minute</li>

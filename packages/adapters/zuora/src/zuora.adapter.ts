@@ -20,7 +20,7 @@ import {
   type OfferConfig,
   type PricingConfig,
   BillingProviderError,
-} from "@relay/core";
+} from "@zentla/core";
 import { type ZuoraConfig, validateZuoraConfig } from "./zuora.config";
 import * as crypto from "crypto";
 
@@ -429,8 +429,8 @@ export class ZuoraAdapter implements BillingProvider {
         },
         // Store Relay metadata
         Notes: JSON.stringify({
-          relay_workspace_id: params.workspaceId,
-          relay_customer_id: params.customerId,
+          zentla_workspace_id: params.workspaceId,
+          zentla_customer_id: params.customerId,
           ...params.metadata,
         }),
       },
@@ -521,9 +521,9 @@ export class ZuoraAdapter implements BillingProvider {
 
     // Store metadata in session
     pageParams.field_passthrough = JSON.stringify({
-      relay_workspace_id: params.workspaceId,
-      relay_offer_id: params.offerId,
-      relay_checkout_id: params.metadata?.checkoutId,
+      zentla_workspace_id: params.workspaceId,
+      zentla_offer_id: params.offerId,
+      zentla_checkout_id: params.metadata?.checkoutId,
       success_url: params.successUrl,
       cancel_url: params.cancelUrl,
       ...params.metadata,

@@ -2,7 +2,7 @@ import { Injectable, Logger, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
 import { BillingService, ProviderType } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
-import type { StripeAdapter } from "@relay/stripe-adapter";
+import type { StripeAdapter } from "@zentla/stripe-adapter";
 import type Stripe from "stripe";
 
 const PROVIDER: ProviderType = "stripe";

@@ -1,5 +1,5 @@
 import type Stripe from "stripe";
-import type { DomainEvent } from "@relay/core";
+import type { DomainEvent } from "@zentla/core";
 import { StripeAdapter } from "./stripe.adapter";
 
 export interface WebhookHandlerResult {

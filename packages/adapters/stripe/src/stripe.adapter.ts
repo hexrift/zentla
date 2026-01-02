@@ -24,7 +24,7 @@ import type {
   CreateCustomerParams,
   UpdateCustomerParams,
   CustomerResult,
-} from "@relay/core";
+} from "@zentla/core";
 import type { StripeConfig } from "./stripe.config";
 import { validateStripeConfig } from "./stripe.config";
 
@@ -76,9 +76,9 @@ export class StripeAdapter implements BillingProvider {
         name: offer.name,
         ...(offer.description && { description: offer.description }),
         metadata: {
-          relay_offer_id: offer.id,
-          relay_version_id: version.id,
-          relay_workspace_id: offer.workspaceId,
+          zentla_offer_id: offer.id,
+          zentla_version_id: version.id,
+          zentla_workspace_id: offer.workspaceId,
         },
       });
 
@@ -91,9 +91,9 @@ export class StripeAdapter implements BillingProvider {
         name: offer.name,
         ...(offer.description && { description: offer.description }),
         metadata: {
-          relay_offer_id: offer.id,
-          relay_version_id: version.id,
-          relay_workspace_id: offer.workspaceId,
+          zentla_offer_id: offer.id,
+          zentla_version_id: version.id,
+          zentla_workspace_id: offer.workspaceId,
         },
       });
 
@@ -147,8 +147,8 @@ export class StripeAdapter implements BillingProvider {
       email: params.email,
       name: params.name,
       metadata: {
-        relay_workspace_id: params.workspaceId,
-        relay_customer_id: params.customerId,
+        zentla_workspace_id: params.workspaceId,
+        zentla_customer_id: params.customerId,
         ...params.metadata,
       },
     });
@@ -183,8 +183,8 @@ export class StripeAdapter implements BillingProvider {
       product: productId,
       currency: pricing.currency.toLowerCase(),
       metadata: {
-        relay_offer_id: offerId,
-        relay_version_id: versionId,
+        zentla_offer_id: offerId,
+        zentla_version_id: versionId,
       },
     };
 
@@ -236,9 +236,9 @@ export class StripeAdapter implements BillingProvider {
         },
       ],
       metadata: {
-        relay_workspace_id: params.workspaceId,
-        relay_offer_id: params.offerId,
-        relay_checkout_id: (params.metadata?.checkoutId as string) ?? "",
+        zentla_workspace_id: params.workspaceId,
+        zentla_offer_id: params.offerId,
+        zentla_checkout_id: (params.metadata?.checkoutId as string) ?? "",
         ...(params.metadata as Record<string, string>),
       },
     };
@@ -480,9 +480,9 @@ export class StripeAdapter implements BillingProvider {
     const couponParams: Stripe.CouponCreateParams = {
       name: promotion.name,
       metadata: {
-        relay_promotion_id: promotion.id,
-        relay_promotion_version_id: version.id,
-        relay_workspace_id: promotion.workspaceId,
+        zentla_promotion_id: promotion.id,
+        zentla_promotion_version_id: version.id,
+        zentla_workspace_id: promotion.workspaceId,
       },
     };
 
@@ -534,9 +534,9 @@ export class StripeAdapter implements BillingProvider {
       code: promotion.code,
       active: true,
       metadata: {
-        relay_promotion_id: promotion.id,
-        relay_promotion_version_id: version.id,
-        relay_workspace_id: promotion.workspaceId,
+        zentla_promotion_id: promotion.id,
+        zentla_promotion_version_id: version.id,
+        zentla_workspace_id: promotion.workspaceId,
       },
     };
 
@@ -674,9 +674,9 @@ export class StripeAdapter implements BillingProvider {
     return {
       id: crypto.randomUUID(),
       type: "checkout.completed",
-      workspaceId: metadata.relay_workspace_id ?? "",
+      workspaceId: metadata.zentla_workspace_id ?? "",
       aggregateType: "checkout",
-      aggregateId: metadata.relay_checkout_id ?? session.id,
+      aggregateId: metadata.zentla_checkout_id ?? session.id,
       data: {
         sessionId: session.id,
         customerId: session.customer as string,
@@ -706,7 +706,7 @@ export class StripeAdapter implements BillingProvider {
     return {
       id: crypto.randomUUID(),
       type: eventTypeMap[event.type] ?? event.type,
-      workspaceId: metadata.relay_workspace_id ?? "",
+      workspaceId: metadata.zentla_workspace_id ?? "",
       aggregateType: "subscription",
       aggregateId: subscription.id,
       data: {
@@ -740,7 +740,7 @@ export class StripeAdapter implements BillingProvider {
     return {
       id: crypto.randomUUID(),
       type: eventTypeMap[event.type] ?? event.type,
-      workspaceId: metadata.relay_workspace_id ?? "",
+      workspaceId: metadata.zentla_workspace_id ?? "",
       aggregateType: "invoice",
       aggregateId: invoice.id ?? "",
       data: {

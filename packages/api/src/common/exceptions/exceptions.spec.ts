@@ -19,7 +19,7 @@ import {
   ApiKeyInvalidException,
   InsufficientPermissionsException,
 } from "./index";
-import { ErrorCode } from "@relay/core";
+import { ErrorCode } from "@zentla/core";
 
 describe("RelayException", () => {
   it("should create exception with code and message", () => {

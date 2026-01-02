@@ -1,5 +1,5 @@
 {
-  "name": "@relay/zuora-adapter",
+  "name": "@zentla/zuora-adapter",
   "version": "0.1.0",
   "private": true,
   "main": "./dist/index.js",
@@ -12,7 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@relay/core": "workspace:*"
+    "@zentla/core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.3.0",

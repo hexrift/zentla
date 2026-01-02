@@ -1,6 +1,6 @@
-# Relay Demo Script
+# Zentla Demo Script
 
-A 2-3 minute demo script for explaining and demonstrating Relay.
+A 2-3 minute demo script for explaining and demonstrating Zentla.
 
 ---
 
@@ -8,7 +8,7 @@ A 2-3 minute demo script for explaining and demonstrating Relay.
 
 > "If you've ever built subscription billing into a SaaS product, you know the pain. You're either locked into one payment provider, wrestling with webhook spaghetti, or rebuilding the same subscription logic for the third time.
 >
-> Relay fixes this. It's a subscription commerce layer that sits between your app and payment providers like Stripe — giving you a clean API for offers, subscriptions, and entitlements, without the vendor lock-in."
+> Zentla fixes this. It's a subscription commerce layer that sits between your app and payment providers like Stripe — giving you a clean API for offers, subscriptions, and entitlements, without the vendor lock-in."
 
 ---
 
@@ -34,12 +34,12 @@ Your App ──► Stripe SDK ──► Stripe
 
 ## The Solution (30 seconds)
 
-> "Relay gives you a provider-agnostic abstraction layer:"
+> "Zentla gives you a provider-agnostic abstraction layer:"
 
 _[Show architecture diagram]_
 
 ```
-Your App ──► Relay API ──► Stripe / Zuora / etc.
+Your App ──► Zentla API ──► Stripe / Zuora / etc.
               │
               ├── One API for all providers
               ├── Offers with versioned pricing
@@ -47,7 +47,7 @@ Your App ──► Relay API ──► Stripe / Zuora / etc.
               └── Entitlements you can query
 ```
 
-> "You define Offers — your pricing plans. Relay syncs them to Stripe. When a customer checks out, Relay handles the session. When Stripe sends webhooks, Relay normalizes them into simple domain events and manages your subscription state.
+> "You define Offers — your pricing plans. Zentla syncs them to Stripe. When a customer checks out, Zentla handles the session. When Stripe sends webhooks, Zentla normalizes them into simple domain events and manages your subscription state.
 >
 > If you ever need to switch providers or add a second one, your application code doesn't change."
 
@@ -73,7 +73,7 @@ _[Click Publish]_
 
 _[Switch to Stripe Dashboard → Products]_
 
-> "See? Relay automatically created the Product and Price in Stripe. I didn't write any Stripe-specific code."
+> "See? Zentla automatically created the Product and Price in Stripe. I didn't write any Stripe-specific code."
 
 ### Trigger a Checkout (20 seconds)
 
@@ -81,7 +81,7 @@ _[Open terminal]_
 
 ```bash
 curl -X POST http://localhost:3002/api/v1/checkout/sessions \
-  -H "Authorization: Bearer relay_test_..." \
+  -H "Authorization: Bearer zentla_test_..." \
   -d '{"offerId": "...", "customerEmail": "demo@test.com", ...}'
 ```
 
@@ -97,7 +97,7 @@ _[Enter test card 4242... and complete]_
 
 _[Return to Admin UI → Subscriptions]_
 
-> "And there it is — an active subscription, created automatically from the Stripe webhook. I didn't have to parse the webhook myself. Relay did that."
+> "And there it is — an active subscription, created automatically from the Stripe webhook. I didn't have to parse the webhook myself. Zentla did that."
 
 _[Click into subscription]_
 
@@ -119,7 +119,7 @@ curl http://localhost:3002/api/v1/customers/.../entitlements
 
 ## Closing (15 seconds)
 
-> "That's Relay. Define your offers, let customers check out, query entitlements. Under the hood, it's all Stripe — but your code doesn't know that.
+> "That's Zentla. Define your offers, let customers check out, query entitlements. Under the hood, it's all Stripe — but your code doesn't know that.
 >
 > When you're ready to add invoice billing through Zuora, or expand to another provider, you flip a config. Your app stays the same."
 
@@ -157,16 +157,16 @@ ZIP: Any 5 digits
 
 **Q: How does this compare to Stripe Billing?**
 
-> "Stripe Billing is great, but it's Stripe-only. Relay gives you abstraction. If you're 100% committed to Stripe forever, you might not need this. But if you want flexibility, or you're already feeling the pain of Stripe-specific code, Relay helps."
+> "Stripe Billing is great, but it's Stripe-only. Zentla gives you abstraction. If you're 100% committed to Stripe forever, you might not need this. But if you want flexibility, or you're already feeling the pain of Stripe-specific code, Zentla helps."
 
 **Q: What about existing subscriptions?**
 
-> "You can import them. Relay has a migration path where you sync existing Stripe subscriptions into Relay's model. New subscriptions go through Relay; old ones get backfilled."
+> "You can import them. Zentla has a migration path where you sync existing Stripe subscriptions into Zentla's model. New subscriptions go through Zentla; old ones get backfilled."
 
 **Q: Is this just a Stripe wrapper?**
 
 > "Today, yes — Stripe is the primary adapter. But the architecture supports multiple providers. Zuora is stubbed out. The abstraction is real; we just haven't built all the adapters yet."
 
-**Q: Where does Relay run?**
+**Q: Where does Zentla run?**
 
 > "It's your infrastructure. Self-hosted, or we're working on a managed cloud version. Your data, your control."

@@ -30,7 +30,7 @@ describe("DashboardApiKeysController", () => {
   const mockApiKey = {
     id: "key_123",
     name: "Test Key",
-    keyPrefix: "relay_live_",
+    keyPrefix: "zentla_live_",
     role: "admin",
     environment: "live",
     lastUsedAt: null,
@@ -120,8 +120,8 @@ describe("DashboardApiKeysController", () => {
       });
       apiKeyService.generateApiKey.mockResolvedValue({
         id: "key_new",
-        secret: "relay_test_secret123",
-        prefix: "relay_test_",
+        secret: "zentla_test_secret123",
+        prefix: "zentla_test_",
       });
 
       const result = await controller.createApiKey(mockSession, "ws_123", {
@@ -131,7 +131,7 @@ describe("DashboardApiKeysController", () => {
       });
 
       expect(result.id).toBe("key_new");
-      expect(result.secret).toBe("relay_test_secret123");
+      expect(result.secret).toBe("zentla_test_secret123");
       expect(result.message).toContain("Store this secret securely");
     });
 
@@ -176,8 +176,8 @@ describe("DashboardApiKeysController", () => {
       });
       apiKeyService.generateApiKey.mockResolvedValue({
         id: "key_live",
-        secret: "relay_live_secret123",
-        prefix: "relay_live_",
+        secret: "zentla_live_secret123",
+        prefix: "zentla_live_",
       });
 
       const result = await controller.createApiKey(mockSession, "ws_123", {
@@ -196,8 +196,8 @@ describe("DashboardApiKeysController", () => {
       });
       apiKeyService.generateApiKey.mockResolvedValue({
         id: "key_expiring",
-        secret: "relay_test_secret",
-        prefix: "relay_test_",
+        secret: "zentla_test_secret",
+        prefix: "zentla_test_",
       });
 
       const expiresAt = "2025-12-31T23:59:59Z";

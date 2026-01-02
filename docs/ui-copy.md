@@ -1,6 +1,6 @@
 # Admin Dashboard UI Copy
 
-Clear, non-technical copy for the Relay admin dashboard.
+Clear, non-technical copy for the Zentla admin dashboard.
 
 ---
 
@@ -282,7 +282,7 @@ or you can add them manually.
 
 ```
 Webhooks
-Get notified when events happen in your Relay workspace.
+Get notified when events happen in your Zentla workspace.
 We'll send a POST request to your URL for each event.
 ```
 
@@ -345,7 +345,7 @@ Payments
 
 ```
 API Keys
-Manage credentials for accessing the Relay API.
+Manage credentials for accessing the Zentla API.
 Keep your keys secure and never share them publicly.
 ```
 
@@ -354,7 +354,7 @@ Keep your keys secure and never share them publicly.
 ```
 No API keys
 
-Create an API key to start integrating with Relay.
+Create an API key to start integrating with Zentla.
 
 [+ Create API Key]
 ```
@@ -362,10 +362,10 @@ Create an API key to start integrating with Relay.
 ### Environment Explanation
 
 ```
-Test Keys (relay_test_...)
+Test Keys (zentla_test_...)
 Use for development and testing. No real charges.
 
-Live Keys (relay_live_...)
+Live Keys (zentla_live_...)
 Use in production. Processes real payments.
 ```
 
@@ -386,7 +386,7 @@ Body:
 Your new API key is ready. Copy it now — you won't be able to see it again.
 
 ┌─────────────────────────────────────────────┐
-│ relay_test_abc123def456...                  │
+│ zentla_test_abc123def456...                  │
 │                                    [Copy]   │
 └─────────────────────────────────────────────┘
 
@@ -417,7 +417,7 @@ This cannot be undone.
 
 ```
 Settings
-Configure your Relay workspace.
+Configure your Zentla workspace.
 ```
 
 ### Workspace Settings

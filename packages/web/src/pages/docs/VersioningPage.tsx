@@ -22,16 +22,16 @@ export function VersioningPage() {
 
       <div className="not-prose mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
         <p className="text-sm text-amber-800">
-          <strong>Beta Status:</strong> Relay is currently in beta. While we aim
-          for stability, some breaking changes may occur with advance notice.
-          We'll communicate all changes through our changelog and email
+          <strong>Beta Status:</strong> Zentla is currently in beta. While we
+          aim for stability, some breaking changes may occur with advance
+          notice. We'll communicate all changes through our changelog and email
           notifications.
         </p>
       </div>
 
       <h2 id="api-versioning">API Versioning</h2>
       <p>
-        The Relay API uses URL-based versioning. The current version is{" "}
+        The Zentla API uses URL-based versioning. The current version is{" "}
         <code>v1</code>:
       </p>
       <CodeBlock
@@ -122,7 +122,7 @@ https://api.relay.com/api/v1/subscriptions`}</CodeBlock>
         </li>
         <li>
           <strong>Deprecation Headers:</strong> Deprecated endpoints return a
-          <code>X-Relay-Deprecated</code> header with migration guidance.
+          <code>X-Zentla-Deprecated</code> header with migration guidance.
         </li>
         <li>
           <strong>Migration Guide:</strong> We publish detailed migration
@@ -138,9 +138,9 @@ https://api.relay.com/api/v1/subscriptions`}</CodeBlock>
         title="Deprecation headers"
         language="http"
       >{`# Example deprecation header
-X-Relay-Deprecated: true
-X-Relay-Sunset: 2025-06-01
-X-Relay-Migration: See https://relay.com/docs/migrations/v2`}</CodeBlock>
+X-Zentla-Deprecated: true
+X-Zentla-Sunset: 2025-06-01
+X-Zentla-Migration: See https://relay.com/docs/migrations/v2`}</CodeBlock>
 
       <h2 id="beta-considerations">Beta Considerations</h2>
       <p>
@@ -170,12 +170,12 @@ X-Relay-Migration: See https://relay.com/docs/migrations/v2`}</CodeBlock>
       </ul>
       <p>
         SDK major versions correspond to API versions. For example,{" "}
-        <code>@relay/sdk@1.x</code>
+        <code>@zentla/sdk@1.x</code>
         targets API <code>v1</code>.
       </p>
 
       <h2 id="offer-versioning">Offer Versioning</h2>
-      <p>Relay automatically versions offers to ensure pricing consistency:</p>
+      <p>Zentla automatically versions offers to ensure pricing consistency:</p>
       <ul>
         <li>
           Each offer has an immutable <code>offerVersionId</code>
@@ -301,7 +301,7 @@ X-Relay-Migration: See https://relay.com/docs/migrations/v2`}</CodeBlock>
         <p className="text-sm text-gray-600">
           We understand that API stability is crucial for your business. We're
           committed to maintaining backward compatibility and providing clear
-          migration paths when changes are necessary. Your trust in Relay's
+          migration paths when changes are necessary. Your trust in Zentla's
           stability is our priority.
         </p>
       </div>

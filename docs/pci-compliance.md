@@ -1,6 +1,6 @@
 # PCI Compliance
 
-Relay is designed to maintain PCI DSS compliance by minimizing the PCI scope and delegating sensitive payment operations to certified providers.
+Zentla is designed to maintain PCI DSS compliance by minimizing the PCI scope and delegating sensitive payment operations to certified providers.
 
 ## PCI Boundary Architecture
 
@@ -11,7 +11,7 @@ Relay is designed to maintain PCI DSS compliance by minimizing the PCI scope and
 │  │                    Out of PCI Scope                          │   │
 │  │  - User authentication                                       │   │
 │  │  - Business logic                                            │   │
-│  │  - Relay SDK integration                                     │   │
+│  │  - Zentla SDK integration                                     │   │
 │  │  - Subscription status checks                                │   │
 │  │  - Entitlement verification                                  │   │
 │  └─────────────────────────────────────────────────────────────┘   │
@@ -47,9 +47,9 @@ Relay is designed to maintain PCI DSS compliance by minimizing the PCI scope and
 
 ### 1. No Card Data Storage
 
-Relay never stores, processes, or transmits cardholder data:
+Zentla never stores, processes, or transmits cardholder data:
 
-| Data Type         | Relay Storage  | Provider Storage |
+| Data Type         | Zentla Storage | Provider Storage |
 | ----------------- | -------------- | ---------------- |
 | Card Number (PAN) | Never          | Tokenized        |
 | CVV/CVC           | Never          | Never (per PCI)  |
@@ -63,7 +63,7 @@ Relay never stores, processes, or transmits cardholder data:
 All payment references use provider tokens:
 
 ```typescript
-// What Relay stores (ProviderRef table)
+// What Zentla stores (ProviderRef table)
 {
   entityType: 'customer',
   entityId: 'relay_customer_abc123',
@@ -84,12 +84,12 @@ All payment references use provider tokens:
 Card collection happens entirely on the provider's domain:
 
 ```
-1. Your app calls Relay SDK: relay.checkout.createSession()
-2. Relay creates session, gets Stripe Checkout URL
+1. Your app calls Zentla SDK: relay.checkout.createSession()
+2. Zentla creates session, gets Stripe Checkout URL
 3. Customer redirected to checkout.stripe.com
-4. Card entered directly on Stripe (never touches Relay)
-5. Stripe webhook notifies Relay of completion
-6. Relay creates subscription record (no card data)
+4. Card entered directly on Stripe (never touches Zentla)
+5. Stripe webhook notifies Zentla of completion
+6. Zentla creates subscription record (no card data)
 7. Customer redirected to your success URL
 ```
 
@@ -107,12 +107,12 @@ const event = stripe.webhooks.constructEvent(
 
 // Outbound to your app
 const signature = hmac("sha256", secret, `${timestamp}.${payload}`);
-headers["Relay-Signature"] = `t=${timestamp},v1=${signature}`;
+headers["Zentla-Signature"] = `t=${timestamp},v1=${signature}`;
 ```
 
 ## SAQ-A Eligibility
 
-Relay qualifies for SAQ-A (the simplest self-assessment questionnaire) because:
+Zentla qualifies for SAQ-A (the simplest self-assessment questionnaire) because:
 
 1. **No direct card data handling** - All card collection via Stripe Checkout
 2. **No card data storage** - Only token references stored
@@ -151,7 +151,7 @@ Relay qualifies for SAQ-A (the simplest self-assessment questionnaire) because:
 
 ## Provider Responsibility Matrix
 
-| Responsibility        | Relay              | Stripe                   |
+| Responsibility        | Zentla             | Stripe                   |
 | --------------------- | ------------------ | ------------------------ |
 | Card collection UI    | -                  | Stripe Checkout/Elements |
 | Card data encryption  | -                  | Yes                      |
@@ -192,7 +192,7 @@ Maintain compliance with yearly reviews:
 If a security incident occurs:
 
 1. **Contain** - Revoke affected API keys immediately
-2. **Assess** - Determine scope (Relay data vs provider data)
+2. **Assess** - Determine scope (Zentla data vs provider data)
 3. **Notify** - Contact Stripe if their data affected
 4. **Report** - Document timeline and actions
 5. **Remediate** - Fix vulnerability and verify

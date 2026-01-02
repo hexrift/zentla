@@ -1,6 +1,6 @@
 # Security
 
-Relay is designed with security-first principles aligned with OWASP guidelines.
+Zentla is designed with security-first principles aligned with OWASP guidelines.
 
 ## Authentication
 
@@ -9,12 +9,12 @@ Relay is designed with security-first principles aligned with OWASP guidelines.
 All API requests require authentication via API key:
 
 ```
-Authorization: Bearer relay_live_xxxxx
+Authorization: Bearer zentla_live_xxxxx
 ```
 
 Key properties:
 
-- **Prefixed**: `relay_live_` or `relay_test_`
+- **Prefixed**: `zentla_live_` or `zentla_test_`
 - **Hashed**: Keys are stored as SHA-256 hashes
 - **Scoped**: Each key belongs to one workspace
 - **Role-based**: owner, admin, member, readonly
@@ -104,10 +104,10 @@ Requirements:
 
 ### Outbound (Your App)
 
-Relay signs all outbound webhooks:
+Zentla signs all outbound webhooks:
 
 ```
-Relay-Signature: t=1234567890,v1=abc123...
+Zentla-Signature: t=1234567890,v1=abc123...
 ```
 
 Verify in your handler:
@@ -155,7 +155,7 @@ WEBHOOK_SIGNING_SECRET=...
 
 ## PCI Compliance
 
-Relay maintains PCI compliance by:
+Zentla maintains PCI compliance by:
 
 1. **No card data storage** - All card data handled by Stripe
 2. **Tokenization only** - References to Stripe objects, never card numbers

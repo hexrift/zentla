@@ -7,7 +7,7 @@ Base URL: `https://api.relay.com/api/v1` (or your self-hosted instance)
 All requests require an API key in the Authorization header:
 
 ```
-Authorization: Bearer relay_live_xxxxx
+Authorization: Bearer zentla_live_xxxxx
 ```
 
 ## Common Response Format
@@ -886,7 +886,7 @@ POST /api-keys
   "data": {
     "id": "key_123",
     "name": "Production Key",
-    "key": "relay_live_abc123...",
+    "key": "zentla_live_abc123...",
     "role": "admin",
     "expiresAt": "2025-01-15T00:00:00Z",
     "createdAt": "2024-01-15T10:30:00Z"

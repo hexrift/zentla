@@ -56,8 +56,8 @@ describe("UsersService", () => {
 
   const mockApiKey = {
     id: "key_123",
-    secret: "relay_test_abc123",
-    prefix: "relay_test_abc",
+    secret: "zentla_test_abc123",
+    prefix: "zentla_test_abc",
   };
 
   beforeEach(async () => {

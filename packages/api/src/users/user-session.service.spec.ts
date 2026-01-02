@@ -57,7 +57,7 @@ describe("UserSessionService", () => {
         userAgent: "Mozilla/5.0",
       });
 
-      expect(result.token).toMatch(/^relay_session_/);
+      expect(result.token).toMatch(/^zentla_session_/);
       expect(result.session).toEqual(mockSession);
       expect(prisma.userSession.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
@@ -103,7 +103,7 @@ describe("UserSessionService", () => {
     it("should return null when session not found", async () => {
       prisma.userSession.findUnique.mockResolvedValue(null);
 
-      const result = await service.validateSession("relay_session_abc123");
+      const result = await service.validateSession("zentla_session_abc123");
 
       expect(result).toBeNull();
     });
@@ -115,7 +115,7 @@ describe("UserSessionService", () => {
       });
       prisma.userSession.delete.mockResolvedValue({});
 
-      const result = await service.validateSession("relay_session_abc123");
+      const result = await service.validateSession("zentla_session_abc123");
 
       expect(result).toBeNull();
       expect(prisma.userSession.delete).toHaveBeenCalledWith({
@@ -126,7 +126,7 @@ describe("UserSessionService", () => {
     it("should return session context for valid session", async () => {
       prisma.userSession.findUnique.mockResolvedValue(mockSession);
 
-      const result = await service.validateSession("relay_session_abc123");
+      const result = await service.validateSession("zentla_session_abc123");
 
       expect(result).toEqual({
         userId: "user_123",

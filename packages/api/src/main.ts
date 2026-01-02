@@ -9,7 +9,7 @@ import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { ApiVersionInterceptor } from "./common/interceptors/api-version.interceptor";
 import { LoggerService } from "./common/logger/logger.service";
 import { ALL_MODELS } from "./common/models";
-import { RELAY_VERSION } from "./common/version";
+import { ZENTLA_VERSION } from "./common/version";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 
 async function bootstrap(): Promise<void> {
@@ -103,11 +103,11 @@ Relay manages subscriptions, customers, entitlements, and checkouts. It connects
 Include your API key in the Authorization header:
 
 \`\`\`
-Authorization: Bearer relay_live_xxx
+Authorization: Bearer zentla_live_xxx
 \`\`\`
 
-- \`relay_live_xxx\` - Production
-- \`relay_test_xxx\` - Test/sandbox (uses Stripe test mode)
+- \`zentla_live_xxx\` - Production
+- \`zentla_test_xxx\` - Test/sandbox (uses Stripe test mode)
 
 ## Metadata
 
@@ -166,7 +166,7 @@ Idempotency-Key: unique-request-id-123
 Use \`error.code\` for programmatic handling.
 `,
       )
-      .setVersion(RELAY_VERSION)
+      .setVersion(ZENTLA_VERSION)
       .addServer(
         configService.get<string>("API_URL", `http://localhost:${port}`),
         nodeEnv === "production" ? "Production" : "Local Development",
@@ -177,7 +177,7 @@ Use \`error.code\` for programmatic handling.
           name: "Authorization",
           in: "header",
           description:
-            "API Key with format: Bearer relay_live_xxx or Bearer relay_test_xxx",
+            "API Key with format: Bearer zentla_live_xxx or Bearer zentla_test_xxx",
         },
         "api-key",
       )

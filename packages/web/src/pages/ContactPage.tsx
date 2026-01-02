@@ -134,7 +134,7 @@ export function ContactPage() {
     <div className="min-h-screen bg-gray-50">
       <SEO
         title="Contact Sales"
-        description="Get in touch with our team to learn how Relay can help manage your subscriptions."
+        description="Get in touch with our team to learn how Zentla can help manage your subscriptions."
         path="/contact"
       />
       {/* Header */}
@@ -145,7 +145,9 @@ export function ContactPage() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <span className="text-lg font-semibold text-gray-900">Relay</span>
+              <span className="text-lg font-semibold text-gray-900">
+                Zentla
+              </span>
             </Link>
             <Link to="/" className="text-sm text-gray-500 hover:text-gray-700">
               Back to Home
@@ -162,7 +164,7 @@ export function ContactPage() {
           </h1>
           <p className="text-lg text-gray-500">
             Ready to streamline your subscription management? Let's talk about
-            how Relay can help your business.
+            how Zentla can help your business.
           </p>
         </div>
 
@@ -260,7 +262,7 @@ export function ContactPage() {
                 id="contact-message"
                 value={formData.message}
                 onChange={(e) => handleChange("message", e.target.value)}
-                placeholder="Tell us about your subscription management needs, current challenges, or questions about Relay..."
+                placeholder="Tell us about your subscription management needs, current challenges, or questions about Zentla..."
                 rows={5}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
                 required

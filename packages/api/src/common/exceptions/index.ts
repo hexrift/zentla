@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
-import { ErrorCode, ErrorCodeHttpStatus } from "@relay/core";
+import { ErrorCode, ErrorCodeHttpStatus } from "@zentla/core";
 
 /**
  * Base exception class for Relay API errors.

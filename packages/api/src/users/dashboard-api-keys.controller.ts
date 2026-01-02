@@ -27,7 +27,7 @@ import type {
   ApiKeyRole,
   ApiKeyEnvironment,
   WorkspaceRole,
-} from "@relay/database";
+} from "@zentla/database";
 
 // ============================================================================
 // REQUEST DTOs
@@ -104,7 +104,7 @@ const ROLE_HIERARCHY: Record<WorkspaceRole, number> = {
 @ApiTags("dashboard")
 @ApiHeader({
   name: "Authorization",
-  description: "Session token: Bearer relay_session_...",
+  description: "Session token: Bearer zentla_session_...",
 })
 @Controller("dashboard/workspaces/:workspaceId/api-keys")
 export class DashboardApiKeysController {

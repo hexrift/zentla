@@ -1,4 +1,4 @@
-# Relay API Versioning Strategy
+# Zentla API Versioning Strategy
 
 **Internal Document** - Guidelines for maintaining API compatibility and versioning across the platform.
 
@@ -20,10 +20,10 @@ All API endpoints use URI-based versioning with the format `/api/v{n}/`:
 
 Every API response includes:
 
-| Header                   | Example | Description                        |
-| ------------------------ | ------- | ---------------------------------- |
-| `X-API-Version`          | `1`     | Current API version                |
-| `X-Relay-API-Deprecated` | `false` | Whether this version is deprecated |
+| Header                    | Example | Description                        |
+| ------------------------- | ------- | ---------------------------------- |
+| `X-API-Version`           | `1`     | Current API version                |
+| `X-Zentla-API-Deprecated` | `false` | Whether this version is deprecated |
 
 ### When to Create a New Version
 
@@ -47,7 +47,7 @@ Create a new major version (`v2`, `v3`, etc.) only for **breaking changes**:
 
 ### Deprecation Process
 
-1. **Announce**: Set `X-Relay-API-Deprecated: true` header with deprecation date
+1. **Announce**: Set `X-Zentla-API-Deprecated: true` header with deprecation date
 2. **Document**: Update API docs with migration guide
 3. **Notify**: Email all API key holders with deprecation timeline
 4. **Timeline**:
@@ -109,7 +109,7 @@ Webhook payloads follow additive-only changes:
 ### Webhook Version Header
 
 ```
-X-Relay-Webhook-Version: 1
+X-Zentla-Webhook-Version: 1
 ```
 
 ### Breaking Change Policy
@@ -151,7 +151,7 @@ MAJOR.MINOR.PATCH
 
 ### Current Pin
 
-The Relay API pins to a specific Stripe API version to ensure consistent behavior:
+The Zentla API pins to a specific Stripe API version to ensure consistent behavior:
 
 ```typescript
 // In stripe.adapter.ts
@@ -195,7 +195,7 @@ Stripe webhooks include their API version in the `stripe-signature` header conte
 
 ## 8. Beta Period Exceptions
 
-During beta (`X-Relay-Beta: true`):
+During beta (`X-Zentla-Beta: true`):
 
 - Breaking changes may occur with 2-week notice
 - All clients acknowledged beta terms

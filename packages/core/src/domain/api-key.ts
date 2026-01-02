@@ -29,6 +29,6 @@ export interface ApiKeyContext {
 }
 
 export const API_KEY_PREFIXES = {
-  live: "relay_live_",
-  test: "relay_test_",
+  live: "zentla_live_",
+  test: "zentla_test_",
 } as const;

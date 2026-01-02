@@ -1,4 +1,4 @@
-# Getting Started with Relay
+# Getting Started with Zentla
 
 Get from zero to your first Stripe test checkout in under 10 minutes.
 
@@ -64,7 +64,7 @@ Save the API key from the output:
 
 ```
 Created test API key: Development Test Key
-  Full key (save this): relay_test_xxxxxxxx...
+  Full key (save this): zentla_test_xxxxxxxx...
 ```
 
 ### 5. Start Development Servers (1 min)
@@ -89,7 +89,7 @@ Open http://localhost:3001 and set your API key:
 3. Run:
 
 ```javascript
-localStorage.setItem("relay_api_key", "relay_test_YOUR_KEY_HERE");
+localStorage.setItem("relay_api_key", "zentla_test_YOUR_KEY_HERE");
 ```
 
 4. Refresh the page
@@ -110,7 +110,7 @@ localStorage.setItem("relay_api_key", "relay_test_YOUR_KEY_HERE");
 
 ```bash
 curl -X POST http://localhost:3002/api/v1/offers \
-  -H "Authorization: Bearer relay_test_YOUR_KEY" \
+  -H "Authorization: Bearer zentla_test_YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Starter Plan",
@@ -135,7 +135,7 @@ curl -X POST http://localhost:3002/api/v1/offers \
 ```bash
 # Get your offer ID from the previous response
 curl -X POST http://localhost:3002/api/v1/offers/YOUR_OFFER_ID/publish \
-  -H "Authorization: Bearer relay_test_YOUR_KEY" \
+  -H "Authorization: Bearer zentla_test_YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
@@ -144,7 +144,7 @@ curl -X POST http://localhost:3002/api/v1/offers/YOUR_OFFER_ID/publish \
 
 ```bash
 curl -X POST http://localhost:3002/api/v1/checkout/sessions \
-  -H "Authorization: Bearer relay_test_YOUR_KEY" \
+  -H "Authorization: Bearer zentla_test_YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "offerId": "YOUR_OFFER_ID",
@@ -170,13 +170,13 @@ Response:
 3. Any future expiry, any CVC, any ZIP
 4. Click Pay
 
-The Stripe CLI will forward the webhook to Relay, creating the subscription.
+The Stripe CLI will forward the webhook to Zentla, creating the subscription.
 
 ### 11. Verify Subscription Created
 
 ```bash
 curl http://localhost:3002/api/v1/subscriptions \
-  -H "Authorization: Bearer relay_test_YOUR_KEY"
+  -H "Authorization: Bearer zentla_test_YOUR_KEY"
 ```
 
 You should see your new subscription!
@@ -189,7 +189,7 @@ You should see your new subscription!
 
 ```bash
 curl http://localhost:3002/api/v1/customers/CUSTOMER_ID/entitlements \
-  -H "Authorization: Bearer relay_test_YOUR_KEY"
+  -H "Authorization: Bearer zentla_test_YOUR_KEY"
 ```
 
 ### Explore the API
@@ -204,7 +204,7 @@ Send events to your own endpoint:
 
 ```bash
 curl -X POST http://localhost:3002/api/v1/webhook-endpoints \
-  -H "Authorization: Bearer relay_test_YOUR_KEY" \
+  -H "Authorization: Bearer zentla_test_YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "url": "https://your-app.com/webhooks/relay",
@@ -255,7 +255,7 @@ docker-compose logs postgres
                               │ REST API
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                        Relay API                             │
+│                        Zentla API                             │
 │  ┌─────────┐  ┌──────────────┐  ┌────────────────────────┐  │
 │  │ Offers  │  │ Subscriptions│  │     Entitlements       │  │
 │  └────┬────┘  └──────┬───────┘  └───────────┬────────────┘  │
