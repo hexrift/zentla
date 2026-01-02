@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.7.0](https://github.com/PrimeCodeLabs/zentla/compare/v1.6.0...v1.7.0) (2026-01-02)
+
+
+### Features
+
+* add visible FAQ section to homepage ([6233e0d](https://github.com/PrimeCodeLabs/zentla/commit/6233e0d9c9865ea9c4313e6dad194853d7bbe033))
+
+
+### Bug Fixes
+
+* replace hardcoded purple/indigo colors with primary theme ([6fb423b](https://github.com/PrimeCodeLabs/zentla/commit/6fb423baf4ae364c0fcd9bf0777f7a59789fc9d5))
+
 ## [1.6.0](https://github.com/PrimeCodeLabs/zentla/compare/v1.5.4...v1.6.0) (2026-01-02)
 
 
