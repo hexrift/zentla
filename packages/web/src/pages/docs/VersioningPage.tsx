@@ -281,15 +281,12 @@ X-Zentla-Migration: See https://zentla.dev/docs/migrations/v2`}</CodeBlock>
 
       <h2 id="support">Getting Help</h2>
       <p>
-        If you have questions about versioning or need help with migrations:
+        If you have questions about versioning or need help with migrations,{" "}
+        <Link to="/feedback" className="text-primary-600 hover:text-primary-700">
+          send us feedback
+        </Link>
+        . We're here to help during beta.
       </p>
-      <ul>
-        <li>
-          <Link to="/feedback">Send us feedback</Link>
-        </li>
-        <li>Email us at support@zentla.dev</li>
-        <li>Join our Discord community (coming soon)</li>
-      </ul>
 
       <div className="not-prose mt-12 p-6 bg-gray-50 rounded-xl">
         <h3 className="font-semibold text-gray-900 mb-2">Our Commitment</h3>
