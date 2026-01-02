@@ -88,6 +88,56 @@
         ]
       }
     </script>
+
+    <!-- FAQ Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Zentla?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Zentla is a subscription management API that helps developers build and manage subscription-based products. It provides a provider-agnostic layer over payment processors like Stripe, handling offers, customers, subscriptions, and entitlements."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does Zentla integrate with Stripe?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Zentla syncs with your Stripe account to manage customers, subscriptions, and payments. You connect your Stripe API keys, and Zentla handles the complexity of subscription lifecycle, webhooks, and entitlement management automatically."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What are entitlements in Zentla?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Entitlements are feature access controls tied to subscriptions. When a customer subscribes to an offer, they receive entitlements that define what features they can access. You can check entitlements via API to control feature access in your app."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Zentla support headless checkout?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, Zentla provides headless checkout APIs that let you build custom checkout experiences. You get a client secret to use with Stripe.js for payment collection while Zentla handles the subscription provisioning."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Zentla free to use?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Zentla offers a free tier for startups and small projects. This includes core features like subscription management, customer sync, and entitlements. Contact us for enterprise pricing and additional features."
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
