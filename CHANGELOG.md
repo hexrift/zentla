@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.5.0](https://github.com/PrimeCodeLabs/zentla/compare/v1.4.0...v1.5.0) (2026-01-02)
+
+
+### Features
+
+* complete rebrand from Relay to Zentla ([6ae9ba0](https://github.com/PrimeCodeLabs/zentla/commit/6ae9ba0c2506725f225735491b002c95e2baa9b6))
+* Complete rebrand from Relay to Zentla ([d939493](https://github.com/PrimeCodeLabs/zentla/commit/d93949332e9aa2de461464922708f901fa77d5c8))
+
+
+### Bug Fixes
+
+* update Dockerfiles with [@zentla](https://github.com/zentla) package names ([65cb06e](https://github.com/PrimeCodeLabs/zentla/commit/65cb06e379ecc5f7eeb9553053141f7d526e8d95))
+* update Koyeb app name to zentla ([d6b691c](https://github.com/PrimeCodeLabs/zentla/commit/d6b691c7d99ec1a708242a416ab92be94568e240))
+* update session token prefix and fix prettier formatting ([6f2952a](https://github.com/PrimeCodeLabs/zentla/commit/6f2952afddd54e934ebb4443e0f530c965b1c0f4))
+
 ## [1.4.0](https://github.com/PrimeCodeLabs/relay/compare/v1.3.2...v1.4.0) (2026-01-02)
 
 
