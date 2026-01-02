@@ -113,7 +113,7 @@ Zentla-Signature: t=1234567890,v1=abc123...
 Verify in your handler:
 
 ```typescript
-const signature = req.headers["relay-signature"];
+const signature = req.headers["zentla-signature"];
 const payload = req.body;
 
 // Verify

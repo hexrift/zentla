@@ -1,6 +1,6 @@
 # API Reference
 
-Base URL: `https://api.relay.com/api/v1` (or your self-hosted instance)
+Base URL: `https://api.zentla.dev/api/v1` (or your self-hosted instance)
 
 ## Authentication
 
@@ -808,7 +808,7 @@ POST /webhook-endpoints
 
 ```json
 {
-  "url": "https://yourapp.com/webhooks/relay",
+  "url": "https://yourapp.com/webhooks/zentla",
   "events": [
     "subscription.created",
     "subscription.updated",
@@ -825,7 +825,7 @@ POST /webhook-endpoints
 {
   "data": {
     "id": "we_123",
-    "url": "https://yourapp.com/webhooks/relay",
+    "url": "https://yourapp.com/webhooks/zentla",
     "events": ["subscription.created", "subscription.updated"],
     "status": "active",
     "secret": "whsec_abc123..."

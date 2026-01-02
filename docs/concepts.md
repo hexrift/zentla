@@ -70,7 +70,7 @@ Entitlements are derived from the active subscription's offer configuration:
 }
 
 // Check at runtime
-const check = await relay.customers.checkEntitlement(customerId, "seats");
+const check = await zentla.customers.checkEntitlement(customerId, "seats");
 // { featureKey: 'seats', hasAccess: true, value: 10, valueType: 'number' }
 ```
 

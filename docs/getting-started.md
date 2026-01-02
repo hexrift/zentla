@@ -14,7 +14,7 @@ Get from zero to your first Stripe test checkout in under 10 minutes.
 ### 1. Clone and Install (2 min)
 
 ```bash
-git clone https://github.com/your-org/relay.git
+git clone https://github.com/PrimeCodeLabs/zentla.git
 cd relay
 yarn install
 ```
@@ -89,7 +89,7 @@ Open http://localhost:3001 and set your API key:
 3. Run:
 
 ```javascript
-localStorage.setItem("relay_api_key", "zentla_test_YOUR_KEY_HERE");
+localStorage.setItem("zentla_api_key", "zentla_test_YOUR_KEY_HERE");
 ```
 
 4. Refresh the page
@@ -207,7 +207,7 @@ curl -X POST http://localhost:3002/api/v1/webhook-endpoints \
   -H "Authorization: Bearer zentla_test_YOUR_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "url": "https://your-app.com/webhooks/relay",
+    "url": "https://your-app.com/webhooks/zentla",
     "events": ["subscription.created", "subscription.canceled"]
   }'
 ```

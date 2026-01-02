@@ -1,5 +1,5 @@
 # =============================================================================
-# Relay Infrastructure - Production Environment
+# Zentla Infrastructure - Production Environment
 # =============================================================================
 # This is the production environment configuration.
 # Run: terraform init && terraform apply
@@ -10,10 +10,10 @@ terraform {
 
   # Uncomment and configure for remote state storage
   # backend "s3" {
-  #   bucket         = "relay-terraform-state"
+  #   bucket         = "zentla-terraform-state"
   #   key            = "production/terraform.tfstate"
   #   region         = "us-east-1"
-  #   dynamodb_table = "relay-terraform-locks"
+  #   dynamodb_table = "zentla-terraform-locks"
   #   encrypt        = true
   # }
 
@@ -30,7 +30,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project     = "relay"
+      Project     = "zentla"
       Environment = "production"
       ManagedBy   = "terraform"
     }
@@ -38,10 +38,10 @@ provider "aws" {
 }
 
 # Use the root module
-module "relay" {
+module "zentla" {
   source = "../../"
 
-  project     = "relay"
+  project     = "zentla"
   environment = "production"
   aws_region  = var.aws_region
 
@@ -50,8 +50,8 @@ module "relay" {
   availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 
   # Database - larger for production
-  database_name     = "relay"
-  database_username = "relay_admin"
+  database_name     = "zentla"
+  database_username = "zentla_admin"
   database_password = var.database_password
   rds_min_capacity  = 1
   rds_max_capacity  = 8
@@ -81,43 +81,43 @@ module "relay" {
 # Outputs
 # -----------------------------------------------------------------------------
 output "vpc_id" {
-  value = module.relay.vpc_id
+  value = module.zentla.vpc_id
 }
 
 output "alb_dns_name" {
-  value = module.relay.alb_dns_name
+  value = module.zentla.alb_dns_name
 }
 
 output "ecr_repository_url" {
-  value = module.relay.ecr_repository_url
+  value = module.zentla.ecr_repository_url
 }
 
 output "rds_endpoint" {
-  value     = module.relay.rds_endpoint
+  value     = module.zentla.rds_endpoint
   sensitive = true
 }
 
 output "redis_endpoint" {
-  value     = module.relay.redis_endpoint
+  value     = module.zentla.redis_endpoint
   sensitive = true
 }
 
 output "admin_ui_cloudfront_domain" {
-  value = module.relay.admin_ui_cloudfront_domain
+  value = module.zentla.admin_ui_cloudfront_domain
 }
 
 output "admin_ui_bucket_name" {
-  value = module.relay.admin_ui_bucket_name
+  value = module.zentla.admin_ui_bucket_name
 }
 
 output "admin_ui_distribution_id" {
-  value = module.relay.admin_ui_cloudfront_distribution_id
+  value = module.zentla.admin_ui_cloudfront_distribution_id
 }
 
 output "ecs_cluster_name" {
-  value = module.relay.ecs_cluster_name
+  value = module.zentla.ecs_cluster_name
 }
 
 output "ecs_service_name" {
-  value = module.relay.ecs_service_name
+  value = module.zentla.ecs_service_name
 }

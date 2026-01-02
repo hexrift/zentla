@@ -1,5 +1,5 @@
 /**
- * Standardized error codes for the Relay API.
+ * Standardized error codes for the Zentla API.
  * These codes enable programmatic error handling by API consumers.
  */
 export enum ErrorCode {

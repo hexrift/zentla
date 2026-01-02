@@ -1,33 +1,33 @@
-# @relay/sdk
+# @zentla/sdk
 
-TypeScript SDK for the Relay Subscription Commerce API.
+TypeScript SDK for the Zentla Subscription Commerce API.
 
 ## Installation
 
 ```bash
-npm install @relay/sdk
+npm install @zentla/sdk
 # or
-yarn add @relay/sdk
+yarn add @zentla/sdk
 ```
 
 ## Quick Start
 
 ```typescript
-import { RelayClient } from "@relay/sdk";
+import { ZentlaClient } from "@zentla/sdk";
 
-const relay = new RelayClient({
+const zentla = new ZentlaClient({
   apiKey: "zentla_live_xxxxx",
-  baseUrl: "https://api.relay.com/api/v1", // optional
+  baseUrl: "https://api.zentla.dev/api/v1", // optional
 });
 
 // Check customer entitlements
-const { entitlements } = await relay.customers.getEntitlements("cust_123");
+const { entitlements } = await zentla.customers.getEntitlements("cust_123");
 const hasPremium = entitlements.find(
   (e) => e.featureKey === "premium",
 )?.hasAccess;
 
 // Create a checkout session
-const checkout = await relay.checkout.createSession({
+const checkout = await zentla.checkout.createSession({
   offerId: "offer_abc",
   customerEmail: "customer@example.com",
   successUrl: "https://yourapp.com/success",
@@ -44,13 +44,13 @@ window.location.href = checkout.sessionUrl;
 
 ```typescript
 // List offers
-const { data: offers } = await relay.offers.list({ status: "active" });
+const { data: offers } = await zentla.offers.list({ status: "active" });
 
 // Get offer with versions
-const offer = await relay.offers.get("offer_abc");
+const offer = await zentla.offers.get("offer_abc");
 
 // Create offer
-const newOffer = await relay.offers.create({
+const newOffer = await zentla.offers.create({
   name: "Pro Offer",
   description: "Everything you need",
   config: {
@@ -69,10 +69,10 @@ const newOffer = await relay.offers.create({
 });
 
 // Publish draft
-await relay.offers.publish("offer_abc");
+await zentla.offers.publish("offer_abc");
 
 // Create new version
-await relay.offers.createVersion("offer_abc", {
+await zentla.offers.createVersion("offer_abc", {
   pricing: { model: "flat", currency: "USD", amount: 3900, interval: "month" },
   entitlements: [{ featureKey: "seats", value: 25, valueType: "number" }],
 });
@@ -82,15 +82,15 @@ await relay.offers.createVersion("offer_abc", {
 
 ```typescript
 // List customers
-const { data: customers } = await relay.customers.list({
+const { data: customers } = await zentla.customers.list({
   email: "user@example.com",
 });
 
 // Get customer
-const customer = await relay.customers.get("cust_123");
+const customer = await zentla.customers.get("cust_123");
 
 // Create customer
-const newCustomer = await relay.customers.create({
+const newCustomer = await zentla.customers.create({
   email: "user@example.com",
   name: "John Doe",
   externalId: "your-internal-id",
@@ -98,10 +98,10 @@ const newCustomer = await relay.customers.create({
 
 // Get all entitlements
 const { entitlements, activeSubscriptionIds } =
-  await relay.customers.getEntitlements("cust_123");
+  await zentla.customers.getEntitlements("cust_123");
 
 // Check single entitlement
-const seatCheck = await relay.customers.checkEntitlement("cust_123", "seats");
+const seatCheck = await zentla.customers.checkEntitlement("cust_123", "seats");
 if (seatCheck.hasAccess && seatCheck.value >= 10) {
   // Allow action
 }
@@ -111,27 +111,27 @@ if (seatCheck.hasAccess && seatCheck.value >= 10) {
 
 ```typescript
 // List subscriptions
-const { data: subs } = await relay.subscriptions.list({
+const { data: subs } = await zentla.subscriptions.list({
   customerId: "cust_123",
   status: "active",
 });
 
 // Get subscription
-const sub = await relay.subscriptions.get("sub_456");
+const sub = await zentla.subscriptions.get("sub_456");
 
 // Cancel at period end
-await relay.subscriptions.cancel("sub_456", {
+await zentla.subscriptions.cancel("sub_456", {
   cancelAtPeriodEnd: true,
   reason: "Customer requested",
 });
 
 // Cancel immediately (revokes entitlements)
-await relay.subscriptions.cancel("sub_456", {
+await zentla.subscriptions.cancel("sub_456", {
   cancelAtPeriodEnd: false,
 });
 
 // Upgrade/downgrade subscription
-await relay.subscriptions.change("sub_456", {
+await zentla.subscriptions.change("sub_456", {
   newOfferId: "offer_enterprise",
   prorationBehavior: "create_prorations",
 });
@@ -141,7 +141,7 @@ await relay.subscriptions.change("sub_456", {
 
 ```typescript
 // Create checkout session
-const checkout = await relay.checkout.createSession({
+const checkout = await zentla.checkout.createSession({
   offerId: "offer_abc",
   customerEmail: "customer@example.com",
   successUrl: "https://yourapp.com/success?session_id={CHECKOUT_SESSION_ID}",
@@ -151,15 +151,15 @@ const checkout = await relay.checkout.createSession({
 });
 
 // Get session status
-const session = await relay.checkout.getSession("checkout_789");
+const session = await zentla.checkout.getSession("checkout_789");
 ```
 
 ### Webhook Endpoints
 
 ```typescript
 // Create webhook endpoint
-const endpoint = await relay.webhooks.create({
-  url: "https://yourapp.com/webhooks/relay",
+const endpoint = await zentla.webhooks.create({
+  url: "https://yourapp.com/webhooks/zentla",
   events: ["subscription.created", "subscription.canceled", "invoice.paid"],
   description: "Main handler",
 });
@@ -168,24 +168,24 @@ const endpoint = await relay.webhooks.create({
 console.log("Webhook secret:", endpoint.secret);
 
 // Rotate secret if compromised
-const { secret } = await relay.webhooks.rotateSecret("we_123");
+const { secret } = await zentla.webhooks.rotateSecret("we_123");
 
 // Disable endpoint
-await relay.webhooks.update("we_123", { status: "disabled" });
+await zentla.webhooks.update("we_123", { status: "disabled" });
 
 // Delete endpoint
-await relay.webhooks.delete("we_123");
+await zentla.webhooks.delete("we_123");
 ```
 
 ## Error Handling
 
 ```typescript
-import { RelayClient, RelayError } from "@relay/sdk";
+import { ZentlaClient, ZentlaError } from "@zentla/sdk";
 
 try {
-  await relay.customers.get("invalid-id");
+  await zentla.customers.get("invalid-id");
 } catch (error) {
-  if (error instanceof RelayError) {
+  if (error instanceof ZentlaError) {
     console.error(`Error ${error.status}: ${error.message}`);
     console.error(`Code: ${error.code}`);
   }
@@ -207,7 +207,7 @@ import type {
   WebhookEndpoint,
   EntitlementCheck,
   PaginatedResponse,
-} from "@relay/sdk";
+} from "@zentla/sdk";
 ```
 
 ## Pagination
@@ -219,7 +219,7 @@ let cursor: string | undefined;
 const allOffers: Offer[] = [];
 
 do {
-  const { data, hasMore, nextCursor } = await relay.offers.list({
+  const { data, hasMore, nextCursor } = await zentla.offers.list({
     limit: 50,
     cursor,
   });
@@ -230,10 +230,10 @@ do {
 
 ## Configuration
 
-| Option  | Type   | Default                        | Description        |
-| ------- | ------ | ------------------------------ | ------------------ |
-| apiKey  | string | required                       | Your Relay API key |
-| baseUrl | string | `https://api.relay.com/api/v1` | API base URL       |
+| Option  | Type   | Default                         | Description          |
+| ------- | ------ | ------------------------------- | -------------------- |
+| apiKey  | string | required                        | Your Zentla API key  |
+| baseUrl | string | `https://api.zentla.dev/api/v1` | API base URL         |
 
 ## License
 

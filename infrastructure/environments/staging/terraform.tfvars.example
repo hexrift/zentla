@@ -11,7 +11,7 @@ container_image_tag = "staging-latest"
 # SSL Certificates (create these in ACM first)
 acm_certificate_arn      = "arn:aws:acm:us-east-1:123456789012:certificate/xxx"
 admin_ui_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/xxx"
-admin_ui_domain          = "staging-admin.relay.example.com"
+admin_ui_domain          = "staging-admin.zentla.example.com"
 
 # Secrets - use environment variables or a secrets file
 # export TF_VAR_database_password="..."

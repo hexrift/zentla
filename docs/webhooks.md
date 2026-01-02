@@ -13,8 +13,8 @@ Provider (Stripe) -> Zentla Inbound Webhook -> Normalize Event -> Outbox -> Your
 ### 1. Create a Webhook Endpoint
 
 ```typescript
-const endpoint = await relay.webhooks.create({
-  url: "https://yourapp.com/webhooks/relay",
+const endpoint = await zentla.webhooks.create({
+  url: "https://yourapp.com/webhooks/zentla",
   events: [
     "subscription.created",
     "subscription.updated",
@@ -38,10 +38,10 @@ const app = express();
 
 // Use raw body for signature verification
 app.post(
-  "/webhooks/relay",
+  "/webhooks/zentla",
   express.raw({ type: "application/json" }),
   (req, res) => {
-    const signature = req.headers["relay-signature"] as string;
+    const signature = req.headers["zentla-signature"] as string;
     const payload = req.body;
 
     // Verify signature
@@ -333,9 +333,9 @@ POST /webhook-endpoints/:id/dead-letter/:eventId/replay
 Return a 2xx response as quickly as possible. Process events asynchronously:
 
 ```typescript
-app.post("/webhooks/relay", async (req, res) => {
+app.post("/webhooks/zentla", async (req, res) => {
   // Verify signature first
-  if (!verifySignature(req.body, req.headers["relay-signature"], secret)) {
+  if (!verifySignature(req.body, req.headers["zentla-signature"], secret)) {
     return res.status(400).send("Invalid signature");
   }
 
@@ -419,7 +419,7 @@ fastify.addContentTypeParser(
 If a secret is compromised, rotate it immediately:
 
 ```typescript
-const { secret } = await relay.webhooks.rotateSecret(endpointId);
+const { secret } = await zentla.webhooks.rotateSecret(endpointId);
 // Update your application with the new secret
 ```
 
@@ -428,7 +428,7 @@ const { secret } = await relay.webhooks.rotateSecret(endpointId);
 Temporarily disable an endpoint without deleting it:
 
 ```typescript
-await relay.webhooks.update(endpointId, { status: "disabled" });
+await zentla.webhooks.update(endpointId, { status: "disabled" });
 ```
 
 ### Filter Events
@@ -436,7 +436,7 @@ await relay.webhooks.update(endpointId, { status: "disabled" });
 Only subscribe to events you need:
 
 ```typescript
-await relay.webhooks.create({
+await zentla.webhooks.create({
   url: "https://yourapp.com/webhooks",
   events: ["subscription.created", "subscription.canceled"],
 });

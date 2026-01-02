@@ -24,8 +24,8 @@ function parseVersion(versionString) {
 
 function generateVersionFile(version, isApi = false) {
   const comment = isApi
-    ? "// Central version information for the Relay API\n// Auto-generated from root package.json - do not edit manually"
-    : "// Central version information for Relay\n// Auto-generated from root package.json - do not edit manually";
+    ? "// Central version information for the Zentla API\n// Auto-generated from root package.json - do not edit manually"
+    : "// Central version information for Zentla\n// Auto-generated from root package.json - do not edit manually";
 
   return `${comment}
 
@@ -45,7 +45,7 @@ export const VERSION = {
 export const API_VERSION = VERSION.major.toString();
 
 // Full semver version
-export const RELAY_VERSION = VERSION.full;
+export const ZENTLA_VERSION = VERSION.full;
 `;
 }
 

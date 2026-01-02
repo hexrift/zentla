@@ -1,5 +1,5 @@
 # =============================================================================
-# Relay Admin UI - Production Dockerfile
+# Zentla Admin UI - Production Dockerfile
 # Multi-stage build for static React app served by nginx
 # =============================================================================
 

@@ -273,13 +273,13 @@ jobs:
         with:
           payload: |
             {
-              "text": "✅ Relay deployed to ${{ needs.setup.outputs.environment }}",
+              "text": "✅ Zentla deployed to ${{ needs.setup.outputs.environment }}",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "✅ *Relay deployed successfully*\n\n*Environment:* ${{ needs.setup.outputs.environment }}\n*Commit:* `${{ github.sha }}`\n*Author:* ${{ github.actor }}"
+                    "text": "✅ *Zentla deployed successfully*\n\n*Environment:* ${{ needs.setup.outputs.environment }}\n*Commit:* `${{ github.sha }}`\n*Author:* ${{ github.actor }}"
                   }
                 }
               ]
@@ -294,13 +294,13 @@ jobs:
         with:
           payload: |
             {
-              "text": "❌ Relay deployment failed",
+              "text": "❌ Zentla deployment failed",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "❌ *Relay deployment failed*\n\n*Environment:* ${{ needs.setup.outputs.environment }}\n*Commit:* `${{ github.sha }}`\n*Author:* ${{ github.actor }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>"
+                    "text": "❌ *Zentla deployment failed*\n\n*Environment:* ${{ needs.setup.outputs.environment }}\n*Commit:* `${{ github.sha }}`\n*Author:* ${{ github.actor }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>"
                   }
                 }
               ]

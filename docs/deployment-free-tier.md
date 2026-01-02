@@ -8,7 +8,7 @@ Deploy Zentla using free-tier services for beta testing and development.
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Cloudflare Pages                          │
 │  ┌─────────────────────┐    ┌─────────────────────┐             │
-│  │   relay-admin       │    │    relay-web        │             │
+│  │   zentla-admin       │    │    relay-web        │             │
 │  │   (Admin Dashboard) │    │    (Checkout UI)    │             │
 │  └─────────────────────┘    └─────────────────────┘             │
 └─────────────────────────────────────────────────────────────────┘
@@ -17,7 +17,7 @@ Deploy Zentla using free-tier services for beta testing and development.
 ┌─────────────────────────────────────────────────────────────────┐
 │                           Koyeb                                  │
 │  ┌─────────────────────────────────────────────────────────┐    │
-│  │                    relay-api                              │    │
+│  │                    zentla-api                              │    │
 │  │                  (NestJS API)                             │    │
 │  └─────────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────┘
@@ -94,8 +94,8 @@ Add these as repository variables (Settings → Secrets → Variables):
 
 | Variable       | Description           | Example                                            |
 | -------------- | --------------------- | -------------------------------------------------- |
-| `API_URL`      | API URL for frontends | `https://relay-api-xxx.koyeb.app`                  |
-| `CORS_ORIGINS` | Allowed CORS origins  | `https://relay-admin.pages.dev,https://zentla.dev` |
+| `API_URL`      | API URL for frontends | `https://zentla-api-xxx.koyeb.app`                  |
+| `CORS_ORIGINS` | Allowed CORS origins  | `https://zentla-admin.pages.dev,https://zentla.dev` |
 
 ## Initial Setup
 
@@ -109,7 +109,7 @@ npm install -g wrangler
 wrangler login
 
 # Create projects (do this once)
-wrangler pages project create relay-admin
+wrangler pages project create zentla-admin
 wrangler pages project create relay-web
 ```
 
@@ -123,7 +123,7 @@ brew install koyeb/tap/koyeb
 koyeb login
 
 # Create app (do this once)
-koyeb app create relay-api
+koyeb app create zentla-api
 ```
 
 ### 3. Setup Neon Database
@@ -171,14 +171,14 @@ gh workflow run deploy-db.yml
 ### Health Checks
 
 - API: `https://your-koyeb-app.koyeb.app/api/health`
-- Admin: `https://relay-admin.pages.dev`
+- Admin: `https://zentla-admin.pages.dev`
 - Web: `https://zentla.dev`
 
 ### Logs
 
 ```bash
 # Koyeb logs
-koyeb service logs relay-api/api
+koyeb service logs zentla-api/api
 
 # Neon query stats
 # Check Neon dashboard → Monitoring

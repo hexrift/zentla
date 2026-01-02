@@ -303,7 +303,7 @@ cancellations, and payment failures in real-time.
 
 ```
 Label: Endpoint URL
-Placeholder: https://your-app.com/webhooks/relay
+Placeholder: https://your-app.com/webhooks/zentla
 Helper: Must be HTTPS and publicly accessible.
 ```
 

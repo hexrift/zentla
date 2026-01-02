@@ -1,5 +1,5 @@
 # =============================================================================
-# Relay API - Production Dockerfile
+# Zentla API - Production Dockerfile
 # Multi-stage build for optimal image size
 # =============================================================================
 
@@ -70,7 +70,7 @@ WORKDIR /app
 
 # Security: run as non-root user
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 relay
+    adduser --system --uid 1001 zentla
 
 # Install OpenSSL for Prisma runtime detection
 RUN apk add --no-cache openssl
@@ -108,9 +108,9 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 # Set ownership
-RUN chown -R relay:nodejs /app
+RUN chown -R zentla:nodejs /app
 
-USER relay
+USER zentla
 
 # Expose port
 EXPOSE 3000

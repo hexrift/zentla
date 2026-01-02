@@ -1,5 +1,5 @@
 # =============================================================================
-# Relay Infrastructure - Main Configuration
+# Zentla Infrastructure - Main Configuration
 # =============================================================================
 # This is the root module that orchestrates all infrastructure components.
 # Use environments/staging or environments/production for actual deployments.
@@ -30,7 +30,7 @@ locals {
     Project     = var.project
     Environment = var.environment
     ManagedBy   = "terraform"
-    Repository  = "relay"
+    Repository  = "zentla"
   }
 }
 

@@ -362,7 +362,7 @@ export class ZuoraAdapter implements BillingProvider {
   }
 
   /**
-   * Map Relay pricing model to Zuora charge model.
+   * Map Zentla pricing model to Zuora charge model.
    */
   private mapChargeModel(
     model: string,
@@ -382,7 +382,7 @@ export class ZuoraAdapter implements BillingProvider {
   }
 
   /**
-   * Map Relay interval to Zuora billing period.
+   * Map Zentla interval to Zuora billing period.
    */
   private mapBillingPeriod(
     interval: string,
@@ -427,7 +427,7 @@ export class ZuoraAdapter implements BillingProvider {
           LastName: params.name?.split(" ").slice(1).join(" ") || params.email,
           WorkEmail: params.email,
         },
-        // Store Relay metadata
+        // Store Zentla metadata
         Notes: JSON.stringify({
           zentla_workspace_id: params.workspaceId,
           zentla_customer_id: params.customerId,
