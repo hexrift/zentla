@@ -2,7 +2,26 @@
   "name": "zentla",
   "version": "1.7.0",
   "private": true,
-  "description": "Provider-agnostic subscription commerce orchestration platform",
+  "description": "Open source subscription management for modern apps",
+  "author": "PrimeCodeLabs",
+  "license": "MIT",
+  "homepage": "https://zentla-web.pages.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PrimeCodeLabs/zentla.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PrimeCodeLabs/zentla/issues"
+  },
+  "keywords": [
+    "subscription",
+    "billing",
+    "saas",
+    "stripe",
+    "entitlements",
+    "checkout",
+    "payments"
+  ],
   "workspaces": [
     "packages/*",
     "packages/adapters/*"
