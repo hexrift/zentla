@@ -204,7 +204,7 @@ describe("FeedbackService", () => {
       expect(mockFetch).toHaveBeenCalled();
       const [url, options] = mockFetch.mock.calls[0];
       expect(url).toBe(
-        "https://api.github.com/repos/PrimeCodeLabs/relay/issues",
+        "https://api.github.com/repos/PrimeCodeLabs/zentla/issues",
       );
       expect(options.method).toBe("POST");
       expect(options.headers.Authorization).toBe("Bearer ghp_test_token");

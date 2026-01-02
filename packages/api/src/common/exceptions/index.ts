@@ -2,10 +2,10 @@ import { HttpException, HttpStatus } from "@nestjs/common";
 import { ErrorCode, ErrorCodeHttpStatus } from "@zentla/core";
 
 /**
- * Base exception class for Relay API errors.
+ * Base exception class for Zentla API errors.
  * Includes error code for programmatic handling.
  */
-export class RelayException extends HttpException {
+export class ZentlaException extends HttpException {
   constructor(
     public readonly code: ErrorCode,
     message: string,
@@ -32,7 +32,7 @@ export class RelayException extends HttpException {
 /**
  * Thrown when a requested resource is not found.
  */
-export class ResourceNotFoundException extends RelayException {
+export class ResourceNotFoundException extends ZentlaException {
   constructor(
     resourceType: string,
     identifier: string | Record<string, string>,
@@ -51,7 +51,7 @@ export class ResourceNotFoundException extends RelayException {
 /**
  * Thrown when a resource already exists or conflicts with existing state.
  */
-export class ResourceConflictException extends RelayException {
+export class ResourceConflictException extends ZentlaException {
   constructor(message: string, details?: Record<string, unknown>) {
     super(ErrorCode.RESOURCE_CONFLICT, message, HttpStatus.CONFLICT, details);
   }
@@ -60,7 +60,7 @@ export class ResourceConflictException extends RelayException {
 /**
  * Thrown when a resource has expired.
  */
-export class ResourceExpiredException extends RelayException {
+export class ResourceExpiredException extends ZentlaException {
   constructor(resourceType: string, identifier: string) {
     super(
       ErrorCode.RESOURCE_EXPIRED,
@@ -78,7 +78,7 @@ export class ResourceExpiredException extends RelayException {
 /**
  * Thrown when a subscription is not in a valid state for the requested operation.
  */
-export class SubscriptionInvalidStateException extends RelayException {
+export class SubscriptionInvalidStateException extends ZentlaException {
   constructor(
     subscriptionId: string,
     currentState: string,
@@ -96,7 +96,7 @@ export class SubscriptionInvalidStateException extends RelayException {
 /**
  * Thrown when an offer has no published version.
  */
-export class OfferNotPublishedException extends RelayException {
+export class OfferNotPublishedException extends ZentlaException {
   constructor(offerId: string) {
     super(
       ErrorCode.OFFER_NOT_PUBLISHED,
@@ -110,7 +110,7 @@ export class OfferNotPublishedException extends RelayException {
 /**
  * Thrown when trying to create a draft but one already exists.
  */
-export class DraftExistsException extends RelayException {
+export class DraftExistsException extends ZentlaException {
   constructor(resourceType: string, resourceId: string) {
     super(
       ErrorCode.OFFER_DRAFT_EXISTS,
@@ -124,7 +124,7 @@ export class DraftExistsException extends RelayException {
 /**
  * Thrown when a promotion code is invalid.
  */
-export class PromotionInvalidException extends RelayException {
+export class PromotionInvalidException extends ZentlaException {
   constructor(code: string, reason: string) {
     super(
       ErrorCode.PROMOTION_INVALID,
@@ -138,7 +138,7 @@ export class PromotionInvalidException extends RelayException {
 /**
  * Thrown when a promotion is not yet valid.
  */
-export class PromotionNotYetValidException extends RelayException {
+export class PromotionNotYetValidException extends ZentlaException {
   constructor(code: string, validFrom: Date) {
     super(
       ErrorCode.PROMOTION_NOT_YET_VALID,
@@ -152,7 +152,7 @@ export class PromotionNotYetValidException extends RelayException {
 /**
  * Thrown when a promotion has expired.
  */
-export class PromotionExpiredException extends RelayException {
+export class PromotionExpiredException extends ZentlaException {
   constructor(code: string, validUntil: Date) {
     super(
       ErrorCode.PROMOTION_EXPIRED,
@@ -170,7 +170,7 @@ export class PromotionExpiredException extends RelayException {
 /**
  * Thrown when a billing provider is not configured.
  */
-export class ProviderNotConfiguredException extends RelayException {
+export class ProviderNotConfiguredException extends ZentlaException {
   constructor(provider: string) {
     super(
       ErrorCode.PROVIDER_NOT_CONFIGURED,
@@ -184,7 +184,7 @@ export class ProviderNotConfiguredException extends RelayException {
 /**
  * Thrown when a provider API call fails.
  */
-export class ProviderErrorException extends RelayException {
+export class ProviderErrorException extends ZentlaException {
   constructor(provider: string, operation: string, originalError?: string) {
     super(
       ErrorCode.PROVIDER_ERROR,
@@ -198,7 +198,7 @@ export class ProviderErrorException extends RelayException {
 /**
  * Thrown when webhook signature verification fails.
  */
-export class WebhookInvalidSignatureException extends RelayException {
+export class WebhookInvalidSignatureException extends ZentlaException {
   constructor(provider: string) {
     super(
       ErrorCode.WEBHOOK_INVALID_SIGNATURE,
@@ -216,7 +216,7 @@ export class WebhookInvalidSignatureException extends RelayException {
 /**
  * Thrown when ETag/If-Match precondition fails.
  */
-export class PreconditionFailedException extends RelayException {
+export class PreconditionFailedException extends ZentlaException {
   constructor(resourceType: string, currentVersion: number) {
     super(
       ErrorCode.PRECONDITION_FAILED,
@@ -230,7 +230,7 @@ export class PreconditionFailedException extends RelayException {
 /**
  * Thrown when another request with the same idempotency key is in progress.
  */
-export class RequestInProgressException extends RelayException {
+export class RequestInProgressException extends ZentlaException {
   constructor(idempotencyKey: string) {
     super(
       ErrorCode.REQUEST_IN_PROGRESS,
@@ -248,7 +248,7 @@ export class RequestInProgressException extends RelayException {
 /**
  * Thrown when API key is invalid.
  */
-export class ApiKeyInvalidException extends RelayException {
+export class ApiKeyInvalidException extends ZentlaException {
   constructor() {
     super(
       ErrorCode.API_KEY_INVALID,
@@ -261,7 +261,7 @@ export class ApiKeyInvalidException extends RelayException {
 /**
  * Thrown when API key lacks required permissions.
  */
-export class InsufficientPermissionsException extends RelayException {
+export class InsufficientPermissionsException extends ZentlaException {
   constructor(requiredRole: string, currentRole: string) {
     super(
       ErrorCode.API_KEY_INSUFFICIENT_ROLE,

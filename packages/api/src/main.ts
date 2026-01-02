@@ -49,7 +49,7 @@ async function bootstrap(): Promise<void> {
   app.enableCors({
     origin:
       nodeEnv === "production"
-        ? configService.get<string>("CORS_ORIGIN", "https://app.relay.com")
+        ? configService.get<string>("CORS_ORIGIN", "https://app.zentla.dev")
         : true,
     credentials: true,
   });
@@ -85,17 +85,17 @@ async function bootstrap(): Promise<void> {
   // OpenAPI/Swagger with Scalar UI
   {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle("Relay API")
+      .setTitle("Zentla API")
       .setDescription(
-        `# Relay API
+        `# Zentla API
 
-Relay manages subscriptions, customers, entitlements, and checkouts. It connects your application to billing providers like Stripe, handling the complexity so you don't have to.
+Zentla manages subscriptions, customers, entitlements, and checkouts. It connects your application to billing providers like Stripe, handling the complexity so you don't have to.
 
 ## Quick Start
 
 1. Create an **Offer** with pricing and entitlements
 2. Generate a **Checkout** link for customers
-3. Customers subscribe → Relay creates the **Subscription** and grants **Entitlements**
+3. Customers subscribe → Zentla creates the **Subscription** and grants **Entitlements**
 4. Query entitlements to control feature access in your app
 
 ## Authentication
@@ -240,7 +240,7 @@ Use \`error.code\` for programmatic handling.
         layout: "modern",
         darkMode: true,
         metaData: {
-          title: "Relay API Documentation",
+          title: "Zentla API Documentation",
           description:
             "Subscription management API for offers, customers, and entitlements",
         },
@@ -267,7 +267,7 @@ Use \`error.code\` for programmatic handling.
 
   await app.listen(port);
   logger.log(
-    `Relay API running on port ${port} in ${nodeEnv} mode`,
+    `Zentla API running on port ${port} in ${nodeEnv} mode`,
     "Bootstrap",
   );
 
@@ -284,6 +284,6 @@ Use \`error.code\` for programmatic handling.
 }
 
 bootstrap().catch((error: unknown) => {
-  console.error("Failed to start Relay API:", error);
+  console.error("Failed to start Zentla API:", error);
   process.exit(1);
 });

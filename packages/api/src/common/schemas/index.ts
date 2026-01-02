@@ -671,7 +671,7 @@ export const AuthErrorResponses = {
 
 Possible causes:
 - Missing Authorization header
-- Invalid API key format (should be \`Bearer relay_xxx_xxx\`)
+- Invalid API key format (should be \`Bearer zentla_xxx_xxx\`)
 - API key not found or revoked
 - API key expired`,
     content: {

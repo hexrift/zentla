@@ -143,7 +143,7 @@ export function ContactPage() {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">R</span>
+                <span className="text-white font-bold text-sm">Z</span>
               </div>
               <span className="text-lg font-semibold text-gray-900">
                 Zentla

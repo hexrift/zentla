@@ -108,7 +108,7 @@ export class ProviderRefService {
   /**
    * Get the external customer ID for a given provider.
    * @param workspaceId - Workspace ID
-   * @param customerId - Relay customer ID
+   * @param customerId - Zentla customer ID
    * @param provider - Billing provider (defaults to 'stripe')
    * @returns External customer ID or null if not found
    */
@@ -129,7 +129,7 @@ export class ProviderRefService {
   /**
    * Get the external price ID for a given provider.
    * @param workspaceId - Workspace ID
-   * @param offerVersionId - Relay offer version ID
+   * @param offerVersionId - Zentla offer version ID
    * @param provider - Billing provider (defaults to 'stripe')
    * @returns External price ID or null if not found
    */
@@ -150,7 +150,7 @@ export class ProviderRefService {
   /**
    * Get the external product ID for a given provider.
    * @param workspaceId - Workspace ID
-   * @param offerId - Relay offer ID
+   * @param offerId - Zentla offer ID
    * @param provider - Billing provider (defaults to 'stripe')
    * @returns External product ID or null if not found
    */
@@ -171,7 +171,7 @@ export class ProviderRefService {
   /**
    * Get the external subscription ID for a given provider.
    * @param workspaceId - Workspace ID
-   * @param subscriptionId - Relay subscription ID
+   * @param subscriptionId - Zentla subscription ID
    * @param provider - Billing provider (defaults to 'stripe')
    * @returns External subscription ID or null if not found
    */

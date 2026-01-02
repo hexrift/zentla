@@ -1,7 +1,7 @@
 /**
  * Webhook Event Type Definitions
  *
- * This file documents all webhook events that Relay sends to your endpoints.
+ * This file documents all webhook events that Zentla sends to your endpoints.
  * Use these types for strong typing in your webhook handlers.
  */
 
@@ -10,7 +10,7 @@
 // ============================================================================
 
 /**
- * All webhook event types sent by Relay.
+ * All webhook event types sent by Zentla.
  */
 export enum WebhookEventType {
   // Subscription Events

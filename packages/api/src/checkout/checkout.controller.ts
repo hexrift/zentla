@@ -75,7 +75,7 @@ class CreateCheckoutSessionDto {
   offerVersionId?: string;
 
   @ApiPropertyOptional({
-    description: `Existing Relay customer ID to associate with this checkout. When provided:
+    description: `Existing Zentla customer ID to associate with this checkout. When provided:
 - Customer's saved payment methods may be available
 - Customer email is pre-filled from their profile
 - Subscription is linked to their existing account
@@ -414,7 +414,7 @@ export class CheckoutController {
 5. Your server verifies the session and provisions access
 
 **What this creates:**
-- A checkout record in Relay with \`pending\` status
+- A checkout record in Zentla with \`pending\` status
 - A Stripe Checkout Session linked to this record
 - Appropriate Stripe Product/Price if not already synced
 
@@ -585,7 +585,7 @@ export class CheckoutController {
 **Flow:**
 1. Create intent → returns \`clientSecret\` for Stripe.js
 2. Client calls \`stripe.confirmPayment()\` with the client secret
-3. Stripe webhook confirms payment → Relay provisions subscription
+3. Stripe webhook confirms payment → Zentla provisions subscription
 4. Poll \`GET /checkout/intents/{id}\` for status
 
 **What this creates:**

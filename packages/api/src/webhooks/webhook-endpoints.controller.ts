@@ -47,14 +47,14 @@ class CreateWebhookEndpointDto {
 
 **Requirements:**
 - Must be a valid HTTPS URL (HTTP only allowed for localhost in test mode)
-- Must be publicly accessible from Relay's servers
+- Must be publicly accessible from Zentla's servers
 - Should respond with 2xx status within 30 seconds
 
 **Your endpoint should:**
 1. Verify the webhook signature using the secret
 2. Process the event idempotently (we may retry)
 3. Return 200 quickly (do heavy processing async)`,
-    example: "https://api.example.com/webhooks/relay",
+    example: "https://api.example.com/webhooks/zentla",
   })
   @IsUrl()
   url!: string;
@@ -111,7 +111,7 @@ class UpdateWebhookEndpointDto {
   @ApiPropertyOptional({
     description:
       "Updated webhook URL. Must meet same requirements as during creation.",
-    example: "https://api.example.com/webhooks/relay/v2",
+    example: "https://api.example.com/webhooks/zentla/v2",
   })
   @IsOptional()
   @IsUrl()
@@ -299,7 +299,7 @@ export class WebhookEndpointsController {
 - **secret**: Signing secret for verifying webhooks (shown only once!)
 
 **Signature verification:**
-Each webhook includes a \`Relay-Signature\` header. Verify it using HMAC-SHA256:
+Each webhook includes a \`Zentla-Signature\` header. Verify it using HMAC-SHA256:
 \`\`\`
 signature = HMAC-SHA256(secret, timestamp + '.' + payload)
 \`\`\`

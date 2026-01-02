@@ -26,7 +26,7 @@ export class StripeSyncService {
   ) {}
 
   /**
-   * Sync customers and subscriptions from Stripe to Relay.
+   * Sync customers and subscriptions from Stripe to Zentla.
    * This imports existing Stripe data that was created before webhook was configured.
    */
   async syncFromStripe(workspaceId: string): Promise<SyncResult> {
@@ -219,7 +219,7 @@ export class StripeSyncService {
 
     if (!priceRef) {
       result.errors.push(
-        `Subscription ${stripeSubscription.id}: Price ${priceId} not linked to Relay offer`,
+        `Subscription ${stripeSubscription.id}: Price ${priceId} not linked to Zentla offer`,
       );
       result.subscriptionsSkipped++;
       return;
@@ -239,7 +239,7 @@ export class StripeSyncService {
       return;
     }
 
-    // Map Stripe status to Relay status
+    // Map Stripe status to Zentla status
     const statusMap: Record<string, string> = {
       active: "active",
       past_due: "past_due",

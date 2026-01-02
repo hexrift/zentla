@@ -70,7 +70,7 @@ class CreateCustomerDto {
   name?: string;
 
   @ApiPropertyOptional({
-    description: `Your application's unique identifier for this customer. Use this to link Relay customers to users in your system.
+    description: `Your application's unique identifier for this customer. Use this to link Zentla customers to users in your system.
 
 **Use cases:**
 - Store your database user ID
@@ -346,7 +346,7 @@ Use this value in the \`If-Match\` header when updating to prevent concurrent mo
 - Webhooks sync a new Stripe customer
 
 **Side effects:**
-- Creates customer record in Relay database
+- Creates customer record in Zentla database
 - Creates corresponding Stripe customer
 - Stores provider reference for future syncing`,
   })
@@ -398,7 +398,7 @@ If the resource has been modified since you fetched it, the update will fail wit
 3. If 412 error, re-fetch and retry
 
 **Side effects:**
-- Updates Relay customer record
+- Updates Zentla customer record
 - Syncs changes to Stripe customer
 - Increments version number
 
@@ -474,7 +474,7 @@ If the resource has been modified since you fetched it, the update will fail wit
 **Warning:** This is a destructive operation that cannot be undone.
 
 **What gets deleted:**
-- Customer record in Relay
+- Customer record in Zentla
 - Associated entitlements
 
 **What is NOT deleted:**
