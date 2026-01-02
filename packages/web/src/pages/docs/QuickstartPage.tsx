@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { CodeBlock } from "../../components/CodeBlock";
 import { SEO } from "../../components/SEO";
 
@@ -175,12 +176,16 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
       <h2 id="whats-next">What's Next</h2>
       <ul>
         <li>
-          <a href="/docs/headless-checkout">Headless Checkout</a> – Build custom
-          checkout flows
+          <Link to="/docs/example">End-to-End Example</Link> – Complete
+          walkthrough from offer to webhook
         </li>
         <li>
-          <a href="/docs/webhooks">Webhooks</a> – React to subscription events
-          in real-time
+          <Link to="/docs/headless-checkout">Headless Checkout</Link> – Build
+          custom checkout flows
+        </li>
+        <li>
+          <Link to="/docs/webhooks">Webhooks</Link> – React to subscription
+          events in real-time
         </li>
         <li>
           <a href={API_DOCS_URL} target="_blank" rel="noopener">
@@ -196,14 +201,12 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
           Zentla is in beta. If you run into issues or have feedback, we'd love
           to hear from you.
         </p>
-        <a
-          href="https://github.com/PrimeCodeLabs/zentla/issues"
-          target="_blank"
-          rel="noopener"
+        <Link
+          to="/feedback"
           className="text-sm font-medium text-primary-600 hover:text-primary-700"
         >
-          Open an issue on GitHub →
-        </a>
+          Send us feedback →
+        </Link>
       </div>
     </article>
   );

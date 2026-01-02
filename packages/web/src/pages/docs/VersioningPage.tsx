@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { CodeBlock } from "../../components/CodeBlock";
 import { SEO } from "../../components/SEO";
 
@@ -284,13 +285,7 @@ X-Zentla-Migration: See https://zentla.dev/docs/migrations/v2`}</CodeBlock>
       </p>
       <ul>
         <li>
-          <a
-            href="https://github.com/PrimeCodeLabs/zentla/issues"
-            target="_blank"
-            rel="noopener"
-          >
-            Open an issue on GitHub
-          </a>
+          <Link to="/feedback">Send us feedback</Link>
         </li>
         <li>Email us at support@zentla.dev</li>
         <li>Join our Discord community (coming soon)</li>

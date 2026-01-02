@@ -4,6 +4,7 @@ import { DocsLayout } from "./components/DocsLayout";
 import { HomePage } from "./pages/HomePage";
 import { FeedbackPage } from "./pages/FeedbackPage";
 import { ContactPage } from "./pages/ContactPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 import { QuickstartPage } from "./pages/docs/QuickstartPage";
 import { HeadlessCheckoutPage } from "./pages/docs/HeadlessCheckoutPage";
 import { WebhooksPage } from "./pages/docs/WebhooksPage";
@@ -26,6 +27,7 @@ function App() {
         <Route path="example" element={<ExamplePage />} />
         <Route path="versioning" element={<VersioningPage />} />
       </Route>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
