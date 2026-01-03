@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/PrimeCodeLabs/zentla/compare/v2.0.0...v2.0.1) (2026-01-03)
+
+
+### Bug Fixes
+
+* remove Stripe-specific terminology from user-facing areas ([#67](https://github.com/PrimeCodeLabs/zentla/issues/67)) ([56161a8](https://github.com/PrimeCodeLabs/zentla/commit/56161a86dc6333df093de707e1c105d661c76623))
+
 ## [2.0.0](https://github.com/PrimeCodeLabs/zentla/compare/v1.7.3...v2.0.0) (2026-01-03)
 
 
