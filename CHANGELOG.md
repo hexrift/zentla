@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.0](https://github.com/PrimeCodeLabs/zentla/compare/v1.7.3...v2.0.0) (2026-01-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* API responses now use new status values. Existing subscriptions will be migrated via database migration.
+
+### Features
+
+* replace Stripe status terminology with Zentla-native terms ([6f6cf1c](https://github.com/PrimeCodeLabs/zentla/commit/6f6cf1c690b02a1482d50054e569394e5777cdb6))
+* replace Stripe status terminology with Zentla-native terms ([89ae468](https://github.com/PrimeCodeLabs/zentla/commit/89ae468ac008ca225921aac96096a9c7a7598280))
+
+
+### Bug Fixes
+
+* split status migration to avoid PostgreSQL enum transaction issue ([3ad301d](https://github.com/PrimeCodeLabs/zentla/commit/3ad301d68bd1e34281c7dab6255be43c53a8a175))
+
 ## [1.7.3](https://github.com/PrimeCodeLabs/zentla/compare/v1.7.2...v1.7.3) (2026-01-02)
 
 

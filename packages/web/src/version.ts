@@ -2,9 +2,9 @@
 // Auto-updated by release-please - do not edit manually
 
 export const VERSION = {
-  major: 1, // x-release-please-major
-  minor: 7, // x-release-please-minor
-  patch: 3, // x-release-please-patch
+  major: 2, // x-release-please-major
+  minor: 0, // x-release-please-minor
+  patch: 0, // x-release-please-patch
   get full(): string {
     return `${this.major}.${this.minor}.${this.patch}`;
   },
