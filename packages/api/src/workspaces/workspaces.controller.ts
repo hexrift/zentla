@@ -106,7 +106,7 @@ export class WorkspacesController {
 
 **Supported providers:**
 - **Stripe**: Production ready
-- **Zuora**: Planned for future release`,
+- **Zuora**: Supported (requires configuration)`,
   })
   @ApiResponse({
     status: 200,
