@@ -57,7 +57,9 @@ https://api.zentla.dev/api/v1/subscriptions`}</CodeBlock>
           </thead>
           <tbody className="divide-y divide-gray-100">
             <tr>
-              <td className="py-2 pr-4 font-medium text-green-600">Current</td>
+              <td className="py-2 pr-4 font-medium text-primary-600">
+                Current
+              </td>
               <td className="py-2 text-gray-600">
                 Active development, receives new features and fixes
               </td>
@@ -228,7 +230,7 @@ X-Zentla-Migration: See https://zentla.dev/docs/migrations/v2`}</CodeBlock>
           <tbody className="divide-y divide-gray-100">
             <tr>
               <td className="py-2 pr-4">
-                <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded">
+                <span className="px-2 py-0.5 text-xs font-medium bg-primary-100 text-primary-700 rounded">
                   Stable
                 </span>
               </td>

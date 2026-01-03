@@ -357,7 +357,7 @@ export function HomePage() {
                   loading="lazy"
                 />
               </div>
-              <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+              <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-primary-100 text-primary-800 rounded-full">
                 Available
               </span>
             </a>
@@ -378,7 +378,7 @@ export function HomePage() {
                   loading="lazy"
                 />
               </div>
-              <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+              <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-primary-100 text-primary-800 rounded-full">
                 Available
               </span>
             </a>
