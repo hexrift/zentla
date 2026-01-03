@@ -46,7 +46,7 @@ app.post(
 
     // Verify signature
     if (
-      !verifySignature(payload, signature, process.env.RELAY_WEBHOOK_SECRET)
+      !verifySignature(payload, signature, process.env.ZENTLA_WEBHOOK_SECRET)
     ) {
       return res.status(400).send("Invalid signature");
     }

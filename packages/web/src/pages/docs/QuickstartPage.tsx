@@ -58,7 +58,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
         language="bash"
       >{`curl -X POST http://localhost:3002/api/v1/features \\
   -H "Content-Type: application/json" \\
-  -H "x-api-key: YOUR_API_KEY" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
     "key": "api_access",
     "name": "API Access",
@@ -76,7 +76,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
         language="bash"
       >{`curl -X POST http://localhost:3002/api/v1/offers \\
   -H "Content-Type: application/json" \\
-  -H "x-api-key: YOUR_API_KEY" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
     "name": "Pro Offer",
     "config": {
@@ -103,7 +103,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
         title="Terminal"
         language="bash"
       >{`curl -X POST http://localhost:3002/api/v1/offers/{offerId}/publish \\
-  -H "x-api-key: YOUR_API_KEY"`}</CodeBlock>
+  -H "Authorization: Bearer YOUR_API_KEY"`}</CodeBlock>
 
       <h2 id="step-5-create-customer">Step 5: Create a Customer</h2>
       <p>Customers represent your users. Create one before checkout:</p>
@@ -112,7 +112,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
         language="bash"
       >{`curl -X POST http://localhost:3002/api/v1/customers \\
   -H "Content-Type: application/json" \\
-  -H "x-api-key: YOUR_API_KEY" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
     "email": "user@example.com",
     "name": "Jane Doe",
@@ -129,7 +129,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
         language="bash"
       >{`curl -X POST http://localhost:3002/api/v1/checkout/sessions \\
   -H "Content-Type: application/json" \\
-  -H "x-api-key: YOUR_API_KEY" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
   -d '{
     "customerId": "cust_...",
     "offerId": "offer_...",
@@ -150,7 +150,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
         title="Terminal"
         language="bash"
       >{`curl http://localhost:3002/api/v1/customers/{customerId}/entitlements \\
-  -H "x-api-key: YOUR_API_KEY"
+  -H "Authorization: Bearer YOUR_API_KEY"
 
 # Response
 {
