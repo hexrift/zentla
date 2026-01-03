@@ -76,10 +76,11 @@ export interface SubscriptionEventData {
     status:
       | "trialing"
       | "active"
-      | "past_due"
+      | "payment_failed"
       | "canceled"
-      | "unpaid"
-      | "incomplete"
+      | "suspended"
+      | "pending"
+      | "expired"
       | "paused";
     currentPeriodStart: string;
     currentPeriodEnd: string;

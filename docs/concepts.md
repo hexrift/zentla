@@ -49,10 +49,10 @@ v1 (published) -> v2 (published) -> v3 (draft)
 ### Status Flow
 
 ```
-incomplete -> trialing -> active -> canceled
-                |           |
-                v           v
-              past_due -> unpaid
+pending -> trialing -> active -> canceled
+               |           |
+               v           v
+         payment_failed -> suspended
 ```
 
 ### Entitlements

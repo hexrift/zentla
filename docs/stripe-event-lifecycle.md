@@ -12,9 +12,9 @@ This document maps Stripe webhook events to Zentla domain events and state trans
 | `customer.updated`                     | `customer.synced`           | Update Customer metadata                                | Safe to replay                                                                                     |
 | `customer.deleted`                     | `customer.deleted`          | Soft-delete or mark inactive                            | Check if already deleted                                                                           |
 | `invoice.paid`                         | `invoice.paid`              | Update subscription period dates                        | Dedupe by `invoice.id`                                                                             |
-| `invoice.payment_failed`               | `invoice.payment_failed`    | Subscription: `active` → `past_due`                     | Log attempt, update status                                                                         |
+| `invoice.payment_failed`               | `invoice.payment_failed`    | Subscription: `active` → `payment_failed`               | Log attempt, update status                                                                         |
 | `subscription_schedule.created`        | (internal)                  | Store schedule reference                                | Upsert by schedule ID                                                                              |
-| `customer.subscription.created`        | `subscription.created`      | Create Subscription: `incomplete` → `active`/`trialing` | Create only if not exists by `provider_ref`                                                        |
+| `customer.subscription.created`        | `subscription.created`      | Create Subscription: `pending` → `active`/`trialing`    | Create only if not exists by `provider_ref`                                                        |
 | `customer.subscription.updated`        | `subscription.updated`      | Update status, dates, offer                             | Always apply latest state                                                                          |
 | `customer.subscription.deleted`        | `subscription.canceled`     | Subscription: \* → `canceled`                           | Terminal state, safe to replay                                                                     |
 | `customer.subscription.trial_will_end` | `subscription.trial_ending` | (notification only)                                     | No state change, emit event                                                                        |
@@ -27,7 +27,7 @@ This document maps Stripe webhook events to Zentla domain events and state trans
 
 ```
                     ┌─────────────┐
-                    │  incomplete │
+                    │   pending   │
                     └──────┬──────┘
                            │ checkout.session.completed
                            ▼
@@ -39,19 +39,19 @@ This document maps Stripe webhook events to Zentla domain events and state trans
               │                         │
               │                         │ payment_failed
               │                         ▼
-              │                  ┌──────────┐
-              │                  │ past_due │
-              │                  └────┬─────┘
-              │                       │
-              │    ┌──────────────────┼──────────────────┐
-              │    │                  │                  │
-              │    ▼                  ▼                  ▼
-              │ ┌──────┐        ┌─────────┐        ┌────────┐
-              │ │unpaid│        │ canceled│        │recovered│
-              │ └──────┘        └─────────┘        │→ active │
-              │                       ▲            └────────┘
-              │                       │
-              └───────────────────────┘
+              │                  ┌────────────────┐
+              │                  │ payment_failed │
+              │                  └───────┬────────┘
+              │                          │
+              │    ┌─────────────────────┼──────────────────┐
+              │    │                     │                  │
+              │    ▼                     ▼                  ▼
+              │ ┌─────────┐        ┌─────────┐        ┌────────┐
+              │ │suspended│        │ canceled│        │recovered│
+              │ └─────────┘        └─────────┘        │→ active │
+              │                          ▲            └────────┘
+              │                          │
+              └──────────────────────────┘
                     cancel request
 ```
 

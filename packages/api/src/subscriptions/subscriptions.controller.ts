@@ -89,14 +89,14 @@ class QuerySubscriptionsDto {
 - **active**: Subscription is current and billing normally
 - **trialing**: Customer is in trial period, not yet billed
 - **canceled**: Subscription has been canceled (may still be active until period end)
-- **past_due**: Payment failed, subscription at risk
+- **payment_failed**: Payment failed, subscription at risk
 - **paused**: Subscription is temporarily paused`,
-    enum: ["active", "trialing", "canceled", "past_due", "paused"],
+    enum: ["active", "trialing", "canceled", "payment_failed", "paused"],
     example: "active",
   })
   @IsOptional()
   @IsString()
-  status?: "active" | "trialing" | "canceled" | "past_due" | "paused";
+  status?: "active" | "trialing" | "canceled" | "payment_failed" | "paused";
 }
 
 // ============================================================================

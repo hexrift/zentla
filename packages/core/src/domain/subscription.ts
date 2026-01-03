@@ -20,11 +20,11 @@ export interface Subscription {
 export type SubscriptionStatus =
   | "trialing"
   | "active"
-  | "past_due"
+  | "payment_failed"
   | "canceled"
-  | "unpaid"
-  | "incomplete"
-  | "incomplete_expired"
+  | "suspended"
+  | "pending"
+  | "expired"
   | "paused";
 
 export type ProrationBehavior = "create_prorations" | "none" | "always_invoice";

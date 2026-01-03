@@ -168,7 +168,7 @@ app.post('/webhooks/zentla', express.raw({ type: 'application/json' }), (req, re
             </tr>
             <tr>
               <td className="py-2 pr-4">
-                <code>subscription.past_due</code>
+                <code>subscription.payment_failed</code>
               </td>
               <td className="py-2 text-gray-600">
                 Payment failed, subscription at risk

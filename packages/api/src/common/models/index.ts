@@ -190,10 +190,11 @@ export class SubscriptionModel {
     enum: [
       "trialing",
       "active",
-      "past_due",
+      "payment_failed",
       "canceled",
-      "unpaid",
-      "incomplete",
+      "suspended",
+      "pending",
+      "expired",
       "paused",
     ],
   })

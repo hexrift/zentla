@@ -644,12 +644,12 @@ export class StripeAdapter implements BillingProvider {
     > = {
       active: "active",
       canceled: "canceled",
-      incomplete: "incomplete",
-      incomplete_expired: "incomplete_expired",
-      past_due: "past_due",
+      incomplete: "pending",
+      incomplete_expired: "expired",
+      past_due: "payment_failed",
       paused: "paused",
       trialing: "trialing",
-      unpaid: "unpaid",
+      unpaid: "suspended",
     };
     return statusMap[status];
   }
