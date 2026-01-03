@@ -49,11 +49,13 @@ Zentla supports optimistic concurrency control using ETags. This prevents lost u
 ### How It Works
 
 1. **GET requests** return an `ETag` header with the resource version:
+
    ```
    ETag: W/"resource-id-1"
    ```
 
 2. **PATCH/PUT requests** can include an `If-Match` header:
+
    ```
    If-Match: W/"resource-id-1"
    ```
@@ -79,6 +81,7 @@ curl -X PATCH /api/v1/customers/cust_123 \
 ### Supported Endpoints
 
 ETag concurrency control is available on:
+
 - `PATCH /customers/:id`
 - `PATCH /offers/:id`
 - `PATCH /promotions/:id`
@@ -824,12 +827,12 @@ POST /usage/metrics
 
 **Aggregation Types:**
 
-| Type    | Description                        |
-| ------- | ---------------------------------- |
-| `sum`   | Add all values (default)           |
-| `max`   | Take the maximum value             |
-| `count` | Count number of events             |
-| `last`  | Use the most recent value          |
+| Type    | Description               |
+| ------- | ------------------------- |
+| `sum`   | Add all values (default)  |
+| `max`   | Take the maximum value    |
+| `count` | Count number of events    |
+| `last`  | Use the most recent value |
 
 ---
 
