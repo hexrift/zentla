@@ -194,7 +194,7 @@ app.post('/api/subscribe', express.json(), async (req, res) => {
     },
   });
 
-  res.json({ checkoutUrl: checkout.url });
+  res.json({ checkoutUrl: checkout.sessionUrl });
 });
 
 // Check if user has access to a feature
