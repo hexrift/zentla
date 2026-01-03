@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.2.2](https://github.com/PrimeCodeLabs/zentla/compare/v2.2.1...v2.2.2) (2026-01-03)
+
+
+### Bug Fixes
+
+* **api:** rename checkout url field to sessionUrl for schema consistency ([d0282f4](https://github.com/PrimeCodeLabs/zentla/commit/d0282f40d02a787410ef7b625b50b2c011bcf1cf))
+* **api:** rename checkout url field to sessionUrl for schema consistency ([a02ddd8](https://github.com/PrimeCodeLabs/zentla/commit/a02ddd8f902af42211bf7bd81acc2e82094ba901))
+* **test:** update test to use sessionUrl instead of url ([b4c8d07](https://github.com/PrimeCodeLabs/zentla/commit/b4c8d07f2d0a816cd0496ab1272a71ea2995877f))
+
 ## [2.2.1](https://github.com/PrimeCodeLabs/zentla/compare/v2.2.0...v2.2.1) (2026-01-03)
 
 
