@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.4](https://github.com/PrimeCodeLabs/zentla/compare/v2.2.3...v2.2.4) (2026-01-03)
+
+
+### Bug Fixes
+
+* **api:** return 200 for POST /quotes endpoint ([cdd0432](https://github.com/PrimeCodeLabs/zentla/commit/cdd04323b7a717a49857a1b0066b72f60e09ac6a))
+* **api:** return 200 for POST /quotes endpoint ([b4f19a1](https://github.com/PrimeCodeLabs/zentla/commit/b4f19a14c0c2cf04e2aebc1cdc6571ad7a9de0a8))
+
 ## [2.2.3](https://github.com/PrimeCodeLabs/zentla/compare/v2.2.2...v2.2.3) (2026-01-03)
 
 
