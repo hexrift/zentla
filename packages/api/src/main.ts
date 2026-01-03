@@ -49,7 +49,7 @@ async function bootstrap(): Promise<void> {
   app.enableCors({
     origin:
       nodeEnv === "production"
-        ? configService.get<string>("CORS_ORIGIN", "https://app.zentla.dev")
+        ? configService.get<string>("CORS_ORIGIN", "https://zentla-admin.pages.dev")
         : true,
     credentials: true,
   });

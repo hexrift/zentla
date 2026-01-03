@@ -125,7 +125,7 @@ curl http://localhost:3002/api/v1/customers/.../entitlements
 
 _[Show slide with links]_
 
-> "Docs are at zentla.dev/docs. The API is OpenAPI-documented. You can be up and running in under 10 minutes."
+> "Docs are at zentla-web.pages.dev/docs. The API is OpenAPI-documented. You can be up and running in under 10 minutes."
 
 ---
 
