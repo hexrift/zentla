@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.2.1](https://github.com/PrimeCodeLabs/zentla/compare/v2.2.0...v2.2.1) (2026-01-03)
+
+
+### Bug Fixes
+
+* apply Prettier formatting ([7256a5e](https://github.com/PrimeCodeLabs/zentla/commit/7256a5e8171f51c628af647f97e00820b187d07f))
+* update branding consistency across packages ([d67a7a3](https://github.com/PrimeCodeLabs/zentla/commit/d67a7a39a089223ae83ad00dc7daca1b6d6f131a))
+* update branding consistency across packages ([6d47f76](https://github.com/PrimeCodeLabs/zentla/commit/6d47f761634e91cb10abc55db3e429bb3e972e5e))
+
 ## [2.2.0](https://github.com/PrimeCodeLabs/zentla/compare/v2.1.1...v2.2.0) (2026-01-03)
 
 
