@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/PrimeCodeLabs/zentla/compare/v2.0.1...v2.1.0) (2026-01-03)
+
+
+### Features
+
+* implement strategic moat features ([#69](https://github.com/PrimeCodeLabs/zentla/issues/69)) ([36fe344](https://github.com/PrimeCodeLabs/zentla/commit/36fe344e8c527d28aa25f7e5c725766067ac0777))
+
 ## [2.0.1](https://github.com/PrimeCodeLabs/zentla/compare/v2.0.0...v2.0.1) (2026-01-03)
 
 
