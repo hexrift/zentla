@@ -4,24 +4,24 @@ This document maps Stripe webhook events to Zentla domain events and state trans
 
 ## Event Mapping Table
 
-| Stripe Event                           | Zentla Domain Event         | State Transition                                        | Idempotency Rule                                                                                   |
-| -------------------------------------- | --------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `checkout.session.completed`           | `checkout.completed`        | Checkout: `open` → `complete`                           | Process once per `checkout.session.id`. Create subscription only if none exists for this checkout. |
-| `checkout.session.expired`             | `checkout.expired`          | Checkout: `open` → `expired`                            | Idempotent by nature (terminal state)                                                              |
-| `customer.created`                     | `customer.synced`           | Create/update Customer record                           | Upsert by `provider_ref.external_id`                                                               |
-| `customer.updated`                     | `customer.synced`           | Update Customer metadata                                | Safe to replay                                                                                     |
-| `customer.deleted`                     | `customer.deleted`          | Soft-delete or mark inactive                            | Check if already deleted                                                                           |
-| `invoice.paid`                         | `invoice.paid`              | Update subscription period dates                        | Dedupe by `invoice.id`                                                                             |
-| `invoice.payment_failed`               | `invoice.payment_failed`    | Subscription: `active` → `payment_failed`               | Log attempt, update status                                                                         |
-| `subscription_schedule.created`        | (internal)                  | Store schedule reference                                | Upsert by schedule ID                                                                              |
-| `customer.subscription.created`        | `subscription.created`      | Create Subscription: `pending` → `active`/`trialing`    | Create only if not exists by `provider_ref`                                                        |
-| `customer.subscription.updated`        | `subscription.updated`      | Update status, dates, offer                             | Always apply latest state                                                                          |
-| `customer.subscription.deleted`        | `subscription.canceled`     | Subscription: \* → `canceled`                           | Terminal state, safe to replay                                                                     |
-| `customer.subscription.trial_will_end` | `subscription.trial_ending` | (notification only)                                     | No state change, emit event                                                                        |
-| `customer.subscription.paused`         | `subscription.paused`       | Subscription: `active` → `paused`                       | Update status                                                                                      |
-| `customer.subscription.resumed`        | `subscription.resumed`      | Subscription: `paused` → `active`                       | Update status                                                                                      |
-| `payment_intent.succeeded`             | (internal)                  | Confirm payment for checkout                            | Part of checkout flow                                                                              |
-| `payment_intent.payment_failed`        | `payment.failed`            | Log failure, notify                                     | Retry logic in Stripe                                                                              |
+| Stripe Event                           | Zentla Domain Event         | State Transition                                     | Idempotency Rule                                                                                   |
+| -------------------------------------- | --------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `checkout.session.completed`           | `checkout.completed`        | Checkout: `open` → `complete`                        | Process once per `checkout.session.id`. Create subscription only if none exists for this checkout. |
+| `checkout.session.expired`             | `checkout.expired`          | Checkout: `open` → `expired`                         | Idempotent by nature (terminal state)                                                              |
+| `customer.created`                     | `customer.synced`           | Create/update Customer record                        | Upsert by `provider_ref.external_id`                                                               |
+| `customer.updated`                     | `customer.synced`           | Update Customer metadata                             | Safe to replay                                                                                     |
+| `customer.deleted`                     | `customer.deleted`          | Soft-delete or mark inactive                         | Check if already deleted                                                                           |
+| `invoice.paid`                         | `invoice.paid`              | Update subscription period dates                     | Dedupe by `invoice.id`                                                                             |
+| `invoice.payment_failed`               | `invoice.payment_failed`    | Subscription: `active` → `payment_failed`            | Log attempt, update status                                                                         |
+| `subscription_schedule.created`        | (internal)                  | Store schedule reference                             | Upsert by schedule ID                                                                              |
+| `customer.subscription.created`        | `subscription.created`      | Create Subscription: `pending` → `active`/`trialing` | Create only if not exists by `provider_ref`                                                        |
+| `customer.subscription.updated`        | `subscription.updated`      | Update status, dates, offer                          | Always apply latest state                                                                          |
+| `customer.subscription.deleted`        | `subscription.canceled`     | Subscription: \* → `canceled`                        | Terminal state, safe to replay                                                                     |
+| `customer.subscription.trial_will_end` | `subscription.trial_ending` | (notification only)                                  | No state change, emit event                                                                        |
+| `customer.subscription.paused`         | `subscription.paused`       | Subscription: `active` → `paused`                    | Update status                                                                                      |
+| `customer.subscription.resumed`        | `subscription.resumed`      | Subscription: `paused` → `active`                    | Update status                                                                                      |
+| `payment_intent.succeeded`             | (internal)                  | Confirm payment for checkout                         | Part of checkout flow                                                                              |
+| `payment_intent.payment_failed`        | `payment.failed`            | Log failure, notify                                  | Retry logic in Stripe                                                                              |
 
 ## State Machine: Subscription
 
