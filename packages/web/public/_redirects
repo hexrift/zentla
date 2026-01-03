@@ -1,2 +1,0 @@
-# Redirect pages.dev to custom domain
-https://zentla-web.pages.dev/* https://zentla.dev/:splat 301
