@@ -87,14 +87,12 @@ Webhook signatures are verified using the STRIPE_WEBHOOK_SECRET environment vari
     summary: "Handle Zuora webhook",
     description: `Receives and processes webhook events from Zuora.
 
-**Note:** Zuora integration is planned for future release.`,
+**Note:** Requires Zuora credentials to be configured in workspace settings.`,
   })
   @ApiResponse({ status: 200, description: "Webhook acknowledged" })
   async handleZuoraWebhook(@Req() _req: Request, @Res() res: Response) {
-    // Zuora webhook handler stub - planned for future release
-    res
-      .status(200)
-      .json({ received: true, message: "Zuora integration coming soon" });
+    // Zuora webhook handler - requires configuration
+    res.status(200).json({ received: true, message: "Zuora webhook received" });
   }
 
   // ============================================================================

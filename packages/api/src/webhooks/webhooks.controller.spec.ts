@@ -142,7 +142,7 @@ describe("WebhooksController", () => {
   });
 
   describe("handleZuoraWebhook", () => {
-    it("should acknowledge zuora webhook with coming soon message", async () => {
+    it("should acknowledge zuora webhook", async () => {
       const mockRequest = createMockRequest(Buffer.from("{}"));
       const mockResponse = createMockResponse();
 
@@ -154,7 +154,7 @@ describe("WebhooksController", () => {
       expect(mockResponse.status).toHaveBeenCalledWith(200);
       expect(mockResponse.json).toHaveBeenCalledWith({
         received: true,
-        message: "Zuora integration coming soon",
+        message: "Zuora webhook received",
       });
     });
   });

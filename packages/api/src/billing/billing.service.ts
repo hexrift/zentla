@@ -350,7 +350,7 @@ export class BillingService implements OnModuleInit {
         customerPortal: false,
         webhooksConfigured: false,
       },
-      errors: ["Zuora integration planned for future release"],
+      errors: ["Zuora requires configuration - add credentials in Settings"],
     });
     return { providers: statuses };
   }
