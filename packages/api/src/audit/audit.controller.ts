@@ -2,80 +2,155 @@ import { Controller, Get, Query } from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
-  ApiBearerAuth,
-  ApiQuery,
+  ApiResponse,
+  ApiSecurity,
+  ApiPropertyOptional,
 } from "@nestjs/swagger";
-import { ApiKeyContext, CurrentApiKey } from "../common/decorators";
+import { WorkspaceId, MemberOnly } from "../common/decorators";
 import { AuditService } from "./audit.service";
+import { IsOptional, IsString, IsInt, Min, Max, IsEnum } from "class-validator";
+import { Transform } from "class-transformer";
+
+// ============================================================================
+// REQUEST DTOs
+// ============================================================================
+
+export enum ActorType {
+  API_KEY = "api_key",
+  USER = "user",
+  SYSTEM = "system",
+  WEBHOOK = "webhook",
+}
+
+class QueryAuditLogsDto {
+  @ApiPropertyOptional({
+    description: "Maximum number of audit logs to return per page.",
+    example: 50,
+    default: 50,
+    minimum: 1,
+    maximum: 100,
+  })
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value as string, 10))
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    description:
+      "Pagination cursor from a previous response. Pass `nextCursor` from the last response to fetch the next page.",
+  })
+  @IsOptional()
+  @IsString()
+  cursor?: string;
+
+  @ApiPropertyOptional({
+    description: "Filter by actor type.",
+    enum: ActorType,
+  })
+  @IsOptional()
+  @IsEnum(ActorType)
+  actorType?: ActorType;
+
+  @ApiPropertyOptional({
+    description: "Filter by actor ID (e.g., API key ID or user ID).",
+  })
+  @IsOptional()
+  @IsString()
+  actorId?: string;
+
+  @ApiPropertyOptional({
+    description:
+      "Filter by action (e.g., 'create', 'update', 'delete', 'publish').",
+  })
+  @IsOptional()
+  @IsString()
+  action?: string;
+
+  @ApiPropertyOptional({
+    description:
+      "Filter by resource type (e.g., 'customer', 'offer', 'subscription').",
+  })
+  @IsOptional()
+  @IsString()
+  resourceType?: string;
+
+  @ApiPropertyOptional({
+    description: "Filter by resource ID.",
+  })
+  @IsOptional()
+  @IsString()
+  resourceId?: string;
+
+  @ApiPropertyOptional({
+    description: "Filter logs created on or after this date (ISO 8601 format).",
+    example: "2025-01-01T00:00:00Z",
+  })
+  @IsOptional()
+  @IsString()
+  startDate?: string;
+
+  @ApiPropertyOptional({
+    description:
+      "Filter logs created on or before this date (ISO 8601 format).",
+    example: "2025-12-31T23:59:59Z",
+  })
+  @IsOptional()
+  @IsString()
+  endDate?: string;
+}
+
+// ============================================================================
+// CONTROLLER
+// ============================================================================
 
 @ApiTags("Audit Logs")
-@ApiBearerAuth()
-@Controller({ path: "audit-logs", version: "1" })
+@ApiSecurity("api-key")
+@Controller("audit-logs")
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}
 
   @Get()
+  @MemberOnly()
   @ApiOperation({
     summary: "List audit logs",
-    description: "List audit log entries for the workspace",
+    description: `Retrieves a paginated list of audit log entries for your workspace.
+
+**Use this to:**
+- Track changes made to resources
+- Monitor API key usage
+- Debug issues and investigate incidents
+- Build audit trail reports
+
+**Filters:** Filter by actor, action, resource, or date range.`,
   })
-  @ApiQuery({ name: "limit", required: false, type: Number })
-  @ApiQuery({ name: "cursor", required: false, type: String })
-  @ApiQuery({
-    name: "actorType",
-    required: false,
-    enum: ["api_key", "user", "system", "webhook"],
+  @ApiResponse({
+    status: 200,
+    description: "Paginated list of audit log entries",
   })
-  @ApiQuery({ name: "actorId", required: false, type: String })
-  @ApiQuery({ name: "action", required: false, type: String })
-  @ApiQuery({ name: "resourceType", required: false, type: String })
-  @ApiQuery({ name: "resourceId", required: false, type: String })
-  @ApiQuery({
-    name: "startDate",
-    required: false,
-    type: String,
-    description: "ISO 8601 date",
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
   })
-  @ApiQuery({
-    name: "endDate",
-    required: false,
-    type: String,
-    description: "ISO 8601 date",
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
   })
   async listAuditLogs(
-    @CurrentApiKey() apiKey: ApiKeyContext,
-    @Query("limit") limit?: string,
-    @Query("cursor") cursor?: string,
-    @Query("actorType") actorType?: "api_key" | "user" | "system" | "webhook",
-    @Query("actorId") actorId?: string,
-    @Query("action") action?: string,
-    @Query("resourceType") resourceType?: string,
-    @Query("resourceId") resourceId?: string,
-    @Query("startDate") startDate?: string,
-    @Query("endDate") endDate?: string,
+    @WorkspaceId() workspaceId: string,
+    @Query() query: QueryAuditLogsDto,
   ) {
-    const result = await this.auditService.listAuditLogs(apiKey.workspaceId, {
-      limit: limit ? parseInt(limit, 10) : 50,
-      cursor,
-      actorType,
-      actorId,
-      action,
-      resourceType,
-      resourceId,
-      startDate: startDate ? new Date(startDate) : undefined,
-      endDate: endDate ? new Date(endDate) : undefined,
+    return this.auditService.listAuditLogs(workspaceId, {
+      limit: query.limit ?? 50,
+      cursor: query.cursor,
+      actorType: query.actorType,
+      actorId: query.actorId,
+      action: query.action,
+      resourceType: query.resourceType,
+      resourceId: query.resourceId,
+      startDate: query.startDate ? new Date(query.startDate) : undefined,
+      endDate: query.endDate ? new Date(query.endDate) : undefined,
     });
-
-    return {
-      success: true,
-      data: result.data,
-      meta: {
-        timestamp: new Date().toISOString(),
-        pagination: {
-          hasMore: result.hasMore,
-          nextCursor: result.nextCursor,
-        },
-      },
-    };
   }
 }

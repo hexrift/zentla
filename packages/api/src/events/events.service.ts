@@ -10,7 +10,7 @@ interface ListEventsParams {
   aggregateId?: string;
 }
 
-interface PaginatedResult<T> {
+export interface PaginatedResult<T> {
   data: T[];
   hasMore: boolean;
   nextCursor?: string;

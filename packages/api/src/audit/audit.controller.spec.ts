@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
-import { AuditController } from "./audit.controller";
+import { AuditController, ActorType } from "./audit.controller";
 import { AuditService } from "./audit.service";
 
 describe("AuditController", () => {
@@ -21,13 +21,6 @@ describe("AuditController", () => {
     ipAddress: "127.0.0.1",
     userAgent: "Mozilla/5.0",
     createdAt: "2025-01-01T00:00:00.000Z",
-  };
-
-  const mockApiKey = {
-    keyId: "key_123",
-    workspaceId: "ws_123",
-    role: "admin" as const,
-    environment: "live" as const,
   };
 
   beforeEach(async () => {
@@ -51,11 +44,10 @@ describe("AuditController", () => {
         nextCursor: null,
       });
 
-      const result = await controller.listAuditLogs(mockApiKey);
+      const result = await controller.listAuditLogs("ws_123", {});
 
-      expect(result.success).toBe(true);
       expect(result.data).toHaveLength(1);
-      expect(result.meta.pagination.hasMore).toBe(false);
+      expect(result.hasMore).toBe(false);
       expect(auditService.listAuditLogs).toHaveBeenCalledWith("ws_123", {
         limit: 50,
         cursor: undefined,
@@ -76,18 +68,17 @@ describe("AuditController", () => {
         nextCursor: null,
       });
 
-      await controller.listAuditLogs(
-        mockApiKey,
-        "25",
-        "cursor123",
-        "user",
-        "user_123",
-        "customer.created",
-        "customer",
-        "cust_123",
-        "2025-01-01",
-        "2025-01-31",
-      );
+      await controller.listAuditLogs("ws_123", {
+        limit: 25,
+        cursor: "cursor123",
+        actorType: ActorType.USER,
+        actorId: "user_123",
+        action: "customer.created",
+        resourceType: "customer",
+        resourceId: "cust_123",
+        startDate: "2025-01-01",
+        endDate: "2025-01-31",
+      });
 
       expect(auditService.listAuditLogs).toHaveBeenCalledWith("ws_123", {
         limit: 25,
@@ -109,23 +100,25 @@ describe("AuditController", () => {
         nextCursor: "log_100",
       });
 
-      const result = await controller.listAuditLogs(mockApiKey, "10");
+      const result = await controller.listAuditLogs("ws_123", { limit: 10 });
 
-      expect(result.meta.pagination.hasMore).toBe(true);
-      expect(result.meta.pagination.nextCursor).toBe("log_100");
+      expect(result.hasMore).toBe(true);
+      expect(result.nextCursor).toBe("log_100");
     });
 
-    it("should include timestamp in meta", async () => {
+    it("should use default limit when not provided", async () => {
       auditService.listAuditLogs.mockResolvedValue({
         data: [],
         hasMore: false,
         nextCursor: null,
       });
 
-      const result = await controller.listAuditLogs(mockApiKey);
+      await controller.listAuditLogs("ws_123", {});
 
-      expect(result.meta.timestamp).toBeDefined();
-      expect(typeof result.meta.timestamp).toBe("string");
+      expect(auditService.listAuditLogs).toHaveBeenCalledWith(
+        "ws_123",
+        expect.objectContaining({ limit: 50 }),
+      );
     });
   });
 });
