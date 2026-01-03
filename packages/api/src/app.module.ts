@@ -29,7 +29,7 @@ import { UsageModule } from "./usage/usage.module";
 
 // Guards
 import { ApiKeyGuard } from "./auth/guards/api-key.guard";
-import { ThrottlerGuard } from "@nestjs/throttler";
+import { RateLimitGuard } from "./common/guards/throttler.guard";
 import { WorkspaceGuard } from "./auth/guards/workspace.guard";
 import { SessionGuard } from "./users/session.guard";
 
@@ -118,7 +118,7 @@ import { configuration, validationSchema } from "./config/configuration";
     // Global guards (order matters)
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: RateLimitGuard,
     },
     {
       provide: APP_GUARD,
