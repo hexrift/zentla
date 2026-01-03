@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/PrimeCodeLabs/zentla/compare/v2.1.1...v2.2.0) (2026-01-03)
+
+
+### Features
+
+* add migration for usage models ([#73](https://github.com/PrimeCodeLabs/zentla/issues/73)) ([dee3f7e](https://github.com/PrimeCodeLabs/zentla/commit/dee3f7e0df352d176114e3ba343bdfdd5c89c5f8))
+
 ## [2.1.1](https://github.com/PrimeCodeLabs/zentla/compare/v2.1.0...v2.1.1) (2026-01-03)
 
 
