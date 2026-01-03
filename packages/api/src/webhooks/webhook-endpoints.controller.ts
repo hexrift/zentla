@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
+  UseInterceptors,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -18,7 +19,9 @@ import {
   ApiResponse,
   ApiSecurity,
   ApiParam,
+  ApiHeader,
 } from "@nestjs/swagger";
+import { ETagInterceptor } from "../common/interceptors/etag.interceptor";
 import { WebhooksService } from "./webhooks.service";
 import { WorkspaceId, AdminOnly, MemberOnly } from "../common/decorators";
 import { WebhookEndpointSchema, PaginationSchema } from "../common/schemas";
@@ -349,6 +352,7 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
 
   @Patch(":id")
   @AdminOnly()
+  @UseInterceptors(ETagInterceptor)
   @ApiOperation({
     summary: "Update webhook endpoint",
     description: `Updates an existing webhook endpoint configuration.
@@ -362,16 +366,32 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
 
 **Changing URL:** If you change the URL, ensure the new endpoint can verify signatures with the existing secret.
 
-**Disabling vs Deleting:** Use \`status: disabled\` for temporary maintenance. Events will queue and can be replayed later. Delete if you permanently don't need the endpoint.`,
+**Disabling vs Deleting:** Use \`status: disabled\` for temporary maintenance. Events will queue and can be replayed later. Delete if you permanently don't need the endpoint.
+
+**Concurrency Control (Optimistic Locking):**
+Include the \`If-Match\` header with the ETag from a previous GET to prevent concurrent modification conflicts.`,
   })
   @ApiParam({
     name: "id",
     description: "Webhook endpoint ID to update",
     example: "123e4567-e89b-12d3-a456-426614174000",
   })
+  @ApiHeader({
+    name: "If-Match",
+    required: false,
+    description:
+      'ETag from a previous GET request for concurrency control. Format: W/"id-version"',
+    example: 'W/"123e4567-e89b-12d3-a456-426614174000-1"',
+  })
   @ApiResponse({
     status: 200,
     description: "Webhook endpoint updated",
+    headers: {
+      ETag: {
+        description: "New resource version after update",
+        schema: { type: "string", example: 'W/"id-2"' },
+      },
+    },
     schema: WebhookEndpointSchema,
   })
   @ApiResponse({
@@ -383,6 +403,11 @@ signature = HMAC-SHA256(secret, timestamp + '.' + payload)
     description: "Forbidden - Insufficient permissions (requires admin role)",
   })
   @ApiResponse({ status: 404, description: "Endpoint not found" })
+  @ApiResponse({
+    status: 412,
+    description:
+      "Precondition Failed - Version mismatch, resource was modified",
+  })
   async update(
     @WorkspaceId() workspaceId: string,
     @Param("id", ParseUUIDPipe) id: string,
