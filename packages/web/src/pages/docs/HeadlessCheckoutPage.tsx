@@ -28,10 +28,17 @@ export function HeadlessCheckoutPage() {
       <ul>
         <li>Price calculation and currency formatting</li>
         <li>Trial periods and promotional codes</li>
-        <li>Stripe Customer and PaymentIntent creation</li>
+        <li>Billing provider customer and payment intent creation</li>
         <li>Subscription provisioning after payment</li>
         <li>Entitlement activation</li>
       </ul>
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 my-4">
+        <p className="text-sm text-blue-800 m-0">
+          <strong>Note:</strong> This guide uses Stripe Elements for payment
+          collection. The concepts apply to other providers, but the client-side
+          integration will differ.
+        </p>
+      </div>
 
       <h2 id="flow">Checkout Flow</h2>
       <p>The headless checkout flow has three steps:</p>

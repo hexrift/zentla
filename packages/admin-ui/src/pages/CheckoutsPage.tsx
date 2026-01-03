@@ -179,14 +179,18 @@ function StatusBadge({
   );
 }
 
-function StripeLink({
+function ProviderLink({
   id,
   type,
 }: {
   id: string;
   type: "payment_intent" | "session";
 }) {
-  const baseUrl = "https://dashboard.stripe.com/test";
+  // Determine environment from provider ID prefix
+  const isLive = id.startsWith("pi_") || id.startsWith("cs_");
+  const baseUrl = isLive
+    ? "https://dashboard.stripe.com"
+    : "https://dashboard.stripe.com/test";
   const path = type === "payment_intent" ? "payments" : "checkout/sessions";
 
   return (
@@ -195,10 +199,18 @@ function StripeLink({
       target="_blank"
       rel="noopener noreferrer"
       className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-primary-600 transition-colors"
-      title="View in Stripe"
+      title="View in provider dashboard"
     >
-      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z" />
+      <svg
+        className="w-3.5 h-3.5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
       </svg>
       <span className="font-mono text-[10px]">{id.slice(0, 12)}...</span>
     </a>
@@ -476,7 +488,7 @@ export function CheckoutsPage() {
                       </td>
                       <td className="px-6 py-4">
                         {session.providerSessionId && (
-                          <StripeLink
+                          <ProviderLink
                             id={session.providerSessionId}
                             type="session"
                           />
@@ -624,7 +636,7 @@ export function CheckoutsPage() {
                     </td>
                     <td className="px-6 py-4">
                       {intent.providerPaymentId && (
-                        <StripeLink
+                        <ProviderLink
                           id={intent.providerPaymentId}
                           type="payment_intent"
                         />

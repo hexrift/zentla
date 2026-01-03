@@ -137,10 +137,10 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
     "cancelUrl": "https://yourapp.com/cancel"
   }'
 
-# Response includes checkout URL
+# Response includes checkout URL (hosted by your billing provider)
 {
   "id": "cs_...",
-  "url": "https://checkout.stripe.com/...",
+  "url": "https://checkout.provider.com/...",
   "status": "pending"
 }`}</CodeBlock>
 

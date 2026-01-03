@@ -583,22 +583,22 @@ export class CheckoutController {
     description: `Creates a checkout intent for headless/custom checkout UIs.
 
 **Flow:**
-1. Create intent → returns \`clientSecret\` for Stripe.js
-2. Client calls \`stripe.confirmPayment()\` with the client secret
-3. Stripe webhook confirms payment → Zentla provisions subscription
+1. Create intent → returns \`clientSecret\` for payment provider SDK
+2. Client confirms payment using the provider's client-side SDK
+3. Provider webhook confirms payment → Zentla provisions subscription
 4. Poll \`GET /checkout/intents/{id}\` for status
 
 **What this creates:**
 - Locks in pricing at creation time (quote snapshot)
-- Creates Stripe PaymentIntent or SetupIntent
+- Creates payment or setup intent with the billing provider
 - Returns \`clientSecret\` for client-side payment confirmation
 
 **Idempotency:**
 Pass \`Idempotency-Key\` header to safely retry. Same key returns existing intent.
 
 **Trial handling:**
-- If offer has a trial and no payment required, uses SetupIntent
-- If payment required immediately, uses PaymentIntent`,
+- If offer has a trial and no payment required, creates setup intent
+- If payment required immediately, creates payment intent`,
   })
   @ApiResponse({
     status: 201,
