@@ -72,11 +72,7 @@ export const validationSchema = Joi.object({
   DATABASE_URL: Joi.string().required(),
   REDIS_URL: Joi.string().default("redis://localhost:6379"),
   API_KEY_SECRET: Joi.string().min(32).required(),
-  STRIPE_SECRET_KEY: Joi.string().when("NODE_ENV", {
-    is: "production",
-    then: Joi.required(),
-    otherwise: Joi.optional(),
-  }),
+  STRIPE_SECRET_KEY: Joi.string().optional(),
   STRIPE_WEBHOOK_SECRET: Joi.string().optional(),
   STRIPE_PUBLISHABLE_KEY: Joi.string().optional(),
   WEBHOOK_SIGNING_SECRET: Joi.string().min(32).required(),
