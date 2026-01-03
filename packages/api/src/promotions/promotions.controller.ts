@@ -251,7 +251,8 @@ Changes take effect immediately and are reflected in all API responses.`,
   @ApiResponse({ status: 404, description: "Promotion not found" })
   @ApiResponse({
     status: 412,
-    description: "Precondition Failed - Version mismatch, resource was modified",
+    description:
+      "Precondition Failed - Version mismatch, resource was modified",
   })
   async update(
     @WorkspaceId() workspaceId: string,

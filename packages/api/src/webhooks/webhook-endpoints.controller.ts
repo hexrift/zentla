@@ -405,7 +405,8 @@ Include the \`If-Match\` header with the ETag from a previous GET to prevent con
   @ApiResponse({ status: 404, description: "Endpoint not found" })
   @ApiResponse({
     status: 412,
-    description: "Precondition Failed - Version mismatch, resource was modified",
+    description:
+      "Precondition Failed - Version mismatch, resource was modified",
   })
   async update(
     @WorkspaceId() workspaceId: string,
