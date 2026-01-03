@@ -259,6 +259,12 @@ export class EntitlementsService {
     subscriptionId: string,
     featureKey: string,
   ): Promise<void> {
+    // Get customerId before deleting for cache invalidation
+    const entitlement = await this.prisma.entitlement.findFirst({
+      where: { workspaceId, subscriptionId, featureKey },
+      select: { customerId: true },
+    });
+
     await this.prisma.entitlement.deleteMany({
       where: {
         workspaceId,
@@ -266,18 +272,34 @@ export class EntitlementsService {
         featureKey,
       },
     });
+
+    // Invalidate cache after revocation
+    if (entitlement) {
+      this.invalidateCustomerCache(workspaceId, entitlement.customerId);
+    }
   }
 
   async revokeAllForSubscription(
     workspaceId: string,
     subscriptionId: string,
   ): Promise<void> {
+    // Get customerId before deleting for cache invalidation
+    const entitlement = await this.prisma.entitlement.findFirst({
+      where: { workspaceId, subscriptionId },
+      select: { customerId: true },
+    });
+
     await this.prisma.entitlement.deleteMany({
       where: {
         workspaceId,
         subscriptionId,
       },
     });
+
+    // Invalidate cache after revocation
+    if (entitlement) {
+      this.invalidateCustomerCache(workspaceId, entitlement.customerId);
+    }
   }
 
   async refreshExpirationForSubscription(
