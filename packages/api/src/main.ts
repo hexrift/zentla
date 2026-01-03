@@ -239,6 +239,7 @@ Use \`error.code\` for programmatic handling.
         theme: "default",
         layout: "modern",
         darkMode: true,
+        favicon: "https://zentla.dev/favicon.svg",
         metaData: {
           title: "Zentla API Documentation",
           description:
