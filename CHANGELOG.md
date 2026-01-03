@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.4.0](https://github.com/PrimeCodeLabs/zentla/compare/v2.3.0...v2.4.0) (2026-01-03)
+
+
+### Features
+
+* **api:** add ETag support and update URLs ([de1a465](https://github.com/PrimeCodeLabs/zentla/commit/de1a4653623bb122b1e66b3c91036a1ff72de434))
+* **api:** add ETag support and update URLs ([64a49e3](https://github.com/PrimeCodeLabs/zentla/commit/64a49e3ef39a00fb522f2f57bc0a1ed7acbd40e4))
+
 ## [2.3.0](https://github.com/PrimeCodeLabs/zentla/compare/v2.2.5...v2.3.0) (2026-01-03)
 
 
