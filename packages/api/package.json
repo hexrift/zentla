@@ -22,7 +22,7 @@
     "@nestjs/platform-express": "^10.3.0",
     "@nestjs/schedule": "^6.1.0",
     "@nestjs/swagger": "^8.1.0",
-    "@nestjs/throttler": "^5.1.0",
+    "@nestjs/throttler": "^6.5.0",
     "@scalar/nestjs-api-reference": "^1.0.13",
     "@zentla/core": "workspace:*",
     "@zentla/database": "workspace:*",

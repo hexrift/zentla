@@ -1519,14 +1519,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/throttler@npm:^5.1.0":
-  version: 5.2.0
-  resolution: "@nestjs/throttler@npm:5.2.0"
+"@nestjs/throttler@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "@nestjs/throttler@npm:6.5.0"
   peerDependencies:
-    "@nestjs/common": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
-    "@nestjs/core": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
+    "@nestjs/common": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+    "@nestjs/core": ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
     reflect-metadata: ^0.1.13 || ^0.2.0
-  checksum: 10c0/5f2a322e114eadc8f2b682fdc35732b4cc725d09126582f61f4777dfae455ec4bf4dd689edaf0b6339e36e1a1c7f0ae02c4000401377a07edb53967d942493af
+  checksum: 10c0/bd755e765d020189b24fd8cb8a5989b47d7856abdc8efc881d73dd76e71b8e6e4466e532464434fd1199a106bf4752bda3d0036ef4aa13aa61e9317f60658da8
   languageName: node
   linkType: hard
 
@@ -2936,7 +2936,7 @@ __metadata:
     "@nestjs/schematics": "npm:^10.0.0"
     "@nestjs/swagger": "npm:^8.1.0"
     "@nestjs/testing": "npm:^10.3.0"
-    "@nestjs/throttler": "npm:^5.1.0"
+    "@nestjs/throttler": "npm:^6.5.0"
     "@scalar/nestjs-api-reference": "npm:^1.0.13"
     "@swc/core": "npm:^1.15.8"
     "@types/express": "npm:^4.17.21"
