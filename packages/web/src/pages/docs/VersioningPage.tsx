@@ -275,7 +275,6 @@ X-Zentla-Migration: See https://zentla.dev/docs/migrations/v2`}</CodeBlock>
             GitHub Releases
           </a>
         </li>
-        <li>RSS feed (coming soon)</li>
         <li>Email notifications via Dashboard settings</li>
       </ul>
 

@@ -366,7 +366,7 @@ export function HomePage() {
               href="https://www.zuora.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center opacity-60 group"
+              className="flex flex-col items-center group"
             >
               <div className="h-12 flex items-center">
                 <img
@@ -378,10 +378,32 @@ export function HomePage() {
                   loading="lazy"
                 />
               </div>
+              <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                Available
+              </span>
+            </a>
+            {/* Paddle - Coming Soon */}
+            <div className="flex flex-col items-center opacity-50">
+              <div className="h-12 flex items-center">
+                <span className="text-xl font-semibold text-gray-400">
+                  Paddle
+                </span>
+              </div>
               <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
                 Coming Soon
               </span>
-            </a>
+            </div>
+            {/* Adyen - Coming Soon */}
+            <div className="flex flex-col items-center opacity-50">
+              <div className="h-12 flex items-center">
+                <span className="text-xl font-semibold text-gray-400">
+                  Adyen
+                </span>
+              </div>
+              <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                Coming Soon
+              </span>
+            </div>
           </div>
         </div>
       </section>
