@@ -159,7 +159,7 @@ describe("CheckoutController", () => {
       });
 
       expect(result.id).toBe("session_123");
-      expect(result.url).toBe("https://checkout.stripe.com/session_123");
+      expect(result.sessionUrl).toBe("https://checkout.stripe.com/session_123");
       expect(checkoutService.create).toHaveBeenCalledWith("ws_123", {
         offerId: "offer_123",
         successUrl: "https://example.com/success",

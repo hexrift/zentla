@@ -24,7 +24,7 @@ const checkout = await zentla.checkout.createSession({
   cancelUrl: 'https://yourapp.com/cancel'
 });
 
-// 3. Redirect customer to checkout.url
+// 3. Redirect customer to checkout.sessionUrl
 // After payment, check entitlements:
 const access = await zentla.customers.checkEntitlement(customerId, 'api_access');
 // { featureKey: 'api_access', hasAccess: true }`;
