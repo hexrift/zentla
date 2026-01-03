@@ -242,16 +242,16 @@ export class StripeSyncService {
     // Map Stripe status to Zentla status
     const statusMap: Record<string, string> = {
       active: "active",
-      past_due: "past_due",
+      past_due: "payment_failed",
       canceled: "canceled",
-      unpaid: "unpaid",
-      incomplete: "incomplete",
-      incomplete_expired: "incomplete_expired",
+      unpaid: "suspended",
+      incomplete: "pending",
+      incomplete_expired: "expired",
       trialing: "trialing",
       paused: "paused",
     };
 
-    const status = statusMap[stripeSubscription.status] ?? "incomplete";
+    const status = statusMap[stripeSubscription.status] ?? "pending";
 
     // Create subscription
     const subscription = await this.prisma.subscription.create({

@@ -616,7 +616,7 @@ export class StripeWebhookService {
     await this.prisma.subscription.update({
       where: { id: subscriptionRef.entityId },
       data: {
-        status: "past_due",
+        status: "payment_failed",
       },
     });
 
@@ -1026,30 +1026,30 @@ export class StripeWebhookService {
   ):
     | "active"
     | "trialing"
-    | "past_due"
+    | "payment_failed"
     | "canceled"
-    | "unpaid"
-    | "incomplete"
-    | "incomplete_expired"
+    | "suspended"
+    | "pending"
+    | "expired"
     | "paused" {
     const statusMap: Record<
       Stripe.Subscription.Status,
       | "active"
       | "trialing"
-      | "past_due"
+      | "payment_failed"
       | "canceled"
-      | "unpaid"
-      | "incomplete"
-      | "incomplete_expired"
+      | "suspended"
+      | "pending"
+      | "expired"
       | "paused"
     > = {
       active: "active",
       trialing: "trialing",
-      past_due: "past_due",
+      past_due: "payment_failed",
       canceled: "canceled",
-      unpaid: "unpaid",
-      incomplete: "incomplete",
-      incomplete_expired: "incomplete_expired",
+      unpaid: "suspended",
+      incomplete: "pending",
+      incomplete_expired: "expired",
       paused: "paused",
     };
     return statusMap[status];

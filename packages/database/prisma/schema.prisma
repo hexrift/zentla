@@ -336,7 +336,7 @@ model Subscription {
   customerId         String             @map("customer_id") @db.Uuid
   offerId            String             @map("offer_id") @db.Uuid
   offerVersionId     String             @map("offer_version_id") @db.Uuid
-  status             SubscriptionStatus @default(incomplete)
+  status             SubscriptionStatus @default(pending)
   currentPeriodStart DateTime           @map("current_period_start") @db.Timestamptz
   currentPeriodEnd   DateTime           @map("current_period_end") @db.Timestamptz
   cancelAt           DateTime?          @map("cancel_at") @db.Timestamptz
@@ -368,11 +368,11 @@ model Subscription {
 enum SubscriptionStatus {
   trialing
   active
-  past_due
+  payment_failed
   canceled
-  unpaid
-  incomplete
-  incomplete_expired
+  suspended
+  pending
+  expired
   paused
 
   @@map("subscription_status")

@@ -275,19 +275,19 @@ describe("SubscriptionsService", () => {
       prisma.subscription.findFirst.mockResolvedValue(mockSubscription);
       prisma.subscription.update.mockResolvedValue({
         ...mockSubscription,
-        status: "past_due",
+        status: "payment_failed",
       });
 
       const result = await service.updateStatus(
         "ws_123",
         "sub_123",
-        "past_due",
+        "payment_failed",
       );
 
-      expect(result.status).toBe("past_due");
+      expect(result.status).toBe("payment_failed");
       expect(prisma.subscription.update).toHaveBeenCalledWith({
         where: { id: "sub_123" },
-        data: { status: "past_due", version: { increment: 1 } },
+        data: { status: "payment_failed", version: { increment: 1 } },
       });
     });
   });

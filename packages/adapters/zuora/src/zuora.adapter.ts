@@ -855,9 +855,9 @@ export class ZuoraAdapter implements BillingProvider {
       Cancelled: "canceled",
       Expired: "canceled",
       Suspended: "paused",
-      Draft: "incomplete",
-      PendingActivation: "incomplete",
-      PendingAcceptance: "incomplete",
+      Draft: "pending",
+      PendingActivation: "pending",
+      PendingAcceptance: "pending",
     };
     return statusMap[status] || "active";
   }
