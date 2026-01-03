@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.5](https://github.com/PrimeCodeLabs/zentla/compare/v2.2.4...v2.2.5) (2026-01-03)
+
+
+### Bug Fixes
+
+* **api:** invalidate entitlement cache on revocation ([f6a7d37](https://github.com/PrimeCodeLabs/zentla/commit/f6a7d37a58b7de211fecb0a0ef351532091ccca0))
+
 ## [2.2.4](https://github.com/PrimeCodeLabs/zentla/compare/v2.2.3...v2.2.4) (2026-01-03)
 
 
