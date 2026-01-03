@@ -19,7 +19,7 @@ Zentla is designed to maintain PCI DSS compliance by minimizing the PCI scope an
                                   │
                                   ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                             RELAY                                    │
+│                            ZENTLA                                    │
 │  ┌─────────────────────────────────────────────────────────────┐   │
 │  │                   Minimal PCI Scope (SAQ-A)                  │   │
 │  │  - Checkout session orchestration (no card data)            │   │
@@ -66,7 +66,7 @@ All payment references use provider tokens:
 // What Zentla stores (ProviderRef table)
 {
   entityType: 'customer',
-  entityId: 'relay_customer_abc123',
+  entityId: 'zentla_customer_abc123',
   provider: 'stripe',
   externalId: 'cus_stripe123'  // Token reference, not card data
 }

@@ -42,6 +42,51 @@ Authorization: Bearer zentla_live_xxxxx
 }
 ```
 
+## Concurrency Control (ETags)
+
+Zentla supports optimistic concurrency control using ETags. This prevents lost updates when multiple clients modify the same resource.
+
+### How It Works
+
+1. **GET requests** return an `ETag` header with the resource version:
+
+   ```
+   ETag: W/"resource-id-1"
+   ```
+
+2. **PATCH/PUT requests** can include an `If-Match` header:
+
+   ```
+   If-Match: W/"resource-id-1"
+   ```
+
+3. If the resource was modified, you'll get a `412 Precondition Failed` response.
+
+### Example Workflow
+
+```bash
+# 1. Fetch the resource and note the ETag
+curl -X GET /api/v1/customers/cust_123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+# Response header: ETag: W/"cust_123-1"
+
+# 2. Update with If-Match to prevent conflicts
+curl -X PATCH /api/v1/customers/cust_123 \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "If-Match: W/\"cust_123-1\"" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Updated Name"}'
+```
+
+### Supported Endpoints
+
+ETag concurrency control is available on:
+
+- `PATCH /customers/:id`
+- `PATCH /offers/:id`
+- `PATCH /promotions/:id`
+- `PATCH /webhook-endpoints/:id`
+
 ---
 
 ## Offers
@@ -665,6 +710,129 @@ GET /checkout/intents/:id
 | `succeeded`       | Payment complete, subscription created   |
 | `failed`          | Payment failed                           |
 | `expired`         | Intent expired (24 hours)                |
+
+---
+
+## Usage (Metering)
+
+Track and aggregate usage for usage-based billing.
+
+### Ingest Usage Event
+
+```
+POST /usage/events
+```
+
+Record a single usage event.
+
+**Request Body:**
+
+```json
+{
+  "customerId": "cust_123",
+  "subscriptionId": "sub_456",
+  "metricKey": "api_calls",
+  "quantity": 1,
+  "timestamp": "2024-01-15T10:30:00Z",
+  "idempotencyKey": "evt_abc123",
+  "properties": {
+    "endpoint": "/api/v1/users",
+    "method": "GET"
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": "usage_evt_789",
+  "deduplicated": false
+}
+```
+
+### Ingest Batch Events
+
+```
+POST /usage/events/batch
+```
+
+Record up to 1000 usage events at once.
+
+**Request Body:**
+
+```json
+{
+  "events": [
+    { "customerId": "cust_123", "metricKey": "api_calls", "quantity": 5 },
+    { "customerId": "cust_123", "metricKey": "storage_gb", "quantity": 0.5 }
+  ]
+}
+```
+
+**Response:**
+
+```json
+{
+  "ingested": 2,
+  "deduplicated": 0
+}
+```
+
+### Get Usage Summary
+
+```
+GET /usage/summary/:customerId/:metricKey?periodStart=...&periodEnd=...
+```
+
+Get aggregated usage for a customer and metric.
+
+**Response:**
+
+```json
+{
+  "metricKey": "api_calls",
+  "totalQuantity": 15420,
+  "eventCount": 8234,
+  "periodStart": "2024-01-01T00:00:00Z",
+  "periodEnd": "2024-01-31T23:59:59Z"
+}
+```
+
+### List Usage Metrics
+
+```
+GET /usage/metrics
+```
+
+Get all defined usage metrics for the workspace.
+
+### Create Usage Metric
+
+```
+POST /usage/metrics
+```
+
+**Request Body:**
+
+```json
+{
+  "key": "api_calls",
+  "name": "API Calls",
+  "description": "Number of API requests made",
+  "unit": "requests",
+  "aggregation": "sum"
+}
+```
+
+**Aggregation Types:**
+
+| Type    | Description               |
+| ------- | ------------------------- |
+| `sum`   | Add all values (default)  |
+| `max`   | Take the maximum value    |
+| `count` | Count number of events    |
+| `last`  | Use the most recent value |
 
 ---
 

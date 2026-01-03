@@ -142,7 +142,7 @@ The API will be running at `http://localhost:3002`. Open the [API docs](http://l
 # Create a feature
 curl -X POST http://localhost:3002/api/v1/features \
   -H "Content-Type: application/json" \
-  -H "x-api-key: YOUR_API_KEY" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{
     "key": "seats",
     "name": "Team Seats",

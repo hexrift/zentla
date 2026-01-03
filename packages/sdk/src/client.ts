@@ -13,16 +13,16 @@ import type {
   CreateWebhookEndpointInput,
 } from "./types";
 
-export interface RelayClientConfig {
+export interface ZentlaClientConfig {
   apiKey: string;
   baseUrl?: string;
 }
 
-export class RelayClient {
+export class ZentlaClient {
   private readonly apiKey: string;
   private readonly baseUrl: string;
 
-  constructor(config: RelayClientConfig) {
+  constructor(config: ZentlaClientConfig) {
     this.apiKey = config.apiKey;
     this.baseUrl = config.baseUrl ?? "https://api.zentla.dev/api/v1";
   }
@@ -46,7 +46,7 @@ export class RelayClient {
         message?: string;
         code?: string;
       };
-      throw new RelayError(
+      throw new ZentlaError(
         error.message ?? `HTTP ${response.status}`,
         response.status,
         error.code,
@@ -204,13 +204,13 @@ export class RelayClient {
   };
 }
 
-export class RelayError extends Error {
+export class ZentlaError extends Error {
   constructor(
     message: string,
     public readonly status: number,
     public readonly code?: string,
   ) {
     super(message);
-    this.name = "RelayError";
+    this.name = "ZentlaError";
   }
 }
