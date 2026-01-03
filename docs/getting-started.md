@@ -1,6 +1,15 @@
 # Getting Started with Zentla
 
-Get from zero to your first Stripe test checkout in under 10 minutes.
+Zentla is the unified monetization layer for SaaS. Get billing + entitlements in one API, with the freedom to switch providers without code changes.
+
+**What makes Zentla different:**
+
+- **Billing + Entitlements together** - No more stitching Stripe + feature flags
+- **Provider-agnostic** - Switch between Stripe, Zuora, or others without code changes
+- **Self-hosted option** - Own your billing data with full data sovereignty
+- **Pricing experiments** - A/B test with immutable offer versioning
+
+Get from zero to your first checkout in under 10 minutes.
 
 ## Prerequisites
 
@@ -262,16 +271,22 @@ docker-compose logs postgres
 │       │              │                      │               │
 │       └──────────────┼──────────────────────┘               │
 │                      │                                      │
-│              ┌───────▼───────┐                              │
-│              │ Stripe Adapter│                              │
-│              └───────┬───────┘                              │
-└──────────────────────┼──────────────────────────────────────┘
-                       │
-                       ▼
-              ┌─────────────────┐
-              │     Stripe      │
-              └─────────────────┘
+│       ┌──────────────┼──────────────┐                       │
+│       ▼              ▼              ▼                       │
+│  ┌─────────┐   ┌──────────┐   ┌───────────┐                │
+│  │ Stripe  │   │  Zuora   │   │  Future   │                │
+│  │ Adapter │   │ Adapter  │   │ Providers │                │
+│  └────┬────┘   └────┬─────┘   └─────┬─────┘                │
+└───────┼─────────────┼───────────────┼───────────────────────┘
+        │             │               │
+        ▼             ▼               ▼
+   ┌─────────┐   ┌─────────┐    ┌──────────┐
+   │ Stripe  │   │  Zuora  │    │ Paddle,  │
+   └─────────┘   └─────────┘    │ Adyen... │
+                                └──────────┘
 ```
+
+**Why this matters:** Write your integration once. Switch providers without changing your application code.
 
 ---
 

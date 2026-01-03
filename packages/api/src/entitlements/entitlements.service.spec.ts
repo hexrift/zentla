@@ -60,6 +60,9 @@ describe("EntitlementsService", () => {
     }).compile();
 
     service = module.get<EntitlementsService>(EntitlementsService);
+
+    // Clear cache between tests to prevent test pollution
+    service.clearCache();
   });
 
   describe("checkEntitlement", () => {

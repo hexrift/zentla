@@ -857,3 +857,68 @@ enum FeedbackStatus {
 
   @@map("feedback_status")
 }
+
+// ============================================================================
+// USAGE METERING (Usage-Based Billing)
+// ============================================================================
+
+model UsageEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  workspaceId    String   @map("workspace_id") @db.Uuid
+  customerId     String   @map("customer_id") @db.Uuid
+  subscriptionId String?  @map("subscription_id") @db.Uuid
+  metricKey      String   @map("metric_key") @db.VarChar(100)
+  quantity       Decimal  @db.Decimal(20, 6)
+  idempotencyKey String?  @unique @map("idempotency_key") @db.VarChar(255)
+  timestamp      DateTime @default(now()) @db.Timestamptz
+  properties     Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([workspaceId, customerId, metricKey])
+  @@index([workspaceId, subscriptionId, metricKey])
+  @@index([workspaceId, metricKey, timestamp])
+  @@index([idempotencyKey])
+  @@map("usage_event")
+}
+
+model UsageAggregate {
+  id             String   @id @default(uuid()) @db.Uuid
+  workspaceId    String   @map("workspace_id") @db.Uuid
+  customerId     String   @map("customer_id") @db.Uuid
+  subscriptionId String?  @map("subscription_id") @db.Uuid
+  metricKey      String   @map("metric_key") @db.VarChar(100)
+  periodStart    DateTime @map("period_start") @db.Timestamptz
+  periodEnd      DateTime @map("period_end") @db.Timestamptz
+  totalQuantity  Decimal  @map("total_quantity") @db.Decimal(20, 6)
+  eventCount     Int      @default(0) @map("event_count")
+  lastUpdatedAt  DateTime @default(now()) @map("last_updated_at") @db.Timestamptz
+
+  @@unique([workspaceId, customerId, metricKey, periodStart])
+  @@index([workspaceId, subscriptionId])
+  @@map("usage_aggregate")
+}
+
+model UsageMetric {
+  id           String               @id @default(uuid()) @db.Uuid
+  workspaceId  String               @map("workspace_id") @db.Uuid
+  key          String               @db.VarChar(100)
+  name         String               @db.VarChar(200)
+  description  String?              @db.VarChar(1000)
+  unit         String?              @db.VarChar(50)
+  aggregation  UsageAggregationType @default(sum)
+  createdAt    DateTime             @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime             @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([workspaceId, key])
+  @@index([workspaceId])
+  @@map("usage_metric")
+}
+
+enum UsageAggregationType {
+  sum
+  max
+  count
+  last
+
+  @@map("usage_aggregation_type")
+}

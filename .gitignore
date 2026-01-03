@@ -61,3 +61,6 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 CLAUDE.md
+
+# Internal documentation (not for public)
+docs/internal/

@@ -15,9 +15,9 @@ interface SEOProps {
 }
 
 const BASE_URL = "https://zentla.dev";
-const DEFAULT_TITLE = "Zentla - Subscription Management API";
+const DEFAULT_TITLE = "Zentla - The Unified Monetization Layer for SaaS";
 const DEFAULT_DESCRIPTION =
-  "Zentla is a subscription management API for modern apps. Manage offers, customers, entitlements, and checkouts with a simple, provider-agnostic API.";
+  "Entitlements, billing, and pricing experiments—without the vendor lock-in. Combine billing + entitlements in one API. Switch providers without code changes. Self-host for data sovereignty.";
 const DEFAULT_IMAGE = `${BASE_URL}/og-image.svg`;
 
 export function SEO({

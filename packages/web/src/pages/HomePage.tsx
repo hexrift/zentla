@@ -31,51 +31,9 @@ const access = await zentla.customers.checkEntitlement(customerId, 'api_access')
 
 const features = [
   {
-    title: "Offers & Versioning",
+    title: "Billing + Entitlements",
     description:
-      "Create pricing plans with immutable versions. Publish, rollback, or schedule changes with confidence.",
-    icon: (
-      <svg
-        className="w-6 h-6"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Checkout",
-    description:
-      "Hosted or headless checkout flows. Support for trials, promotions, and metadata tracking.",
-    icon: (
-      <svg
-        className="w-6 h-6"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Entitlements",
-    description:
-      "Define features and quotas per plan. Query access at runtime with a simple API call.",
+      "One unified system. No more stitching together Stripe + feature flags. Entitlements derived directly from subscriptions.",
     icon: (
       <svg
         className="w-6 h-6"
@@ -94,9 +52,9 @@ const features = [
     ),
   },
   {
-    title: "Webhooks",
+    title: "Provider Portability",
     description:
-      "Receive real-time events for subscriptions, payments, and entitlement changes.",
+      "Switch between Stripe, Zuora, or others without code changes. Never be locked into a single billing provider again.",
     icon: (
       <svg
         className="w-6 h-6"
@@ -109,7 +67,49 @@ const features = [
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={1.5}
-          d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+          d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "Pricing Experiments",
+    description:
+      "A/B test pricing with immutable offer versions. Publish, rollback, or schedule changes without deploys.",
+    icon: (
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "Self-Hosted Option",
+    description:
+      "Run on your infrastructure. Own your billing data. No vendor lock-in, full data sovereignty.",
+    icon: (
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"
         />
       </svg>
     ),
@@ -120,27 +120,27 @@ const faqs = [
   {
     question: "What is Zentla?",
     answer:
-      "Zentla is a subscription management API that helps developers build and manage subscription-based products. It provides a provider-agnostic layer over payment processors like Stripe, handling offers, customers, subscriptions, and entitlements.",
+      "Zentla is a unified monetization layer that combines billing and entitlements in one system. Unlike using Stripe + a separate feature flag tool, Zentla gives you one API where entitlements are derived directly from subscriptions.",
   },
   {
-    question: "How does Zentla integrate with billing providers?",
+    question: "How is Zentla different from Chargebee or Stripe Billing?",
     answer:
-      "Zentla connects to your billing provider to sync customers, subscriptions, and payments. Currently Stripe is supported, with more providers coming soon. You connect your API keys, and Zentla handles the complexity of subscription lifecycle, webhooks, and entitlement management automatically.",
+      "Zentla is provider-agnostic—you can switch between Stripe, Zuora, or other providers without code changes. It also natively integrates entitlements with billing, so you don't need a separate system like Stigg or LaunchDarkly.",
   },
   {
-    question: "What are entitlements in Zentla?",
+    question: "Can I switch billing providers later?",
     answer:
-      "Entitlements are feature access controls tied to subscriptions. When a customer subscribes to an offer, they receive entitlements that define what features they can access. You can check entitlements via API to control feature access in your app.",
+      "Yes. Zentla abstracts your billing provider, so you can migrate from Stripe to Zuora (or vice versa) without changing your application code. Your offers, entitlements, and customer data stay consistent.",
   },
   {
-    question: "Does Zentla support headless checkout?",
+    question: "Can I self-host Zentla?",
     answer:
-      "Yes, Zentla provides headless checkout APIs that let you build custom checkout experiences. You get a client secret for secure payment collection while Zentla handles the subscription provisioning.",
+      "Yes. Zentla can be deployed on your own infrastructure for full data sovereignty. Perfect for regulated industries or teams that need complete control over their billing data.",
   },
   {
-    question: "Is Zentla free to use?",
+    question: "How do pricing experiments work?",
     answer:
-      "Zentla offers a free tier for startups and small projects. This includes core features like subscription management, customer sync, and entitlements. Contact us for enterprise pricing and additional features.",
+      "Offers in Zentla use immutable versioning. Create a new version of your pricing, publish it, and measure conversion. If it underperforms, instantly rollback to the previous version—no deploys required.",
   },
 ];
 
@@ -198,12 +198,12 @@ export function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight">
-              Subscription management
-              <span className="block text-primary-600">for modern apps</span>
+              The unified monetization layer
+              <span className="block text-primary-600">for SaaS</span>
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-              Zentla manages offers, customers, entitlements, and checkouts.
-              Connect your billing provider with a simple API.
+              Entitlements, billing, and pricing experiments—without the vendor
+              lock-in. Own your billing. Own your data.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
@@ -302,11 +302,11 @@ export function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Everything you need
+              Why teams choose Zentla
             </h2>
             <p className="mt-4 text-gray-600 max-w-xl mx-auto">
-              A complete subscription management layer between your app and
-              billing providers.
+              The last billing migration you'll ever need. From feature flags to
+              invoices, one API.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">

@@ -21,6 +21,7 @@ import { AuditLogsPage } from "./pages/AuditLogsPage";
 import { ApiKeysPage } from "./pages/ApiKeysPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { FeedbackPage } from "./pages/FeedbackPage";
+import { AnalyticsPage } from "./pages/AnalyticsPage";
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="checkouts" element={<CheckoutsPage />} />
           <Route path="offers" element={<OffersPage />} />
           <Route path="offers/new" element={<OfferNewPage />} />
