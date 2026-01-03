@@ -328,7 +328,7 @@ export function Layout() {
           <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200/80">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-primary-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">R</span>
+                <span className="text-white font-bold text-sm">Z</span>
               </div>
               <span className="text-lg font-semibold text-gray-900">
                 Zentla
@@ -491,7 +491,7 @@ export function Layout() {
           <div className="flex items-center h-16 px-6 border-b border-gray-200/80">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-primary-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">R</span>
+                <span className="text-white font-bold text-sm">Z</span>
               </div>
               <span className="text-lg font-semibold text-gray-900">
                 Zentla
@@ -651,7 +651,7 @@ export function Layout() {
           </button>
           <div className="flex items-center gap-2 ml-2">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-600 to-primary-600 flex items-center justify-center">
-              <span className="text-white font-bold text-xs">R</span>
+              <span className="text-white font-bold text-xs">Z</span>
             </div>
             <span className="text-base font-semibold text-gray-900">
               Zentla
