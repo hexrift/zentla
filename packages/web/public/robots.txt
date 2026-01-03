@@ -1,11 +1,11 @@
 # Zentla Web - robots.txt
-# https://zentla-web.pages.dev/
+# https://zentla.dev/
 
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://zentla-web.pages.dev/sitemap.xml
+Sitemap: https://zentla.dev/sitemap.xml
 
 # Crawl-delay for polite crawling
 Crawl-delay: 1

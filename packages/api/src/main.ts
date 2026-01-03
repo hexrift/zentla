@@ -51,7 +51,7 @@ async function bootstrap(): Promise<void> {
       nodeEnv === "production"
         ? configService.get<string>(
             "CORS_ORIGIN",
-            "https://zentla-admin.pages.dev",
+            "https://admin.zentla.dev",
           )
         : true,
     credentials: true,
