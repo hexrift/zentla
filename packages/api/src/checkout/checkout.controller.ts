@@ -37,12 +37,97 @@ import {
   IsEmail,
   IsObject,
   IsString,
+  IsEnum,
 } from "class-validator";
+import { Transform } from "class-transformer";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 // UUID regex that accepts any UUID-formatted string (including non-RFC4122 compliant)
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// ============================================================================
+// QUERY DTOs
+// ============================================================================
+
+export enum CheckoutSessionStatus {
+  PENDING = "pending",
+  COMPLETED = "completed",
+  EXPIRED = "expired",
+}
+
+export enum CheckoutIntentStatus {
+  PENDING = "pending",
+  PROCESSING = "processing",
+  REQUIRES_ACTION = "requires_action",
+  SUCCEEDED = "succeeded",
+  FAILED = "failed",
+  EXPIRED = "expired",
+}
+
+class QueryCheckoutSessionsDto {
+  @ApiPropertyOptional({
+    description: "Filter by session status.",
+    enum: CheckoutSessionStatus,
+  })
+  @IsOptional()
+  @IsEnum(CheckoutSessionStatus)
+  status?: CheckoutSessionStatus;
+
+  @ApiPropertyOptional({
+    description: "Maximum number of sessions to return per page.",
+    example: 20,
+    default: 20,
+    minimum: 1,
+    maximum: 100,
+  })
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value as string, 10))
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    description:
+      "Pagination cursor from a previous response. Pass `nextCursor` to fetch the next page.",
+  })
+  @IsOptional()
+  @IsString()
+  cursor?: string;
+}
+
+class QueryCheckoutIntentsDto {
+  @ApiPropertyOptional({
+    description: "Filter by intent status.",
+    enum: CheckoutIntentStatus,
+  })
+  @IsOptional()
+  @IsEnum(CheckoutIntentStatus)
+  status?: CheckoutIntentStatus;
+
+  @ApiPropertyOptional({
+    description: "Maximum number of intents to return per page.",
+    example: 20,
+    default: 20,
+    minimum: 1,
+    maximum: 100,
+  })
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value as string, 10))
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    description:
+      "Pagination cursor from a previous response. Pass `nextCursor` to fetch the next page.",
+  })
+  @IsOptional()
+  @IsString()
+  cursor?: string;
+}
 
 // ============================================================================
 // REQUEST DTOs
@@ -351,17 +436,22 @@ export class CheckoutController {
     description: "List all checkout sessions with optional status filter.",
   })
   @ApiResponse({ status: 200, description: "List of checkout sessions" })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   async listSessions(
     @WorkspaceId() workspaceId: string,
-    @Query("status") status?: string,
-    @Query("limit") limitParam?: string,
-    @Query("cursor") cursor?: string,
+    @Query() query: QueryCheckoutSessionsDto,
   ) {
-    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
     return this.checkoutService.listSessions(workspaceId, {
-      status,
-      limit,
-      cursor,
+      status: query.status,
+      limit: query.limit ?? 20,
+      cursor: query.cursor,
     });
   }
 
@@ -373,17 +463,22 @@ export class CheckoutController {
       "List all checkout intents (headless) with optional status filter.",
   })
   @ApiResponse({ status: 200, description: "List of checkout intents" })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
   async listIntents(
     @WorkspaceId() workspaceId: string,
-    @Query("status") status?: string,
-    @Query("limit") limitParam?: string,
-    @Query("cursor") cursor?: string,
+    @Query() query: QueryCheckoutIntentsDto,
   ) {
-    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
     return this.checkoutService.listIntents(workspaceId, {
-      status,
-      limit,
-      cursor,
+      status: query.status,
+      limit: query.limit ?? 20,
+      cursor: query.cursor,
     });
   }
 

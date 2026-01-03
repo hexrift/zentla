@@ -14,7 +14,7 @@ interface ListAuditLogsParams {
   endDate?: Date;
 }
 
-interface PaginatedResult<T> {
+export interface PaginatedResult<T> {
   data: T[];
   hasMore: boolean;
   nextCursor?: string;

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
-import { EventsController } from "./events.controller";
+import { EventsController, EventStatus } from "./events.controller";
 import { EventsService } from "./events.service";
 
 describe("EventsController", () => {
@@ -48,7 +48,7 @@ describe("EventsController", () => {
       await controller.listEvents("ws_123", {
         limit: 25,
         cursor: "cursor123",
-        status: "pending" as const,
+        status: EventStatus.PENDING,
         eventType: "subscription.created",
         aggregateType: "subscription",
         aggregateId: "sub_123",

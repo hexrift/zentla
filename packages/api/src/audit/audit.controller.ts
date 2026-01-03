@@ -15,7 +15,7 @@ import { Transform } from "class-transformer";
 // REQUEST DTOs
 // ============================================================================
 
-enum ActorType {
+export enum ActorType {
   API_KEY = "api_key",
   USER = "user",
   SYSTEM = "system",

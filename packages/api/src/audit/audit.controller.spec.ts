@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
-import { AuditController } from "./audit.controller";
+import { AuditController, ActorType } from "./audit.controller";
 import { AuditService } from "./audit.service";
 
 describe("AuditController", () => {
@@ -71,7 +71,7 @@ describe("AuditController", () => {
       await controller.listAuditLogs("ws_123", {
         limit: 25,
         cursor: "cursor123",
-        actorType: "user" as const,
+        actorType: ActorType.USER,
         actorId: "user_123",
         action: "customer.created",
         resourceType: "customer",

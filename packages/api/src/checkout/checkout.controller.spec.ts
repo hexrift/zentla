@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
 import { NotFoundException } from "@nestjs/common";
-import { CheckoutController } from "./checkout.controller";
+import {
+  CheckoutController,
+  CheckoutSessionStatus,
+  CheckoutIntentStatus,
+} from "./checkout.controller";
 import { CheckoutService } from "./checkout.service";
 
 describe("CheckoutController", () => {
@@ -68,12 +72,12 @@ describe("CheckoutController", () => {
         nextCursor: null,
       });
 
-      const result = await controller.listSessions("ws_123");
+      const result = await controller.listSessions("ws_123", {});
 
       expect(result.data).toHaveLength(1);
       expect(checkoutService.listSessions).toHaveBeenCalledWith("ws_123", {
         status: undefined,
-        limit: undefined,
+        limit: 20,
         cursor: undefined,
       });
     });
@@ -85,7 +89,11 @@ describe("CheckoutController", () => {
         nextCursor: null,
       });
 
-      await controller.listSessions("ws_123", "completed", "50", "cursor123");
+      await controller.listSessions("ws_123", {
+        status: CheckoutSessionStatus.COMPLETED,
+        limit: 50,
+        cursor: "cursor123",
+      });
 
       expect(checkoutService.listSessions).toHaveBeenCalledWith("ws_123", {
         status: "completed",
@@ -103,12 +111,12 @@ describe("CheckoutController", () => {
         nextCursor: null,
       });
 
-      const result = await controller.listIntents("ws_123");
+      const result = await controller.listIntents("ws_123", {});
 
       expect(result.data).toHaveLength(1);
       expect(checkoutService.listIntents).toHaveBeenCalledWith("ws_123", {
         status: undefined,
-        limit: undefined,
+        limit: 20,
         cursor: undefined,
       });
     });
@@ -120,7 +128,11 @@ describe("CheckoutController", () => {
         nextCursor: null,
       });
 
-      await controller.listIntents("ws_123", "succeeded", "25", "cursor456");
+      await controller.listIntents("ws_123", {
+        status: CheckoutIntentStatus.SUCCEEDED,
+        limit: 25,
+        cursor: "cursor456",
+      });
 
       expect(checkoutService.listIntents).toHaveBeenCalledWith("ws_123", {
         status: "succeeded",

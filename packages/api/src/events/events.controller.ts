@@ -15,7 +15,7 @@ import { Transform } from "class-transformer";
 // REQUEST DTOs
 // ============================================================================
 
-enum EventStatus {
+export enum EventStatus {
   PENDING = "pending",
   PROCESSED = "processed",
   FAILED = "failed",
