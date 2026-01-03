@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.3](https://github.com/PrimeCodeLabs/zentla/compare/v2.2.2...v2.2.3) (2026-01-03)
+
+
+### Bug Fixes
+
+* **api:** eliminate idempotency race condition ([7725e9b](https://github.com/PrimeCodeLabs/zentla/commit/7725e9b227ef704b7e5e65d3adf2206eef433f71))
+* **api:** eliminate idempotency race condition with create-first pattern ([f7b6e9e](https://github.com/PrimeCodeLabs/zentla/commit/f7b6e9e64b51b8dc521f19f8bb8e16bddbb52a2c))
+
 ## [2.2.2](https://github.com/PrimeCodeLabs/zentla/compare/v2.2.1...v2.2.2) (2026-01-03)
 
 
