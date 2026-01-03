@@ -8,6 +8,8 @@ import {
   ParseUUIDPipe,
   NotFoundException,
   Headers,
+  HttpCode,
+  HttpStatus,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -535,6 +537,7 @@ export class CheckoutController {
   // ==========================================================================
 
   @Post("quotes")
+  @HttpCode(HttpStatus.OK)
   @MemberOnly()
   @ApiOperation({
     summary: "Get checkout quote",
