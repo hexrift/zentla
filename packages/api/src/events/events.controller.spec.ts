@@ -10,13 +10,6 @@ describe("EventsController", () => {
     listDeadLetterEvents: ReturnType<typeof vi.fn>;
   };
 
-  const mockApiKey = {
-    keyId: "key_123",
-    workspaceId: "ws_123",
-    role: "admin" as const,
-    environment: "live" as const,
-  };
-
   beforeEach(async () => {
     eventsService = {
       listEvents: vi.fn(),
@@ -32,18 +25,17 @@ describe("EventsController", () => {
   });
 
   describe("listEvents", () => {
-    it("should return events with pagination meta", async () => {
+    it("should return events with pagination", async () => {
       eventsService.listEvents.mockResolvedValue({
         data: [{ id: "evt_123", eventType: "subscription.created" }],
         hasMore: false,
         nextCursor: undefined,
       });
 
-      const result = await controller.listEvents(mockApiKey);
+      const result = await controller.listEvents("ws_123", {});
 
-      expect(result.success).toBe(true);
       expect(result.data).toHaveLength(1);
-      expect(result.meta.pagination.hasMore).toBe(false);
+      expect(result.hasMore).toBe(false);
     });
 
     it("should pass filters to service", async () => {
@@ -53,15 +45,14 @@ describe("EventsController", () => {
         nextCursor: undefined,
       });
 
-      await controller.listEvents(
-        mockApiKey,
-        "25",
-        "cursor123",
-        "pending",
-        "subscription.created",
-        "subscription",
-        "sub_123",
-      );
+      await controller.listEvents("ws_123", {
+        limit: 25,
+        cursor: "cursor123",
+        status: "pending" as const,
+        eventType: "subscription.created",
+        aggregateType: "subscription",
+        aggregateId: "sub_123",
+      });
 
       expect(eventsService.listEvents).toHaveBeenCalledWith("ws_123", {
         limit: 25,
@@ -80,7 +71,7 @@ describe("EventsController", () => {
         nextCursor: undefined,
       });
 
-      await controller.listEvents(mockApiKey);
+      await controller.listEvents("ws_123", {});
 
       expect(eventsService.listEvents).toHaveBeenCalledWith("ws_123", {
         limit: 50,
@@ -94,19 +85,18 @@ describe("EventsController", () => {
   });
 
   describe("listDeadLetterEvents", () => {
-    it("should return dead letter events with pagination meta", async () => {
+    it("should return dead letter events with pagination", async () => {
       eventsService.listDeadLetterEvents.mockResolvedValue({
         data: [{ id: "dle_123", failureReason: "Timeout" }],
         hasMore: true,
         nextCursor: "dle_123",
       });
 
-      const result = await controller.listDeadLetterEvents(mockApiKey);
+      const result = await controller.listDeadLetterEvents("ws_123", {});
 
-      expect(result.success).toBe(true);
       expect(result.data).toHaveLength(1);
-      expect(result.meta.pagination.hasMore).toBe(true);
-      expect(result.meta.pagination.nextCursor).toBe("dle_123");
+      expect(result.hasMore).toBe(true);
+      expect(result.nextCursor).toBe("dle_123");
     });
 
     it("should pass limit and cursor to service", async () => {
@@ -116,7 +106,10 @@ describe("EventsController", () => {
         nextCursor: undefined,
       });
 
-      await controller.listDeadLetterEvents(mockApiKey, "30", "cursor456");
+      await controller.listDeadLetterEvents("ws_123", {
+        limit: 30,
+        cursor: "cursor456",
+      });
 
       expect(eventsService.listDeadLetterEvents).toHaveBeenCalledWith(
         "ws_123",

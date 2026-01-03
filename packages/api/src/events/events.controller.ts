@@ -2,94 +2,183 @@ import { Controller, Get, Query } from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
-  ApiBearerAuth,
-  ApiQuery,
+  ApiResponse,
+  ApiSecurity,
+  ApiPropertyOptional,
 } from "@nestjs/swagger";
-import { ApiKeyContext, CurrentApiKey } from "../common/decorators";
+import { WorkspaceId, MemberOnly } from "../common/decorators";
 import { EventsService } from "./events.service";
+import { IsOptional, IsString, IsInt, Min, Max, IsEnum } from "class-validator";
+import { Transform } from "class-transformer";
+
+// ============================================================================
+// REQUEST DTOs
+// ============================================================================
+
+enum EventStatus {
+  PENDING = "pending",
+  PROCESSED = "processed",
+  FAILED = "failed",
+}
+
+class QueryEventsDto {
+  @ApiPropertyOptional({
+    description: "Maximum number of events to return per page.",
+    example: 50,
+    default: 50,
+    minimum: 1,
+    maximum: 100,
+  })
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value as string, 10))
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    description:
+      "Pagination cursor from a previous response. Pass `nextCursor` from the last response to fetch the next page.",
+  })
+  @IsOptional()
+  @IsString()
+  cursor?: string;
+
+  @ApiPropertyOptional({
+    description: "Filter by event status.",
+    enum: EventStatus,
+  })
+  @IsOptional()
+  @IsEnum(EventStatus)
+  status?: EventStatus;
+
+  @ApiPropertyOptional({
+    description:
+      "Filter by event type (e.g., 'subscription.created', 'invoice.paid').",
+  })
+  @IsOptional()
+  @IsString()
+  eventType?: string;
+
+  @ApiPropertyOptional({
+    description:
+      "Filter by aggregate type (e.g., 'subscription', 'customer', 'invoice').",
+  })
+  @IsOptional()
+  @IsString()
+  aggregateType?: string;
+
+  @ApiPropertyOptional({
+    description: "Filter by aggregate ID.",
+  })
+  @IsOptional()
+  @IsString()
+  aggregateId?: string;
+}
+
+class QueryDeadLetterDto {
+  @ApiPropertyOptional({
+    description: "Maximum number of dead letter events to return per page.",
+    example: 50,
+    default: 50,
+    minimum: 1,
+    maximum: 100,
+  })
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value as string, 10))
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    description:
+      "Pagination cursor from a previous response. Pass `nextCursor` from the last response to fetch the next page.",
+  })
+  @IsOptional()
+  @IsString()
+  cursor?: string;
+}
+
+// ============================================================================
+// CONTROLLER
+// ============================================================================
 
 @ApiTags("Events")
-@ApiBearerAuth()
-@Controller({ path: "events", version: "1" })
+@ApiSecurity("api-key")
+@Controller("events")
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Get()
+  @MemberOnly()
   @ApiOperation({
     summary: "List events",
-    description: "List outbox events for the workspace",
-  })
-  @ApiQuery({ name: "limit", required: false, type: Number })
-  @ApiQuery({ name: "cursor", required: false, type: String })
-  @ApiQuery({
-    name: "status",
-    required: false,
-    enum: ["pending", "processed", "failed"],
-  })
-  @ApiQuery({ name: "eventType", required: false, type: String })
-  @ApiQuery({ name: "aggregateType", required: false, type: String })
-  @ApiQuery({ name: "aggregateId", required: false, type: String })
-  async listEvents(
-    @CurrentApiKey() apiKey: ApiKeyContext,
-    @Query("limit") limit?: string,
-    @Query("cursor") cursor?: string,
-    @Query("status") status?: "pending" | "processed" | "failed",
-    @Query("eventType") eventType?: string,
-    @Query("aggregateType") aggregateType?: string,
-    @Query("aggregateId") aggregateId?: string,
-  ) {
-    const result = await this.eventsService.listEvents(apiKey.workspaceId, {
-      limit: limit ? parseInt(limit, 10) : 50,
-      cursor,
-      status,
-      eventType,
-      aggregateType,
-      aggregateId,
-    });
+    description: `Retrieves a paginated list of outbox events for your workspace.
 
-    return {
-      success: true,
-      data: result.data,
-      meta: {
-        timestamp: new Date().toISOString(),
-        pagination: {
-          hasMore: result.hasMore,
-          nextCursor: result.nextCursor,
-        },
-      },
-    };
+**Use this to:**
+- Monitor webhook delivery status
+- Debug event processing issues
+- Build event monitoring dashboards
+
+**Filters:** Filter by status, event type, or aggregate.`,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Paginated list of events",
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
+  async listEvents(
+    @WorkspaceId() workspaceId: string,
+    @Query() query: QueryEventsDto,
+  ) {
+    return this.eventsService.listEvents(workspaceId, {
+      limit: query.limit ?? 50,
+      cursor: query.cursor,
+      status: query.status,
+      eventType: query.eventType,
+      aggregateType: query.aggregateType,
+      aggregateId: query.aggregateId,
+    });
   }
 
   @Get("dead-letter")
+  @MemberOnly()
   @ApiOperation({
     summary: "List dead letter events",
-    description: "List failed webhook deliveries",
-  })
-  @ApiQuery({ name: "limit", required: false, type: Number })
-  @ApiQuery({ name: "cursor", required: false, type: String })
-  async listDeadLetterEvents(
-    @CurrentApiKey() apiKey: ApiKeyContext,
-    @Query("limit") limit?: string,
-    @Query("cursor") cursor?: string,
-  ) {
-    const result = await this.eventsService.listDeadLetterEvents(
-      apiKey.workspaceId,
-      {
-        limit: limit ? parseInt(limit, 10) : 50,
-        cursor,
-      },
-    );
+    description: `Retrieves a paginated list of failed webhook deliveries.
 
-    return {
-      success: true,
-      data: result.data,
-      meta: {
-        timestamp: new Date().toISOString(),
-        pagination: {
-          hasMore: result.hasMore,
-          nextCursor: result.nextCursor,
-        },
-      },
-    };
+**Use this to:**
+- Monitor failed webhook deliveries
+- Investigate delivery failures
+- Retry failed events`,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Paginated list of dead letter events",
+  })
+  @ApiResponse({
+    status: 401,
+    description: "Unauthorized - Invalid or missing API key",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - Insufficient permissions",
+  })
+  async listDeadLetterEvents(
+    @WorkspaceId() workspaceId: string,
+    @Query() query: QueryDeadLetterDto,
+  ) {
+    return this.eventsService.listDeadLetterEvents(workspaceId, {
+      limit: query.limit ?? 50,
+      cursor: query.cursor,
+    });
   }
 }
