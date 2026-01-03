@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/PrimeCodeLabs/zentla/compare/v2.2.5...v2.3.0) (2026-01-03)
+
+
+### Features
+
+* **api:** add rate limit headers to API responses ([d8da07e](https://github.com/PrimeCodeLabs/zentla/commit/d8da07ecdd56503f1335127074a5505942965811))
+
 ## [2.2.5](https://github.com/PrimeCodeLabs/zentla/compare/v2.2.4...v2.2.5) (2026-01-03)
 
 
