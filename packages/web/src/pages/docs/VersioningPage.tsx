@@ -57,7 +57,9 @@ https://api.zentla.dev/api/v1/subscriptions`}</CodeBlock>
           </thead>
           <tbody className="divide-y divide-gray-100">
             <tr>
-              <td className="py-2 pr-4 font-medium text-primary-600">Current</td>
+              <td className="py-2 pr-4 font-medium text-primary-600">
+                Current
+              </td>
               <td className="py-2 text-gray-600">
                 Active development, receives new features and fixes
               </td>
