@@ -92,11 +92,11 @@ const access = await zentla.customers.checkEntitlement(
 │  └─────────┘ └─────────┘ └─────────┘ └─────────────────┘   │
 └──────────────────────────┬──────────────────────────────────┘
                            │
-              ┌────────────┴────────────┐
-              ▼                         ▼
-┌─────────────────────┐     ┌─────────────────────┐
-│       Stripe        │     │   Zuora (coming)    │
-└─────────────────────┘     └─────────────────────┘
+                           ▼
+              ┌────────────────────────┐
+              │    Billing Provider    │
+              │  (Stripe, Zuora, etc.) │
+              └────────────────────────┘
 ```
 
 ## Quick Start
@@ -165,7 +165,7 @@ zentla/
 │   ├── database/       # Prisma schema & migrations
 │   └── adapters/
 │       ├── stripe/     # Stripe integration
-│       └── zuora/      # Zuora integration (WIP)
+│       └── zuora/      # Zuora integration
 ├── infrastructure/     # Terraform for AWS deployment
 └── docs/               # Additional documentation
 ```
