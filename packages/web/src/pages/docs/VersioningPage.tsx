@@ -143,7 +143,7 @@ https://api.zentla.dev/api/v1/subscriptions`}</CodeBlock>
       >{`# Example deprecation header
 X-Zentla-Deprecated: true
 X-Zentla-Sunset: 2025-06-01
-X-Zentla-Migration: See https://zentla-web.pages.dev/docs/migrations/v2`}</CodeBlock>
+X-Zentla-Migration: See https://zentla.dev/docs/migrations/v2`}</CodeBlock>
 
       <h2 id="beta-considerations">Beta Considerations</h2>
       <p>

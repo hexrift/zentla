@@ -15,15 +15,15 @@
   <a href="https://github.com/PrimeCodeLabs/zentla/actions/workflows/ci.yml">
     <img src="https://github.com/PrimeCodeLabs/zentla/actions/workflows/ci.yml/badge.svg" alt="CI" />
   </a>
-  <a href="https://zentla-web.pages.dev">
+  <a href="https://zentla.dev">
     <img src="https://img.shields.io/badge/docs-zentla.dev-green" alt="Documentation" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://zentla-web.pages.dev/docs">Documentation</a> |
-  <a href="https://zentla-web.pages.dev/docs/quickstart">Quickstart</a> |
-  <a href="https://zentla-web.pages.dev/docs/example">Example</a> |
+  <a href="https://zentla.dev/docs">Documentation</a> |
+  <a href="https://zentla.dev/docs/quickstart">Quickstart</a> |
+  <a href="https://zentla.dev/docs/example">Example</a> |
   <a href="#self-hosting">Self-Hosting</a>
 </p>
 
@@ -150,7 +150,7 @@ curl -X POST http://localhost:3002/api/v1/features \
   }'
 ```
 
-See the [Quickstart Guide](https://zentla-web.pages.dev/docs/quickstart) for a complete walkthrough.
+See the [Quickstart Guide](https://zentla.dev/docs/quickstart) for a complete walkthrough.
 
 ## Project Structure
 
@@ -197,10 +197,10 @@ See our deployment guides:
 
 ## Documentation
 
-- [Quickstart](https://zentla-web.pages.dev/docs/quickstart) - Get up and running in 5 minutes
-- [Headless Checkout](https://zentla-web.pages.dev/docs/headless-checkout) - Build custom checkout UI
-- [Webhooks](https://zentla-web.pages.dev/docs/webhooks) - Handle subscription events
-- [End-to-End Example](https://zentla-web.pages.dev/docs/example) - Complete implementation walkthrough
+- [Quickstart](https://zentla.dev/docs/quickstart) - Get up and running in 5 minutes
+- [Headless Checkout](https://zentla.dev/docs/headless-checkout) - Build custom checkout UI
+- [Webhooks](https://zentla.dev/docs/webhooks) - Handle subscription events
+- [End-to-End Example](https://zentla.dev/docs/example) - Complete implementation walkthrough
 - [API Reference](http://localhost:3002/docs) - OpenAPI documentation
 
 ## Contributing

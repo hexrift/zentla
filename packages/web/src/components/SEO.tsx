@@ -14,7 +14,7 @@ interface SEOProps {
   breadcrumbs?: BreadcrumbItem[];
 }
 
-const BASE_URL = "https://zentla-web.pages.dev";
+const BASE_URL = "https://zentla.dev";
 const DEFAULT_TITLE = "Zentla - The Unified Monetization Layer for SaaS";
 const DEFAULT_DESCRIPTION =
   "Entitlements, billing, and pricing experiments—without the vendor lock-in. Combine billing + entitlements in one API. Switch providers without code changes. Self-host for data sovereignty.";

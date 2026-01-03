@@ -92,10 +92,10 @@ Add these secrets to your repository (Settings → Secrets → Actions):
 
 Add these as repository variables (Settings → Secrets → Variables):
 
-| Variable       | Description           | Example                                                       |
-| -------------- | --------------------- | ------------------------------------------------------------- |
-| `API_URL`      | API URL for frontends | `https://zentla-api-xxx.koyeb.app`                            |
-| `CORS_ORIGINS` | Allowed CORS origins  | `https://zentla-admin.pages.dev,https://zentla-web.pages.dev` |
+| Variable       | Description           | Example                                       |
+| -------------- | --------------------- | --------------------------------------------- |
+| `API_URL`      | API URL for frontends | `https://api.zentla.dev`                      |
+| `CORS_ORIGINS` | Allowed CORS origins  | `https://admin.zentla.dev,https://zentla.dev` |
 
 ## Initial Setup
 
@@ -170,9 +170,9 @@ gh workflow run deploy-db.yml
 
 ### Health Checks
 
-- API: `https://your-koyeb-app.koyeb.app/api/health`
-- Admin: `https://zentla-admin.pages.dev`
-- Web: `https://zentla-web.pages.dev`
+- API: `https://api.zentla.dev/api/health`
+- Admin: `https://admin.zentla.dev`
+- Web: `https://zentla.dev`
 
 ### Logs
 
