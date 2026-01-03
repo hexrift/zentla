@@ -301,6 +301,19 @@ export function ContactPage() {
           </form>
         </div>
 
+        {/* Direct email option */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-500">
+            Or email us directly at{" "}
+            <a
+              href="mailto:hello@zentla.dev"
+              className="text-primary-600 hover:text-primary-700 font-medium"
+            >
+              hello@zentla.dev
+            </a>
+          </p>
+        </div>
+
         {/* Trust indicators */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500 mb-4">

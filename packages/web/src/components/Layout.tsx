@@ -228,14 +228,22 @@ export function Layout() {
               </ul>
             </div>
             <div>
-              <h4 className="font-medium text-gray-900 mb-3">Product</h4>
+              <h4 className="font-medium text-gray-900 mb-3">Contact</h4>
               <ul className="space-y-2">
                 <li>
                   <a
-                    href={DASHBOARD_URL}
+                    href="mailto:hello@zentla.dev"
                     className="text-sm text-gray-500 hover:text-gray-700"
                   >
-                    Dashboard
+                    hello@zentla.dev
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="mailto:support@zentla.dev"
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    support@zentla.dev
                   </a>
                 </li>
                 <li>
