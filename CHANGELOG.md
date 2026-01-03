@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/PrimeCodeLabs/zentla/compare/v2.1.0...v2.1.1) (2026-01-03)
+
+
+### Bug Fixes
+
+* update provider availability and remove placeholder text ([#71](https://github.com/PrimeCodeLabs/zentla/issues/71)) ([d3d1314](https://github.com/PrimeCodeLabs/zentla/commit/d3d131456a320bbad76ab6bec3cb3b0bcd6d5f5a))
+
 ## [2.1.0](https://github.com/PrimeCodeLabs/zentla/compare/v2.0.1...v2.1.0) (2026-01-03)
 
 
