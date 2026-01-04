@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.3](https://github.com/hexrift/zentla/compare/v5.5.2...v5.5.3) (2026-01-04)
+
+
+### Bug Fixes
+
+* use getProviderForWorkspace in syncToProvider ([#41](https://github.com/hexrift/zentla/issues/41)) ([1377f2e](https://github.com/hexrift/zentla/commit/1377f2efa98166599f4ff9b70896e30e9f46a552))
+
 ## [5.5.2](https://github.com/hexrift/zentla/compare/v5.5.1...v5.5.2) (2026-01-04)
 
 
