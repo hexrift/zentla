@@ -2,7 +2,7 @@
   "name": "zentla",
   "version": "5.4.0",
   "private": true,
-  "description": "Open source subscription management for modern apps",
+  "description": "Open source entitlements, metering, and billing—without the lock-in",
   "author": "Hexrift",
   "license": "MIT",
   "homepage": "https://zentla.dev",
@@ -14,13 +14,16 @@
     "url": "https://github.com/hexrift/zentla/issues"
   },
   "keywords": [
-    "subscription",
     "billing",
+    "entitlements",
+    "metering",
+    "usage-based-billing",
+    "subscription",
     "saas",
     "stripe",
-    "entitlements",
-    "checkout",
-    "payments"
+    "zuora",
+    "revenue-analytics",
+    "checkout"
   ],
   "workspaces": [
     "packages/*",
