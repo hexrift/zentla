@@ -383,44 +383,89 @@ export function HomePage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary-50/50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
-          <div className="text-center max-w-3xl mx-auto">
-            <HeroLogo />
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight animate-fade-up animation-delay-100">
-              Billing
-              <span className="block text-primary-600">you control</span>
-            </h1>
-            <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto animate-fade-up animation-delay-200">
-              Open source entitlements, metering, and billing—without the
-              lock-in. Self-host or use our cloud. Switch providers anytime.
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up animation-delay-300">
-              <Link
-                to="/docs/quickstart"
-                className="btn-primary text-base px-6 py-3 w-full sm:w-auto transform hover:scale-105 transition-transform"
-              >
-                Get Started
-              </Link>
-              <a
-                href="https://github.com/hexrift/zentla"
-                target="_blank"
-                rel="noopener"
-                className="btn-secondary text-base px-6 py-3 w-full sm:w-auto inline-flex items-center justify-center gap-2 transform hover:scale-105 transition-transform"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left: Content */}
+            <div className="text-center lg:text-left">
+              <div className="flex justify-center lg:justify-start">
+                <HeroLogo />
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight animate-fade-up animation-delay-100">
+                Billing
+                <span className="block text-primary-600">you control</span>
+              </h1>
+              <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-xl animate-fade-up animation-delay-200">
+                Open source entitlements, metering, and billing—without the
+                lock-in. Self-host or use our cloud. Switch providers anytime.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-4 animate-fade-up animation-delay-300">
+                <Link
+                  to="/docs/quickstart"
+                  className="btn-primary text-base px-6 py-3 w-full sm:w-auto transform hover:scale-105 transition-transform"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Star on GitHub
-              </a>
+                  Get Started
+                </Link>
+                <a
+                  href="https://github.com/hexrift/zentla"
+                  target="_blank"
+                  rel="noopener"
+                  className="btn-secondary text-base px-6 py-3 w-full sm:w-auto inline-flex items-center justify-center gap-2 transform hover:scale-105 transition-transform"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Star on GitHub
+                </a>
+              </div>
+            </div>
+
+            {/* Right: Code Preview */}
+            <div className="relative animate-fade-up animation-delay-200">
+              <div className="absolute -inset-4 bg-gradient-to-r from-primary-500/20 to-primary-600/20 rounded-3xl blur-2xl" />
+              <div className="relative bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
+                {/* Window chrome */}
+                <div className="flex items-center gap-2 px-4 py-3 bg-gray-800/80 border-b border-gray-700">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                    <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                  </div>
+                  <span className="ml-2 text-xs text-gray-400 font-mono">app.ts</span>
+                </div>
+                {/* Code */}
+                <pre className="p-4 sm:p-6 text-xs sm:text-sm font-mono overflow-x-auto">
+                  <code className="text-gray-300">
+                    <span className="text-gray-500">{"// Check entitlements at runtime"}</span>{"\n"}
+                    <span className="text-purple-400">const</span> access = <span className="text-purple-400">await</span> zentla.customers{"\n"}
+                    {"  "}.checkEntitlement(customerId, <span className="text-green-400">'api_access'</span>);{"\n\n"}
+                    <span className="text-purple-400">if</span> (access.hasAccess) {"{"}{"\n"}
+                    {"  "}<span className="text-gray-500">{"// Feature is enabled"}</span>{"\n"}
+                    {"}"}{"\n\n"}
+                    <span className="text-gray-500">{"// Track usage for billing"}</span>{"\n"}
+                    <span className="text-purple-400">await</span> zentla.usage.ingest({"{"}{"\n"}
+                    {"  "}customerId: <span className="text-green-400">'cust_123'</span>,{"\n"}
+                    {"  "}metricKey: <span className="text-green-400">'api_calls'</span>,{"\n"}
+                    {"  "}quantity: <span className="text-orange-400">1</span>{"\n"}
+                    {"}"});
+                  </code>
+                </pre>
+              </div>
+              {/* Floating badges */}
+              <div className="absolute -right-2 top-8 bg-white rounded-lg shadow-lg px-3 py-2 text-xs font-medium text-gray-700 animate-float hidden sm:block">
+                Entitlements
+              </div>
+              <div className="absolute -left-2 bottom-12 bg-white rounded-lg shadow-lg px-3 py-2 text-xs font-medium text-gray-700 animate-float animation-delay-200 hidden sm:block">
+                Usage Metering
+              </div>
             </div>
           </div>
         </div>
