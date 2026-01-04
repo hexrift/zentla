@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/hexrift/zentla/compare/v5.0.0...v5.0.1) (2026-01-04)
+
+
+### Bug Fixes
+
+* **ci:** use squash merge for release PRs ([#21](https://github.com/hexrift/zentla/issues/21)) ([efc2dba](https://github.com/hexrift/zentla/commit/efc2dbaf5ec99c38dc0add9c218e2bba7469e9b8))
+
 ## [5.0.0](https://github.com/hexrift/zentla/compare/v4.0.0...v5.0.0) (2026-01-04)
 
 
