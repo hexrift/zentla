@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.0](https://github.com/hexrift/zentla/compare/v5.4.0...v5.5.0) (2026-01-04)
+
+
+### Features
+
+* branding positioning update ([#35](https://github.com/hexrift/zentla/issues/35)) ([485d644](https://github.com/hexrift/zentla/commit/485d644c774a171cef06170bb8b857a04eb4286e))
+
 ## [5.4.0](https://github.com/hexrift/zentla/compare/v5.3.0...v5.4.0) (2026-01-04)
 
 
