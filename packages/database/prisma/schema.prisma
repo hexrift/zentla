@@ -93,6 +93,7 @@ model Workspace {
   providerRefs      ProviderRef[]
   outboxEvents      OutboxEvent[]
   deadLetterEvents  DeadLetterEvent[]
+  seatAssignments   SeatAssignment[]
 
   @@map("workspace")
 }
@@ -157,6 +158,7 @@ model Customer {
   checkouts         Checkout[]
   checkoutIntents   CheckoutIntent[]
   appliedPromotions AppliedPromotion[]
+  seatAssignments   SeatAssignment[]
 
   @@unique([workspaceId, email])
   @@unique([workspaceId, externalId])
@@ -921,4 +923,32 @@ enum UsageAggregationType {
   last
 
   @@map("usage_aggregation_type")
+}
+
+// ============================================================================
+// SEAT-BASED ENTITLEMENTS
+// ============================================================================
+
+model SeatAssignment {
+  id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String    @map("workspace_id") @db.Uuid
+  customerId  String    @map("customer_id") @db.Uuid
+  featureKey  String    @map("feature_key") @db.VarChar(100)
+  userId      String    @map("user_id") @db.VarChar(255)
+  userEmail   String?   @map("user_email") @db.VarChar(255)
+  userName    String?   @map("user_name") @db.VarChar(200)
+  assignedAt  DateTime  @default(now()) @map("assigned_at") @db.Timestamptz
+  expiresAt   DateTime? @map("expires_at") @db.Timestamptz
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, customerId, featureKey, userId])
+  @@index([workspaceId, customerId, featureKey])
+  @@index([workspaceId, userId])
+  @@index([expiresAt])
+  @@map("seat_assignment")
 }
