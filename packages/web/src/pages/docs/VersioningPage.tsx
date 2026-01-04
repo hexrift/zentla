@@ -20,7 +20,6 @@ export function VersioningPage() {
         Our commitment to API stability and how we handle changes.
       </p>
 
-
       <h2 id="api-versioning">API Versioning</h2>
       <p>
         The Zentla API uses URL-based versioning. The current version is{" "}
@@ -137,9 +136,7 @@ X-Zentla-Sunset: 2025-06-01
 X-Zentla-Migration: See https://zentla.dev/docs/migrations/v2`}</CodeBlock>
 
       <h2 id="stability">Stability</h2>
-      <p>
-        We are committed to API stability. For any breaking changes, we:
-      </p>
+      <p>We are committed to API stability. For any breaking changes, we:</p>
       <ul>
         <li>Communicate all changes via email to registered developers</li>
         <li>Provide migration scripts or tools where possible</li>
