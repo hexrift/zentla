@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.1](https://github.com/hexrift/zentla/compare/v5.5.0...v5.5.1) (2026-01-04)
+
+
+### Bug Fixes
+
+* billing config check and settings UX improvements ([#37](https://github.com/hexrift/zentla/issues/37)) ([e86e268](https://github.com/hexrift/zentla/commit/e86e2689abe8daff67c40b9ffd5a98d5f2f13e60))
+
 ## [5.5.0](https://github.com/hexrift/zentla/compare/v5.4.0...v5.5.0) (2026-01-04)
 
 
