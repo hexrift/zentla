@@ -30,12 +30,35 @@ export class StripeSyncService {
    * This imports existing Stripe data that was created before webhook was configured.
    */
   async syncFromStripe(workspaceId: string): Promise<SyncResult> {
-    if (!this.billingService.isConfigured(PROVIDER)) {
+    // Get workspace settings for billing provider
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const workspaceSettings = workspace?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
+    if (
+      !this.billingService.isConfiguredForWorkspace(
+        workspaceId,
+        PROVIDER,
+        workspaceSettings,
+      )
+    ) {
       throw new BadRequestException(`${PROVIDER} not configured`);
     }
 
-    const stripeAdapter = this.billingService.getProvider(
+    const stripeAdapter = this.billingService.getProviderForWorkspace(
+      workspaceId,
       PROVIDER,
+      workspaceSettings,
     ) as StripeAdapter;
     const result: SyncResult = {
       customersImported: 0,

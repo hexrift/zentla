@@ -450,7 +450,7 @@ describe("PromotionsService", () => {
         ...mockVersion,
         status: "draft",
       });
-      billingService.isConfigured.mockReturnValue(false);
+      billingService.isConfiguredForWorkspace.mockReturnValue(false);
 
       await expect(
         service.publishVersion("ws_123", "promo_123"),
