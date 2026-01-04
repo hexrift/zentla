@@ -40,7 +40,8 @@ export class StripeWebhookService {
       const parsed = JSON.parse(bodyStr);
       // Try to get workspace ID from various event types' metadata
       const metadata =
-        parsed?.data?.object?.metadata ?? parsed?.data?.object?.subscription_details?.metadata;
+        parsed?.data?.object?.metadata ??
+        parsed?.data?.object?.subscription_details?.metadata;
       workspaceId = metadata?.zentla_workspace_id;
 
       if (workspaceId) {
@@ -69,7 +70,9 @@ export class StripeWebhookService {
 
         if (stripeAdapter.verifyWebhook(rawBody, signature)) {
           event = stripeAdapter.parseWebhookEvent(rawBody, signature);
-          this.logger.log(`Webhook verified using workspace ${workspaceId} secret`);
+          this.logger.log(
+            `Webhook verified using workspace ${workspaceId} secret`,
+          );
         }
       } catch {
         // Fall through to global secret
@@ -78,7 +81,9 @@ export class StripeWebhookService {
 
     // Fall back to global secret
     if (!event) {
-      stripeAdapter = this.billingService.getProvider(PROVIDER) as StripeAdapter;
+      stripeAdapter = this.billingService.getProvider(
+        PROVIDER,
+      ) as StripeAdapter;
       if (!stripeAdapter) {
         throw new Error("No Stripe adapter configured");
       }
