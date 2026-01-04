@@ -3,15 +3,15 @@
   "version": "3.0.1",
   "private": true,
   "description": "Open source subscription management for modern apps",
-  "author": "PrimeCodeLabs",
+  "author": "Hexrift",
   "license": "MIT",
   "homepage": "https://zentla.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PrimeCodeLabs/zentla.git"
+    "url": "https://github.com/hexrift/zentla.git"
   },
   "bugs": {
-    "url": "https://github.com/PrimeCodeLabs/zentla/issues"
+    "url": "https://github.com/hexrift/zentla/issues"
   },
   "keywords": [
     "subscription",

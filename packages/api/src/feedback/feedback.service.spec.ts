@@ -203,9 +203,7 @@ describe("FeedbackService", () => {
       expect(result.githubIssue).toBe("https://github.com/test/repo/issues/42");
       expect(mockFetch).toHaveBeenCalled();
       const [url, options] = mockFetch.mock.calls[0];
-      expect(url).toBe(
-        "https://api.github.com/repos/PrimeCodeLabs/zentla/issues",
-      );
+      expect(url).toBe("https://api.github.com/repos/hexrift/zentla/issues");
       expect(options.method).toBe("POST");
       expect(options.headers.Authorization).toBe("Bearer ghp_test_token");
     });
