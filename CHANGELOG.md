@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.2](https://github.com/hexrift/zentla/compare/v5.5.1...v5.5.2) (2026-01-04)
+
+
+### Bug Fixes
+
+* check workspace billing config in syncToProvider ([#39](https://github.com/hexrift/zentla/issues/39)) ([f442137](https://github.com/hexrift/zentla/commit/f442137842d87144b0fa721294b8bc63c6fa3127))
+
 ## [5.5.1](https://github.com/hexrift/zentla/compare/v5.5.0...v5.5.1) (2026-01-04)
 
 
