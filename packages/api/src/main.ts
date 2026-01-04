@@ -247,10 +247,10 @@ Use \`error.code\` for programmatic handling.
         },
         customCss: `
           :root {
-            --scalar-color-accent: #059669;
+            --scalar-color-accent: #0d9488;
           }
           .light-mode {
-            --scalar-color-accent: #059669;
+            --scalar-color-accent: #0d9488;
           }
         `,
         hideDownloadButton: false,

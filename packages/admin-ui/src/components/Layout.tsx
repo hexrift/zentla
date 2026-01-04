@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { clsx } from "clsx";
 import { useAuth } from "../lib/auth-context";
+import { Logo } from "./Logo";
 
 const DOCS_URL = `${import.meta.env.VITE_DASHBOARD_URL || ""}/docs`;
 const API_DOCS_URL = `${import.meta.env.VITE_API_URL || ""}/docs`;
@@ -326,14 +327,7 @@ export function Layout() {
         <div className="flex flex-col h-full">
           {/* Logo with close button */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200/80">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-primary-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">Z</span>
-              </div>
-              <span className="text-lg font-semibold text-gray-900">
-                Zentla
-              </span>
-            </div>
+            <Logo size="md" />
             <button
               onClick={() => setSidebarOpen(false)}
               className="p-2 text-gray-500 hover:text-gray-700"
@@ -486,14 +480,7 @@ export function Layout() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center h-16 px-6 border-b border-gray-200/80">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-primary-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">Z</span>
-              </div>
-              <span className="text-lg font-semibold text-gray-900">
-                Zentla
-              </span>
-            </div>
+            <Logo size="md" />
           </div>
 
           {/* Navigation */}
@@ -643,13 +630,8 @@ export function Layout() {
           >
             <MenuIcon className="w-6 h-6" />
           </button>
-          <div className="flex items-center gap-2 ml-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-600 to-primary-600 flex items-center justify-center">
-              <span className="text-white font-bold text-xs">Z</span>
-            </div>
-            <span className="text-base font-semibold text-gray-900">
-              Zentla
-            </span>
+          <div className="ml-2">
+            <Logo size="sm" />
           </div>
         </div>
 

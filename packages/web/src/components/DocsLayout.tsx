@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Outlet, Link, NavLink, useLocation } from "react-router-dom";
 import { clsx } from "clsx";
 import { ZENTLA_VERSION } from "../version";
+import { Logo } from "./Logo";
 
 const DASHBOARD_URL =
   import.meta.env.VITE_DASHBOARD_URL || "http://localhost:3001";
@@ -171,10 +172,7 @@ export function DocsLayout() {
                 </svg>
               </button>
               <Link to="/" className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">Z</span>
-                </div>
-                <span className="font-semibold text-gray-900">Zentla</span>
+                <Logo size="sm" />
                 <span className="ml-1 px-1.5 py-0.5 text-[10px] font-medium bg-primary-100 text-primary-700 rounded">
                   {ZENTLA_VERSION}
                 </span>

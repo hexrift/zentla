@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Primary Meta Tags -->
-    <title>Zentla - Subscription Management API</title>
-    <meta name="title" content="Zentla - Subscription Management API" />
+    <title>Zentla - Billing You Control</title>
+    <meta name="title" content="Zentla - Billing You Control" />
     <meta
       name="description"
-      content="Zentla is a subscription management API for modern apps. Manage offers, customers, entitlements, and checkouts with a simple, provider-agnostic API."
+      content="Open source entitlements, metering, and billing—without the lock-in. Self-host or use our cloud. Switch providers anytime. The open source alternative to Stigg, Orb, and Lago."
     />
     <meta
       name="keywords"
-      content="subscription management, billing API, SaaS billing, Stripe integration, subscription API, entitlements, checkout, offers"
+      content="open source billing, billing infrastructure, entitlements, usage metering, usage-based billing, SaaS billing, Stripe alternative, subscription API, revenue analytics, MRR tracking"
     />
     <meta name="author" content="Zentla" />
     <meta name="robots" content="index, follow" />
@@ -26,10 +26,10 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://zentla.dev/" />
-    <meta property="og:title" content="Zentla - Subscription Management API" />
+    <meta property="og:title" content="Zentla - Billing You Control" />
     <meta
       property="og:description"
-      content="Zentla is a subscription management API for modern apps. Manage offers, customers, entitlements, and checkouts with a simple, provider-agnostic API."
+      content="Open source entitlements, metering, and billing—without the lock-in. Self-host or use our cloud. Switch providers anytime."
     />
     <meta property="og:image" content="https://zentla.dev/og-image.svg" />
     <meta property="og:site_name" content="Zentla" />
@@ -38,10 +38,10 @@
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://zentla.dev/" />
-    <meta name="twitter:title" content="Zentla - Subscription Management API" />
+    <meta name="twitter:title" content="Zentla - Billing You Control" />
     <meta
       name="twitter:description"
-      content="Zentla is a subscription management API for modern apps. Manage offers, customers, entitlements, and checkouts with a simple, provider-agnostic API."
+      content="Open source entitlements, metering, and billing—without the lock-in. Self-host or use our cloud. Switch providers anytime."
     />
     <meta name="twitter:image" content="https://zentla.dev/og-image.svg" />
 
@@ -63,28 +63,31 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Zentla",
-        "description": "Subscription management API for modern apps. Manage offers, customers, entitlements, and checkouts with a simple, provider-agnostic API.",
+        "description": "Billing you control. Open source entitlements, metering, and billing—without the lock-in. Self-host or use our cloud. Switch providers anytime.",
         "url": "https://zentla.dev/",
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Web",
+        "license": "https://opensource.org/licenses/MIT",
         "offers": {
           "@type": "Offer",
           "price": "0",
           "priceCurrency": "USD",
-          "description": "Free tier available for startups"
+          "description": "Free and open source, self-hostable"
         },
         "author": {
           "@type": "Organization",
-          "name": "Zentla",
-          "url": "https://zentla.dev/"
+          "name": "Hexrift",
+          "url": "https://github.com/hexrift"
         },
         "featureList": [
-          "Subscription lifecycle management",
-          "Customer management with Stripe sync",
-          "Offer versioning with A/B testing",
+          "Entitlements and feature gating",
+          "Usage metering and aggregation",
+          "Multi-provider billing (Stripe, Zuora)",
+          "Revenue analytics (MRR, churn, cohorts)",
+          "Pricing experiments with A/B testing",
           "Headless checkout sessions",
-          "Feature entitlements",
-          "Webhook event delivery"
+          "Self-hostable infrastructure",
+          "Audit logging and compliance"
         ]
       }
     </script>
@@ -100,39 +103,47 @@
             "name": "What is Zentla?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Zentla is a subscription management API that helps developers build and manage subscription-based products. It provides a provider-agnostic layer over payment processors like Stripe, handling offers, customers, subscriptions, and entitlements."
+              "text": "Zentla is open source billing infrastructure that combines entitlements, usage metering, multi-provider billing, and revenue analytics in one unified API. Think of it as the open source alternative to Stigg, Orb, or Lago."
             }
           },
           {
             "@type": "Question",
-            "name": "How does Zentla integrate with billing providers?",
+            "name": "How is Zentla different from Stripe Billing?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Zentla connects to your billing provider to sync customers, subscriptions, and payments. Currently Stripe is supported, with more providers coming soon. You connect your API keys, and Zentla handles the complexity of subscription lifecycle, webhooks, and entitlement management automatically."
+              "text": "Stripe Billing ties you to Stripe. Zentla is provider-agnostic—connect Stripe, Zuora, or both. It also adds entitlements (feature gating), usage metering, and revenue analytics that Stripe doesn't provide natively."
             }
           },
           {
             "@type": "Question",
-            "name": "What are entitlements in Zentla?",
+            "name": "How is Zentla different from Stigg or Orb?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Entitlements are feature access controls tied to subscriptions. When a customer subscribes to an offer, they receive entitlements that define what features they can access. You can check entitlements via API to control feature access in your app."
+              "text": "Zentla is fully open source and self-hostable. Stigg focuses on entitlements but lacks usage metering. Orb focuses on usage-based billing but lacks entitlements. Zentla does both, plus multi-provider support and revenue analytics."
             }
           },
           {
             "@type": "Question",
-            "name": "Does Zentla support headless checkout?",
+            "name": "Can I switch billing providers later?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes, Zentla provides headless checkout APIs that let you build custom checkout experiences. You get a client secret for secure payment collection while Zentla handles the subscription provisioning."
+              "text": "Yes. Zentla abstracts your billing provider, so you can migrate from Stripe to Zuora (or vice versa) without changing your application code. Your offers, entitlements, and customer data stay consistent."
             }
           },
           {
             "@type": "Question",
-            "name": "Is Zentla free to use?",
+            "name": "Can I self-host Zentla?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Zentla offers a free tier for startups and small projects. This includes core features like subscription management, customer sync, and entitlements. Contact us for enterprise pricing and additional features."
+              "text": "Yes. Zentla is MIT licensed and can be deployed on your own infrastructure. Run it on Kubernetes, Railway, Render, or any platform that supports Node.js, PostgreSQL, and Redis."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What about usage-based billing?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Zentla includes a full usage metering system. Ingest events via API, aggregate with flexible strategies (sum, max, count, last), and get real-time usage summaries. Perfect for API calls, compute time, or any metered resource."
             }
           }
         ]
