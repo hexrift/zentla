@@ -386,18 +386,15 @@ export function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
           <div className="text-center max-w-3xl mx-auto">
             <HeroLogo />
-            <p className="text-sm font-medium text-primary-600 mb-4 animate-fade-up animation-delay-100">
-              Open source alternative to Stigg, Orb, and Lago
-            </p>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight animate-fade-up animation-delay-200">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight animate-fade-up animation-delay-100">
               Billing
               <span className="block text-primary-600">you control</span>
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto animate-fade-up animation-delay-300">
+            <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto animate-fade-up animation-delay-200">
               Open source entitlements, metering, and billing—without the
               lock-in. Self-host or use our cloud. Switch providers anytime.
             </p>
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up animation-delay-400">
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up animation-delay-300">
               <Link
                 to="/docs/quickstart"
                 className="btn-primary text-base px-6 py-3 w-full sm:w-auto transform hover:scale-105 transition-transform"
