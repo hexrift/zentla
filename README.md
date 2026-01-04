@@ -5,7 +5,7 @@
 <h1 align="center">Zentla</h1>
 
 <p align="center">
-  <strong>Open source subscription management for modern apps</strong>
+  <strong>The open source monetization layer for SaaS</strong>
 </p>
 
 <p align="center">
@@ -28,7 +28,7 @@
 
 ## What is Zentla?
 
-Zentla is a **provider-agnostic subscription management API** that sits between your application and billing providers like Stripe. It handles the complexity of subscription commerce so you can focus on building your product.
+Zentla is an **open source monetization layer** that sits between your application and billing providers like Stripe. Entitlements, billing, and pricing experiments—without the vendor lock-in.
 
 ```typescript
 // Create an offer with pricing and entitlements
