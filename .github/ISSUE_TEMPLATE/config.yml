@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Question or Discussion
-    url: https://github.com/PrimeCodeLabs/zentla/discussions
+    url: https://github.com/hexrift/zentla/discussions
     about: Ask questions and discuss ideas in GitHub Discussions
   - name: Security Vulnerability
-    url: https://github.com/PrimeCodeLabs/zentla/security/policy
+    url: https://github.com/hexrift/zentla/security/policy
     about: Report security vulnerabilities privately
