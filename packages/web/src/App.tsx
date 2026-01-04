@@ -10,6 +10,7 @@ import { HeadlessCheckoutPage } from "./pages/docs/HeadlessCheckoutPage";
 import { WebhooksPage } from "./pages/docs/WebhooksPage";
 import { VersioningPage } from "./pages/docs/VersioningPage";
 import { ExamplePage } from "./pages/docs/ExamplePage";
+import { ChangelogPage } from "./pages/docs/ChangelogPage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="webhooks" element={<WebhooksPage />} />
         <Route path="example" element={<ExamplePage />} />
         <Route path="versioning" element={<VersioningPage />} />
+        <Route path="changelog" element={<ChangelogPage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
