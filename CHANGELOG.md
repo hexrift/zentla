@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.6](https://github.com/hexrift/zentla/compare/v5.5.5...v5.5.6) (2026-01-04)
+
+
+### Bug Fixes
+
+* return 'url' instead of 'sessionUrl' in checkout session response ([#47](https://github.com/hexrift/zentla/issues/47)) ([a027d1c](https://github.com/hexrift/zentla/commit/a027d1cb84b1f91b9beaee66ce5076387faabb1d))
+
 ## [5.5.5](https://github.com/hexrift/zentla/compare/v5.5.4...v5.5.5) (2026-01-04)
 
 
