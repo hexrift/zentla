@@ -2,9 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { SEO } from "../components/SEO";
 
-const API_DOCS_URL =
-  import.meta.env.VITE_API_DOCS_URL || "http://localhost:3002/docs";
-
 // Hook for intersection observer animations
 function useInView(threshold = 0.1) {
   const ref = useRef<HTMLDivElement>(null);
