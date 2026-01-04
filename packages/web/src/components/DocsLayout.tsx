@@ -28,6 +28,7 @@ const navigation = [
     items: [
       { name: "API Reference", href: API_DOCS_URL, external: true },
       { name: "Versioning & Stability", href: "/docs/versioning" },
+      { name: "Changelog", href: "/docs/changelog" },
     ],
   },
 ];
