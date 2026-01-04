@@ -5,7 +5,8 @@
 <h1 align="center">Zentla</h1>
 
 <p align="center">
-  <strong>The open source monetization layer for SaaS</strong>
+  <strong>Billing you control</strong><br/>
+  <sub>Open source entitlements, metering, and billing—without the lock-in</sub>
 </p>
 
 <p align="center">
@@ -26,9 +27,27 @@
 
 ---
 
+## The Problem
+
+Building billing infrastructure is a black hole for engineering time:
+
+- **Entitlements sprawl** — Feature flags, plan limits, and access controls scattered across services
+- **Usage tracking pain** — Metering, aggregation, and overage logic built from scratch
+- **Provider lock-in** — Tightly coupled to Stripe, dreading the day you need to support Zuora
+- **No visibility** — MRR, churn, and cohort metrics buried in spreadsheets
+
+Zentla solves this with a unified API layer that handles entitlements, usage metering, multi-provider billing, and revenue analytics—so you can focus on your product.
+
 ## What is Zentla?
 
-Zentla is an **open source monetization layer** that sits between your application and billing providers like Stripe. Entitlements, billing, and pricing experiments—without the vendor lock-in.
+Zentla is **billing infrastructure you control**—open source, self-hostable, and provider-agnostic. Four pillars, one API:
+
+| Pillar | What it does |
+|--------|--------------|
+| **Entitlements** | Feature access, quotas, and limits derived from subscriptions |
+| **Usage Metering** | Track, aggregate, and bill for usage-based pricing |
+| **Multi-Provider** | Stripe today, Zuora tomorrow—switch without code changes |
+| **Revenue Analytics** | MRR, churn, cohorts, and growth metrics in real-time |
 
 ```typescript
 // Create an offer with pricing and entitlements
@@ -49,29 +68,67 @@ const offer = await zentla.offers.create({
   },
 });
 
-// Create a checkout session
-const checkout = await zentla.checkout.createSession({
-  offerId: offer.id,
+// Track usage events for usage-based billing
+await zentla.usage.ingest({
   customerId: customer.id,
-  successUrl: "https://yourapp.com/success",
+  metricKey: "api_calls",
+  quantity: 1,
 });
 
 // Check entitlements at runtime
-const access = await zentla.customers.checkEntitlement(
-  customerId,
-  "api_access",
-);
+const access = await zentla.customers.checkEntitlement(customerId, "api_access");
 // { hasAccess: true, value: true }
 ```
 
+## Why Zentla?
+
+| | Zentla | Stigg | Orb | Stripe Billing |
+|---|:---:|:---:|:---:|:---:|
+| Open Source | ✅ | ❌ | ❌ | ❌ |
+| Self-Hostable | ✅ | ❌ | ❌ | ❌ |
+| Entitlements | ✅ | ✅ | ❌ | ❌ |
+| Usage Metering | ✅ | ❌ | ✅ | ✅ |
+| Multi-Provider | ✅ | ❌ | ❌ | ❌ |
+| Revenue Analytics | ✅ | ❌ | ❌ | ❌ |
+| Pricing Experiments | ✅ | ✅ | ❌ | ❌ |
+
 ## Features
 
-- **Offers & Versioning** - Pricing plans with immutable versions. Publish, rollback, or A/B test.
-- **Checkout** - Hosted or headless checkout with trial and promo code support.
-- **Entitlements** - Define features and quotas per plan. Query access at runtime.
-- **Customer Sync** - Automatic sync with your billing provider.
-- **Webhooks** - Real-time events for subscriptions and payments.
-- **Multi-Provider** - Stripe today, Zuora tomorrow. Switch without code changes.
+### Entitlements & Feature Gating
+- Define features and quotas per plan
+- Query access at runtime with sub-10ms latency
+- Boolean flags, numeric limits, and custom values
+- Automatic sync when subscriptions change
+
+### Usage Metering & Billing
+- Ingest millions of events with idempotency
+- Flexible aggregation: sum, max, count, or last value
+- Real-time usage summaries per customer
+- Overage calculations and usage-based pricing
+
+### Multi-Provider Billing
+- Connect Stripe, Zuora, or both simultaneously
+- Provider-agnostic checkout (hosted or headless)
+- Switch providers without code changes
+- Unified webhook handling and event normalization
+
+### Revenue Analytics
+- Real-time MRR, ARR, and growth metrics
+- Churn rate and cohort analysis
+- Revenue breakdown by plan, period, and segment
+- Built-in analytics dashboard
+
+### Pricing Experiments
+- Immutable offer versions for safe A/B testing
+- Publish, rollback, or schedule pricing changes
+- No deploys required for pricing updates
+- Track conversion by offer version
+
+### Enterprise-Ready
+- Comprehensive audit logging
+- API versioning with ETag concurrency control
+- Idempotent operations for safe retries
+- Role-based access control
 
 ## Quick Start
 
@@ -102,7 +159,30 @@ API runs at `http://localhost:3002`. Open `http://localhost:3002/docs` to explor
 ## Try the Live Demo
 
 - **API**: [api.zentla.dev/docs](https://api.zentla.dev/docs) - Interactive API documentation
-- **Dashboard**: [admin.zentla.dev](https://admin.zentla.dev) - Example admin interface
+- **Dashboard**: [admin.zentla.dev](https://admin.zentla.dev) - Admin interface with analytics
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Your Application                         │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                          Zentla API                             │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────┐ │
+│  │ Entitlements│  │   Usage     │  │  Checkout   │  │Analytics│ │
+│  │   Engine    │  │  Metering   │  │   Engine    │  │ Engine  │ │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                ┌───────────────┼───────────────┐
+                ▼               ▼               ▼
+         ┌──────────┐    ┌──────────┐    ┌──────────┐
+         │  Stripe  │    │  Zuora   │    │  More... │
+         └──────────┘    └──────────┘    └──────────┘
+```
 
 ## Self-Hosting
 
@@ -117,7 +197,7 @@ docker run -p 3002:3002 \
   zentla
 ```
 
-See [Self-Hosting Guide](docs/self-hosting.md) for detailed deployment options.
+See [Self-Hosting Guide](docs/self-hosting.md) for Kubernetes, Railway, and Render deployments.
 
 ## Project Structure
 
@@ -138,6 +218,7 @@ zentla/
 - [Getting Started](docs/getting-started.md)
 - [Core Concepts](docs/concepts.md)
 - [API Reference](docs/api-reference.md)
+- [Usage Metering](docs/api-reference.md#usage-metering)
 - [Webhooks](docs/webhooks.md)
 - [Self-Hosting](docs/self-hosting.md)
 - [Security](docs/security.md)
