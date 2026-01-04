@@ -21,19 +21,24 @@ describe("EnforcementGuard", () => {
 
   const mockRequest = {
     apiKeyContext: { workspaceId: "ws_123" },
-    params: { customerId: "cust_123" },
-    body: {},
-    query: {},
+    params: { customerId: "cust_123" } as Record<string, string>,
+    body: {} as Record<string, unknown>,
+    query: {} as Record<string, string>,
+    enforcementResult: undefined as unknown,
   };
 
-  const createMockContext = (request = mockRequest): ExecutionContext =>
-    ({
+  const createMockContext = (
+    request: Partial<typeof mockRequest> = mockRequest,
+  ): ExecutionContext => {
+    const mergedRequest = { ...mockRequest, ...request };
+    return {
       switchToHttp: () => ({
-        getRequest: () => request,
+        getRequest: () => mergedRequest,
       }),
       getHandler: () => ({}),
       getClass: () => ({}),
-    }) as ExecutionContext;
+    } as ExecutionContext;
+  };
 
   const mockAllowedResult = {
     allowed: true,
@@ -93,9 +98,23 @@ describe("EnforcementGuard", () => {
         return undefined;
       });
 
-      const request = { params: {}, body: {}, query: {} };
+      const request = {
+        apiKeyContext: undefined,
+        params: {} as Record<string, string>,
+        body: {} as Record<string, unknown>,
+        query: {} as Record<string, string>,
+        enforcementResult: undefined as unknown,
+      };
 
-      await expect(guard.canActivate(createMockContext(request))).rejects.toThrow(
+      const context = {
+        switchToHttp: () => ({
+          getRequest: () => request,
+        }),
+        getHandler: () => ({}),
+        getClass: () => ({}),
+      } as ExecutionContext;
+
+      await expect(guard.canActivate(context)).rejects.toThrow(
         "Workspace context required",
       );
     });
@@ -143,11 +162,23 @@ describe("EnforcementGuard", () => {
 
       it("should attach enforcement result to request", async () => {
         enforcementService.enforce.mockResolvedValue(mockAllowedResult);
-        const request = { ...mockRequest };
+        const testRequest = {
+          ...mockRequest,
+          enforcementResult: undefined as unknown,
+        };
 
-        await guard.canActivate(createMockContext(request));
+        // Create context that uses the same reference
+        const context = {
+          switchToHttp: () => ({
+            getRequest: () => testRequest,
+          }),
+          getHandler: () => ({}),
+          getClass: () => ({}),
+        } as ExecutionContext;
 
-        expect(request.enforcementResult).toEqual(mockAllowedResult);
+        await guard.canActivate(context);
+
+        expect(testRequest.enforcementResult).toEqual(mockAllowedResult);
       });
 
       it("should pass incrementBy option", async () => {
@@ -328,12 +359,22 @@ describe("EnforcementGuard", () => {
 
       it("should get workspace ID from URL params", async () => {
         const request = {
-          params: { workspaceId: "ws_from_params", customerId: "cust_123" },
-          body: {},
-          query: {},
+          apiKeyContext: undefined,
+          params: { workspaceId: "ws_from_params", customerId: "cust_123" } as Record<string, string>,
+          body: {} as Record<string, unknown>,
+          query: {} as Record<string, string>,
+          enforcementResult: undefined as unknown,
         };
 
-        await guard.canActivate(createMockContext(request));
+        const context = {
+          switchToHttp: () => ({
+            getRequest: () => request,
+          }),
+          getHandler: () => ({}),
+          getClass: () => ({}),
+        } as ExecutionContext;
+
+        await guard.canActivate(context);
 
         expect(enforcementService.enforce).toHaveBeenCalledWith(
           "ws_from_params",
@@ -343,25 +384,6 @@ describe("EnforcementGuard", () => {
         );
       });
 
-      it("should get workspace ID from session context", async () => {
-        const request = {
-          sessionContext: {
-            workspaces: [{ workspaceId: "ws_from_session" }],
-          },
-          params: { customerId: "cust_123" },
-          body: {},
-          query: {},
-        };
-
-        await guard.canActivate(createMockContext(request));
-
-        expect(enforcementService.enforce).toHaveBeenCalledWith(
-          "ws_from_session",
-          expect.any(String),
-          expect.any(String),
-          expect.any(Object),
-        );
-      });
     });
 
     describe("increment from body", () => {

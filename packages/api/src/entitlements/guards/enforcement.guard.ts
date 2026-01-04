@@ -16,6 +16,7 @@ import {
 
 // Extend Express Request type to include enforcement result
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       enforcementResult?: EnforcementResult | EnforcementResult[];
@@ -123,12 +124,7 @@ export class EnforcementGuard implements CanActivate {
 
     // From URL params
     if (request.params.workspaceId) {
-      return request.params.workspaceId;
-    }
-
-    // From session context (first workspace)
-    if (request.sessionContext?.workspaces?.length) {
-      return request.sessionContext.workspaces[0].workspaceId;
+      return request.params.workspaceId as string;
     }
 
     return undefined;
@@ -140,7 +136,8 @@ export class EnforcementGuard implements CanActivate {
   ): string | undefined {
     // Custom path specified
     if (customerIdPath) {
-      return this.getNestedValue(request, customerIdPath);
+      const value = this.getNestedValue(request, customerIdPath);
+      return typeof value === "string" ? value : undefined;
     }
 
     // Default locations

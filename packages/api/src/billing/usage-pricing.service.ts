@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
 import { UsageService } from "../usage/usage.service";
 import type { PricingModel, PricingTier } from "@zentla/core";
@@ -55,8 +55,6 @@ export interface UsagePricingConfig {
 
 @Injectable()
 export class UsagePricingService {
-  private readonly logger = new Logger(UsagePricingService.name);
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly usageService: UsageService,

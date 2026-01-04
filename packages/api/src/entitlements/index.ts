@@ -6,6 +6,12 @@ export {
   EnforcementOptions,
   EnforcementMode,
 } from "./enforcement.service";
+export {
+  SeatsService,
+  SeatAssignment,
+  SeatUsageSummary,
+  AssignSeatOptions,
+} from "./seats.service";
 
 // Guards
 export { EnforcementGuard } from "./guards/enforcement.guard";
