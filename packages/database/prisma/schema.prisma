@@ -98,6 +98,7 @@ model Workspace {
   revenueSnapshots  RevenueSnapshot[]
   revenueEvents     RevenueEvent[]
   customerCohorts   CustomerCohort[]
+  cloudSubscription CloudSubscription?
 
   @@map("workspace")
 }
@@ -1228,4 +1229,210 @@ model CustomerCohort {
   @@index([workspaceId])
   @@index([workspaceId, cohortMonth])
   @@map("customer_cohort")
+}
+
+// ============================================================================
+// ZENTLA CLOUD - Managed SaaS Infrastructure
+// ============================================================================
+
+model CloudPlan {
+  id          String          @id @default(uuid()) @db.Uuid
+  key         String          @unique @db.VarChar(50) // free, pro, business, enterprise
+  name        String          @db.VarChar(100)
+  description String?         @db.VarChar(1000)
+  tier        CloudPlanTier   @default(free)
+  status      CloudPlanStatus @default(active)
+
+  // Pricing (in cents, monthly)
+  monthlyPrice Int @default(0) @map("monthly_price")
+  yearlyPrice  Int @default(0) @map("yearly_price") // Annual price (discounted)
+
+  // Usage limits (null = unlimited)
+  maxWorkspaces      Int? @map("max_workspaces")
+  maxCustomers       Int? @map("max_customers")
+  maxApiCalls        Int? @map("max_api_calls") // Per month
+  maxWebhooks        Int? @map("max_webhooks")
+  maxTeamMembers     Int? @map("max_team_members")
+  maxOffersPerMonth  Int? @map("max_offers_per_month")
+  maxEventsPerMonth  Int? @map("max_events_per_month")
+
+  // Feature flags
+  features Json @default("{}") // { analytics: true, experiments: true, sso: false }
+
+  // Trial settings
+  trialDays Int @default(0) @map("trial_days")
+
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  subscriptions CloudSubscription[]
+
+  @@index([key])
+  @@index([tier, status])
+  @@map("cloud_plan")
+}
+
+enum CloudPlanTier {
+  free
+  pro
+  business
+  enterprise
+
+  @@map("cloud_plan_tier")
+}
+
+enum CloudPlanStatus {
+  active
+  deprecated
+  hidden
+
+  @@map("cloud_plan_status")
+}
+
+model CloudSubscription {
+  id          String                  @id @default(uuid()) @db.Uuid
+  workspaceId String                  @unique @map("workspace_id") @db.Uuid
+  planId      String                  @map("plan_id") @db.Uuid
+  status      CloudSubscriptionStatus @default(trialing)
+
+  // Billing
+  billingInterval CloudBillingInterval @default(monthly) @map("billing_interval")
+  currentPeriodStart DateTime         @map("current_period_start") @db.Timestamptz
+  currentPeriodEnd   DateTime         @map("current_period_end") @db.Timestamptz
+
+  // Trial
+  trialStart DateTime? @map("trial_start") @db.Timestamptz
+  trialEnd   DateTime? @map("trial_end") @db.Timestamptz
+
+  // Cancellation
+  cancelAt   DateTime? @map("cancel_at") @db.Timestamptz
+  canceledAt DateTime? @map("canceled_at") @db.Timestamptz
+
+  // Payment provider reference (Stripe subscription ID)
+  providerSubscriptionId String? @map("provider_subscription_id") @db.VarChar(255)
+  providerCustomerId     String? @map("provider_customer_id") @db.VarChar(255)
+
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  plan      CloudPlan @relation(fields: [planId], references: [id])
+  invoices  CloudInvoice[]
+  usage     CloudUsage[]
+
+  @@index([workspaceId])
+  @@index([planId])
+  @@index([status])
+  @@map("cloud_subscription")
+}
+
+enum CloudSubscriptionStatus {
+  trialing
+  active
+  past_due
+  canceled
+  paused
+
+  @@map("cloud_subscription_status")
+}
+
+enum CloudBillingInterval {
+  monthly
+  yearly
+
+  @@map("cloud_billing_interval")
+}
+
+model CloudUsage {
+  id             String   @id @default(uuid()) @db.Uuid
+  subscriptionId String   @map("subscription_id") @db.Uuid
+  workspaceId    String   @map("workspace_id") @db.Uuid
+  periodStart    DateTime @map("period_start") @db.Timestamptz
+  periodEnd      DateTime @map("period_end") @db.Timestamptz
+
+  // Usage metrics
+  apiCalls      Int @default(0) @map("api_calls")
+  customers     Int @default(0)
+  webhooks      Int @default(0)
+  events        Int @default(0)
+  teamMembers   Int @default(0) @map("team_members")
+  offersCreated Int @default(0) @map("offers_created")
+
+  // Overage tracking
+  apiCallsOverage Int @default(0) @map("api_calls_overage")
+  overageAmount   Int @default(0) @map("overage_amount") // In cents
+
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  subscription CloudSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriptionId, periodStart])
+  @@index([workspaceId])
+  @@index([subscriptionId])
+  @@index([periodStart, periodEnd])
+  @@map("cloud_usage")
+}
+
+model CloudInvoice {
+  id             String             @id @default(uuid()) @db.Uuid
+  subscriptionId String             @map("subscription_id") @db.Uuid
+  workspaceId    String             @map("workspace_id") @db.Uuid
+  status         CloudInvoiceStatus @default(draft)
+
+  // Invoice details
+  invoiceNumber String   @unique @map("invoice_number") @db.VarChar(50)
+  periodStart   DateTime @map("period_start") @db.Timestamptz
+  periodEnd     DateTime @map("period_end") @db.Timestamptz
+  dueDate       DateTime @map("due_date") @db.Timestamptz
+
+  // Amounts (in cents)
+  subtotal     Int @default(0)
+  tax          Int @default(0)
+  total        Int @default(0)
+  amountPaid   Int @default(0) @map("amount_paid")
+  amountDue    Int @default(0) @map("amount_due")
+
+  currency String @default("usd") @db.VarChar(3)
+
+  // Line items stored as JSON
+  lineItems Json @default("[]") @map("line_items")
+
+  // Payment provider reference
+  providerInvoiceId String? @map("provider_invoice_id") @db.VarChar(255)
+  providerPaymentId String? @map("provider_payment_id") @db.VarChar(255)
+
+  // Dates
+  paidAt      DateTime? @map("paid_at") @db.Timestamptz
+  voidedAt    DateTime? @map("voided_at") @db.Timestamptz
+  finalizedAt DateTime? @map("finalized_at") @db.Timestamptz
+
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  subscription CloudSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([invoiceNumber])
+  @@map("cloud_invoice")
+}
+
+enum CloudInvoiceStatus {
+  draft
+  open
+  paid
+  void
+  uncollectible
+
+  @@map("cloud_invoice_status")
 }
