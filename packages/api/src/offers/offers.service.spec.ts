@@ -30,6 +30,7 @@ describe("OffersService", () => {
     isConfigured: ReturnType<typeof vi.fn>;
     isConfiguredForWorkspace: ReturnType<typeof vi.fn>;
     getProvider: ReturnType<typeof vi.fn>;
+    getProviderForWorkspace: ReturnType<typeof vi.fn>;
   };
   let providerRefService: {
     findByEntity: ReturnType<typeof vi.fn>;
@@ -100,6 +101,13 @@ describe("OffersService", () => {
       isConfigured: vi.fn().mockReturnValue(true),
       isConfiguredForWorkspace: vi.fn().mockReturnValue(true),
       getProvider: vi.fn().mockReturnValue({
+        syncOffer: vi.fn().mockResolvedValue({
+          productRef: { externalId: "prod_123" },
+          priceRef: { externalId: "price_123" },
+        }),
+        archiveProduct: vi.fn().mockResolvedValue(undefined),
+      }),
+      getProviderForWorkspace: vi.fn().mockReturnValue({
         syncOffer: vi.fn().mockResolvedValue({
           productRef: { externalId: "prod_123" },
           priceRef: { externalId: "price_123" },
@@ -722,7 +730,7 @@ describe("OffersService", () => {
       prisma.offer.update.mockResolvedValue(mockOffer);
 
       // Make provider sync fail
-      billingService.getProvider.mockReturnValue({
+      billingService.getProviderForWorkspace.mockReturnValue({
         syncOffer: vi.fn().mockRejectedValue(new Error("Provider error")),
       });
 
@@ -816,7 +824,7 @@ describe("OffersService", () => {
         currentVersion: mockOfferVersion,
       };
       prisma.offer.findFirst.mockResolvedValue(offerWithVersion);
-      billingService.getProvider.mockReturnValue({
+      billingService.getProviderForWorkspace.mockReturnValue({
         syncOffer: vi.fn().mockRejectedValue(new Error("Sync failed")),
       });
 

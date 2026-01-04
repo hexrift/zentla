@@ -632,7 +632,11 @@ export class OffersService {
       );
     }
 
-    const billingProvider = this.billingService.getProvider(provider);
+    const billingProvider = this.billingService.getProviderForWorkspace(
+      workspaceId,
+      provider,
+      workspaceSettings,
+    );
 
     // Check if we have an existing product ref
     const existingProductRef = await this.providerRefService.findByEntity(
