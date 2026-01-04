@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.0](https://github.com/hexrift/zentla/compare/v5.1.0...v5.2.0) (2026-01-04)
+
+
+### Features
+
+* monetization infrastructure phases 1 & 2 ([#28](https://github.com/hexrift/zentla/issues/28)) ([b9bc675](https://github.com/hexrift/zentla/commit/b9bc67586a6e741840aab6416123b3baddc0caae))
+
 ## [5.1.0](https://github.com/hexrift/zentla/compare/v5.0.1...v5.1.0) (2026-01-04)
 
 
