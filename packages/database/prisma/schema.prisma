@@ -95,6 +95,9 @@ model Workspace {
   deadLetterEvents  DeadLetterEvent[]
   seatAssignments   SeatAssignment[]
   experiments       Experiment[]
+  revenueSnapshots  RevenueSnapshot[]
+  revenueEvents     RevenueEvent[]
+  customerCohorts   CustomerCohort[]
 
   @@map("workspace")
 }
@@ -1086,4 +1089,143 @@ model SeatAssignment {
   @@index([workspaceId, userId])
   @@index([expiresAt])
   @@map("seat_assignment")
+}
+
+// ============================================================================
+// REVENUE ANALYTICS
+// ============================================================================
+
+model RevenueSnapshot {
+  id          String           @id @default(uuid()) @db.Uuid
+  workspaceId String           @map("workspace_id") @db.Uuid
+  date        DateTime         @db.Date
+  period      SnapshotPeriod   @default(daily)
+
+  // Core revenue metrics (stored in cents)
+  mrr              Int @default(0) // Monthly Recurring Revenue
+  arr              Int @default(0) // Annual Recurring Revenue
+  newMrr           Int @default(0) @map("new_mrr") // New MRR from new customers
+  expansionMrr     Int @default(0) @map("expansion_mrr") // MRR from upgrades
+  contractionMrr   Int @default(0) @map("contraction_mrr") // MRR lost to downgrades
+  churnedMrr       Int @default(0) @map("churned_mrr") // MRR lost to cancellations
+  reactivationMrr  Int @default(0) @map("reactivation_mrr") // MRR from reactivations
+  netNewMrr        Int @default(0) @map("net_new_mrr") // Net change in MRR
+
+  // Customer counts
+  totalCustomers      Int @default(0) @map("total_customers")
+  activeSubscriptions Int @default(0) @map("active_subscriptions")
+  newCustomers        Int @default(0) @map("new_customers")
+  churnedCustomers    Int @default(0) @map("churned_customers")
+  reactivatedCustomers Int @default(0) @map("reactivated_customers")
+
+  // Derived metrics (stored as basis points, e.g., 500 = 5.00%)
+  churnRate            Int @default(0) @map("churn_rate")
+  netRevenueRetention  Int @default(0) @map("net_revenue_retention")
+  grossRevenueRetention Int @default(0) @map("gross_revenue_retention")
+
+  // Average metrics (stored in cents)
+  arpu Int @default(0) // Average Revenue Per User
+  ltv  Int @default(0) // Lifetime Value estimate
+
+  currency  String   @default("usd") @db.VarChar(3)
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, date, period])
+  @@index([workspaceId])
+  @@index([workspaceId, period, date])
+  @@map("revenue_snapshot")
+}
+
+enum SnapshotPeriod {
+  daily
+  weekly
+  monthly
+  quarterly
+  yearly
+
+  @@map("snapshot_period")
+}
+
+model RevenueEvent {
+  id          String           @id @default(uuid()) @db.Uuid
+  workspaceId String           @map("workspace_id") @db.Uuid
+  customerId  String           @map("customer_id") @db.Uuid
+  subscriptionId String?       @map("subscription_id") @db.Uuid
+  type        RevenueEventType
+
+  // Revenue impact (in cents, can be negative)
+  amount      Int
+  currency    String           @default("usd") @db.VarChar(3)
+
+  // MRR impact (in cents, can be negative)
+  mrrDelta    Int              @default(0) @map("mrr_delta")
+
+  // Previous and new values for changes
+  previousMrr Int?             @map("previous_mrr")
+  newMrr      Int?             @map("new_mrr")
+  previousOfferId String?      @map("previous_offer_id") @db.Uuid
+  newOfferId      String?      @map("new_offer_id") @db.Uuid
+
+  // Context
+  reason      String?          @db.VarChar(500)
+  metadata    Json             @default("{}")
+  occurredAt  DateTime         @default(now()) @map("occurred_at") @db.Timestamptz
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workspaceId, type])
+  @@index([workspaceId, customerId])
+  @@index([workspaceId, occurredAt])
+  @@index([subscriptionId])
+  @@map("revenue_event")
+}
+
+enum RevenueEventType {
+  new_subscription      // New customer subscription
+  upgrade               // Plan upgrade (expansion)
+  downgrade             // Plan downgrade (contraction)
+  cancellation          // Subscription canceled
+  reactivation          // Previously churned customer returns
+  payment_received      // Payment collected
+  payment_failed        // Payment failed
+  refund                // Refund issued
+  credit_applied        // Credit applied to account
+  trial_started         // Trial period started
+  trial_converted       // Trial converted to paid
+  trial_expired         // Trial expired without conversion
+
+  @@map("revenue_event_type")
+}
+
+model CustomerCohort {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  cohortMonth DateTime @map("cohort_month") @db.Date // First day of cohort month
+  monthNumber Int      @map("month_number") // 0 = acquisition month, 1 = first month after, etc.
+
+  // Cohort metrics
+  customersAtStart   Int @default(0) @map("customers_at_start")
+  customersRemaining Int @default(0) @map("customers_remaining")
+  mrrAtStart         Int @default(0) @map("mrr_at_start")
+  mrrRemaining       Int @default(0) @map("mrr_remaining")
+
+  // Retention rates (basis points)
+  customerRetention Int @default(0) @map("customer_retention")
+  revenueRetention  Int @default(0) @map("revenue_retention")
+
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, cohortMonth, monthNumber])
+  @@index([workspaceId])
+  @@index([workspaceId, cohortMonth])
+  @@map("customer_cohort")
 }
