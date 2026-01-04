@@ -277,9 +277,29 @@ export class SubscriptionsService {
       );
     }
 
-    // 3. Check if billing provider is configured
+    // 3. Get workspace settings and check if billing provider is configured
     const provider: ProviderType = "stripe";
-    if (!this.billingService.isConfigured(provider)) {
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const workspaceSettings = workspace?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
+    if (
+      !this.billingService.isConfiguredForWorkspace(
+        workspaceId,
+        provider,
+        workspaceSettings,
+      )
+    ) {
       throw new BadRequestException(
         `${provider} billing provider is not configured`,
       );
@@ -313,7 +333,11 @@ export class SubscriptionsService {
     }
 
     // 6. Change the subscription in billing provider
-    const billingProvider = this.billingService.getProvider(provider);
+    const billingProvider = this.billingService.getProviderForWorkspace(
+      workspaceId,
+      provider,
+      workspaceSettings,
+    );
     const result = await billingProvider.changeSubscription(
       {
         ...providerSubscriptionRef,

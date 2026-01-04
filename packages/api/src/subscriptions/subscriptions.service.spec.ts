@@ -16,6 +16,9 @@ describe("SubscriptionsService", () => {
       findMany: ReturnType<typeof vi.fn>;
       update: ReturnType<typeof vi.fn>;
     };
+    workspace: {
+      findUnique: ReturnType<typeof vi.fn>;
+    };
   };
   let entitlementsService: {
     revokeAllForSubscription: ReturnType<typeof vi.fn>;
@@ -48,6 +51,14 @@ describe("SubscriptionsService", () => {
         findMany: vi.fn(),
         update: vi.fn(),
       },
+      workspace: {
+        findUnique: vi.fn().mockResolvedValue({
+          settings: {
+            stripeSecretKey: "sk_test_123",
+            stripeWebhookSecret: "whsec_123",
+          },
+        }),
+      },
     };
 
     entitlementsService = {
@@ -61,8 +72,14 @@ describe("SubscriptionsService", () => {
         {
           provide: BillingService,
           useValue: {
-            isConfigured: vi.fn(),
-            getProvider: vi.fn(),
+            isConfigured: vi.fn().mockReturnValue(true),
+            isConfiguredForWorkspace: vi.fn().mockReturnValue(true),
+            getProvider: vi.fn().mockReturnValue({
+              changeSubscription: vi.fn().mockResolvedValue({ success: true }),
+            }),
+            getProviderForWorkspace: vi.fn().mockReturnValue({
+              changeSubscription: vi.fn().mockResolvedValue({ success: true }),
+            }),
           },
         },
         {
@@ -320,7 +337,9 @@ describe("SubscriptionsService", () => {
   describe("change", () => {
     let billingService: {
       isConfigured: ReturnType<typeof vi.fn>;
+      isConfiguredForWorkspace: ReturnType<typeof vi.fn>;
       getProvider: ReturnType<typeof vi.fn>;
+      getProviderForWorkspace: ReturnType<typeof vi.fn>;
     };
     let providerRefService: {
       findByEntity: ReturnType<typeof vi.fn>;
@@ -335,7 +354,13 @@ describe("SubscriptionsService", () => {
     beforeEach(async () => {
       billingService = {
         isConfigured: vi.fn().mockReturnValue(true),
+        isConfiguredForWorkspace: vi.fn().mockReturnValue(true),
         getProvider: vi.fn().mockReturnValue({
+          changeSubscription: vi.fn().mockResolvedValue({
+            effectiveDate: new Date(),
+          }),
+        }),
+        getProviderForWorkspace: vi.fn().mockReturnValue({
           changeSubscription: vi.fn().mockResolvedValue({
             effectiveDate: new Date(),
           }),
@@ -430,7 +455,7 @@ describe("SubscriptionsService", () => {
 
     it("should throw BadRequestException when billing provider not configured", async () => {
       prisma.subscription.findFirst.mockResolvedValue(mockSubscription);
-      billingService.isConfigured.mockReturnValue(false);
+      billingService.isConfiguredForWorkspace.mockReturnValue(false);
 
       await expect(
         service.change("ws_123", "sub_123", { newOfferId: "new_offer" }),

@@ -26,11 +26,16 @@ describe("PromotionsService", () => {
       create: ReturnType<typeof vi.fn>;
       aggregate: ReturnType<typeof vi.fn>;
     };
+    workspace: {
+      findUnique: ReturnType<typeof vi.fn>;
+    };
     executeInTransaction: ReturnType<typeof vi.fn>;
   };
   let billingService: {
     isConfigured: ReturnType<typeof vi.fn>;
+    isConfiguredForWorkspace: ReturnType<typeof vi.fn>;
     getProvider: ReturnType<typeof vi.fn>;
+    getProviderForWorkspace: ReturnType<typeof vi.fn>;
   };
   let providerRefService: {
     findByEntity: ReturnType<typeof vi.fn>;
@@ -88,12 +93,27 @@ describe("PromotionsService", () => {
         create: vi.fn(),
         aggregate: vi.fn(),
       },
+      workspace: {
+        findUnique: vi.fn().mockResolvedValue({
+          settings: {
+            stripeSecretKey: "sk_test_123",
+            stripeWebhookSecret: "whsec_123",
+          },
+        }),
+      },
       executeInTransaction: vi.fn((fn) => fn(prisma)),
     };
 
     billingService = {
       isConfigured: vi.fn().mockReturnValue(true),
+      isConfiguredForWorkspace: vi.fn().mockReturnValue(true),
       getProvider: vi.fn().mockReturnValue({
+        syncPromotion: vi.fn().mockResolvedValue({
+          couponRef: { externalId: "stripe_coupon_123" },
+          promotionCodeRef: { externalId: "stripe_promo_123" },
+        }),
+      }),
+      getProviderForWorkspace: vi.fn().mockReturnValue({
         syncPromotion: vi.fn().mockResolvedValue({
           couponRef: { externalId: "stripe_coupon_123" },
           promotionCodeRef: { externalId: "stripe_promo_123" },
