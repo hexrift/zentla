@@ -303,9 +303,30 @@ export class PromotionsService {
       );
     }
 
+    // Get workspace settings to check billing provider configuration
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const workspaceSettings = workspace?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
     // Validate billing provider is configured
     const provider: ProviderType = "stripe";
-    if (!this.billingService.isConfigured(provider)) {
+    if (
+      !this.billingService.isConfiguredForWorkspace(
+        workspaceId,
+        provider,
+        workspaceSettings,
+      )
+    ) {
       throw new BadRequestException(
         `Cannot publish: ${provider} is not configured. Check your billing settings.`,
       );
