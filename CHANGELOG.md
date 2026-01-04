@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.3.0](https://github.com/hexrift/zentla/compare/v5.2.0...v5.3.0) (2026-01-04)
+
+
+### Features
+
+* **api:** add Phase 3 A/B experiment infrastructure ([#30](https://github.com/hexrift/zentla/issues/30)) ([9fe4402](https://github.com/hexrift/zentla/commit/9fe440248151863f0eb7b2022b8b100ab7314900))
+
 ## [5.2.0](https://github.com/hexrift/zentla/compare/v5.1.0...v5.2.0) (2026-01-04)
 
 
