@@ -109,13 +109,13 @@ function ChurnIndicator({
 export function AnalyticsPage() {
   // Fetch subscriptions to calculate metrics
   const { data: subscriptions, isLoading: subsLoading } = useQuery({
-    queryKey: ["subscriptions", { limit: 1000 }],
-    queryFn: () => api.subscriptions.list({ limit: 1000 }),
+    queryKey: ["subscriptions", { limit: 100 }],
+    queryFn: () => api.subscriptions.list({ limit: 100 }),
   });
 
   const { data: customers, isLoading: custLoading } = useQuery({
-    queryKey: ["customers", { limit: 1000 }],
-    queryFn: () => api.customers.list({ limit: 1000 }),
+    queryKey: ["customers", { limit: 100 }],
+    queryFn: () => api.customers.list({ limit: 100 }),
   });
 
   const { data: offers } = useQuery({
