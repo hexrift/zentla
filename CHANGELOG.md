@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.1](https://github.com/hexrift/zentla/compare/v3.0.0...v3.0.1) (2026-01-04)
+
+
+### Bug Fixes
+
+* **api:** allow empty string for Stripe env vars ([acd8246](https://github.com/hexrift/zentla/commit/acd82465938dac1acd0083b8084b5fabc482fc6a))
+* **api:** allow empty string for Stripe env vars ([bd99b47](https://github.com/hexrift/zentla/commit/bd99b471dc9d2b4524616e037c300e8f0407416f))
+
 ## [3.0.0](https://github.com/hexrift/zentla/compare/v2.4.0...v3.0.0) (2026-01-03)
 
 
