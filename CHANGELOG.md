@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.4.0](https://github.com/hexrift/zentla/compare/v5.3.0...v5.4.0) (2026-01-04)
+
+
+### Features
+
+* **api:** add Phase 4 revenue analytics dashboard ([#32](https://github.com/hexrift/zentla/issues/32)) ([d35ad7f](https://github.com/hexrift/zentla/commit/d35ad7f1bf32abc9b8b9ef5fa42dd7e42b4261c7))
+
 ## [5.3.0](https://github.com/hexrift/zentla/compare/v5.2.0...v5.3.0) (2026-01-04)
 
 
