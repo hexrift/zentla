@@ -38,7 +38,8 @@ export function SettingsPage() {
     localStorage.setItem("zentla_api_key", apiKey);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
-    window.location.reload();
+    // Invalidate all queries so they refetch with the new API key
+    queryClient.invalidateQueries();
   };
 
   const { data: workspace } = useQuery({

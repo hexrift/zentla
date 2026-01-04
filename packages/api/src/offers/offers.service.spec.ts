@@ -21,10 +21,14 @@ describe("OffersService", () => {
       create: ReturnType<typeof vi.fn>;
       update: ReturnType<typeof vi.fn>;
     };
+    workspace: {
+      findUnique: ReturnType<typeof vi.fn>;
+    };
     executeInTransaction: ReturnType<typeof vi.fn>;
   };
   let billingService: {
     isConfigured: ReturnType<typeof vi.fn>;
+    isConfiguredForWorkspace: ReturnType<typeof vi.fn>;
     getProvider: ReturnType<typeof vi.fn>;
   };
   let providerRefService: {
@@ -81,11 +85,20 @@ describe("OffersService", () => {
         create: vi.fn(),
         update: vi.fn(),
       },
+      workspace: {
+        findUnique: vi.fn().mockResolvedValue({
+          settings: {
+            stripeSecretKey: "sk_test_123",
+            stripeWebhookSecret: "whsec_123",
+          },
+        }),
+      },
       executeInTransaction: vi.fn((fn) => fn(prisma)),
     };
 
     billingService = {
       isConfigured: vi.fn().mockReturnValue(true),
+      isConfiguredForWorkspace: vi.fn().mockReturnValue(true),
       getProvider: vi.fn().mockReturnValue({
         syncOffer: vi.fn().mockResolvedValue({
           productRef: { externalId: "prod_123" },
@@ -633,7 +646,7 @@ describe("OffersService", () => {
     it("should throw BadRequestException when billing provider not configured", async () => {
       prisma.offer.findFirst.mockResolvedValue(mockOffer);
       prisma.offerVersion.findFirst.mockResolvedValue(mockOfferVersion);
-      billingService.isConfigured.mockReturnValue(false);
+      billingService.isConfiguredForWorkspace.mockReturnValue(false);
 
       await expect(
         service.publishVersion("ws_123", "offer_123"),

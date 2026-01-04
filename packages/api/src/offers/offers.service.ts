@@ -453,8 +453,29 @@ export class OffersService {
       );
     }
 
-    // Validate billing provider is configured
-    if (!this.billingService.isConfigured(DEFAULT_PROVIDER)) {
+    // Get workspace settings to check billing provider configuration
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const workspaceSettings = workspace?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
+    // Validate billing provider is configured (check workspace-level or global)
+    if (
+      !this.billingService.isConfiguredForWorkspace(
+        workspaceId,
+        DEFAULT_PROVIDER,
+        workspaceSettings,
+      )
+    ) {
       throw new BadRequestException(
         `Cannot publish: ${DEFAULT_PROVIDER} is not configured. Check your billing settings.`,
       );
