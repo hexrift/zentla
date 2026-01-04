@@ -132,9 +132,9 @@ describe("EnforcementGuard", () => {
         query: {},
       };
 
-      await expect(guard.canActivate(createMockContext(request))).rejects.toThrow(
-        "Customer ID required",
-      );
+      await expect(
+        guard.canActivate(createMockContext(request)),
+      ).rejects.toThrow("Customer ID required");
     });
 
     describe("single feature enforcement", () => {
@@ -265,7 +265,9 @@ describe("EnforcementGuard", () => {
             return { errorMessage: "Upgrade required" };
           return undefined;
         });
-        enforcementService.enforceMultiple.mockResolvedValue([mockDeniedResult]);
+        enforcementService.enforceMultiple.mockResolvedValue([
+          mockDeniedResult,
+        ]);
         enforcementService.anyExceeded.mockReturnValue(true);
         enforcementService.getExceeded.mockReturnValue([mockDeniedResult]);
 
@@ -360,7 +362,10 @@ describe("EnforcementGuard", () => {
       it("should get workspace ID from URL params", async () => {
         const request = {
           apiKeyContext: undefined,
-          params: { workspaceId: "ws_from_params", customerId: "cust_123" } as Record<string, string>,
+          params: {
+            workspaceId: "ws_from_params",
+            customerId: "cust_123",
+          } as Record<string, string>,
           body: {} as Record<string, unknown>,
           query: {} as Record<string, string>,
           enforcementResult: undefined as unknown,
@@ -383,7 +388,6 @@ describe("EnforcementGuard", () => {
           expect.any(Object),
         );
       });
-
     });
 
     describe("increment from body", () => {
@@ -414,7 +418,8 @@ describe("EnforcementGuard", () => {
       it("should use array length for increment", async () => {
         reflector.getAllAndOverride.mockImplementation((key: string) => {
           if (key === ENFORCE_KEY) return ["api_calls"];
-          if (key === ENFORCE_OPTIONS_KEY) return { incrementFromBody: "items" };
+          if (key === ENFORCE_OPTIONS_KEY)
+            return { incrementFromBody: "items" };
           return undefined;
         });
         enforcementService.enforce.mockResolvedValue(mockAllowedResult);

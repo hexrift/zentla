@@ -250,7 +250,10 @@ export class SeatsService {
       };
     }
 
-    if (entitlement.valueType === "unlimited" || entitlement.value === Infinity) {
+    if (
+      entitlement.valueType === "unlimited" ||
+      entitlement.value === Infinity
+    ) {
       isUnlimited = true;
     } else if (typeof entitlement.value === "number") {
       totalSeats = entitlement.value;
@@ -316,7 +319,10 @@ export class SeatsService {
       userEmail?: string;
       userName?: string;
     }>,
-  ): Promise<{ assigned: SeatAssignment[]; errors: Array<{ userId: string; error: string }> }> {
+  ): Promise<{
+    assigned: SeatAssignment[];
+    errors: Array<{ userId: string; error: string }>;
+  }> {
     const assigned: SeatAssignment[] = [];
     const errors: Array<{ userId: string; error: string }> = [];
 
@@ -352,7 +358,10 @@ export class SeatsService {
     customerId: string,
     featureKey: string,
     userIds: string[],
-  ): Promise<{ unassigned: number; errors: Array<{ userId: string; error: string }> }> {
+  ): Promise<{
+    unassigned: number;
+    errors: Array<{ userId: string; error: string }>;
+  }> {
     let unassigned = 0;
     const errors: Array<{ userId: string; error: string }> = [];
 
@@ -484,20 +493,18 @@ export class SeatsService {
     });
   }
 
-  private toSeatAssignment(
-    dbAssignment: {
-      id: string;
-      workspaceId: string;
-      customerId: string;
-      featureKey: string;
-      userId: string;
-      userEmail: string | null;
-      userName: string | null;
-      assignedAt: Date;
-      expiresAt: Date | null;
-      metadata: unknown;
-    },
-  ): SeatAssignment {
+  private toSeatAssignment(dbAssignment: {
+    id: string;
+    workspaceId: string;
+    customerId: string;
+    featureKey: string;
+    userId: string;
+    userEmail: string | null;
+    userName: string | null;
+    assignedAt: Date;
+    expiresAt: Date | null;
+    metadata: unknown;
+  }): SeatAssignment {
     return {
       id: dbAssignment.id,
       workspaceId: dbAssignment.workspaceId,

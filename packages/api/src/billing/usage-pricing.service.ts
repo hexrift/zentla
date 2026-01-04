@@ -153,8 +153,7 @@ export class UsagePricingService {
 
       // Apply flat amount for entering this tier (if any)
       const flatAmount = tier.flatAmount ?? 0;
-      const tierTotal =
-        flatAmount + Math.round(tierQuantity * tier.unitAmount);
+      const tierTotal = flatAmount + Math.round(tierQuantity * tier.unitAmount);
 
       tierBreakdown.push({
         tierIndex: i,
@@ -207,7 +206,8 @@ export class UsagePricingService {
     }
 
     const flatAmount = applicableTier.flatAmount ?? 0;
-    const totalPrice = flatAmount + Math.round(quantity * applicableTier.unitAmount);
+    const totalPrice =
+      flatAmount + Math.round(quantity * applicableTier.unitAmount);
 
     return {
       metricKey,
@@ -279,7 +279,12 @@ export class UsagePricingService {
     // For metered pricing, calculate from usage
     if (pricing.usageType === "metered") {
       // Look for metrics associated with this offer's entitlements
-      const entitlementConfigs = (offerVersion.config as { entitlements?: Array<{ featureKey: string }> }).entitlements || [];
+      const entitlementConfigs =
+        (
+          offerVersion.config as {
+            entitlements?: Array<{ featureKey: string }>;
+          }
+        ).entitlements || [];
 
       for (const entitlement of entitlementConfigs) {
         const usageSummary = await this.usageService.getUsageSummary(

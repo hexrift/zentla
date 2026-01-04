@@ -64,7 +64,9 @@ export class EnforcementGuard implements CanActivate {
     // Extract workspace ID
     const workspaceId = this.getWorkspaceId(request);
     if (!workspaceId) {
-      throw new ForbiddenException("Workspace context required for enforcement");
+      throw new ForbiddenException(
+        "Workspace context required for enforcement",
+      );
     }
 
     // Extract customer ID
@@ -105,7 +107,10 @@ export class EnforcementGuard implements CanActivate {
 
     request.enforcementResult = results;
 
-    if (options.block !== false && this.enforcementService.anyExceeded(results)) {
+    if (
+      options.block !== false &&
+      this.enforcementService.anyExceeded(results)
+    ) {
       const exceeded = this.enforcementService.getExceeded(results);
       const message =
         options.errorMessage ||
@@ -157,7 +162,10 @@ export class EnforcementGuard implements CanActivate {
     return undefined;
   }
 
-  private getIncrementAmount(request: Request, options: EnforceOptions): number {
+  private getIncrementAmount(
+    request: Request,
+    options: EnforceOptions,
+  ): number {
     // Fixed increment
     if (options.incrementBy !== undefined) {
       return options.incrementBy;
@@ -165,7 +173,10 @@ export class EnforcementGuard implements CanActivate {
 
     // From request body
     if (options.incrementFromBody) {
-      const value = this.getNestedValue(request.body, options.incrementFromBody);
+      const value = this.getNestedValue(
+        request.body,
+        options.incrementFromBody,
+      );
       if (typeof value === "number") {
         return value;
       }

@@ -192,11 +192,7 @@ describe("EnforcementService", () => {
           totalQuantity: 500,
         });
 
-        const result = await service.enforce(
-          "ws_123",
-          "cust_123",
-          "api_calls",
-        );
+        const result = await service.enforce("ws_123", "cust_123", "api_calls");
 
         expect(result.allowed).toBe(true);
         expect(result.currentUsage).toBe(500);
@@ -237,7 +233,9 @@ describe("EnforcementService", () => {
 
         // With incrementBy=10, so 995+10=1005 > 1000, denied
         await expect(
-          service.enforce("ws_123", "cust_123", "api_calls", { incrementBy: 10 }),
+          service.enforce("ws_123", "cust_123", "api_calls", {
+            incrementBy: 10,
+          }),
         ).rejects.toThrow(ForbiddenException);
       });
 
@@ -270,11 +268,7 @@ describe("EnforcementService", () => {
           totalQuantity: 100,
         });
 
-        const result = await service.enforce(
-          "ws_123",
-          "cust_123",
-          "api_calls",
-        );
+        const result = await service.enforce("ws_123", "cust_123", "api_calls");
 
         expect(result.allowed).toBe(true);
         expect(usageService.getUsageSummary).toHaveBeenCalled();
@@ -303,11 +297,10 @@ describe("EnforcementService", () => {
         .mockResolvedValueOnce(mockBooleanEntitlement)
         .mockResolvedValueOnce(mockNoAccessEntitlement);
 
-      const results = await service.enforceMultiple(
-        "ws_123",
-        "cust_123",
-        ["premium_feature", "enterprise_feature"],
-      );
+      const results = await service.enforceMultiple("ws_123", "cust_123", [
+        "premium_feature",
+        "enterprise_feature",
+      ]);
 
       expect(results).toHaveLength(2);
       expect(results[0].allowed).toBe(true);
@@ -320,11 +313,10 @@ describe("EnforcementService", () => {
       );
 
       // Should not throw because enforceMultiple sets throwOnExceeded: false
-      const results = await service.enforceMultiple(
-        "ws_123",
-        "cust_123",
-        ["feature1", "feature2"],
-      );
+      const results = await service.enforceMultiple("ws_123", "cust_123", [
+        "feature1",
+        "feature2",
+      ]);
 
       expect(results.every((r) => !r.allowed)).toBe(true);
     });
@@ -333,8 +325,16 @@ describe("EnforcementService", () => {
   describe("anyExceeded", () => {
     it("should return true when any result is not allowed", () => {
       const results = [
-        { allowed: true, featureKey: "f1", entitlement: mockBooleanEntitlement },
-        { allowed: false, featureKey: "f2", entitlement: mockNoAccessEntitlement },
+        {
+          allowed: true,
+          featureKey: "f1",
+          entitlement: mockBooleanEntitlement,
+        },
+        {
+          allowed: false,
+          featureKey: "f2",
+          entitlement: mockNoAccessEntitlement,
+        },
       ];
 
       expect(service.anyExceeded(results)).toBe(true);
@@ -342,8 +342,16 @@ describe("EnforcementService", () => {
 
     it("should return false when all results are allowed", () => {
       const results = [
-        { allowed: true, featureKey: "f1", entitlement: mockBooleanEntitlement },
-        { allowed: true, featureKey: "f2", entitlement: mockBooleanEntitlement },
+        {
+          allowed: true,
+          featureKey: "f1",
+          entitlement: mockBooleanEntitlement,
+        },
+        {
+          allowed: true,
+          featureKey: "f2",
+          entitlement: mockBooleanEntitlement,
+        },
       ];
 
       expect(service.anyExceeded(results)).toBe(false);
@@ -353,9 +361,21 @@ describe("EnforcementService", () => {
   describe("getExceeded", () => {
     it("should return only exceeded results", () => {
       const results = [
-        { allowed: true, featureKey: "f1", entitlement: mockBooleanEntitlement },
-        { allowed: false, featureKey: "f2", entitlement: mockNoAccessEntitlement },
-        { allowed: false, featureKey: "f3", entitlement: mockNoAccessEntitlement },
+        {
+          allowed: true,
+          featureKey: "f1",
+          entitlement: mockBooleanEntitlement,
+        },
+        {
+          allowed: false,
+          featureKey: "f2",
+          entitlement: mockNoAccessEntitlement,
+        },
+        {
+          allowed: false,
+          featureKey: "f3",
+          entitlement: mockNoAccessEntitlement,
+        },
       ];
 
       const exceeded = service.getExceeded(results);
@@ -383,7 +403,13 @@ describe("EnforcementService", () => {
     it("should include subscriptionId when provided", async () => {
       usageService.ingestEvent.mockResolvedValue({ id: "evt_123" });
 
-      await service.recordUsage("ws_123", "cust_123", "api_calls", 1, "sub_123");
+      await service.recordUsage(
+        "ws_123",
+        "cust_123",
+        "api_calls",
+        1,
+        "sub_123",
+      );
 
       expect(usageService.ingestEvent).toHaveBeenCalledWith(
         "ws_123",

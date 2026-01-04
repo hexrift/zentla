@@ -388,11 +388,7 @@ describe("SeatsService", () => {
     it("should revoke seats for specific feature", async () => {
       prisma.seatAssignment.deleteMany.mockResolvedValue({ count: 3 });
 
-      const count = await service.revokeAllSeats(
-        "ws_123",
-        "cust_123",
-        "seats",
-      );
+      const count = await service.revokeAllSeats("ws_123", "cust_123", "seats");
 
       expect(count).toBe(3);
       expect(prisma.seatAssignment.deleteMany).toHaveBeenCalledWith({

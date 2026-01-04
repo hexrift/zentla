@@ -332,7 +332,8 @@ export class EnforcementService {
             ? null
             : (entitlement.value as number);
 
-        const remaining = limit !== null ? Math.max(0, limit - currentUsage) : null;
+        const remaining =
+          limit !== null ? Math.max(0, limit - currentUsage) : null;
 
         const percentUsed =
           limit !== null && limit > 0
