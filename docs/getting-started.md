@@ -23,7 +23,7 @@ Get from zero to your first checkout in under 10 minutes.
 ### 1. Clone and Install (2 min)
 
 ```bash
-git clone https://github.com/PrimeCodeLabs/zentla.git
+git clone https://github.com/hexrift/zentla.git
 cd zentla
 yarn install
 ```

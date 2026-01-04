@@ -9,22 +9,19 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/PrimeCodeLabs/zentla/blob/main/LICENSE">
+  <a href="https://github.com/hexrift/zentla/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
   </a>
-  <a href="https://github.com/PrimeCodeLabs/zentla/actions/workflows/ci.yml">
-    <img src="https://github.com/PrimeCodeLabs/zentla/actions/workflows/ci.yml/badge.svg" alt="CI" />
-  </a>
-  <a href="https://zentla.dev">
-    <img src="https://img.shields.io/badge/docs-zentla.dev-green" alt="Documentation" />
+  <a href="https://github.com/hexrift/zentla/actions/workflows/ci.yml">
+    <img src="https://github.com/hexrift/zentla/actions/workflows/ci.yml/badge.svg" alt="CI" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://zentla.dev/docs">Documentation</a> |
-  <a href="https://zentla.dev/docs/quickstart">Quickstart</a> |
-  <a href="https://zentla.dev/docs/example">Example</a> |
-  <a href="#self-hosting">Self-Hosting</a>
+  <a href="https://zentla.dev">Website</a> &bull;
+  <a href="https://zentla.dev/docs">Docs</a> &bull;
+  <a href="https://api.zentla.dev/docs">API Reference</a> &bull;
+  <a href="https://admin.zentla.dev">Live Demo</a>
 </p>
 
 ---
@@ -69,170 +66,102 @@ const access = await zentla.customers.checkEntitlement(
 
 ## Features
 
-- **Offers & Versioning** - Create pricing plans with immutable versions. Publish, rollback, or A/B test with confidence.
-- **Checkout** - Hosted or headless checkout flows with trial support and promotion codes.
-- **Entitlements** - Define features and quotas per plan. Query access at runtime with a simple API.
-- **Customer Sync** - Automatic sync with your billing provider. Link customers by external ID.
-- **Webhooks** - Receive real-time events for subscriptions, payments, and entitlement changes.
-- **Multi-Workspace** - Manage multiple projects with isolated data and API keys.
-- **Audit Logs** - Track all changes with automatic PII anonymization.
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      Your Application                        │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│                        Zentla API                            │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────────────┐   │
-│  │ Offers  │ │Customers│ │Checkout │ │  Entitlements   │   │
-│  └─────────┘ └─────────┘ └─────────┘ └─────────────────┘   │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-              ┌────────────────────────┐
-              │    Billing Provider    │
-              │  (Stripe, Zuora, etc.) │
-              └────────────────────────┘
-```
+- **Offers & Versioning** - Pricing plans with immutable versions. Publish, rollback, or A/B test.
+- **Checkout** - Hosted or headless checkout with trial and promo code support.
+- **Entitlements** - Define features and quotas per plan. Query access at runtime.
+- **Customer Sync** - Automatic sync with your billing provider.
+- **Webhooks** - Real-time events for subscriptions and payments.
+- **Multi-Provider** - Stripe today, Zuora tomorrow. Switch without code changes.
 
 ## Quick Start
 
-### Prerequisites
-
-- Node.js 18+
-- PostgreSQL 14+
-- Redis 6+
-- Stripe account (for payment processing)
-
-### Installation
-
 ```bash
-# Clone the repository
-git clone https://github.com/PrimeCodeLabs/zentla.git
+# Clone
+git clone https://github.com/hexrift/zentla.git
 cd zentla
 
-# Install dependencies
+# Install
 yarn install
 
-# Start infrastructure (PostgreSQL + Redis)
+# Start infrastructure
 docker-compose up -d
 
-# Set up environment
+# Configure
 cp .env.example .env
-# Edit .env with your Stripe keys
+# Edit .env with your settings
 
-# Run migrations and seed
-yarn db:generate
-yarn db:migrate
-yarn db:seed
+# Setup database
+yarn db:generate && yarn db:migrate && yarn db:seed
 
-# Start development server
+# Run
 yarn dev
 ```
 
-The API will be running at `http://localhost:3002`. Open the [API docs](http://localhost:3002/docs) to explore.
+API runs at `http://localhost:3002`. Open `http://localhost:3002/docs` to explore.
 
-### First API Call
+## Try the Live Demo
+
+- **API**: [api.zentla.dev/docs](https://api.zentla.dev/docs) - Interactive API documentation
+- **Dashboard**: [admin.zentla.dev](https://admin.zentla.dev) - Example admin interface
+
+## Self-Hosting
+
+Zentla runs anywhere with Node.js, PostgreSQL, and Redis.
 
 ```bash
-# Create a feature
-curl -X POST http://localhost:3002/api/v1/features \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -d '{
-    "key": "seats",
-    "name": "Team Seats",
-    "type": "numeric"
-  }'
+docker build -t zentla .
+
+docker run -p 3002:3002 \
+  -e DATABASE_URL=postgresql://... \
+  -e REDIS_URL=redis://... \
+  zentla
 ```
 
-See the [Quickstart Guide](https://zentla.dev/docs/quickstart) for a complete walkthrough.
+See [Self-Hosting Guide](docs/self-hosting.md) for detailed deployment options.
 
 ## Project Structure
 
 ```
 zentla/
 ├── packages/
-│   ├── api/            # NestJS API server
-│   ├── admin-ui/       # React admin dashboard
-│   ├── web/            # Marketing site & docs
-│   ├── sdk/            # TypeScript SDK
-│   ├── core/           # Shared domain logic
-│   ├── database/       # Prisma schema & migrations
-│   └── adapters/
-│       ├── stripe/     # Stripe integration
-│       └── zuora/      # Zuora integration
-├── infrastructure/     # Terraform for AWS deployment
-└── docs/               # Additional documentation
+│   ├── api/          # NestJS API server
+│   ├── admin-ui/     # React admin dashboard
+│   ├── web/          # Marketing site & docs
+│   ├── sdk/          # TypeScript SDK
+│   ├── database/     # Prisma schema & migrations
+│   └── adapters/     # Stripe, Zuora integrations
+└── docs/             # Documentation
 ```
-
-## Self-Hosting
-
-Zentla can be self-hosted on any infrastructure that supports Node.js, PostgreSQL, and Redis.
-
-### Docker
-
-```bash
-# Build the image
-docker build -t zentla .
-
-# Run with environment variables
-docker run -p 3002:3002 \
-  -e DATABASE_URL=postgresql://... \
-  -e REDIS_URL=redis://... \
-  -e STRIPE_SECRET_KEY=sk_... \
-  zentla
-```
-
-### Cloud Deployment
-
-See our deployment guides:
-
-- [Free Tier (Cloudflare + Koyeb + Neon)](docs/deployment-free-tier.md)
-- [AWS (Terraform)](infrastructure/README.md)
 
 ## Documentation
 
-- [Quickstart](https://zentla.dev/docs/quickstart) - Get up and running in 5 minutes
-- [Headless Checkout](https://zentla.dev/docs/headless-checkout) - Build custom checkout UI
-- [Webhooks](https://zentla.dev/docs/webhooks) - Handle subscription events
-- [End-to-End Example](https://zentla.dev/docs/example) - Complete implementation walkthrough
-- [API Reference](http://localhost:3002/docs) - OpenAPI documentation
+- [Getting Started](docs/getting-started.md)
+- [Core Concepts](docs/concepts.md)
+- [API Reference](docs/api-reference.md)
+- [Webhooks](docs/webhooks.md)
+- [Self-Hosting](docs/self-hosting.md)
+- [Security](docs/security.md)
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ```bash
-# Run tests
-yarn test
-
-# Run linting
-yarn lint
-
-# Type check
-yarn typecheck
+yarn test      # Run tests
+yarn lint      # Lint code
+yarn typecheck # Type check
 ```
 
 ## Security
 
-If you discover a security vulnerability, please email security@zentla.dev instead of opening a public issue. See [SECURITY.md](SECURITY.md) for our security policy.
+Found a vulnerability? Email security@zentla.dev. See [SECURITY.md](SECURITY.md).
 
 ## License
 
-Zentla is [MIT licensed](LICENSE).
-
-## Community
-
-- [GitHub Issues](https://github.com/PrimeCodeLabs/zentla/issues) - Bug reports and feature requests
-- [GitHub Discussions](https://github.com/PrimeCodeLabs/zentla/discussions) - Questions and ideas
+[MIT](LICENSE)
 
 ---
 
 <p align="center">
-  <sub>Built with care by <a href="https://github.com/PrimeCodeLabs">PrimeCodeLabs</a></sub>
+  <sub>Built by <a href="https://github.com/hexrift">Hexrift</a></sub>
 </p>

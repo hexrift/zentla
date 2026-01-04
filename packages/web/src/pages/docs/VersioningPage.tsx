@@ -270,7 +270,7 @@ X-Zentla-Migration: See https://zentla.dev/docs/migrations/v2`}</CodeBlock>
       <ul>
         <li>
           <a
-            href="https://github.com/PrimeCodeLabs/zentla/releases"
+            href="https://github.com/hexrift/zentla/releases"
             target="_blank"
             rel="noopener"
           >
