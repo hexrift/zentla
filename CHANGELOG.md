@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://github.com/hexrift/zentla/compare/v5.0.1...v5.1.0) (2026-01-04)
+
+
+### Features
+
+* **web:** add changelog page to docs ([#25](https://github.com/hexrift/zentla/issues/25)) ([4a15b79](https://github.com/hexrift/zentla/commit/4a15b795f2016b02fac2b12563d2119ee35a739e))
+
 ## [5.0.1](https://github.com/hexrift/zentla/compare/v5.0.0...v5.0.1) (2026-01-04)
 
 
