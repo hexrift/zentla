@@ -23,9 +23,6 @@ export function Layout() {
               <span className="text-lg font-semibold text-gray-900">
                 Zentla
               </span>
-              <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
-                Beta
-              </span>
             </Link>
 
             {/* Desktop nav */}
@@ -259,7 +256,7 @@ export function Layout() {
           </div>
           <div className="mt-12 pt-8 border-t border-gray-200">
             <p className="text-sm text-gray-400 text-center">
-              Zentla is currently in beta. We'd love your feedback!
+              We'd love your feedback!
             </p>
           </div>
         </div>

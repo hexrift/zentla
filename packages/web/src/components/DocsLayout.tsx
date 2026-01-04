@@ -83,7 +83,7 @@ const tableOfContents: Record<
     { id: "api-versioning", title: "API Versioning", level: 2 },
     { id: "change-policy", title: "Change Policy", level: 2 },
     { id: "deprecation-process", title: "Deprecation Process", level: 2 },
-    { id: "beta-considerations", title: "Beta Considerations", level: 2 },
+    { id: "stability", title: "Stability", level: 2 },
     { id: "sdk-versioning", title: "SDK Versioning", level: 2 },
     { id: "offer-versioning", title: "Offer Versioning", level: 2 },
     { id: "webhook-versioning", title: "Webhook Versioning", level: 2 },
@@ -174,8 +174,8 @@ export function DocsLayout() {
                   <span className="text-white font-bold text-xs">Z</span>
                 </div>
                 <span className="font-semibold text-gray-900">Zentla</span>
-                <span className="ml-1 px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">
-                  Beta · {ZENTLA_VERSION}
+                <span className="ml-1 px-1.5 py-0.5 text-[10px] font-medium bg-primary-100 text-primary-700 rounded">
+                  {ZENTLA_VERSION}
                 </span>
               </Link>
               <span className="hidden sm:block text-gray-300">|</span>
@@ -330,7 +330,7 @@ export function DocsLayout() {
             <div className="mt-8 p-4 bg-gray-50 rounded-xl">
               <h5 className="font-medium text-gray-900 mb-1">Have feedback?</h5>
               <p className="text-sm text-gray-500 mb-3">
-                Help us improve Zentla during beta.
+                Help us improve Zentla.
               </p>
               <Link
                 to="/feedback"
