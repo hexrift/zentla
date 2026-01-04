@@ -25,7 +25,6 @@ export function QuickstartPage() {
         entitlements.
       </p>
 
-
       <h2 id="prerequisites">Prerequisites</h2>
       <ul>
         <li>A Stripe account with API keys</li>
