@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.7](https://github.com/hexrift/zentla/compare/v5.5.6...v5.5.7) (2026-01-04)
+
+
+### Bug Fixes
+
+* analytics limit, add currency/country settings, workspace webhook secret ([#49](https://github.com/hexrift/zentla/issues/49)) ([a2d748a](https://github.com/hexrift/zentla/commit/a2d748a3e91db4ae4e4935dea51f20c725e3faeb))
+
 ## [5.5.6](https://github.com/hexrift/zentla/compare/v5.5.5...v5.5.6) (2026-01-04)
 
 
