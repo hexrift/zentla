@@ -505,7 +505,7 @@ export class CheckoutController {
 
 **Workflow:**
 1. Call this endpoint with offer and redirect URLs
-2. Redirect customer to the returned \`sessionUrl\`
+2. Redirect customer to the returned \`url\`
 3. Customer completes payment on hosted checkout page
 4. Customer is redirected to \`successUrl\` with session ID
 5. Your server verifies the session and provisions access
@@ -565,7 +565,7 @@ export class CheckoutController {
 
     return {
       id: session.id,
-      sessionUrl: session.url,
+      url: session.url,
       expiresAt: session.expiresAt,
     };
   }
