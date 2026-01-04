@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.5](https://github.com/hexrift/zentla/compare/v5.5.4...v5.5.5) (2026-01-04)
+
+
+### Bug Fixes
+
+* use workspace-level billing check in promotions and stripe-sync ([#45](https://github.com/hexrift/zentla/issues/45)) ([cc59e19](https://github.com/hexrift/zentla/commit/cc59e19b86ba32fa33d0bbec06bd79b1459b6645))
+
 ## [5.5.4](https://github.com/hexrift/zentla/compare/v5.5.3...v5.5.4) (2026-01-04)
 
 
