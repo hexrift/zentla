@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Outlet, Link } from "react-router-dom";
+import { Logo } from "./Logo";
 
 const DASHBOARD_URL =
   import.meta.env.VITE_DASHBOARD_URL || "http://localhost:3001";
@@ -16,13 +17,8 @@ export function Layout() {
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">Z</span>
-              </div>
-              <span className="text-lg font-semibold text-gray-900">
-                Zentla
-              </span>
+            <Link to="/">
+              <Logo size="md" />
             </Link>
 
             {/* Desktop nav */}
@@ -154,11 +150,8 @@ export function Layout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">Z</span>
-                </div>
-                <span className="font-semibold text-gray-900">Zentla</span>
+              <div className="mb-4">
+                <Logo size="sm" />
               </div>
               <p className="text-sm text-gray-500">
                 Subscription management for modern apps.
