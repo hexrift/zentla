@@ -584,7 +584,28 @@ export class OffersService {
     version: OfferVersion,
     provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
-    if (!this.billingService.isConfigured(provider)) {
+    // Get workspace settings to check billing provider configuration
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const workspaceSettings = workspace?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
+    if (
+      !this.billingService.isConfiguredForWorkspace(
+        workspaceId,
+        provider,
+        workspaceSettings,
+      )
+    ) {
       throw new BadRequestException(
         `${provider} is not configured. Check your billing settings.`,
       );
