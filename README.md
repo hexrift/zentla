@@ -42,12 +42,12 @@ Zentla solves this with a unified API layer that handles entitlements, usage met
 
 Zentla is **billing infrastructure you control**—open source, self-hostable, and provider-agnostic. Four pillars, one API:
 
-| Pillar | What it does |
-|--------|--------------|
-| **Entitlements** | Feature access, quotas, and limits derived from subscriptions |
-| **Usage Metering** | Track, aggregate, and bill for usage-based pricing |
-| **Multi-Provider** | Stripe today, Zuora tomorrow—switch without code changes |
-| **Revenue Analytics** | MRR, churn, cohorts, and growth metrics in real-time |
+| Pillar                | What it does                                                  |
+| --------------------- | ------------------------------------------------------------- |
+| **Entitlements**      | Feature access, quotas, and limits derived from subscriptions |
+| **Usage Metering**    | Track, aggregate, and bill for usage-based pricing            |
+| **Multi-Provider**    | Stripe today, Zuora tomorrow—switch without code changes      |
+| **Revenue Analytics** | MRR, churn, cohorts, and growth metrics in real-time          |
 
 ```typescript
 // Create an offer with pricing and entitlements
@@ -76,55 +76,64 @@ await zentla.usage.ingest({
 });
 
 // Check entitlements at runtime
-const access = await zentla.customers.checkEntitlement(customerId, "api_access");
+const access = await zentla.customers.checkEntitlement(
+  customerId,
+  "api_access",
+);
 // { hasAccess: true, value: true }
 ```
 
 ## Why Zentla?
 
-| | Zentla | Stigg | Orb | Stripe Billing |
-|---|:---:|:---:|:---:|:---:|
-| Open Source | ✅ | ❌ | ❌ | ❌ |
-| Self-Hostable | ✅ | ❌ | ❌ | ❌ |
-| Entitlements | ✅ | ✅ | ❌ | ❌ |
-| Usage Metering | ✅ | ❌ | ✅ | ✅ |
-| Multi-Provider | ✅ | ❌ | ❌ | ❌ |
-| Revenue Analytics | ✅ | ❌ | ❌ | ❌ |
-| Pricing Experiments | ✅ | ✅ | ❌ | ❌ |
+|                     | Zentla | Stigg | Orb | Stripe Billing |
+| ------------------- | :----: | :---: | :-: | :------------: |
+| Open Source         |   ✅   |  ❌   | ❌  |       ❌       |
+| Self-Hostable       |   ✅   |  ❌   | ❌  |       ❌       |
+| Entitlements        |   ✅   |  ✅   | ❌  |       ❌       |
+| Usage Metering      |   ✅   |  ❌   | ✅  |       ✅       |
+| Multi-Provider      |   ✅   |  ❌   | ❌  |       ❌       |
+| Revenue Analytics   |   ✅   |  ❌   | ❌  |       ❌       |
+| Pricing Experiments |   ✅   |  ✅   | ❌  |       ❌       |
 
 ## Features
 
 ### Entitlements & Feature Gating
+
 - Define features and quotas per plan
 - Query access at runtime with sub-10ms latency
 - Boolean flags, numeric limits, and custom values
 - Automatic sync when subscriptions change
 
 ### Usage Metering & Billing
+
 - Ingest millions of events with idempotency
 - Flexible aggregation: sum, max, count, or last value
 - Real-time usage summaries per customer
 - Overage calculations and usage-based pricing
 
 ### Multi-Provider Billing
+
 - Connect Stripe, Zuora, or both simultaneously
 - Provider-agnostic checkout (hosted or headless)
 - Switch providers without code changes
 - Unified webhook handling and event normalization
 
 ### Revenue Analytics
+
 - Real-time MRR, ARR, and growth metrics
 - Churn rate and cohort analysis
 - Revenue breakdown by plan, period, and segment
 - Built-in analytics dashboard
 
 ### Pricing Experiments
+
 - Immutable offer versions for safe A/B testing
 - Publish, rollback, or schedule pricing changes
 - No deploys required for pricing updates
 - Track conversion by offer version
 
 ### Enterprise-Ready
+
 - Comprehensive audit logging
 - API versioning with ETag concurrency control
 - Idempotent operations for safe retries

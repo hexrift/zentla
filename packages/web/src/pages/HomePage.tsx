@@ -18,7 +18,7 @@ function useInView(threshold = 0.1) {
           observer.disconnect();
         }
       },
-      { threshold }
+      { threshold },
     );
 
     if (ref.current) {
@@ -320,7 +320,13 @@ function HeroLogo() {
             className="animate-draw"
           />
           {/* Control indicator dot with pulse */}
-          <circle cx="25" cy="8" r="2.5" fill="#fbbf24" className="animate-pulse" />
+          <circle
+            cx="25"
+            cy="8"
+            r="2.5"
+            fill="#fbbf24"
+            className="animate-pulse"
+          />
         </svg>
       </div>
       {/* Glow effect */}
@@ -439,22 +445,46 @@ export function HomePage() {
                     <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
                     <div className="w-3 h-3 rounded-full bg-green-500/80" />
                   </div>
-                  <span className="ml-2 text-xs text-gray-400 font-mono">app.ts</span>
+                  <span className="ml-2 text-xs text-gray-400 font-mono">
+                    app.ts
+                  </span>
                 </div>
                 {/* Code */}
                 <pre className="p-4 sm:p-6 text-xs sm:text-sm font-mono overflow-x-auto">
                   <code className="text-gray-300">
-                    <span className="text-gray-500">{"// Check entitlements at runtime"}</span>{"\n"}
-                    <span className="text-purple-400">const</span> access = <span className="text-purple-400">await</span> zentla.customers{"\n"}
-                    {"  "}.checkEntitlement(customerId, <span className="text-green-400">'api_access'</span>);{"\n\n"}
-                    <span className="text-purple-400">if</span> (access.hasAccess) {"{"}{"\n"}
-                    {"  "}<span className="text-gray-500">{"// Feature is enabled"}</span>{"\n"}
-                    {"}"}{"\n\n"}
-                    <span className="text-gray-500">{"// Track usage for billing"}</span>{"\n"}
-                    <span className="text-purple-400">await</span> zentla.usage.ingest({"{"}{"\n"}
-                    {"  "}customerId: <span className="text-green-400">'cust_123'</span>,{"\n"}
-                    {"  "}metricKey: <span className="text-green-400">'api_calls'</span>,{"\n"}
-                    {"  "}quantity: <span className="text-orange-400">1</span>{"\n"}
+                    <span className="text-gray-500">
+                      {"// Check entitlements at runtime"}
+                    </span>
+                    {"\n"}
+                    <span className="text-purple-400">const</span> access ={" "}
+                    <span className="text-purple-400">await</span>{" "}
+                    zentla.customers{"\n"}
+                    {"  "}.checkEntitlement(customerId,{" "}
+                    <span className="text-green-400">'api_access'</span>);
+                    {"\n\n"}
+                    <span className="text-purple-400">if</span>{" "}
+                    (access.hasAccess) {"{"}
+                    {"\n"}
+                    {"  "}
+                    <span className="text-gray-500">
+                      {"// Feature is enabled"}
+                    </span>
+                    {"\n"}
+                    {"}"}
+                    {"\n\n"}
+                    <span className="text-gray-500">
+                      {"// Track usage for billing"}
+                    </span>
+                    {"\n"}
+                    <span className="text-purple-400">await</span>{" "}
+                    zentla.usage.ingest({"{"}
+                    {"\n"}
+                    {"  "}customerId:{" "}
+                    <span className="text-green-400">'cust_123'</span>,{"\n"}
+                    {"  "}metricKey:{" "}
+                    <span className="text-green-400">'api_calls'</span>,{"\n"}
+                    {"  "}quantity: <span className="text-orange-400">1</span>
+                    {"\n"}
                     {"}"});
                   </code>
                 </pre>
@@ -477,7 +507,9 @@ export function HomePage() {
         className="py-16 sm:py-20 bg-gray-900 text-white"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`text-center mb-12 transition-all duration-700 ${problemSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div
+            className={`text-center mb-12 transition-all duration-700 ${problemSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          >
             <h2 className="text-2xl sm:text-3xl font-bold">
               Billing infrastructure is a black hole
             </h2>
@@ -488,14 +520,30 @@ export function HomePage() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { num: 1, title: "Entitlements sprawl", desc: "Feature flags, plan limits, and access controls scattered across services" },
-              { num: 2, title: "Usage tracking pain", desc: "Metering, aggregation, and overage logic built from scratch" },
-              { num: 3, title: "Provider lock-in", desc: "Tightly coupled to Stripe, dreading the day you need Zuora" },
-              { num: 4, title: "No visibility", desc: "MRR, churn, and cohort metrics buried in spreadsheets" },
+              {
+                num: 1,
+                title: "Entitlements sprawl",
+                desc: "Feature flags, plan limits, and access controls scattered across services",
+              },
+              {
+                num: 2,
+                title: "Usage tracking pain",
+                desc: "Metering, aggregation, and overage logic built from scratch",
+              },
+              {
+                num: 3,
+                title: "Provider lock-in",
+                desc: "Tightly coupled to Stripe, dreading the day you need Zuora",
+              },
+              {
+                num: 4,
+                title: "No visibility",
+                desc: "MRR, churn, and cohort metrics buried in spreadsheets",
+              },
             ].map((problem, i) => (
               <div
                 key={problem.num}
-                className={`bg-gray-800/50 rounded-lg p-5 hover:bg-gray-800/70 transition-all duration-500 hover:scale-105 ${problemSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                className={`bg-gray-800/50 rounded-lg p-5 hover:bg-gray-800/70 transition-all duration-500 hover:scale-105 ${problemSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
                 style={{ transitionDelay: `${i * 100 + 200}ms` }}
               >
                 <div className="text-red-400 font-mono text-sm mb-2">
@@ -510,12 +558,11 @@ export function HomePage() {
       </section>
 
       {/* Four Pillars */}
-      <section
-        ref={pillarsSection.ref}
-        className="py-16 sm:py-24"
-      >
+      <section ref={pillarsSection.ref} className="py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`text-center mb-16 transition-all duration-700 ${pillarsSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div
+            className={`text-center mb-16 transition-all duration-700 ${pillarsSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          >
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Four pillars. One API.
             </h2>
@@ -528,7 +575,7 @@ export function HomePage() {
             {pillars.map((pillar, i) => (
               <div
                 key={pillar.title}
-                className={`p-6 rounded-2xl border border-gray-100 hover:border-primary-200 hover:shadow-xl hover:shadow-primary-100/50 transition-all duration-500 hover:-translate-y-2 ${pillarsSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                className={`p-6 rounded-2xl border border-gray-100 hover:border-primary-200 hover:shadow-xl hover:shadow-primary-100/50 transition-all duration-500 hover:-translate-y-2 ${pillarsSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
                 style={{ transitionDelay: `${i * 100 + 200}ms` }}
               >
                 <div className="w-12 h-12 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -545,12 +592,11 @@ export function HomePage() {
       </section>
 
       {/* Code example */}
-      <section
-        ref={codeSection.ref}
-        className="py-16 sm:py-24 bg-gray-900"
-      >
+      <section ref={codeSection.ref} className="py-16 sm:py-24 bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`text-center mb-12 transition-all duration-700 ${codeSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div
+            className={`text-center mb-12 transition-all duration-700 ${codeSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          >
             <h2 className="text-2xl sm:text-3xl font-bold text-white">
               Simple, powerful API
             </h2>
@@ -559,7 +605,9 @@ export function HomePage() {
               lines of code.
             </p>
           </div>
-          <div className={`max-w-4xl mx-auto transition-all duration-700 delay-200 ${codeSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div
+            className={`max-w-4xl mx-auto transition-all duration-700 delay-200 ${codeSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          >
             <pre className="code-block text-xs sm:text-sm overflow-x-auto">
               <code>{codeExample}</code>
             </pre>
@@ -573,7 +621,9 @@ export function HomePage() {
         className="py-16 sm:py-24 bg-gray-50"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`text-center mb-12 transition-all duration-700 ${comparisonSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div
+            className={`text-center mb-12 transition-all duration-700 ${comparisonSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          >
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Why teams choose Zentla
             </h2>
@@ -582,7 +632,9 @@ export function HomePage() {
               source
             </p>
           </div>
-          <div className={`overflow-x-auto transition-all duration-700 delay-200 ${comparisonSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div
+            className={`overflow-x-auto transition-all duration-700 delay-200 ${comparisonSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          >
             <table className="w-full bg-white rounded-xl shadow-sm border border-gray-200">
               <thead>
                 <tr className="border-b border-gray-200">
@@ -605,20 +657,87 @@ export function HomePage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {[
-                  { feature: "Open Source", zentla: true, stigg: false, orb: false, stripe: false },
-                  { feature: "Self-Hostable", zentla: true, stigg: false, orb: false, stripe: false },
-                  { feature: "Entitlements", zentla: true, stigg: true, orb: false, stripe: false },
-                  { feature: "Usage Metering", zentla: true, stigg: false, orb: true, stripe: true },
-                  { feature: "Multi-Provider", zentla: true, stigg: false, orb: false, stripe: false },
-                  { feature: "Revenue Analytics", zentla: true, stigg: false, orb: false, stripe: false },
-                  { feature: "Pricing Experiments", zentla: true, stigg: true, orb: false, stripe: false },
+                  {
+                    feature: "Open Source",
+                    zentla: true,
+                    stigg: false,
+                    orb: false,
+                    stripe: false,
+                  },
+                  {
+                    feature: "Self-Hostable",
+                    zentla: true,
+                    stigg: false,
+                    orb: false,
+                    stripe: false,
+                  },
+                  {
+                    feature: "Entitlements",
+                    zentla: true,
+                    stigg: true,
+                    orb: false,
+                    stripe: false,
+                  },
+                  {
+                    feature: "Usage Metering",
+                    zentla: true,
+                    stigg: false,
+                    orb: true,
+                    stripe: true,
+                  },
+                  {
+                    feature: "Multi-Provider",
+                    zentla: true,
+                    stigg: false,
+                    orb: false,
+                    stripe: false,
+                  },
+                  {
+                    feature: "Revenue Analytics",
+                    zentla: true,
+                    stigg: false,
+                    orb: false,
+                    stripe: false,
+                  },
+                  {
+                    feature: "Pricing Experiments",
+                    zentla: true,
+                    stigg: true,
+                    orb: false,
+                    stripe: false,
+                  },
                 ].map((row) => (
-                  <tr key={row.feature} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-gray-900">{row.feature}</td>
-                    <td className="px-6 py-4 text-center text-primary-600">{row.zentla ? "✓" : "—"}</td>
-                    <td className="px-6 py-4 text-center">{row.stigg ? <span className="text-green-600">✓</span> : <span className="text-gray-300">—</span>}</td>
-                    <td className="px-6 py-4 text-center">{row.orb ? <span className="text-green-600">✓</span> : <span className="text-gray-300">—</span>}</td>
-                    <td className="px-6 py-4 text-center">{row.stripe ? <span className="text-green-600">✓</span> : <span className="text-gray-300">—</span>}</td>
+                  <tr
+                    key={row.feature}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {row.feature}
+                    </td>
+                    <td className="px-6 py-4 text-center text-primary-600">
+                      {row.zentla ? "✓" : "—"}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {row.stigg ? (
+                        <span className="text-green-600">✓</span>
+                      ) : (
+                        <span className="text-gray-300">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {row.orb ? (
+                        <span className="text-green-600">✓</span>
+                      ) : (
+                        <span className="text-gray-300">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {row.stripe ? (
+                        <span className="text-green-600">✓</span>
+                      ) : (
+                        <span className="text-gray-300">—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -628,12 +747,11 @@ export function HomePage() {
       </section>
 
       {/* More Features */}
-      <section
-        ref={featuresSection.ref}
-        className="py-16 sm:py-24"
-      >
+      <section ref={featuresSection.ref} className="py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`text-center mb-16 transition-all duration-700 ${featuresSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div
+            className={`text-center mb-16 transition-all duration-700 ${featuresSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          >
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Everything else you need
             </h2>
@@ -642,7 +760,7 @@ export function HomePage() {
             {features.map((feature, i) => (
               <div
                 key={feature.title}
-                className={`p-6 rounded-2xl border border-gray-100 hover:border-primary-100 hover:bg-primary-50/30 transition-all duration-500 hover:-translate-y-1 ${featuresSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                className={`p-6 rounded-2xl border border-gray-100 hover:border-primary-100 hover:bg-primary-50/30 transition-all duration-500 hover:-translate-y-1 ${featuresSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
                 style={{ transitionDelay: `${i * 100 + 200}ms` }}
               >
                 <div className="w-12 h-12 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center mb-4">
@@ -664,7 +782,9 @@ export function HomePage() {
         className="py-16 sm:py-24 bg-white border-t border-gray-100"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`text-center mb-12 transition-all duration-700 ${integrationsSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div
+            className={`text-center mb-12 transition-all duration-700 ${integrationsSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          >
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Works with your billing provider
             </h2>
@@ -672,7 +792,9 @@ export function HomePage() {
               Connect today. Switch tomorrow. No code changes required.
             </p>
           </div>
-          <div className={`flex flex-wrap items-center justify-center gap-8 lg:gap-16 transition-all duration-700 delay-200 ${integrationsSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div
+            className={`flex flex-wrap items-center justify-center gap-8 lg:gap-16 transition-all duration-700 delay-200 ${integrationsSection.isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          >
             {/* Stripe - Official logo */}
             <a
               href="https://stripe.com"

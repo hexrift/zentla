@@ -10,7 +10,11 @@ const sizes = {
   lg: { icon: "w-10 h-10", text: "text-xl" },
 };
 
-export function Logo({ size = "md", showText = true, animate = false }: LogoProps) {
+export function Logo({
+  size = "md",
+  showText = true,
+  animate = false,
+}: LogoProps) {
   const s = sizes[size];
 
   return (
