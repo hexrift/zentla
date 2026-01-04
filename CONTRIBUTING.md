@@ -168,8 +168,8 @@ docs: update quickstart guide
 
 ## Getting Help
 
-- **Questions**: Open a [GitHub Discussion](https://github.com/PrimeCodeLabs/zentla/discussions)
-- **Bugs**: Open a [GitHub Issue](https://github.com/PrimeCodeLabs/zentla/issues)
+- **Questions**: Open a [GitHub Discussion](https://github.com/hexrift/zentla/discussions)
+- **Bugs**: Open a [GitHub Issue](https://github.com/hexrift/zentla/issues)
 - **Security**: Email security@zentla.dev (see [SECURITY.md](SECURITY.md))
 
 ## Recognition
