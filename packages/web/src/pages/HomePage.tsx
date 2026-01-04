@@ -382,28 +382,6 @@ export function HomePage() {
                 Available
               </span>
             </a>
-            {/* Paddle - Coming Soon */}
-            <div className="flex flex-col items-center opacity-50">
-              <div className="h-12 flex items-center">
-                <span className="text-xl font-semibold text-gray-400">
-                  Paddle
-                </span>
-              </div>
-              <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
-                Coming Soon
-              </span>
-            </div>
-            {/* Adyen - Coming Soon */}
-            <div className="flex flex-col items-center opacity-50">
-              <div className="h-12 flex items-center">
-                <span className="text-xl font-semibold text-gray-400">
-                  Adyen
-                </span>
-              </div>
-              <span className="mt-1 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
-                Coming Soon
-              </span>
-            </div>
           </div>
         </div>
       </section>
