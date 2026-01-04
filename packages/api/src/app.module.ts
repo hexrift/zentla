@@ -26,6 +26,7 @@ import { EventsModule } from "./events/events.module";
 import { AuditModule } from "./audit/audit.module";
 import { FeedbackModule } from "./feedback/feedback.module";
 import { UsageModule } from "./usage/usage.module";
+import { ExperimentsModule } from "./experiments/experiments.module";
 
 // Guards
 import { ApiKeyGuard } from "./auth/guards/api-key.guard";
@@ -100,6 +101,7 @@ import { configuration, validationSchema } from "./config/configuration";
     AuditModule,
     FeedbackModule,
     UsageModule,
+    ExperimentsModule,
   ],
   providers: [
     // Global interceptors

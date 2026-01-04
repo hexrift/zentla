@@ -94,6 +94,7 @@ model Workspace {
   outboxEvents      OutboxEvent[]
   deadLetterEvents  DeadLetterEvent[]
   seatAssignments   SeatAssignment[]
+  experiments       Experiment[]
 
   @@map("workspace")
 }
@@ -923,6 +924,140 @@ enum UsageAggregationType {
   last
 
   @@map("usage_aggregation_type")
+}
+
+// ============================================================================
+// A/B EXPERIMENTS & PRICING EXPERIMENTS
+// ============================================================================
+
+model Experiment {
+  id          String           @id @default(uuid()) @db.Uuid
+  workspaceId String           @map("workspace_id") @db.Uuid
+  key         String           @db.VarChar(100)
+  name        String           @db.VarChar(200)
+  description String?          @db.VarChar(1000)
+  type        ExperimentType   @default(feature)
+  status      ExperimentStatus @default(draft)
+
+  // Traffic allocation (0-100)
+  trafficAllocation Int @default(100) @map("traffic_allocation")
+
+  // Targeting
+  targetingRules Json @default("{}") @map("targeting_rules")
+
+  // Scheduling
+  startAt DateTime? @map("start_at") @db.Timestamptz
+  endAt   DateTime? @map("end_at") @db.Timestamptz
+
+  // Results
+  winningVariantId String? @map("winning_variant_id") @db.Uuid
+  concludedAt      DateTime? @map("concluded_at") @db.Timestamptz
+
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  workspace      Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  variants       ExperimentVariant[]
+  winningVariant ExperimentVariant?    @relation("WinningVariant", fields: [winningVariantId], references: [id])
+  assignments    ExperimentAssignment[]
+
+  @@unique([workspaceId, key])
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, type, status])
+  @@map("experiment")
+}
+
+enum ExperimentType {
+  feature  // Feature flag experiment
+  pricing  // Pricing experiment (different offers/prices)
+  offer    // Different offer variants
+  ui       // UI/UX experiments
+
+  @@map("experiment_type")
+}
+
+enum ExperimentStatus {
+  draft     // Not yet started
+  running   // Currently active
+  paused    // Temporarily stopped
+  concluded // Finished with winner
+  archived  // No longer relevant
+
+  @@map("experiment_status")
+}
+
+model ExperimentVariant {
+  id           String @id @default(uuid()) @db.Uuid
+  experimentId String @map("experiment_id") @db.Uuid
+  key          String @db.VarChar(100)
+  name         String @db.VarChar(200)
+  description  String? @db.VarChar(1000)
+
+  // Weight for random assignment (relative to other variants)
+  weight Int @default(1)
+
+  // Variant configuration (depends on experiment type)
+  // For feature: { enabled: true/false, config: {...} }
+  // For pricing: { offerId: "...", priceOverride: 1999 }
+  // For offer: { offerId: "..." }
+  config Json @default("{}")
+
+  // Control variant flag
+  isControl Boolean @default(false) @map("is_control")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  experiment          Experiment             @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  winningForExperiment Experiment[]          @relation("WinningVariant")
+  assignments         ExperimentAssignment[]
+
+  @@unique([experimentId, key])
+  @@index([experimentId])
+  @@map("experiment_variant")
+}
+
+model ExperimentAssignment {
+  id           String   @id @default(uuid()) @db.Uuid
+  workspaceId  String   @map("workspace_id") @db.Uuid
+  experimentId String   @map("experiment_id") @db.Uuid
+  variantId    String   @map("variant_id") @db.Uuid
+  customerId   String?  @map("customer_id") @db.Uuid
+  sessionId    String?  @map("session_id") @db.VarChar(255)
+  userId       String?  @map("user_id") @db.VarChar(255)
+
+  // Assignment metadata
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Timestamptz
+  source     String   @default("auto") @db.VarChar(50) // auto, manual, override
+
+  // Tracking
+  firstExposureAt DateTime? @map("first_exposure_at") @db.Timestamptz
+  lastExposureAt  DateTime? @map("last_exposure_at") @db.Timestamptz
+  exposureCount   Int       @default(0) @map("exposure_count")
+
+  // Conversion tracking
+  convertedAt DateTime? @map("converted_at") @db.Timestamptz
+  conversionValue Decimal? @map("conversion_value") @db.Decimal(20, 6)
+  conversionMetadata Json? @map("conversion_metadata")
+
+  metadata Json @default("{}")
+
+  // Relations
+  experiment Experiment        @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  variant    ExperimentVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([experimentId, customerId])
+  @@unique([experimentId, sessionId])
+  @@index([workspaceId])
+  @@index([experimentId])
+  @@index([variantId])
+  @@index([customerId])
+  @@index([workspaceId, experimentId, customerId])
+  @@map("experiment_assignment")
 }
 
 // ============================================================================
