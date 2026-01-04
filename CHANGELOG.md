@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.4](https://github.com/hexrift/zentla/compare/v5.5.3...v5.5.4) (2026-01-04)
+
+
+### Bug Fixes
+
+* use workspace-level billing provider across all services ([#43](https://github.com/hexrift/zentla/issues/43)) ([e07b1cc](https://github.com/hexrift/zentla/commit/e07b1cccd54d7f1b325dc2ddbdcdc50708514318))
+
 ## [5.5.3](https://github.com/hexrift/zentla/compare/v5.5.2...v5.5.3) (2026-01-04)
 
 
