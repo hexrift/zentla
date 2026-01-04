@@ -235,7 +235,28 @@ export class OffersService {
     offerId: string,
     provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
-    if (!this.billingService.isConfigured(provider)) {
+    // Get workspace settings for billing provider
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const workspaceSettings = workspace?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
+    if (
+      !this.billingService.isConfiguredForWorkspace(
+        workspaceId,
+        provider,
+        workspaceSettings,
+      )
+    ) {
       return;
     }
 
@@ -248,7 +269,11 @@ export class OffersService {
       );
 
       if (productRef) {
-        const billingProvider = this.billingService.getProvider(provider);
+        const billingProvider = this.billingService.getProviderForWorkspace(
+          workspaceId,
+          provider,
+          workspaceSettings,
+        );
         if (billingProvider.archiveProduct) {
           await billingProvider.archiveProduct(productRef.externalId);
           this.logger.log(

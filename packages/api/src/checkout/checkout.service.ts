@@ -393,13 +393,36 @@ export class CheckoutService {
       }
     }
 
+    // Get workspace settings to check billing provider configuration
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const workspaceSettings = workspace?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
     // Create checkout session via billing provider
-    if (!this.billingService.isConfigured(provider)) {
+    if (
+      !this.billingService.isConfiguredForWorkspace(
+        workspaceId,
+        provider,
+        workspaceSettings,
+      )
+    ) {
       throw new BadRequestException(`${provider} not configured`);
     }
 
-    const billingProvider = this.billingService.getProvider(
+    const billingProvider = this.billingService.getProviderForWorkspace(
+      workspaceId,
       provider,
+      workspaceSettings,
     ) as StripeAdapter;
 
     // Validate webhook is configured before allowing checkout
@@ -751,9 +774,32 @@ export class CheckoutService {
     let clientSecret: string | null = null;
     const intentProvider: ProviderType = "stripe";
 
-    if (this.billingService.isConfigured(intentProvider)) {
-      const billingProvider = this.billingService.getProvider(
+    // Get workspace settings for billing provider
+    const intentWorkspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const intentWorkspaceSettings = intentWorkspace?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
+    if (
+      this.billingService.isConfiguredForWorkspace(
+        workspaceId,
         intentProvider,
+        intentWorkspaceSettings,
+      )
+    ) {
+      const billingProvider = this.billingService.getProviderForWorkspace(
+        workspaceId,
+        intentProvider,
+        intentWorkspaceSettings,
       ) as StripeAdapter;
 
       // Get or create provider customer

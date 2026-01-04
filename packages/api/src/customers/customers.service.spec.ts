@@ -16,10 +16,15 @@ describe("CustomersService", () => {
       update: ReturnType<typeof vi.fn>;
       delete: ReturnType<typeof vi.fn>;
     };
+    workspace: {
+      findUnique: ReturnType<typeof vi.fn>;
+    };
   };
   let billingService: {
     isConfigured: ReturnType<typeof vi.fn>;
+    isConfiguredForWorkspace: ReturnType<typeof vi.fn>;
     getProvider: ReturnType<typeof vi.fn>;
+    getProviderForWorkspace: ReturnType<typeof vi.fn>;
   };
   let providerRefService: {
     getProviderCustomerId: ReturnType<typeof vi.fn>;
@@ -48,21 +53,33 @@ describe("CustomersService", () => {
         update: vi.fn(),
         delete: vi.fn(),
       },
+      workspace: {
+        findUnique: vi.fn().mockResolvedValue({
+          settings: {
+            stripeSecretKey: "sk_test_123",
+            stripeWebhookSecret: "whsec_123",
+          },
+        }),
+      },
+    };
+
+    const mockProvider = {
+      createCustomer: vi
+        .fn()
+        .mockResolvedValue({ externalId: "stripe_cust_123" }),
+      updateCustomer: vi.fn().mockResolvedValue({}),
+      deleteCustomer: vi.fn().mockResolvedValue({}),
+      createPortalSession: vi.fn().mockResolvedValue({
+        id: "ps_123",
+        url: "https://portal.stripe.com",
+      }),
     };
 
     billingService = {
       isConfigured: vi.fn().mockReturnValue(true),
-      getProvider: vi.fn().mockReturnValue({
-        createCustomer: vi
-          .fn()
-          .mockResolvedValue({ externalId: "stripe_cust_123" }),
-        updateCustomer: vi.fn().mockResolvedValue({}),
-        deleteCustomer: vi.fn().mockResolvedValue({}),
-        createPortalSession: vi.fn().mockResolvedValue({
-          id: "ps_123",
-          url: "https://portal.stripe.com",
-        }),
-      }),
+      isConfiguredForWorkspace: vi.fn().mockReturnValue(true),
+      getProvider: vi.fn().mockReturnValue(mockProvider),
+      getProviderForWorkspace: vi.fn().mockReturnValue(mockProvider),
     };
 
     providerRefService = {
@@ -422,7 +439,7 @@ describe("CustomersService", () => {
     it("should skip provider sync when provider not configured", async () => {
       prisma.customer.findFirst.mockResolvedValue(mockCustomer);
       prisma.customer.delete.mockResolvedValue(mockCustomer);
-      billingService.isConfigured.mockReturnValue(false);
+      billingService.isConfiguredForWorkspace.mockReturnValue(false);
 
       await service.delete("ws_123", "cust_123");
 

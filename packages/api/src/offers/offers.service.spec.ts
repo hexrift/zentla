@@ -900,7 +900,7 @@ describe("OffersService", () => {
       await service.archive("ws_123", "offer_123");
 
       const provider = (
-        billingService.getProvider as () => Record<
+        billingService.getProviderForWorkspace as () => Record<
           string,
           ReturnType<typeof vi.fn>
         >
@@ -917,7 +917,7 @@ describe("OffersService", () => {
       providerRefService.findByEntity.mockResolvedValue({
         externalId: "prod_123",
       });
-      billingService.getProvider.mockReturnValue({
+      billingService.getProviderForWorkspace.mockReturnValue({
         archiveProduct: vi.fn().mockRejectedValue(new Error("Provider error")),
       });
 
@@ -932,7 +932,7 @@ describe("OffersService", () => {
         ...mockOffer,
         status: "archived",
       });
-      billingService.isConfigured.mockReturnValue(false);
+      billingService.isConfiguredForWorkspace.mockReturnValue(false);
 
       await service.archive("ws_123", "offer_123");
 

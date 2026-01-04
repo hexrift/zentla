@@ -143,13 +143,38 @@ export class CustomersService {
     customer: Customer,
     provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
-    if (!this.billingService.isConfigured(provider)) {
+    // Get workspace settings for billing provider
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const workspaceSettings = workspace?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
+    if (
+      !this.billingService.isConfiguredForWorkspace(
+        workspaceId,
+        provider,
+        workspaceSettings,
+      )
+    ) {
       this.logger.warn(`${provider} not configured, skipping customer sync`);
       return;
     }
 
     try {
-      const billingProvider = this.billingService.getProvider(provider);
+      const billingProvider = this.billingService.getProviderForWorkspace(
+        workspaceId,
+        provider,
+        workspaceSettings,
+      );
       const result = await billingProvider.createCustomer({
         workspaceId,
         customerId: customer.id,
@@ -252,7 +277,28 @@ export class CustomersService {
     dto: UpdateCustomerDto,
     provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
-    if (!this.billingService.isConfigured(provider)) {
+    // Get workspace settings for billing provider
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const workspaceSettings = workspace?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
+    if (
+      !this.billingService.isConfiguredForWorkspace(
+        workspaceId,
+        provider,
+        workspaceSettings,
+      )
+    ) {
       return;
     }
 
@@ -271,7 +317,11 @@ export class CustomersService {
         return;
       }
 
-      const billingProvider = this.billingService.getProvider(provider);
+      const billingProvider = this.billingService.getProviderForWorkspace(
+        workspaceId,
+        provider,
+        workspaceSettings,
+      );
       await billingProvider.updateCustomer(providerCustomerId, {
         email: dto.email,
         name: dto.name,
@@ -304,7 +354,28 @@ export class CustomersService {
     customerId: string,
     provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
-    if (!this.billingService.isConfigured(provider)) {
+    // Get workspace settings for billing provider
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const workspaceSettings = workspace?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
+    if (
+      !this.billingService.isConfiguredForWorkspace(
+        workspaceId,
+        provider,
+        workspaceSettings,
+      )
+    ) {
       return;
     }
 
@@ -320,7 +391,11 @@ export class CustomersService {
         return;
       }
 
-      const billingProvider = this.billingService.getProvider(provider);
+      const billingProvider = this.billingService.getProviderForWorkspace(
+        workspaceId,
+        provider,
+        workspaceSettings,
+      );
       await billingProvider.deleteCustomer(providerCustomerId);
 
       // Delete the provider ref
@@ -364,6 +439,21 @@ export class CustomersService {
       throw new NotFoundException(`Customer ${customerId} not found`);
     }
 
+    // Get workspace settings for billing provider
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const workspaceSettings = workspace?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
     // Get provider customer ID
     const providerCustomerId =
       await this.providerRefService.getProviderCustomerId(
@@ -379,7 +469,11 @@ export class CustomersService {
     }
 
     // Create portal session via billing provider
-    const billingProvider = this.billingService.getProvider(provider);
+    const billingProvider = this.billingService.getProviderForWorkspace(
+      workspaceId,
+      provider,
+      workspaceSettings,
+    );
     const session = await billingProvider.createPortalSession({
       workspaceId,
       customerId: providerCustomerId,
