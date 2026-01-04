@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { useWorkspace } from "../lib/workspace-context";
 
 interface AnalyticsData {
   mrr: number;
@@ -10,15 +11,6 @@ interface AnalyticsData {
   churnRate: number;
   totalCustomers: number;
   newCustomers: number;
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount / 100);
 }
 
 function formatPercent(value: number): string {
@@ -107,6 +99,8 @@ function ChurnIndicator({
 }
 
 export function AnalyticsPage() {
+  const { formatCurrency } = useWorkspace();
+
   // Fetch subscriptions to calculate metrics
   const { data: subscriptions, isLoading: subsLoading } = useQuery({
     queryKey: ["subscriptions", { limit: 100 }],
@@ -242,7 +236,7 @@ export function AnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
             title="Monthly Recurring Revenue"
-            value={formatCurrency(analytics.mrr)}
+            value={formatCurrency(analytics.mrr / 100)}
             change={analytics.mrrChange}
             changeLabel="vs last month"
             isLoading={isLoading}

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./lib/auth-context";
+import { WorkspaceProvider } from "./lib/workspace-context";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
@@ -36,7 +37,9 @@ export default function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <Layout />
+              <WorkspaceProvider>
+                <Layout />
+              </WorkspaceProvider>
             </ProtectedRoute>
           }
         >

@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import { api } from "../lib/api";
+import { useWorkspace } from "../lib/workspace-context";
 import type { Offer } from "../lib/types";
 
 type Tab =
@@ -19,6 +20,7 @@ export function OfferDetailPage() {
   const [searchParams] = useSearchParams();
   const initialTab = (searchParams.get("tab") as Tab) || "details";
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
+  const { settings: workspaceSettings } = useWorkspace();
 
   // Update tab if URL changes
   useEffect(() => {
@@ -266,13 +268,23 @@ function PricingTab({ offer }: { offer: Offer }) {
     intervalCount: number;
   }>({
     model: existingPricing?.model ?? "flat",
-    currency: existingPricing?.currency ?? "USD",
+    currency: existingPricing?.currency ?? workspaceSettings.defaultCurrency,
     amount: existingPricing?.amount ?? 0,
     interval: existingPricing?.interval ?? "month",
     intervalCount:
       ((existingPricing as Record<string, unknown>)?.intervalCount as number) ??
       1,
   });
+
+  // Update pricing currency when workspace settings load (for new versions)
+  useEffect(() => {
+    if (!existingPricing?.currency && workspaceSettings.defaultCurrency) {
+      setPricing((prev) => ({
+        ...prev,
+        currency: workspaceSettings.defaultCurrency,
+      }));
+    }
+  }, [existingPricing?.currency, workspaceSettings.defaultCurrency]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const updateDraftMutation = useMutation({
@@ -486,7 +498,7 @@ function EntitlementsTab({ offer }: { offer: Offer }) {
     const newConfig = {
       pricing: config?.pricing ?? {
         model: "flat",
-        currency: "USD",
+        currency: workspaceSettings.defaultCurrency,
         amount: 0,
         interval: "month",
       },
@@ -502,7 +514,7 @@ function EntitlementsTab({ offer }: { offer: Offer }) {
     const newConfig = {
       pricing: config?.pricing ?? {
         model: "flat",
-        currency: "USD",
+        currency: workspaceSettings.defaultCurrency,
         amount: 0,
         interval: "month",
       },
