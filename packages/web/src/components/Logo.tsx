@@ -1,6 +1,7 @@
 interface LogoProps {
   size?: "sm" | "md" | "lg";
   showText?: boolean;
+  animate?: boolean;
 }
 
 const sizes = {
@@ -9,30 +10,37 @@ const sizes = {
   lg: { icon: "w-10 h-10", text: "text-xl" },
 };
 
-export function Logo({ size = "md", showText = true }: LogoProps) {
+export function Logo({ size = "md", showText = true, animate = false }: LogoProps) {
   const s = sizes[size];
 
   return (
     <div className="flex items-center gap-2.5">
       <div
-        className={`${s.icon} rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center relative`}
+        className={`${s.icon} rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center relative overflow-hidden`}
       >
-        {/* Stylized Z as connected path */}
+        {/* Concept 5: Clean Z with control accent */}
         <svg
           viewBox="0 0 32 32"
           fill="none"
           className="w-full h-full"
           aria-hidden="true"
         >
+          {/* Clean Z */}
           <path
-            d="M8 10h16l-12 12h16"
+            d="M7 8h18L7 24h18"
             stroke="white"
-            strokeWidth="3"
+            strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          {/* Accent dot */}
-          <circle cx="24" cy="10" r="2" fill="#fbbf24" />
+          {/* Control indicator dot at top-right */}
+          <circle
+            cx="25"
+            cy="8"
+            r="2.5"
+            fill="#fbbf24"
+            className={animate ? "animate-pulse" : ""}
+          />
         </svg>
       </div>
       {showText && (

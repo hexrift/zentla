@@ -1,9 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { SEO } from "../components/SEO";
 
 const API_DOCS_URL =
   import.meta.env.VITE_API_DOCS_URL || "http://localhost:3002/docs";
+
+// Hook for intersection observer animations
+function useInView(threshold = 0.1) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, isInView };
+}
 
 const codeExample = `// 1. Create an offer with entitlements
 const offer = await zentla.offers.create({
@@ -255,7 +281,7 @@ function FAQItem({
       >
         <span className="font-medium text-gray-900">{question}</span>
         <svg
-          className={`w-5 h-5 text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -269,11 +295,36 @@ function FAQItem({
           />
         </svg>
       </button>
-      {isOpen && (
-        <div className="pb-5">
-          <p className="text-gray-600">{answer}</p>
-        </div>
-      )}
+      <div
+        className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 pb-5" : "max-h-0"}`}
+      >
+        <p className="text-gray-600">{answer}</p>
+      </div>
+    </div>
+  );
+}
+
+// Animated hero logo component
+function HeroLogo() {
+  return (
+    <div className="relative inline-flex items-center justify-center mb-6">
+      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/25 animate-float">
+        <svg viewBox="0 0 32 32" fill="none" className="w-full h-full">
+          {/* Clean Z */}
+          <path
+            d="M7 8h18L7 24h18"
+            stroke="white"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="animate-draw"
+          />
+          {/* Control indicator dot with pulse */}
+          <circle cx="25" cy="8" r="2.5" fill="#fbbf24" className="animate-pulse" />
+        </svg>
+      </div>
+      {/* Glow effect */}
+      <div className="absolute inset-0 w-20 h-20 rounded-2xl bg-primary-500/20 blur-xl animate-pulse-slow" />
     </div>
   );
 }
@@ -281,28 +332,75 @@ function FAQItem({
 export function HomePage() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
 
+  // Animation refs
+  const problemSection = useInView(0.2);
+  const pillarsSection = useInView(0.1);
+  const codeSection = useInView(0.2);
+  const comparisonSection = useInView(0.1);
+  const featuresSection = useInView(0.1);
+  const integrationsSection = useInView(0.2);
+
   return (
     <div>
       <SEO path="/" />
+
+      {/* Custom animations */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+        @keyframes draw {
+          from { stroke-dashoffset: 100; }
+          to { stroke-dashoffset: 0; }
+        }
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.7; }
+        }
+        @keyframes fade-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        .animate-draw {
+          stroke-dasharray: 100;
+          stroke-dashoffset: 100;
+          animation: draw 1.5s ease-out forwards;
+        }
+        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+        .animate-fade-up { animation: fade-up 0.6s ease-out forwards; }
+        .animate-fade-in { animation: fade-in 0.6s ease-out forwards; }
+        .animation-delay-100 { animation-delay: 100ms; }
+        .animation-delay-200 { animation-delay: 200ms; }
+        .animation-delay-300 { animation-delay: 300ms; }
+        .animation-delay-400 { animation-delay: 400ms; }
+      `}</style>
+
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary-50/50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
           <div className="text-center max-w-3xl mx-auto">
-            <p className="text-sm font-medium text-primary-600 mb-4">
+            <HeroLogo />
+            <p className="text-sm font-medium text-primary-600 mb-4 animate-fade-up animation-delay-100">
               Open source alternative to Stigg, Orb, and Lago
             </p>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 tracking-tight animate-fade-up animation-delay-200">
               Billing
               <span className="block text-primary-600">you control</span>
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="mt-6 text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto animate-fade-up animation-delay-300">
               Open source entitlements, metering, and billing—without the
               lock-in. Self-host or use our cloud. Switch providers anytime.
             </p>
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up animation-delay-400">
               <Link
                 to="/docs/quickstart"
-                className="btn-primary text-base px-6 py-3 w-full sm:w-auto"
+                className="btn-primary text-base px-6 py-3 w-full sm:w-auto transform hover:scale-105 transition-transform"
               >
                 Get Started
               </Link>
@@ -310,7 +408,7 @@ export function HomePage() {
                 href="https://github.com/hexrift/zentla"
                 target="_blank"
                 rel="noopener"
-                className="btn-secondary text-base px-6 py-3 w-full sm:w-auto inline-flex items-center justify-center gap-2"
+                className="btn-secondary text-base px-6 py-3 w-full sm:w-auto inline-flex items-center justify-center gap-2 transform hover:scale-105 transition-transform"
               >
                 <svg
                   className="w-5 h-5"
@@ -332,9 +430,12 @@ export function HomePage() {
       </section>
 
       {/* Problem Statement */}
-      <section className="py-16 sm:py-20 bg-gray-900 text-white">
+      <section
+        ref={problemSection.ref}
+        className="py-16 sm:py-20 bg-gray-900 text-white"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className={`text-center mb-12 transition-all duration-700 ${problemSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-2xl sm:text-3xl font-bold">
               Billing infrastructure is a black hole
             </h2>
@@ -344,51 +445,35 @@ export function HomePage() {
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-gray-800/50 rounded-lg p-5">
-              <div className="text-red-400 font-mono text-sm mb-2">
-                // Problem 1
+            {[
+              { num: 1, title: "Entitlements sprawl", desc: "Feature flags, plan limits, and access controls scattered across services" },
+              { num: 2, title: "Usage tracking pain", desc: "Metering, aggregation, and overage logic built from scratch" },
+              { num: 3, title: "Provider lock-in", desc: "Tightly coupled to Stripe, dreading the day you need Zuora" },
+              { num: 4, title: "No visibility", desc: "MRR, churn, and cohort metrics buried in spreadsheets" },
+            ].map((problem, i) => (
+              <div
+                key={problem.num}
+                className={`bg-gray-800/50 rounded-lg p-5 hover:bg-gray-800/70 transition-all duration-500 hover:scale-105 ${problemSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                style={{ transitionDelay: `${i * 100 + 200}ms` }}
+              >
+                <div className="text-red-400 font-mono text-sm mb-2">
+                  // Problem {problem.num}
+                </div>
+                <h3 className="font-semibold mb-1">{problem.title}</h3>
+                <p className="text-sm text-gray-400">{problem.desc}</p>
               </div>
-              <h3 className="font-semibold mb-1">Entitlements sprawl</h3>
-              <p className="text-sm text-gray-400">
-                Feature flags, plan limits, and access controls scattered across
-                services
-              </p>
-            </div>
-            <div className="bg-gray-800/50 rounded-lg p-5">
-              <div className="text-red-400 font-mono text-sm mb-2">
-                // Problem 2
-              </div>
-              <h3 className="font-semibold mb-1">Usage tracking pain</h3>
-              <p className="text-sm text-gray-400">
-                Metering, aggregation, and overage logic built from scratch
-              </p>
-            </div>
-            <div className="bg-gray-800/50 rounded-lg p-5">
-              <div className="text-red-400 font-mono text-sm mb-2">
-                // Problem 3
-              </div>
-              <h3 className="font-semibold mb-1">Provider lock-in</h3>
-              <p className="text-sm text-gray-400">
-                Tightly coupled to Stripe, dreading the day you need Zuora
-              </p>
-            </div>
-            <div className="bg-gray-800/50 rounded-lg p-5">
-              <div className="text-red-400 font-mono text-sm mb-2">
-                // Problem 4
-              </div>
-              <h3 className="font-semibold mb-1">No visibility</h3>
-              <p className="text-sm text-gray-400">
-                MRR, churn, and cohort metrics buried in spreadsheets
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Four Pillars */}
-      <section className="py-16 sm:py-24">
+      <section
+        ref={pillarsSection.ref}
+        className="py-16 sm:py-24"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className={`text-center mb-16 transition-all duration-700 ${pillarsSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Four pillars. One API.
             </h2>
@@ -398,12 +483,13 @@ export function HomePage() {
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {pillars.map((pillar) => (
+            {pillars.map((pillar, i) => (
               <div
                 key={pillar.title}
-                className="p-6 rounded-2xl border border-gray-100 hover:border-primary-200 hover:shadow-lg transition-all"
+                className={`p-6 rounded-2xl border border-gray-100 hover:border-primary-200 hover:shadow-xl hover:shadow-primary-100/50 transition-all duration-500 hover:-translate-y-2 ${pillarsSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                style={{ transitionDelay: `${i * 100 + 200}ms` }}
               >
-                <div className="w-12 h-12 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   {pillar.icon}
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">
@@ -417,9 +503,12 @@ export function HomePage() {
       </section>
 
       {/* Code example */}
-      <section className="py-16 sm:py-24 bg-gray-900">
+      <section
+        ref={codeSection.ref}
+        className="py-16 sm:py-24 bg-gray-900"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className={`text-center mb-12 transition-all duration-700 ${codeSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-2xl sm:text-3xl font-bold text-white">
               Simple, powerful API
             </h2>
@@ -428,7 +517,7 @@ export function HomePage() {
               lines of code.
             </p>
           </div>
-          <div className="max-w-4xl mx-auto">
+          <div className={`max-w-4xl mx-auto transition-all duration-700 delay-200 ${codeSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <pre className="code-block text-xs sm:text-sm overflow-x-auto">
               <code>{codeExample}</code>
             </pre>
@@ -437,9 +526,12 @@ export function HomePage() {
       </section>
 
       {/* Comparison Table */}
-      <section className="py-16 sm:py-24 bg-gray-50">
+      <section
+        ref={comparisonSection.ref}
+        className="py-16 sm:py-24 bg-gray-50"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className={`text-center mb-12 transition-all duration-700 ${comparisonSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Why teams choose Zentla
             </h2>
@@ -448,7 +540,7 @@ export function HomePage() {
               source
             </p>
           </div>
-          <div className="overflow-x-auto">
+          <div className={`overflow-x-auto transition-all duration-700 delay-200 ${comparisonSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <table className="w-full bg-white rounded-xl shadow-sm border border-gray-200">
               <thead>
                 <tr className="border-b border-gray-200">
@@ -470,91 +562,23 @@ export function HomePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    Open Source
-                  </td>
-                  <td className="px-6 py-4 text-center text-primary-600">
-                    &#10003;
-                  </td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    Self-Hostable
-                  </td>
-                  <td className="px-6 py-4 text-center text-primary-600">
-                    &#10003;
-                  </td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    Entitlements
-                  </td>
-                  <td className="px-6 py-4 text-center text-primary-600">
-                    &#10003;
-                  </td>
-                  <td className="px-6 py-4 text-center text-green-600">
-                    &#10003;
-                  </td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    Usage Metering
-                  </td>
-                  <td className="px-6 py-4 text-center text-primary-600">
-                    &#10003;
-                  </td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                  <td className="px-6 py-4 text-center text-green-600">
-                    &#10003;
-                  </td>
-                  <td className="px-6 py-4 text-center text-green-600">
-                    &#10003;
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    Multi-Provider
-                  </td>
-                  <td className="px-6 py-4 text-center text-primary-600">
-                    &#10003;
-                  </td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    Revenue Analytics
-                  </td>
-                  <td className="px-6 py-4 text-center text-primary-600">
-                    &#10003;
-                  </td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    Pricing Experiments
-                  </td>
-                  <td className="px-6 py-4 text-center text-primary-600">
-                    &#10003;
-                  </td>
-                  <td className="px-6 py-4 text-center text-green-600">
-                    &#10003;
-                  </td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                  <td className="px-6 py-4 text-center text-gray-300">—</td>
-                </tr>
+                {[
+                  { feature: "Open Source", zentla: true, stigg: false, orb: false, stripe: false },
+                  { feature: "Self-Hostable", zentla: true, stigg: false, orb: false, stripe: false },
+                  { feature: "Entitlements", zentla: true, stigg: true, orb: false, stripe: false },
+                  { feature: "Usage Metering", zentla: true, stigg: false, orb: true, stripe: true },
+                  { feature: "Multi-Provider", zentla: true, stigg: false, orb: false, stripe: false },
+                  { feature: "Revenue Analytics", zentla: true, stigg: false, orb: false, stripe: false },
+                  { feature: "Pricing Experiments", zentla: true, stigg: true, orb: false, stripe: false },
+                ].map((row) => (
+                  <tr key={row.feature} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 text-sm text-gray-900">{row.feature}</td>
+                    <td className="px-6 py-4 text-center text-primary-600">{row.zentla ? "✓" : "—"}</td>
+                    <td className="px-6 py-4 text-center">{row.stigg ? <span className="text-green-600">✓</span> : <span className="text-gray-300">—</span>}</td>
+                    <td className="px-6 py-4 text-center">{row.orb ? <span className="text-green-600">✓</span> : <span className="text-gray-300">—</span>}</td>
+                    <td className="px-6 py-4 text-center">{row.stripe ? <span className="text-green-600">✓</span> : <span className="text-gray-300">—</span>}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -562,18 +586,22 @@ export function HomePage() {
       </section>
 
       {/* More Features */}
-      <section className="py-16 sm:py-24">
+      <section
+        ref={featuresSection.ref}
+        className="py-16 sm:py-24"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className={`text-center mb-16 transition-all duration-700 ${featuresSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Everything else you need
             </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature) => (
+            {features.map((feature, i) => (
               <div
                 key={feature.title}
-                className="p-6 rounded-2xl border border-gray-100 hover:border-primary-100 hover:bg-primary-50/30 transition-colors"
+                className={`p-6 rounded-2xl border border-gray-100 hover:border-primary-100 hover:bg-primary-50/30 transition-all duration-500 hover:-translate-y-1 ${featuresSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                style={{ transitionDelay: `${i * 100 + 200}ms` }}
               >
                 <div className="w-12 h-12 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center mb-4">
                   {feature.icon}
@@ -589,9 +617,12 @@ export function HomePage() {
       </section>
 
       {/* Integrations */}
-      <section className="py-16 sm:py-24 bg-white border-t border-gray-100">
+      <section
+        ref={integrationsSection.ref}
+        className="py-16 sm:py-24 bg-white border-t border-gray-100"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className={`text-center mb-12 transition-all duration-700 ${integrationsSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Works with your billing provider
             </h2>
@@ -599,7 +630,7 @@ export function HomePage() {
               Connect today. Switch tomorrow. No code changes required.
             </p>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-16">
+          <div className={`flex flex-wrap items-center justify-center gap-8 lg:gap-16 transition-all duration-700 delay-200 ${integrationsSection.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             {/* Stripe - Official logo */}
             <a
               href="https://stripe.com"
@@ -607,7 +638,7 @@ export function HomePage() {
               rel="noopener noreferrer"
               className="flex flex-col items-center group"
             >
-              <div className="h-12 flex items-center">
+              <div className="h-12 flex items-center transform group-hover:scale-110 transition-transform">
                 <img
                   src="/logos/stripe.svg"
                   alt="Stripe - Payment processing platform"
@@ -628,7 +659,7 @@ export function HomePage() {
               rel="noopener noreferrer"
               className="flex flex-col items-center group"
             >
-              <div className="h-12 flex items-center">
+              <div className="h-12 flex items-center transform group-hover:scale-110 transition-transform">
                 <img
                   src="/logos/zuora.svg"
                   alt="Zuora - Subscription management platform"
@@ -684,7 +715,7 @@ export function HomePage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/docs/quickstart"
-              className="bg-white text-primary-600 hover:bg-primary-50 font-medium px-8 py-3 rounded-lg transition-colors"
+              className="bg-white text-primary-600 hover:bg-primary-50 font-medium px-8 py-3 rounded-lg transition-all hover:scale-105 transform"
             >
               Get Started Free
             </Link>
@@ -692,7 +723,7 @@ export function HomePage() {
               href="https://github.com/hexrift/zentla"
               target="_blank"
               rel="noopener"
-              className="border border-primary-300 text-white hover:bg-primary-500 font-medium px-8 py-3 rounded-lg transition-colors inline-flex items-center gap-2"
+              className="border border-primary-300 text-white hover:bg-primary-500 font-medium px-8 py-3 rounded-lg transition-all hover:scale-105 transform inline-flex items-center gap-2"
             >
               <svg
                 className="w-5 h-5"

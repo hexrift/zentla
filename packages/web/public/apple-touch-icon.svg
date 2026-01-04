@@ -1,13 +1,13 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="grad" x1="0" y1="0" x2="180" y2="180">
+    <linearGradient id="bg" x1="0" y1="0" x2="180" y2="180">
       <stop offset="0%" stop-color="#14b8a6"/>
       <stop offset="100%" stop-color="#0d9488"/>
     </linearGradient>
   </defs>
-  <rect width="180" height="180" rx="40" fill="url(#grad)"/>
-  <!-- Stylized Z as connected path/flow -->
-  <path d="M45 56h90l-67 68h90" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <!-- Control dot accent -->
-  <circle cx="135" cy="56" r="10" fill="#fbbf24"/>
+  <rect width="180" height="180" rx="40" fill="url(#bg)"/>
+  <!-- Clean Z -->
+  <path d="M40 45h100L40 135h100" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Control indicator dot at top-right -->
+  <circle cx="140" cy="45" r="14" fill="#fbbf24"/>
 </svg>
