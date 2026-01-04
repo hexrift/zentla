@@ -20,7 +20,6 @@ export function OfferDetailPage() {
   const [searchParams] = useSearchParams();
   const initialTab = (searchParams.get("tab") as Tab) || "details";
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
-  const { settings: workspaceSettings } = useWorkspace();
 
   // Update tab if URL changes
   useEffect(() => {
@@ -254,6 +253,7 @@ function DetailsTab({ offer }: { offer: Offer }) {
 
 function PricingTab({ offer }: { offer: Offer }) {
   const queryClient = useQueryClient();
+  const { settings: workspaceSettings } = useWorkspace();
   // Use draft version if available, otherwise current version
   const draftVersion = offer.versions?.find((v) => v.status === "draft");
   const activeVersion = draftVersion ?? offer.currentVersion;
@@ -277,14 +277,15 @@ function PricingTab({ offer }: { offer: Offer }) {
   });
 
   // Update pricing currency when workspace settings load (for new versions)
+  const defaultCurrency = workspaceSettings.defaultCurrency;
   useEffect(() => {
-    if (!existingPricing?.currency && workspaceSettings.defaultCurrency) {
+    if (!existingPricing?.currency && defaultCurrency) {
       setPricing((prev) => ({
         ...prev,
-        currency: workspaceSettings.defaultCurrency,
+        currency: defaultCurrency,
       }));
     }
-  }, [existingPricing?.currency, workspaceSettings.defaultCurrency]);
+  }, [existingPricing?.currency, defaultCurrency]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const updateDraftMutation = useMutation({
@@ -449,6 +450,7 @@ function TrialsTab({ offer }: { offer: Offer }) {
 
 function EntitlementsTab({ offer }: { offer: Offer }) {
   const queryClient = useQueryClient();
+  const { settings: workspaceSettings } = useWorkspace();
   // Use draft version if available, otherwise current version
   const draftVersion = offer.versions?.find((v) => v.status === "draft");
   const activeVersion = draftVersion ?? offer.currentVersion;
