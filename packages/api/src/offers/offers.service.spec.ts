@@ -831,7 +831,7 @@ describe("OffersService", () => {
         currentVersion: mockOfferVersion,
       };
       prisma.offer.findFirst.mockResolvedValue(offerWithVersion);
-      billingService.isConfigured.mockReturnValue(false);
+      billingService.isConfiguredForWorkspace.mockReturnValue(false);
 
       await expect(
         service.syncOfferToProvider("ws_123", "offer_123"),
