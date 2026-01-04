@@ -25,13 +25,6 @@ export function QuickstartPage() {
         entitlements.
       </p>
 
-      <div className="not-prose mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-        <p className="text-sm text-amber-800">
-          <strong>Beta:</strong> Zentla is in active development. APIs are
-          stable but may receive additive changes. Breaking changes will be
-          communicated in advance.
-        </p>
-      </div>
 
       <h2 id="prerequisites">Prerequisites</h2>
       <ul>
@@ -198,8 +191,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
       <div className="not-prose mt-12 p-6 bg-gray-50 rounded-xl">
         <h3 className="font-semibold text-gray-900 mb-2">Need help?</h3>
         <p className="text-sm text-gray-600 mb-4">
-          Zentla is in beta. If you run into issues or have feedback, we'd love
-          to hear from you.
+          If you run into issues or have feedback, we'd love to hear from you.
         </p>
         <Link
           to="/feedback"

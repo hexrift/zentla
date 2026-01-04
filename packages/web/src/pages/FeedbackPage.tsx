@@ -133,7 +133,7 @@ export function FeedbackPage() {
             Send us Feedback
           </h1>
           <p className="text-lg text-gray-500">
-            Help us improve Zentla during beta. We read every piece of feedback.
+            Help us improve Zentla. We read every piece of feedback.
           </p>
         </div>
 

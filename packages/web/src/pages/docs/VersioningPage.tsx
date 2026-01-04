@@ -7,7 +7,7 @@ export function VersioningPage() {
     <article className="prose-docs">
       <SEO
         title="Versioning & Stability"
-        description="Our commitment to API stability and how we handle changes during beta and beyond."
+        description="Our commitment to API stability and how we handle changes."
         path="/docs/versioning"
         breadcrumbs={[
           { name: "Home", path: "/" },
@@ -17,18 +17,9 @@ export function VersioningPage() {
       />
       <h1>Versioning & Stability</h1>
       <p className="lead text-lg text-gray-600 mb-8">
-        Our commitment to API stability and how we handle changes during beta
-        and beyond.
+        Our commitment to API stability and how we handle changes.
       </p>
 
-      <div className="not-prose mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-        <p className="text-sm text-amber-800">
-          <strong>Beta Status:</strong> Zentla is currently in beta. While we
-          aim for stability, some breaking changes may occur with advance
-          notice. We'll communicate all changes through our changelog and email
-          notifications.
-        </p>
-      </div>
 
       <h2 id="api-versioning">API Versioning</h2>
       <p>
@@ -145,17 +136,15 @@ X-Zentla-Deprecated: true
 X-Zentla-Sunset: 2025-06-01
 X-Zentla-Migration: See https://zentla.dev/docs/migrations/v2`}</CodeBlock>
 
-      <h2 id="beta-considerations">Beta Considerations</h2>
+      <h2 id="stability">Stability</h2>
       <p>
-        During the beta period, we may occasionally make breaking changes with
-        shorter notice (minimum 2 weeks) to address fundamental issues. We
-        commit to:
+        We are committed to API stability. For any breaking changes, we:
       </p>
       <ul>
-        <li>Communicating all changes via email to registered developers</li>
-        <li>Providing migration scripts or tools where possible</li>
-        <li>Offering direct support for migration challenges</li>
-        <li>Documenting all changes in our changelog</li>
+        <li>Communicate all changes via email to registered developers</li>
+        <li>Provide migration scripts or tools where possible</li>
+        <li>Offer direct support for migration challenges</li>
+        <li>Document all changes in our changelog</li>
       </ul>
 
       <h2 id="sdk-versioning">SDK Versioning</h2>
@@ -289,7 +278,7 @@ X-Zentla-Migration: See https://zentla.dev/docs/migrations/v2`}</CodeBlock>
         >
           send us feedback
         </Link>
-        . We're here to help during beta.
+        . We're here to help.
       </p>
 
       <div className="not-prose mt-12 p-6 bg-gray-50 rounded-xl">

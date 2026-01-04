@@ -333,9 +333,6 @@ export function Layout() {
               <span className="text-lg font-semibold text-gray-900">
                 Zentla
               </span>
-              <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">
-                Beta
-              </span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -496,9 +493,6 @@ export function Layout() {
               <span className="text-lg font-semibold text-gray-900">
                 Zentla
               </span>
-              <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">
-                Beta
-              </span>
             </div>
           </div>
 
@@ -655,9 +649,6 @@ export function Layout() {
             </div>
             <span className="text-base font-semibold text-gray-900">
               Zentla
-            </span>
-            <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-700 rounded">
-              Beta
             </span>
           </div>
         </div>
