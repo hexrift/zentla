@@ -1,24 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { useWorkspace } from "../lib/workspace-context";
 import type { Offer, PaginatedResponse } from "../lib/types";
 
 type DiscountType = "percent" | "fixed_amount" | "free_trial_days";
 
 export function PromotionNewPage() {
   const navigate = useNavigate();
+  const { settings: workspaceSettings } = useWorkspace();
   const [formData, setFormData] = useState({
     name: "",
     code: "",
     description: "",
     discountType: "percent" as DiscountType,
     discountValue: "",
-    currency: "GBP",
+    currency: workspaceSettings.defaultCurrency,
     maxRedemptions: "",
     validFrom: "",
     validUntil: "",
   });
+
+  // Update currency when workspace settings load
+  useEffect(() => {
+    if (
+      workspaceSettings.defaultCurrency &&
+      formData.currency !== workspaceSettings.defaultCurrency
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        currency: workspaceSettings.defaultCurrency,
+      }));
+    }
+  }, [workspaceSettings.defaultCurrency, formData.currency]);
   const [selectedOfferIds, setSelectedOfferIds] = useState<string[]>([]);
 
   // Fetch active offers for the multi-select

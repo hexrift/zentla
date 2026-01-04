@@ -26,16 +26,75 @@ export class StripeWebhookService {
     rawBody: Buffer,
     signature: string,
   ): Promise<{ received: boolean; eventId?: string }> {
-    const stripeAdapter = this.billingService.getProvider(
-      PROVIDER,
-    ) as StripeAdapter;
+    // Try to extract workspace ID from raw body to use workspace-specific secret
+    let workspaceId: string | undefined;
+    let workspaceSettings:
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+        }
+      | undefined;
 
-    // Verify and parse the webhook
-    if (!stripeAdapter.verifyWebhook(rawBody, signature)) {
-      throw new Error("Invalid webhook signature");
+    try {
+      const bodyStr = rawBody.toString();
+      const parsed = JSON.parse(bodyStr);
+      // Try to get workspace ID from various event types' metadata
+      const metadata =
+        parsed?.data?.object?.metadata ??
+        parsed?.data?.object?.subscription_details?.metadata;
+      workspaceId = metadata?.zentla_workspace_id;
+
+      if (workspaceId) {
+        const workspace = await this.prisma.workspace.findUnique({
+          where: { id: workspaceId },
+          select: { settings: true },
+        });
+        workspaceSettings = workspace?.settings as typeof workspaceSettings;
+      }
+    } catch {
+      // Ignore parsing errors, will fall back to global secret
     }
 
-    const event = stripeAdapter.parseWebhookEvent(rawBody, signature);
+    // Try workspace-specific adapter first, then fall back to global
+    let stripeAdapter: StripeAdapter | null = null;
+    let event: Stripe.Event | null = null;
+
+    // Try workspace-specific secret first
+    if (workspaceId && workspaceSettings?.stripeWebhookSecret) {
+      try {
+        stripeAdapter = this.billingService.getProviderForWorkspace(
+          workspaceId,
+          PROVIDER,
+          workspaceSettings,
+        ) as StripeAdapter;
+
+        if (stripeAdapter.verifyWebhook(rawBody, signature)) {
+          event = stripeAdapter.parseWebhookEvent(rawBody, signature);
+          this.logger.log(
+            `Webhook verified using workspace ${workspaceId} secret`,
+          );
+        }
+      } catch {
+        // Fall through to global secret
+      }
+    }
+
+    // Fall back to global secret
+    if (!event) {
+      stripeAdapter = this.billingService.getProvider(
+        PROVIDER,
+      ) as StripeAdapter;
+      if (!stripeAdapter) {
+        throw new Error("No Stripe adapter configured");
+      }
+
+      if (!stripeAdapter.verifyWebhook(rawBody, signature)) {
+        throw new Error("Invalid webhook signature");
+      }
+
+      event = stripeAdapter.parseWebhookEvent(rawBody, signature);
+      this.logger.log("Webhook verified using global secret");
+    }
 
     // Check if we've already processed this event (idempotency)
     // Use the new provider-agnostic table

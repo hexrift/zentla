@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { useWorkspace } from "../lib/workspace-context";
 import type {
   Promotion,
   PromotionVersion,
@@ -13,6 +14,7 @@ export function PromotionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { formatCurrency, settings: workspaceSettings } = useWorkspace();
   const [editingOffers, setEditingOffers] = useState(false);
   const [selectedOfferIds, setSelectedOfferIds] = useState<string[]>([]);
 
@@ -126,8 +128,11 @@ export function PromotionDetailPage() {
     switch (config.discountType) {
       case "percent":
         return `${config.discountValue}% off`;
-      case "fixed_amount":
-        return `${(config.discountValue / 100).toFixed(2)} ${config.currency?.toUpperCase() || "USD"} off`;
+      case "fixed_amount": {
+        const currencyCode =
+          config.currency || workspaceSettings.defaultCurrency;
+        return `${formatCurrency(config.discountValue / 100, currencyCode)} off`;
+      }
       case "free_trial_days":
         return `${config.discountValue} day free trial`;
     }

@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import { api } from "../lib/api";
+import { useWorkspace } from "../lib/workspace-context";
 import type { Offer } from "../lib/types";
 
 type Tab =
@@ -252,6 +253,7 @@ function DetailsTab({ offer }: { offer: Offer }) {
 
 function PricingTab({ offer }: { offer: Offer }) {
   const queryClient = useQueryClient();
+  const { settings: workspaceSettings } = useWorkspace();
   // Use draft version if available, otherwise current version
   const draftVersion = offer.versions?.find((v) => v.status === "draft");
   const activeVersion = draftVersion ?? offer.currentVersion;
@@ -266,13 +268,24 @@ function PricingTab({ offer }: { offer: Offer }) {
     intervalCount: number;
   }>({
     model: existingPricing?.model ?? "flat",
-    currency: existingPricing?.currency ?? "USD",
+    currency: existingPricing?.currency ?? workspaceSettings.defaultCurrency,
     amount: existingPricing?.amount ?? 0,
     interval: existingPricing?.interval ?? "month",
     intervalCount:
       ((existingPricing as Record<string, unknown>)?.intervalCount as number) ??
       1,
   });
+
+  // Update pricing currency when workspace settings load (for new versions)
+  const defaultCurrency = workspaceSettings.defaultCurrency;
+  useEffect(() => {
+    if (!existingPricing?.currency && defaultCurrency) {
+      setPricing((prev) => ({
+        ...prev,
+        currency: defaultCurrency,
+      }));
+    }
+  }, [existingPricing?.currency, defaultCurrency]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const updateDraftMutation = useMutation({
@@ -437,6 +450,7 @@ function TrialsTab({ offer }: { offer: Offer }) {
 
 function EntitlementsTab({ offer }: { offer: Offer }) {
   const queryClient = useQueryClient();
+  const { settings: workspaceSettings } = useWorkspace();
   // Use draft version if available, otherwise current version
   const draftVersion = offer.versions?.find((v) => v.status === "draft");
   const activeVersion = draftVersion ?? offer.currentVersion;
@@ -486,7 +500,7 @@ function EntitlementsTab({ offer }: { offer: Offer }) {
     const newConfig = {
       pricing: config?.pricing ?? {
         model: "flat",
-        currency: "USD",
+        currency: workspaceSettings.defaultCurrency,
         amount: 0,
         interval: "month",
       },
@@ -502,7 +516,7 @@ function EntitlementsTab({ offer }: { offer: Offer }) {
     const newConfig = {
       pricing: config?.pricing ?? {
         model: "flat",
-        currency: "USD",
+        currency: workspaceSettings.defaultCurrency,
         amount: 0,
         interval: "month",
       },

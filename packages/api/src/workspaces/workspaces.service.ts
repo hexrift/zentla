@@ -24,6 +24,7 @@ export interface UpdateWorkspaceDto {
 
 export interface WorkspaceSettings {
   defaultCurrency?: string;
+  defaultCountry?: string;
   stripeSecretKey?: string;
   stripeWebhookSecret?: string;
   zuoraClientId?: string;

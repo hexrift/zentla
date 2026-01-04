@@ -4,12 +4,48 @@ import { api } from "../lib/api";
 
 type BillingProvider = "stripe" | "zuora";
 
+const CURRENCIES = [
+  { code: "USD", name: "US Dollar" },
+  { code: "EUR", name: "Euro" },
+  { code: "GBP", name: "British Pound" },
+  { code: "CAD", name: "Canadian Dollar" },
+  { code: "AUD", name: "Australian Dollar" },
+  { code: "JPY", name: "Japanese Yen" },
+  { code: "CHF", name: "Swiss Franc" },
+  { code: "INR", name: "Indian Rupee" },
+  { code: "BRL", name: "Brazilian Real" },
+  { code: "MXN", name: "Mexican Peso" },
+];
+
+const COUNTRIES = [
+  { code: "US", name: "United States" },
+  { code: "GB", name: "United Kingdom" },
+  { code: "CA", name: "Canada" },
+  { code: "AU", name: "Australia" },
+  { code: "DE", name: "Germany" },
+  { code: "FR", name: "France" },
+  { code: "JP", name: "Japan" },
+  { code: "IN", name: "India" },
+  { code: "BR", name: "Brazil" },
+  { code: "MX", name: "Mexico" },
+  { code: "NL", name: "Netherlands" },
+  { code: "CH", name: "Switzerland" },
+  { code: "SG", name: "Singapore" },
+  { code: "SE", name: "Sweden" },
+  { code: "NO", name: "Norway" },
+];
+
 export function SettingsPage() {
   const queryClient = useQueryClient();
   const [apiKey, setApiKey] = useState("");
   const [saved, setSaved] = useState(false);
   const [selectedProvider, setSelectedProvider] =
     useState<BillingProvider>("stripe");
+
+  // Workspace settings state
+  const [defaultCurrency, setDefaultCurrency] = useState("USD");
+  const [defaultCountry, setDefaultCountry] = useState("US");
+  const [workspaceSaved, setWorkspaceSaved] = useState(false);
 
   // Stripe config state
   const [stripeSecretKey, setStripeSecretKey] = useState("");
@@ -79,10 +115,16 @@ export function SettingsPage() {
     | undefined;
   const isZuoraConnected = zuoraProvider?.status === "connected";
 
-  // Load Stripe config from workspace settings
+  // Load workspace settings
   useEffect(() => {
     if (workspace?.settings) {
       const settings = workspace.settings as Record<string, unknown>;
+      if (settings.defaultCurrency) {
+        setDefaultCurrency(settings.defaultCurrency as string);
+      }
+      if (settings.defaultCountry) {
+        setDefaultCountry(settings.defaultCountry as string);
+      }
       if (settings.stripeSecretKey) {
         setStripeSecretKey(settings.stripeSecretKey as string);
       }
@@ -124,6 +166,21 @@ export function SettingsPage() {
       setStripeError(error.message);
     },
   });
+
+  const handleSaveWorkspaceSettings = () => {
+    updateWorkspaceMutation.mutate(
+      {
+        defaultCurrency,
+        defaultCountry,
+      },
+      {
+        onSuccess: () => {
+          setWorkspaceSaved(true);
+          setTimeout(() => setWorkspaceSaved(false), 3000);
+        },
+      },
+    );
+  };
 
   const handleSaveStripeConfig = () => {
     updateWorkspaceMutation.mutate({
@@ -214,6 +271,56 @@ export function SettingsPage() {
               <p className="mt-1 text-sm text-gray-500">
                 Select which billing provider to use for this workspace
               </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 max-w-md">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Default Currency
+                </label>
+                <select
+                  value={defaultCurrency}
+                  onChange={(e) => setDefaultCurrency(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code} - {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Default Country
+                </label>
+                <select
+                  value={defaultCountry}
+                  onChange={(e) => setDefaultCountry(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="pt-2 flex items-center gap-3">
+              <button
+                onClick={handleSaveWorkspaceSettings}
+                disabled={updateWorkspaceMutation.isPending}
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
+              >
+                {updateWorkspaceMutation.isPending
+                  ? "Saving..."
+                  : "Save Workspace Settings"}
+              </button>
+              {workspaceSaved && (
+                <span className="text-sm text-green-600">
+                  Saved successfully!
+                </span>
+              )}
             </div>
           </div>
         </div>

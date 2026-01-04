@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { useWorkspace } from "../lib/workspace-context";
 
 interface Promotion {
   id: string;
@@ -24,6 +25,7 @@ interface Promotion {
 
 export function PromotionsPage() {
   const [search, setSearch] = useState("");
+  const { formatCurrency, settings: workspaceSettings } = useWorkspace();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["promotions", search],
@@ -38,8 +40,10 @@ export function PromotionsPage() {
     switch (discountType) {
       case "percent":
         return `${discountValue}% off`;
-      case "fixed_amount":
-        return `${(discountValue / 100).toFixed(2)} ${currency?.toUpperCase() || "USD"} off`;
+      case "fixed_amount": {
+        const currencyCode = currency || workspaceSettings.defaultCurrency;
+        return `${formatCurrency(discountValue / 100, currencyCode)} off`;
+      }
       case "free_trial_days":
         return `${discountValue} day trial`;
       default:

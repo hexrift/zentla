@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { useWorkspace } from "../lib/workspace-context";
 
 interface AnalyticsData {
   mrr: number;
@@ -10,15 +11,6 @@ interface AnalyticsData {
   churnRate: number;
   totalCustomers: number;
   newCustomers: number;
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount / 100);
 }
 
 function formatPercent(value: number): string {
@@ -107,15 +99,17 @@ function ChurnIndicator({
 }
 
 export function AnalyticsPage() {
+  const { formatCurrency } = useWorkspace();
+
   // Fetch subscriptions to calculate metrics
   const { data: subscriptions, isLoading: subsLoading } = useQuery({
-    queryKey: ["subscriptions", { limit: 1000 }],
-    queryFn: () => api.subscriptions.list({ limit: 1000 }),
+    queryKey: ["subscriptions", { limit: 100 }],
+    queryFn: () => api.subscriptions.list({ limit: 100 }),
   });
 
   const { data: customers, isLoading: custLoading } = useQuery({
-    queryKey: ["customers", { limit: 1000 }],
-    queryFn: () => api.customers.list({ limit: 1000 }),
+    queryKey: ["customers", { limit: 100 }],
+    queryFn: () => api.customers.list({ limit: 100 }),
   });
 
   const { data: offers } = useQuery({
@@ -242,7 +236,7 @@ export function AnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
             title="Monthly Recurring Revenue"
-            value={formatCurrency(analytics.mrr)}
+            value={formatCurrency(analytics.mrr / 100)}
             change={analytics.mrrChange}
             changeLabel="vs last month"
             isLoading={isLoading}
