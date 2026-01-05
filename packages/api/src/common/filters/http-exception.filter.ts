@@ -148,7 +148,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
       },
     };
 
-    response.status(status).json(errorResponse);
+    // Skip if headers already sent (e.g., webhook handlers that use res.json() directly)
+    if (!response.headersSent) {
+      response.status(status).json(errorResponse);
+    }
   }
 
   /**
