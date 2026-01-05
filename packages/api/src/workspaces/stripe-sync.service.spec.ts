@@ -34,6 +34,7 @@ describe("StripeSyncService", () => {
   };
   let providerRefService: {
     findByExternalId: ReturnType<typeof vi.fn>;
+    findByEntity: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
   };
 
@@ -99,6 +100,7 @@ describe("StripeSyncService", () => {
 
     providerRefService = {
       findByExternalId: vi.fn(),
+      findByEntity: vi.fn(),
       create: vi.fn(),
     };
 
@@ -221,6 +223,8 @@ describe("StripeSyncService", () => {
         hasMore: false,
       });
       providerRefService.findByExternalId.mockResolvedValue(null);
+      // Mock findByEntity to return null (customer has no existing Stripe ref)
+      providerRefService.findByEntity.mockResolvedValue(null);
       prisma.customer.findFirst.mockResolvedValue({
         id: "cust_zentla_existing",
         email: "test@example.com",
@@ -235,6 +239,34 @@ describe("StripeSyncService", () => {
           entityId: "cust_zentla_existing",
         }),
       );
+    });
+
+    it("should skip existing customer already linked to different Stripe customer", async () => {
+      mockStripeAdapter.listCustomers.mockResolvedValue({
+        customers: [mockStripeCustomer],
+        hasMore: false,
+      });
+      mockStripeAdapter.listSubscriptions.mockResolvedValue({
+        subscriptions: [],
+        hasMore: false,
+      });
+      providerRefService.findByExternalId.mockResolvedValue(null);
+      // Mock findByEntity to return existing ref (customer already linked to different Stripe customer)
+      providerRefService.findByEntity.mockResolvedValue({
+        externalId: "cus_different_stripe_id",
+      });
+      prisma.customer.findFirst.mockResolvedValue({
+        id: "cust_zentla_existing",
+        email: "test@example.com",
+      });
+
+      const result = await service.syncFromStripe("ws_123");
+
+      expect(result.customersSkipped).toBe(1);
+      expect(result.errors).toContainEqual(
+        expect.stringContaining("already linked to Stripe customer"),
+      );
+      expect(providerRefService.create).not.toHaveBeenCalled();
     });
 
     it("should paginate through customers", async () => {
