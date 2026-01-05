@@ -257,11 +257,15 @@ export class StripeAdapter implements BillingProvider {
       sessionParams.allow_promotion_codes = true;
     }
 
-    if (params.trialDays) {
-      sessionParams.subscription_data = {
-        trial_period_days: params.trialDays,
-      };
-    }
+    // Always set subscription_data with metadata so the subscription has workspace ID
+    sessionParams.subscription_data = {
+      metadata: {
+        zentla_workspace_id: params.workspaceId,
+        zentla_offer_id: params.offerId,
+        zentla_checkout_id: (params.metadata?.checkoutId as string) ?? "",
+      },
+      ...(params.trialDays && { trial_period_days: params.trialDays }),
+    };
 
     const session = await this.stripe.checkout.sessions.create(sessionParams);
 
