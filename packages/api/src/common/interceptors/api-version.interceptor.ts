@@ -18,9 +18,12 @@ export class ApiVersionInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap(() => {
-        response.setHeader("X-API-Version", API_VERSION);
-        response.setHeader("X-Zentla-Version", ZENTLA_VERSION);
-        response.setHeader("X-Zentla-API-Deprecated", String(API_DEPRECATED));
+        // Skip if headers already sent (e.g., webhook handlers that use res.json() directly)
+        if (!response.headersSent) {
+          response.setHeader("X-API-Version", API_VERSION);
+          response.setHeader("X-Zentla-Version", ZENTLA_VERSION);
+          response.setHeader("X-Zentla-API-Deprecated", String(API_DEPRECATED));
+        }
       }),
     );
   }
