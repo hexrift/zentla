@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.9](https://github.com/hexrift/zentla/compare/v5.5.8...v5.5.9) (2026-01-05)
+
+
+### Bug Fixes
+
+* webhook headers sent ([#64](https://github.com/hexrift/zentla/issues/64)) ([ada1c99](https://github.com/hexrift/zentla/commit/ada1c990c9c4e24a71b04397063b1e15cd4c2221))
+
 ## [5.5.8](https://github.com/hexrift/zentla/compare/v5.5.7...v5.5.8) (2026-01-05)
 
 
