@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.8](https://github.com/hexrift/zentla/compare/v5.5.7...v5.5.8) (2026-01-05)
+
+
+### Bug Fixes
+
+* add workspace metadata to subscription_data for webhook processing ([#51](https://github.com/hexrift/zentla/issues/51)) ([277b0e4](https://github.com/hexrift/zentla/commit/277b0e49aafb951d4babc7498e366e1145cc7689))
+
 ## [5.5.7](https://github.com/hexrift/zentla/compare/v5.5.6...v5.5.7) (2026-01-04)
 
 
