@@ -161,7 +161,24 @@ export class StripeSyncService {
       where: { workspaceId, email },
     });
 
-    if (!customer) {
+    if (customer) {
+      // Check if this Zentla customer already has a Stripe provider ref
+      const existingCustomerRef = await this.providerRefService.findByEntity(
+        workspaceId,
+        "customer",
+        customer.id,
+        "stripe",
+      );
+
+      if (existingCustomerRef) {
+        // Customer already linked to a different Stripe customer, skip
+        result.errors.push(
+          `Customer ${stripeCustomer.id}: Zentla customer ${customer.email} already linked to Stripe customer ${existingCustomerRef.externalId}`,
+        );
+        result.customersSkipped++;
+        return;
+      }
+    } else {
       // Create new customer
       customer = await this.prisma.customer.create({
         data: {
