@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.10](https://github.com/hexrift/zentla/compare/v5.5.9...v5.5.10) (2026-01-06)
+
+
+### Bug Fixes
+
+* handle null period dates in subscription.updated webhook ([#66](https://github.com/hexrift/zentla/issues/66)) ([587a720](https://github.com/hexrift/zentla/commit/587a7206a7b17d4982ca1e85cdbed5dc6f84e6db))
+
 ## [5.5.9](https://github.com/hexrift/zentla/compare/v5.5.8...v5.5.9) (2026-01-05)
 
 
