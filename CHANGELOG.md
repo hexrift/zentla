@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.5.11](https://github.com/hexrift/zentla/compare/v5.5.10...v5.5.11) (2026-01-06)
+
+
+### Bug Fixes
+
+* subscription webhook race condition ([#69](https://github.com/hexrift/zentla/issues/69)) ([8fe3e93](https://github.com/hexrift/zentla/commit/8fe3e93ca79cd98b4c5f4ee95c791baf8b580811))
+
 ## [5.5.10](https://github.com/hexrift/zentla/compare/v5.5.9...v5.5.10) (2026-01-06)
 
 
