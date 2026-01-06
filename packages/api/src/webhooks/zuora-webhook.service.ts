@@ -115,7 +115,8 @@ export class ZuoraWebhookService {
     }
 
     // Generate a unique event ID if not provided
-    const eventId = event.id || `zuora_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const eventId =
+      event.id || `zuora_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
     // Check if we've already processed this event (idempotency)
     const existingEvent = await this.prisma.processedProviderEvent.findFirst({
@@ -232,12 +233,14 @@ export class ZuoraWebhookService {
     }
 
     // Get subscription details from Zuora to find the rate plan
-    const data = event.data as {
-      ratePlanId?: string;
-      termStartDate?: string;
-      termEndDate?: string;
-      status?: string;
-    } | undefined;
+    const data = event.data as
+      | {
+          ratePlanId?: string;
+          termStartDate?: string;
+          termEndDate?: string;
+          status?: string;
+        }
+      | undefined;
 
     const ratePlanId = data?.ratePlanId;
     if (!ratePlanId) {
@@ -302,7 +305,13 @@ export class ZuoraWebhookService {
     });
 
     // Grant entitlements from offer config
-    const config = offerVersion.config as { entitlements?: Array<{ featureKey: string; value: unknown; valueType: string }> } | null;
+    const config = offerVersion.config as {
+      entitlements?: Array<{
+        featureKey: string;
+        value: unknown;
+        valueType: string;
+      }>;
+    } | null;
     if (config?.entitlements) {
       for (const entitlement of config.entitlements) {
         await this.prisma.entitlement.create({
@@ -368,11 +377,13 @@ export class ZuoraWebhookService {
 
     workspaceId = subscriptionRef.workspaceId;
 
-    const data = event.data as {
-      status?: string;
-      termEndDate?: string;
-      cancelledDate?: string;
-    } | undefined;
+    const data = event.data as
+      | {
+          status?: string;
+          termEndDate?: string;
+          cancelledDate?: string;
+        }
+      | undefined;
 
     // Map Zuora status to Zentla status
     const statusMap: Record<string, string> = {
@@ -382,15 +393,21 @@ export class ZuoraWebhookService {
       Suspended: "paused",
     };
 
-    const status = data?.status ? statusMap[data.status] || "active" : undefined;
+    const status = data?.status
+      ? statusMap[data.status] || "active"
+      : undefined;
 
     // Update subscription
     const subscription = await this.prisma.subscription.update({
       where: { id: subscriptionRef.entityId },
       data: {
         ...(status && { status: status as "active" | "canceled" | "paused" }),
-        ...(data?.termEndDate && { currentPeriodEnd: new Date(data.termEndDate) }),
-        ...(data?.cancelledDate && { canceledAt: new Date(data.cancelledDate) }),
+        ...(data?.termEndDate && {
+          currentPeriodEnd: new Date(data.termEndDate),
+        }),
+        ...(data?.cancelledDate && {
+          canceledAt: new Date(data.cancelledDate),
+        }),
       },
     });
 

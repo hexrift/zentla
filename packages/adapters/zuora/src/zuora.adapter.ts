@@ -110,20 +110,6 @@ interface ZuoraCalloutNotification {
   data?: Record<string, unknown>;
 }
 
-interface ZuoraPaymentMethodResponse {
-  success: boolean;
-  paymentMethodId?: string;
-  reasons?: Array<{ code: string; message: string }>;
-}
-
-interface ZuoraPaymentResponse {
-  success: boolean;
-  paymentId?: string;
-  id?: string;
-  status?: string;
-  reasons?: Array<{ code: string; message: string }>;
-}
-
 interface ZuoraAccountsResponse {
   success: boolean;
   accounts: Array<{
@@ -927,7 +913,10 @@ export class ZuoraAdapter implements BillingProvider {
   /**
    * Parse webhook event from raw body.
    */
-  parseWebhookEvent(rawBody: Buffer, _signature: string): ZuoraCalloutNotification {
+  parseWebhookEvent(
+    rawBody: Buffer,
+    _signature: string,
+  ): ZuoraCalloutNotification {
     try {
       const parsed = JSON.parse(rawBody.toString()) as ZuoraCalloutNotification;
       return parsed;
@@ -992,10 +981,11 @@ export class ZuoraAdapter implements BillingProvider {
         "/v1/object/product",
         {
           Name: `Discount: ${promotion.code}`,
-          Description: promotion.description || `Discount code ${promotion.code}`,
+          Description:
+            promotion.description || `Discount code ${promotion.code}`,
           EffectiveStartDate: new Date().toISOString().split("T")[0],
-          EffectiveEndDate: version.expiresAt
-            ? new Date(version.expiresAt).toISOString().split("T")[0]
+          EffectiveEndDate: version.config.validUntil
+            ? new Date(version.config.validUntil).toISOString().split("T")[0]
             : "2099-12-31",
         },
       );
@@ -1036,7 +1026,9 @@ export class ZuoraAdapter implements BillingProvider {
 
     // Create discount charge
     const chargeType =
-      config.discountType === "percent" ? "Discount-Percentage" : "Discount-Fixed Amount";
+      config.discountType === "percent"
+        ? "Discount-Percentage"
+        : "Discount-Fixed Amount";
 
     await this.request<ZuoraRatePlanChargeResponse>(
       "POST",
@@ -1088,7 +1080,10 @@ export class ZuoraAdapter implements BillingProvider {
   async listCustomers(
     limit: number = 100,
     cursor?: string,
-  ): Promise<{ customers: Array<{ id: string; email: string | null; name: string | null }>; hasMore: boolean }> {
+  ): Promise<{
+    customers: Array<{ id: string; email: string | null; name: string | null }>;
+    hasMore: boolean;
+  }> {
     const params = new URLSearchParams({
       pageSize: limit.toString(),
     });

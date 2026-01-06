@@ -123,7 +123,8 @@ Webhook signatures are verified using the workspace's Zuora webhook secret.`,
   })
   @ApiResponse({
     status: 400,
-    description: "Invalid webhook (signature verification failed or malformed payload)",
+    description:
+      "Invalid webhook (signature verification failed or malformed payload)",
   })
   async handleZuoraWebhook(
     @Req() req: Request,
