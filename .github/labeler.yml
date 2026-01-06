@@ -20,10 +20,6 @@ core:
   - changed-files:
       - any-glob-to-any-file: "packages/core/**/*"
 
-sdk:
-  - changed-files:
-      - any-glob-to-any-file: "packages/sdk/**/*"
-
 stripe:
   - changed-files:
       - any-glob-to-any-file: "packages/adapters/stripe/**/*"

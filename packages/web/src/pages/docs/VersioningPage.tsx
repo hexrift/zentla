@@ -159,7 +159,7 @@ X-Zentla-Migration: See https://zentla.dev/docs/migrations/v2`}</CodeBlock>
       </ul>
       <p>
         SDK major versions correspond to API versions. For example,{" "}
-        <code>@zentla/sdk@1.x</code>
+        <code>@hexrift/zentla-sdk@1.x</code>
         targets API <code>v1</code>.
       </p>
 

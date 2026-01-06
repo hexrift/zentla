@@ -7,7 +7,6 @@ on:
       - "packages/api/**"
       - "packages/core/**"
       - "packages/database/**"
-      - "packages/sdk/**"
       - "packages/adapters/**"
       - "Dockerfile"
       - ".github/workflows/deploy-api.yml"

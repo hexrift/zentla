@@ -22,9 +22,6 @@
 /packages/admin-ui/                 @your-org/frontend-team
 /packages/web/                      @your-org/frontend-team
 
-# SDK
-/packages/sdk/                      @your-org/sdk-team
-
 # Infrastructure and DevOps
 /.github/                           @your-org/devops-team
 /Dockerfile*                        @your-org/devops-team

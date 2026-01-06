@@ -21,7 +21,6 @@ COPY package.json yarn.lock .yarnrc.yml ./
 COPY packages/api/package.json ./packages/api/
 COPY packages/core/package.json ./packages/core/
 COPY packages/database/package.json ./packages/database/
-COPY packages/sdk/package.json ./packages/sdk/
 COPY packages/adapters/stripe/package.json ./packages/adapters/stripe/
 COPY packages/adapters/zuora/package.json ./packages/adapters/zuora/
 
@@ -46,7 +45,6 @@ COPY package.json yarn.lock .yarnrc.yml ./
 COPY tsconfig.base.json ./
 COPY packages/core ./packages/core
 COPY packages/database ./packages/database
-COPY packages/sdk ./packages/sdk
 COPY packages/adapters ./packages/adapters
 COPY packages/api ./packages/api
 
@@ -56,7 +54,6 @@ RUN yarn db:generate
 # Build API-related packages only (exclude admin-ui)
 RUN yarn workspace @zentla/core build && \
     yarn workspace @zentla/database build && \
-    yarn workspace @zentla/sdk build && \
     yarn workspace @zentla/stripe-adapter build && \
     yarn workspace @zentla/zuora-adapter build && \
     yarn workspace @zentla/api build
@@ -86,7 +83,6 @@ COPY package.json yarn.lock .yarnrc.yml ./
 COPY packages/api/package.json ./packages/api/
 COPY packages/core/package.json ./packages/core/
 COPY packages/database/package.json ./packages/database/
-COPY packages/sdk/package.json ./packages/sdk/
 COPY packages/adapters/stripe/package.json ./packages/adapters/stripe/
 COPY packages/adapters/zuora/package.json ./packages/adapters/zuora/
 
@@ -99,7 +95,6 @@ COPY --from=builder /app/packages/api/dist ./packages/api/dist
 COPY --from=builder /app/packages/core/dist ./packages/core/dist
 COPY --from=builder /app/packages/database/dist ./packages/database/dist
 COPY --from=builder /app/packages/database/prisma ./packages/database/prisma
-COPY --from=builder /app/packages/sdk/dist ./packages/sdk/dist
 COPY --from=builder /app/packages/adapters/stripe/dist ./packages/adapters/stripe/dist
 COPY --from=builder /app/packages/adapters/zuora/dist ./packages/adapters/zuora/dist
 
