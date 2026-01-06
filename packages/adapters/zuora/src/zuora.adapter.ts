@@ -1,10 +1,13 @@
 import {
   type BillingProvider,
   type SyncOfferResult,
+  type SyncPromotionResult,
   type ChangeSubscriptionResult,
   type PromoCodeValidation,
   type Offer,
   type OfferVersion,
+  type Promotion,
+  type PromotionVersion,
   type ProviderRef,
   type CheckoutSession,
   type CreateCheckoutParams,
@@ -105,6 +108,43 @@ interface ZuoraCalloutNotification {
   invoiceId?: string;
   timestamp?: string;
   data?: Record<string, unknown>;
+}
+
+interface ZuoraPaymentMethodResponse {
+  success: boolean;
+  paymentMethodId?: string;
+  reasons?: Array<{ code: string; message: string }>;
+}
+
+interface ZuoraPaymentResponse {
+  success: boolean;
+  paymentId?: string;
+  id?: string;
+  status?: string;
+  reasons?: Array<{ code: string; message: string }>;
+}
+
+interface ZuoraAccountsResponse {
+  success: boolean;
+  accounts: Array<{
+    id: string;
+    name: string;
+    accountNumber: string;
+    status: string;
+    billToContact?: {
+      workEmail?: string;
+      firstName?: string;
+      lastName?: string;
+    };
+    notes?: string;
+  }>;
+  nextPage?: string;
+}
+
+interface ZuoraSubscriptionsResponse {
+  success: boolean;
+  subscriptions: ZuoraSubscription[];
+  nextPage?: string;
 }
 
 /**
@@ -881,6 +921,346 @@ export class ZuoraAdapter implements BillingProvider {
       id: response.userId,
       name: response.tenantName,
       tenantId: response.tenantId,
+    };
+  }
+
+  /**
+   * Parse webhook event from raw body.
+   */
+  parseWebhookEvent(rawBody: Buffer, _signature: string): ZuoraCalloutNotification {
+    try {
+      const parsed = JSON.parse(rawBody.toString()) as ZuoraCalloutNotification;
+      return parsed;
+    } catch (error) {
+      throw new BillingProviderError(
+        "Failed to parse Zuora webhook payload",
+        "zuora",
+        "WEBHOOK_PARSE_ERROR",
+        error,
+      );
+    }
+  }
+
+  /**
+   * Archive (deactivate) a product in Zuora.
+   */
+  async archiveProduct(productId: string): Promise<void> {
+    await this.request("PUT", `/v1/object/product/${productId}`, {
+      EffectiveEndDate: new Date().toISOString().split("T")[0],
+    });
+  }
+
+  /**
+   * Reactivate a product in Zuora.
+   */
+  async reactivateProduct(productId: string): Promise<void> {
+    await this.request("PUT", `/v1/object/product/${productId}`, {
+      EffectiveEndDate: "2099-12-31",
+    });
+  }
+
+  /**
+   * Sync a promotion to Zuora.
+   * Zuora handles discounts via discount rate plan charges.
+   */
+  async syncPromotion(
+    promotion: Promotion,
+    version: PromotionVersion,
+    existingCouponRef?: ProviderRef,
+  ): Promise<SyncPromotionResult> {
+    const config = version.config as {
+      discountType: "percent" | "fixed_amount" | "free_trial_days";
+      discountValue: number;
+      duration: "once" | "repeating" | "forever";
+      durationInMonths?: number;
+    };
+
+    let discountProductId: string;
+    let discountRatePlanId: string;
+
+    if (existingCouponRef) {
+      // Update existing discount product
+      discountProductId = existingCouponRef.externalId;
+      await this.request("PUT", `/v1/object/product/${discountProductId}`, {
+        Name: `Discount: ${promotion.code}`,
+        Description: promotion.description || `Discount code ${promotion.code}`,
+      });
+    } else {
+      // Create a discount product
+      const productResponse = await this.request<ZuoraProductResponse>(
+        "POST",
+        "/v1/object/product",
+        {
+          Name: `Discount: ${promotion.code}`,
+          Description: promotion.description || `Discount code ${promotion.code}`,
+          EffectiveStartDate: new Date().toISOString().split("T")[0],
+          EffectiveEndDate: version.expiresAt
+            ? new Date(version.expiresAt).toISOString().split("T")[0]
+            : "2099-12-31",
+        },
+      );
+
+      if (!productResponse.success || !productResponse.id) {
+        throw new BillingProviderError(
+          "Failed to create Zuora discount product",
+          "zuora",
+          "DISCOUNT_CREATE_FAILED",
+        );
+      }
+
+      discountProductId = productResponse.id;
+    }
+
+    // Create discount rate plan
+    const ratePlanResponse = await this.request<ZuoraRatePlanResponse>(
+      "POST",
+      "/v1/object/product-rate-plan",
+      {
+        ProductId: discountProductId,
+        Name: `${promotion.code} - v${version.version}`,
+        Description: `Discount ${config.discountType}: ${config.discountValue}`,
+        EffectiveStartDate: new Date().toISOString().split("T")[0],
+        EffectiveEndDate: "2099-12-31",
+      },
+    );
+
+    if (!ratePlanResponse.success || !ratePlanResponse.id) {
+      throw new BillingProviderError(
+        "Failed to create Zuora discount rate plan",
+        "zuora",
+        "DISCOUNT_RATE_PLAN_FAILED",
+      );
+    }
+
+    discountRatePlanId = ratePlanResponse.id;
+
+    // Create discount charge
+    const chargeType =
+      config.discountType === "percent" ? "Discount-Percentage" : "Discount-Fixed Amount";
+
+    await this.request<ZuoraRatePlanChargeResponse>(
+      "POST",
+      "/v1/object/product-rate-plan-charge",
+      {
+        ProductRatePlanId: discountRatePlanId,
+        Name: promotion.code,
+        ChargeModel: chargeType,
+        ChargeType: config.duration === "once" ? "OneTime" : "Recurring",
+        DiscountLevel: "subscription",
+        DiscountPercentage:
+          config.discountType === "percent" ? config.discountValue : undefined,
+        DiscountAmount:
+          config.discountType === "fixed_amount"
+            ? config.discountValue / 100
+            : undefined,
+        ApplyDiscountTo: "ONETIMERECURRINGUSAGE",
+        BillingPeriod: config.duration === "once" ? undefined : "Month",
+        NumberOfPeriods:
+          config.duration === "repeating" ? config.durationInMonths : undefined,
+      },
+    );
+
+    return {
+      couponRef: {
+        id: crypto.randomUUID(),
+        workspaceId: promotion.workspaceId,
+        entityType: "coupon",
+        entityId: promotion.id,
+        provider: "zuora",
+        externalId: discountProductId,
+        createdAt: new Date(),
+      },
+      promotionCodeRef: {
+        id: crypto.randomUUID(),
+        workspaceId: promotion.workspaceId,
+        entityType: "promotion_code",
+        entityId: version.id,
+        provider: "zuora",
+        externalId: discountRatePlanId,
+        createdAt: new Date(),
+      },
+    };
+  }
+
+  /**
+   * List customers (accounts) from Zuora with pagination.
+   */
+  async listCustomers(
+    limit: number = 100,
+    cursor?: string,
+  ): Promise<{ customers: Array<{ id: string; email: string | null; name: string | null }>; hasMore: boolean }> {
+    const params = new URLSearchParams({
+      pageSize: limit.toString(),
+    });
+    if (cursor) {
+      params.set("page", cursor);
+    }
+
+    const response = await this.request<ZuoraAccountsResponse>(
+      "GET",
+      `/v1/accounts?${params}`,
+    );
+
+    const customers = response.accounts.map((account) => ({
+      id: account.id,
+      email: account.billToContact?.workEmail ?? null,
+      name: account.name,
+    }));
+
+    return {
+      customers,
+      hasMore: !!response.nextPage,
+    };
+  }
+
+  /**
+   * List subscriptions from Zuora with pagination.
+   */
+  async listSubscriptions(
+    limit: number = 100,
+    cursor?: string,
+  ): Promise<{ subscriptions: ZuoraSubscription[]; hasMore: boolean }> {
+    const params = new URLSearchParams({
+      pageSize: limit.toString(),
+    });
+    if (cursor) {
+      params.set("page", cursor);
+    }
+
+    const response = await this.request<ZuoraSubscriptionsResponse>(
+      "GET",
+      `/v1/subscriptions?${params}`,
+    );
+
+    return {
+      subscriptions: response.subscriptions,
+      hasMore: !!response.nextPage,
+    };
+  }
+
+  /**
+   * Check if webhook endpoint is configured in Zuora.
+   */
+  async hasWebhookConfigured(): Promise<boolean> {
+    try {
+      // Zuora uses callout notifications - check if any are configured
+      const response = await this.request<{
+        callouts: Array<{ id: string; active: boolean }>;
+      }>("GET", "/v1/settings/communication-profiles");
+
+      return response.callouts?.some((c) => c.active) ?? false;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Create a payment intent for headless checkout.
+   * In Zuora, this creates a payment method and prepares for payment.
+   */
+  async createPaymentIntent(params: {
+    workspaceId: string;
+    amount: number;
+    currency: string;
+    customerId: string;
+    metadata?: Record<string, string>;
+  }): Promise<{ clientSecret: string; paymentIntentId: string }> {
+    // Create a hosted payment page token for collecting payment method
+    const response = await this.request<ZuoraHostedPageResponse>(
+      "POST",
+      "/v1/rsa-signatures",
+      {
+        method: "POST",
+        uri: "/v1/payment-methods/credit-cards",
+        accountId: params.customerId,
+      },
+    );
+
+    if (!response.token) {
+      throw new BillingProviderError(
+        "Failed to create Zuora payment intent",
+        "zuora",
+        "PAYMENT_INTENT_FAILED",
+      );
+    }
+
+    // Store the intent metadata for later processing
+    const intentId = `zuora_pi_${crypto.randomUUID()}`;
+
+    return {
+      clientSecret: response.token,
+      paymentIntentId: intentId,
+    };
+  }
+
+  /**
+   * Create a setup intent for collecting payment method for future use.
+   * Used for trials where we need payment method but no immediate charge.
+   */
+  async createSetupIntent(params: {
+    workspaceId: string;
+    customerId: string;
+    metadata?: Record<string, string>;
+  }): Promise<{ clientSecret: string; setupIntentId: string }> {
+    // Create a hosted page token for payment method collection only
+    const response = await this.request<ZuoraHostedPageResponse>(
+      "POST",
+      "/v1/rsa-signatures",
+      {
+        method: "POST",
+        uri: "/v1/payment-methods/credit-cards",
+        accountId: params.customerId,
+      },
+    );
+
+    if (!response.token) {
+      throw new BillingProviderError(
+        "Failed to create Zuora setup intent",
+        "zuora",
+        "SETUP_INTENT_FAILED",
+      );
+    }
+
+    const setupIntentId = `zuora_si_${crypto.randomUUID()}`;
+
+    return {
+      clientSecret: response.token,
+      setupIntentId,
+    };
+  }
+
+  /**
+   * Get account details including workspace metadata.
+   * Used to resolve workspaceId from account in webhook handling.
+   */
+  async getAccountWithMetadata(accountId: string): Promise<{
+    id: string;
+    workspaceId: string | null;
+    email: string | null;
+    name: string | null;
+  }> {
+    const account = await this.request<{
+      id: string;
+      name: string;
+      billToContact?: { workEmail?: string };
+      notes?: string;
+    }>("GET", `/v1/object/account/${accountId}`);
+
+    let workspaceId: string | null = null;
+    try {
+      if (account.notes) {
+        const metadata = JSON.parse(account.notes);
+        workspaceId = metadata.zentla_workspace_id ?? null;
+      }
+    } catch {
+      // Ignore JSON parse errors
+    }
+
+    return {
+      id: account.id,
+      workspaceId,
+      email: account.billToContact?.workEmail ?? null,
+      name: account.name,
     };
   }
 }

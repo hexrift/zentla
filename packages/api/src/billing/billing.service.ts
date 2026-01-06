@@ -44,7 +44,7 @@ export class BillingService implements OnModuleInit {
 
   onModuleInit() {
     this.initializeGlobalStripe();
-    // Future: this.initializeGlobalZuora();
+    this.initializeGlobalZuora();
   }
 
   private initializeGlobalStripe(): void {
@@ -55,6 +55,24 @@ export class BillingService implements OnModuleInit {
       const adapter = new StripeAdapter({ secretKey, webhookSecret });
       this.globalProviders.set("stripe", adapter);
       this.logger.log("Global Stripe provider initialized from env vars");
+    }
+  }
+
+  private initializeGlobalZuora(): void {
+    const clientId = this.config.get<string>("zuora.clientId");
+    const clientSecret = this.config.get<string>("zuora.clientSecret");
+    const baseUrl = this.config.get<string>("zuora.baseUrl");
+    const webhookSecret = this.config.get<string>("zuora.webhookSecret");
+
+    if (clientId && clientSecret && baseUrl) {
+      const adapter = new ZuoraAdapter({
+        clientId,
+        clientSecret,
+        baseUrl,
+        webhookSecret,
+      });
+      this.globalProviders.set("zuora", adapter);
+      this.logger.log("Global Zuora provider initialized from env vars");
     }
   }
 
