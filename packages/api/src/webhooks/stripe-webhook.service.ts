@@ -330,7 +330,6 @@ export class StripeWebhookService {
       );
     }
 
-    // Create subscription
     // Handle trial subscriptions where period dates might be 0
     const periodStart = stripeSubscription.current_period_start
       ? new Date(stripeSubscription.current_period_start * 1000)
@@ -341,27 +340,65 @@ export class StripeWebhookService {
         ? new Date(stripeSubscription.trial_end * 1000)
         : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default 30 days
 
-    const subscription = await this.prisma.subscription.create({
-      data: {
+    // Check if a subscription already exists for this customer + offer (race condition prevention)
+    // This can happen if subscription.updated arrives before subscription.created finishes
+    const existingSubscription = await this.prisma.subscription.findFirst({
+      where: {
         workspaceId,
         customerId: customerRef.entityId,
         offerId: offerVersion.offerId,
-        offerVersionId: offerVersion.id,
-        status: this.mapStripeStatus(stripeSubscription.status),
-        currentPeriodStart: periodStart,
+        // Match by period to avoid linking wrong subscription
         currentPeriodEnd: periodEnd,
-        trialStart: stripeSubscription.trial_start
-          ? new Date(stripeSubscription.trial_start * 1000)
-          : null,
-        trialEnd: stripeSubscription.trial_end
-          ? new Date(stripeSubscription.trial_end * 1000)
-          : null,
-        cancelAt: stripeSubscription.cancel_at
-          ? new Date(stripeSubscription.cancel_at * 1000)
-          : null,
-        metadata: {},
       },
     });
+
+    let subscription;
+    if (existingSubscription) {
+      // Update existing subscription instead of creating duplicate
+      subscription = await this.prisma.subscription.update({
+        where: { id: existingSubscription.id },
+        data: {
+          status: this.mapStripeStatus(stripeSubscription.status),
+          currentPeriodStart: periodStart,
+          currentPeriodEnd: periodEnd,
+          trialStart: stripeSubscription.trial_start
+            ? new Date(stripeSubscription.trial_start * 1000)
+            : null,
+          trialEnd: stripeSubscription.trial_end
+            ? new Date(stripeSubscription.trial_end * 1000)
+            : null,
+          cancelAt: stripeSubscription.cancel_at
+            ? new Date(stripeSubscription.cancel_at * 1000)
+            : null,
+        },
+      });
+      this.logger.log(
+        `Updated existing subscription ${subscription.id} from Stripe ${stripeSubscription.id}`,
+      );
+    } else {
+      // Create new subscription
+      subscription = await this.prisma.subscription.create({
+        data: {
+          workspaceId,
+          customerId: customerRef.entityId,
+          offerId: offerVersion.offerId,
+          offerVersionId: offerVersion.id,
+          status: this.mapStripeStatus(stripeSubscription.status),
+          currentPeriodStart: periodStart,
+          currentPeriodEnd: periodEnd,
+          trialStart: stripeSubscription.trial_start
+            ? new Date(stripeSubscription.trial_start * 1000)
+            : null,
+          trialEnd: stripeSubscription.trial_end
+            ? new Date(stripeSubscription.trial_end * 1000)
+            : null,
+          cancelAt: stripeSubscription.cancel_at
+            ? new Date(stripeSubscription.cancel_at * 1000)
+            : null,
+          metadata: {},
+        },
+      });
+    }
 
     // Store provider ref
     await this.providerRefService.create({
@@ -462,7 +499,7 @@ export class StripeWebhookService {
   private async handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
     const stripeSubscription = event.data.object as Stripe.Subscription;
 
-    // Find our subscription
+    // Find our subscription by provider ref
     const subscriptionRef = await this.prisma.providerRef.findFirst({
       where: {
         provider: "stripe",
@@ -472,7 +509,8 @@ export class StripeWebhookService {
     });
 
     if (!subscriptionRef) {
-      // Might be a new subscription, try to create it
+      // Provider ref not found - delegate to handleSubscriptionCreated
+      // which will either update an existing subscription or create a new one
       await this.handleSubscriptionCreated(event);
       return;
     }
