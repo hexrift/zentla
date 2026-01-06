@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - "packages/admin-ui/**"
-      - "packages/sdk/**"
       - ".github/workflows/deploy-admin-ui.yml"
   workflow_dispatch:
 
@@ -30,9 +29,6 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
-
-      - name: Build SDK (dependency)
-        run: yarn workspace @zentla/sdk build
 
       - name: Build Admin UI
         run: yarn workspace @zentla/admin-ui build
