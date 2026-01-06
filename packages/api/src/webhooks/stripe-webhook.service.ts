@@ -477,17 +477,20 @@ export class StripeWebhookService {
       return;
     }
 
-    // Update subscription
+    // Update subscription - handle null period dates safely
+    const periodStart = stripeSubscription.current_period_start
+      ? new Date(stripeSubscription.current_period_start * 1000)
+      : undefined;
+    const periodEnd = stripeSubscription.current_period_end
+      ? new Date(stripeSubscription.current_period_end * 1000)
+      : undefined;
+
     const updatedSubscription = await this.prisma.subscription.update({
       where: { id: subscriptionRef.entityId },
       data: {
         status: this.mapStripeStatus(stripeSubscription.status),
-        currentPeriodStart: new Date(
-          stripeSubscription.current_period_start * 1000,
-        ),
-        currentPeriodEnd: new Date(
-          stripeSubscription.current_period_end * 1000,
-        ),
+        ...(periodStart && { currentPeriodStart: periodStart }),
+        ...(periodEnd && { currentPeriodEnd: periodEnd }),
         cancelAt: stripeSubscription.cancel_at
           ? new Date(stripeSubscription.cancel_at * 1000)
           : null,
