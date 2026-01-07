@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.9.0](https://github.com/hexrift/zentla/compare/v5.8.0...v5.9.0) (2026-01-07)
+
+
+### Features
+
+* **admin-ui:** add experiments pages for A/B testing management ([#78](https://github.com/hexrift/zentla/issues/78)) ([d8f9c1d](https://github.com/hexrift/zentla/commit/d8f9c1d7f4004eff0371a88c5a47cf69ef1614f4))
+
 ## [5.8.0](https://github.com/hexrift/zentla/compare/v5.7.0...v5.8.0) (2026-01-07)
 
 
