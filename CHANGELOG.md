@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.7.0](https://github.com/hexrift/zentla/compare/v5.6.0...v5.7.0) (2026-01-07)
+
+
+### Features
+
+* add analytics API controller with revenue endpoints ([#74](https://github.com/hexrift/zentla/issues/74)) ([3ba4cf9](https://github.com/hexrift/zentla/commit/3ba4cf94ce1a9a69e05405334ba4c8d4b68b5969))
+
 ## [5.6.0](https://github.com/hexrift/zentla/compare/v5.5.11...v5.6.0) (2026-01-07)
 
 
