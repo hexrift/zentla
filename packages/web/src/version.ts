@@ -3,8 +3,8 @@
 
 export const VERSION = {
   major: 5, // x-release-please-major
-  minor: 5, // x-release-please-minor
-  patch: 11, // x-release-please-patch
+  minor: 6, // x-release-please-minor
+  patch: 0, // x-release-please-patch
   get full(): string {
     return `${this.major}.${this.minor}.${this.patch}`;
   },
