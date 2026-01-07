@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.6.0](https://github.com/hexrift/zentla/compare/v5.5.11...v5.6.0) (2026-01-07)
+
+
+### Features
+
+* complete Zuora billing provider implementation ([#72](https://github.com/hexrift/zentla/issues/72)) ([7673b05](https://github.com/hexrift/zentla/commit/7673b054c34d6eb92b94492a335e907be6fedcd9))
+
 ## [5.5.11](https://github.com/hexrift/zentla/compare/v5.5.10...v5.5.11) (2026-01-06)
 
 
