@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.8.0](https://github.com/hexrift/zentla/compare/v5.7.0...v5.8.0) (2026-01-07)
+
+
+### Features
+
+* add experiments API controller for A/B testing ([#76](https://github.com/hexrift/zentla/issues/76)) ([3ee6f8f](https://github.com/hexrift/zentla/commit/3ee6f8fa2a4426464faedfd8304f27e111b47e4d))
+
 ## [5.7.0](https://github.com/hexrift/zentla/compare/v5.6.0...v5.7.0) (2026-01-07)
 
 
