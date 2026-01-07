@@ -9,5 +9,8 @@ export {
   ExperimentStats,
 } from "./experiments.service";
 
+// Controller
+export { ExperimentsController } from "./experiments.controller";
+
 // Module
 export { ExperimentsModule } from "./experiments.module";
