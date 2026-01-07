@@ -23,6 +23,9 @@ import { ApiKeysPage } from "./pages/ApiKeysPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { FeedbackPage } from "./pages/FeedbackPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
+import { ExperimentsPage } from "./pages/ExperimentsPage";
+import { ExperimentNewPage } from "./pages/ExperimentNewPage";
+import { ExperimentDetailPage } from "./pages/ExperimentDetailPage";
 
 export default function App() {
   return (
@@ -46,6 +49,9 @@ export default function App() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="experiments" element={<ExperimentsPage />} />
+          <Route path="experiments/new" element={<ExperimentNewPage />} />
+          <Route path="experiments/:id" element={<ExperimentDetailPage />} />
           <Route path="checkouts" element={<CheckoutsPage />} />
           <Route path="offers" element={<OffersPage />} />
           <Route path="offers/new" element={<OfferNewPage />} />

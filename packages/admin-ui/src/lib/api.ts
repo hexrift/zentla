@@ -15,6 +15,9 @@ import type {
   AuthResponse,
   AuthUser,
   AuthWorkspace,
+  Experiment,
+  ExperimentVariant,
+  ExperimentStats,
 } from "./types";
 
 const API_BASE = `${import.meta.env.VITE_API_URL || ""}/api/v1`;
@@ -511,6 +514,93 @@ export const api = {
           body: JSON.stringify(data),
         },
       ),
+  },
+
+  experiments: {
+    list: (params?: { status?: string; type?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.type) searchParams.set("type", params.type);
+      const query = searchParams.toString();
+      return fetchApi<Experiment[]>(`/experiments${query ? `?${query}` : ""}`);
+    },
+    get: (id: string) => fetchApi<Experiment>(`/experiments/${id}`),
+    getByKey: (key: string) => fetchApi<Experiment>(`/experiments/key/${key}`),
+    create: (data: {
+      key: string;
+      name: string;
+      description?: string;
+      type?: string;
+      trafficAllocation?: number;
+      targetingRules?: Record<string, unknown>;
+    }) =>
+      fetchApi<Experiment>("/experiments", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    update: (
+      id: string,
+      data: {
+        name?: string;
+        description?: string;
+        trafficAllocation?: number;
+        targetingRules?: Record<string, unknown>;
+      },
+    ) =>
+      fetchApi<Experiment>(`/experiments/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
+    start: (id: string) =>
+      fetchApi<Experiment>(`/experiments/${id}/start`, { method: "POST" }),
+    pause: (id: string) =>
+      fetchApi<Experiment>(`/experiments/${id}/pause`, { method: "POST" }),
+    conclude: (id: string, winningVariantId?: string) =>
+      fetchApi<Experiment>(`/experiments/${id}/conclude`, {
+        method: "POST",
+        body: JSON.stringify({ winningVariantId }),
+      }),
+    archive: (id: string) =>
+      fetchApi<Experiment>(`/experiments/${id}/archive`, { method: "POST" }),
+    getStats: (id: string) =>
+      fetchApi<ExperimentStats>(`/experiments/${id}/stats`),
+    // Variant management
+    addVariant: (
+      experimentId: string,
+      data: {
+        key: string;
+        name: string;
+        description?: string;
+        weight?: number;
+        config?: Record<string, unknown>;
+        isControl?: boolean;
+      },
+    ) =>
+      fetchApi<ExperimentVariant>(`/experiments/${experimentId}/variants`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    updateVariant: (
+      experimentId: string,
+      variantId: string,
+      data: {
+        name?: string;
+        description?: string;
+        weight?: number;
+        config?: Record<string, unknown>;
+      },
+    ) =>
+      fetchApi<ExperimentVariant>(
+        `/experiments/${experimentId}/variants/${variantId}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify(data),
+        },
+      ),
+    deleteVariant: (experimentId: string, variantId: string) =>
+      fetchApi<void>(`/experiments/${experimentId}/variants/${variantId}`, {
+        method: "DELETE",
+      }),
   },
 
   // Auth endpoints (public, no token required)
