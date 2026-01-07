@@ -219,6 +219,52 @@ export interface Workspace {
   createdAt: string;
 }
 
+// Experiment types
+export interface ExperimentVariant {
+  id: string;
+  key: string;
+  name: string;
+  description?: string | null;
+  weight: number;
+  config: Record<string, unknown> | null;
+  isControl: boolean;
+}
+
+export interface Experiment {
+  id: string;
+  key: string;
+  name: string;
+  description?: string | null;
+  type: "feature" | "pricing" | "ui" | "funnel";
+  status: "draft" | "running" | "paused" | "concluded" | "archived";
+  trafficAllocation: number;
+  targetingRules: Record<string, unknown> | null;
+  startAt?: string | null;
+  endAt?: string | null;
+  winningVariantId?: string | null;
+  variants: ExperimentVariant[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExperimentStats {
+  experimentId: string;
+  totalAssignments: number;
+  totalExposures: number;
+  totalConversions: number;
+  conversionRate: number;
+  variantStats: Array<{
+    variantId: string;
+    variantKey: string;
+    isControl: boolean;
+    assignments: number;
+    exposures: number;
+    conversions: number;
+    conversionRate: number;
+    totalConversionValue: number;
+  }>;
+}
+
 // Paginated response type
 export interface PaginatedResponse<T> {
   data: T[];
