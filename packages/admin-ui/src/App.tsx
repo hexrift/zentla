@@ -26,6 +26,8 @@ import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { ExperimentsPage } from "./pages/ExperimentsPage";
 import { ExperimentNewPage } from "./pages/ExperimentNewPage";
 import { ExperimentDetailPage } from "./pages/ExperimentDetailPage";
+import { InvoicesPage } from "./pages/InvoicesPage";
+import { InvoiceDetailPage } from "./pages/InvoiceDetailPage";
 
 export default function App() {
   return (
@@ -64,6 +66,8 @@ export default function App() {
             path="subscriptions/:id"
             element={<SubscriptionDetailPage />}
           />
+          <Route path="invoices" element={<InvoicesPage />} />
+          <Route path="invoices/:id" element={<InvoiceDetailPage />} />
           <Route path="customers" element={<CustomersPage />} />
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="events" element={<EventsPage />} />

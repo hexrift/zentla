@@ -28,6 +28,7 @@ import { FeedbackModule } from "./feedback/feedback.module";
 import { UsageModule } from "./usage/usage.module";
 import { ExperimentsModule } from "./experiments/experiments.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
+import { InvoicesModule } from "./invoices/invoices.module";
 
 // Guards
 import { ApiKeyGuard } from "./auth/guards/api-key.guard";
@@ -104,6 +105,7 @@ import { configuration, validationSchema } from "./config/configuration";
     UsageModule,
     ExperimentsModule,
     AnalyticsModule,
+    InvoicesModule,
   ],
   providers: [
     // Global interceptors

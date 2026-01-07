@@ -830,4 +830,26 @@ export class StripeAdapter implements BillingProvider {
     }
     return customer as Stripe.Customer;
   }
+
+  /**
+   * Get PDF download URL for an invoice.
+   */
+  async getInvoicePdfUrl(invoiceId: string): Promise<string | null> {
+    const invoice = await this.stripe.invoices.retrieve(invoiceId);
+    return invoice.invoice_pdf ?? null;
+  }
+
+  /**
+   * Void an open or draft invoice.
+   */
+  async voidInvoice(invoiceId: string): Promise<void> {
+    await this.stripe.invoices.voidInvoice(invoiceId);
+  }
+
+  /**
+   * Trigger a payment attempt for an open invoice.
+   */
+  async payInvoice(invoiceId: string): Promise<void> {
+    await this.stripe.invoices.pay(invoiceId);
+  }
 }

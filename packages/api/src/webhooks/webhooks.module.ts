@@ -7,9 +7,10 @@ import { StripeWebhookService } from "./stripe-webhook.service";
 import { ZuoraWebhookService } from "./zuora-webhook.service";
 import { WebhookDeliveryService } from "./webhook-delivery.service";
 import { EntitlementsModule } from "../entitlements/entitlements.module";
+import { InvoicesModule } from "../invoices/invoices.module";
 
 @Module({
-  imports: [EntitlementsModule],
+  imports: [EntitlementsModule, InvoicesModule],
   controllers: [WebhooksController, WebhookEndpointsController],
   providers: [
     WebhooksService,

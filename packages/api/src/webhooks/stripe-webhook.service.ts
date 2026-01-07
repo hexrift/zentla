@@ -4,9 +4,10 @@ import { BillingService, ProviderType } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
 import { OutboxService } from "./outbox.service";
 import { EntitlementsService } from "../entitlements/entitlements.service";
+import { InvoicesService } from "../invoices/invoices.service";
 import type { StripeAdapter } from "@zentla/stripe-adapter";
 import type Stripe from "stripe";
-import type { Prisma } from "@prisma/client";
+import type { Prisma, InvoiceStatus } from "@prisma/client";
 
 const PROVIDER: ProviderType = "stripe";
 
@@ -20,6 +21,7 @@ export class StripeWebhookService {
     private readonly providerRefService: ProviderRefService,
     private readonly outboxService: OutboxService,
     private readonly entitlementsService: EntitlementsService,
+    private readonly invoicesService: InvoicesService,
   ) {}
 
   async processWebhook(
@@ -141,11 +143,19 @@ export class StripeWebhookService {
       case "customer.subscription.deleted":
         await this.handleSubscriptionDeleted(event);
         break;
+      case "invoice.created":
+      case "invoice.updated":
+      case "invoice.finalized":
+        await this.handleInvoiceUpsert(event);
+        break;
       case "invoice.paid":
         await this.handleInvoicePaid(event);
         break;
       case "invoice.payment_failed":
         await this.handleInvoicePaymentFailed(event);
+        break;
+      case "invoice.voided":
+        await this.handleInvoiceVoided(event);
         break;
       case "payment_intent.succeeded":
         await this.handlePaymentIntentSucceeded(event);
@@ -621,8 +631,113 @@ export class StripeWebhookService {
     );
   }
 
+  /**
+   * Handle invoice created/updated/finalized - upsert the invoice to our database.
+   */
+  private async handleInvoiceUpsert(event: Stripe.Event): Promise<void> {
+    const stripeInvoice = event.data.object as Stripe.Invoice;
+
+    if (!stripeInvoice.id) {
+      this.logger.warn("Invoice has no ID, skipping");
+      return;
+    }
+
+    // Get workspace and customer from subscription or metadata
+    const stripeCustomerId = stripeInvoice.customer as string;
+    const customerRef = await this.prisma.providerRef.findFirst({
+      where: {
+        provider: "stripe",
+        entityType: "customer",
+        externalId: stripeCustomerId,
+      },
+    });
+
+    if (!customerRef) {
+      this.logger.warn(
+        `Customer not found for Stripe customer ${stripeCustomerId}, skipping invoice`,
+      );
+      return;
+    }
+
+    // Get subscription if linked
+    let subscriptionId: string | undefined;
+    const stripeSubscriptionId = stripeInvoice.subscription as string | null;
+    if (stripeSubscriptionId) {
+      const subscriptionRef = await this.prisma.providerRef.findFirst({
+        where: {
+          provider: "stripe",
+          entityType: "subscription",
+          externalId: stripeSubscriptionId,
+        },
+      });
+      subscriptionId = subscriptionRef?.entityId;
+    }
+
+    // Map Stripe status to our status
+    const status = this.mapStripeInvoiceStatus(stripeInvoice.status);
+
+    // Get line items
+    const lineItems = stripeInvoice.lines.data.map((line) => ({
+      description: line.description ?? "Invoice item",
+      quantity: line.quantity ?? 1,
+      unitAmount: line.unit_amount_excluding_tax
+        ? Math.round(parseFloat(line.unit_amount_excluding_tax))
+        : Math.round((line.amount ?? 0) / (line.quantity ?? 1)),
+      amount: line.amount ?? 0,
+      currency: stripeInvoice.currency,
+      periodStart: line.period?.start
+        ? new Date(line.period.start * 1000)
+        : undefined,
+      periodEnd: line.period?.end
+        ? new Date(line.period.end * 1000)
+        : undefined,
+      providerLineItemId: line.id,
+    }));
+
+    await this.invoicesService.upsertFromProvider(customerRef.workspaceId, {
+      customerId: customerRef.entityId,
+      subscriptionId,
+      amountDue: stripeInvoice.amount_due,
+      amountPaid: stripeInvoice.amount_paid,
+      amountRemaining: stripeInvoice.amount_remaining,
+      subtotal: stripeInvoice.subtotal,
+      tax: stripeInvoice.tax ?? 0,
+      total: stripeInvoice.total,
+      currency: stripeInvoice.currency,
+      status,
+      periodStart: stripeInvoice.period_start
+        ? new Date(stripeInvoice.period_start * 1000)
+        : undefined,
+      periodEnd: stripeInvoice.period_end
+        ? new Date(stripeInvoice.period_end * 1000)
+        : undefined,
+      dueDate: stripeInvoice.due_date
+        ? new Date(stripeInvoice.due_date * 1000)
+        : undefined,
+      paidAt:
+        stripeInvoice.status === "paid" && stripeInvoice.status_transitions?.paid_at
+          ? new Date(stripeInvoice.status_transitions.paid_at * 1000)
+          : undefined,
+      provider: "stripe",
+      providerInvoiceId: stripeInvoice.id,
+      providerInvoiceUrl: stripeInvoice.hosted_invoice_url ?? undefined,
+      providerPdfUrl: stripeInvoice.invoice_pdf ?? undefined,
+      attemptCount: stripeInvoice.attempt_count ?? 0,
+      nextPaymentAttempt: stripeInvoice.next_payment_attempt
+        ? new Date(stripeInvoice.next_payment_attempt * 1000)
+        : undefined,
+      lineItems,
+    });
+
+    this.logger.log(`Upserted invoice ${stripeInvoice.id} (${event.type})`);
+  }
+
   private async handleInvoicePaid(event: Stripe.Event): Promise<void> {
     const invoice = event.data.object as Stripe.Invoice;
+
+    // First, upsert the invoice to our database
+    await this.handleInvoiceUpsert(event);
+
     const subscriptionId = invoice.subscription as string;
 
     if (!subscriptionId) {
@@ -693,6 +808,10 @@ export class StripeWebhookService {
 
   private async handleInvoicePaymentFailed(event: Stripe.Event): Promise<void> {
     const invoice = event.data.object as Stripe.Invoice;
+
+    // First, upsert the invoice to our database
+    await this.handleInvoiceUpsert(event);
+
     const subscriptionId = invoice.subscription as string;
 
     if (!subscriptionId) {
@@ -743,6 +862,58 @@ export class StripeWebhookService {
     this.logger.log(
       `Payment failed for subscription ${subscriptionRef.entityId}`,
     );
+  }
+
+  private async handleInvoiceVoided(event: Stripe.Event): Promise<void> {
+    const stripeInvoice = event.data.object as Stripe.Invoice;
+
+    if (!stripeInvoice.id) {
+      return;
+    }
+
+    // Get customer to find workspace
+    const stripeCustomerId = stripeInvoice.customer as string;
+    const customerRef = await this.prisma.providerRef.findFirst({
+      where: {
+        provider: "stripe",
+        entityType: "customer",
+        externalId: stripeCustomerId,
+      },
+    });
+
+    if (!customerRef) {
+      this.logger.warn(
+        `Customer not found for Stripe customer ${stripeCustomerId}`,
+      );
+      return;
+    }
+
+    // Update invoice status
+    await this.invoicesService.updateStatus(
+      customerRef.workspaceId,
+      stripeInvoice.id,
+      "stripe",
+      "void",
+      {
+        voidedAt: new Date(),
+      },
+    );
+
+    // Create outbox event for webhook delivery
+    await this.outboxService.createEvent({
+      workspaceId: customerRef.workspaceId,
+      eventType: "invoice.voided",
+      aggregateType: "invoice",
+      aggregateId: stripeInvoice.id,
+      payload: {
+        invoice: {
+          id: stripeInvoice.id,
+          voidedAt: new Date(),
+        },
+      },
+    });
+
+    this.logger.log(`Invoice voided: ${stripeInvoice.id}`);
   }
 
   /**
@@ -1153,5 +1324,19 @@ export class StripeWebhookService {
       paused: "paused",
     };
     return statusMap[status];
+  }
+
+  private mapStripeInvoiceStatus(
+    status: Stripe.Invoice.Status | null,
+  ): InvoiceStatus {
+    const statusMap: Record<NonNullable<Stripe.Invoice.Status>, InvoiceStatus> =
+      {
+        draft: "draft",
+        open: "open",
+        paid: "paid",
+        void: "void",
+        uncollectible: "uncollectible",
+      };
+    return statusMap[status ?? "draft"] ?? "draft";
   }
 }

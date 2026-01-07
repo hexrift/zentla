@@ -18,6 +18,7 @@ import type {
   Experiment,
   ExperimentVariant,
   ExperimentStats,
+  Invoice,
 } from "./types";
 
 const API_BASE = `${import.meta.env.VITE_API_URL || ""}/api/v1`;
@@ -601,6 +602,35 @@ export const api = {
       fetchApi<void>(`/experiments/${experimentId}/variants/${variantId}`, {
         method: "DELETE",
       }),
+  },
+
+  invoices: {
+    list: (params?: {
+      customerId?: string;
+      subscriptionId?: string;
+      status?: string;
+      limit?: number;
+      cursor?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.customerId) searchParams.set("customerId", params.customerId);
+      if (params?.subscriptionId)
+        searchParams.set("subscriptionId", params.subscriptionId);
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.cursor) searchParams.set("cursor", params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<PaginatedResponse<Invoice>>(
+        `/invoices${query ? `?${query}` : ""}`,
+      );
+    },
+    get: (id: string) => fetchApi<Invoice>(`/invoices/${id}`),
+    getPdfUrl: (id: string) =>
+      fetchApi<{ url: string; expiresAt: string }>(`/invoices/${id}/pdf`),
+    void: (id: string) =>
+      fetchApi<Invoice>(`/invoices/${id}/void`, { method: "POST" }),
+    pay: (id: string) =>
+      fetchApi<Invoice>(`/invoices/${id}/pay`, { method: "POST" }),
   },
 
   // Auth endpoints (public, no token required)
