@@ -26,6 +26,9 @@ describe("RevenueAnalyticsService", () => {
       findMany: ReturnType<typeof vi.fn>;
       upsert: ReturnType<typeof vi.fn>;
     };
+    workspace: {
+      findUnique: ReturnType<typeof vi.fn>;
+    };
   };
 
   const mockSubscription = {
@@ -105,6 +108,11 @@ describe("RevenueAnalyticsService", () => {
       customerCohort: {
         findMany: vi.fn(),
         upsert: vi.fn(),
+      },
+      workspace: {
+        findUnique: vi.fn().mockResolvedValue({
+          settings: { defaultCurrency: "usd" },
+        }),
       },
     };
 

@@ -227,6 +227,14 @@ export class RevenueAnalyticsService {
       1,
     );
 
+    // Get workspace settings for currency
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { settings: true },
+    });
+    const settings = workspace?.settings as { defaultCurrency?: string } | null;
+    const currency = settings?.defaultCurrency || "usd";
+
     // Calculate current MRR
     const mrr = await this.calculateCurrentMrr(workspaceId);
     const arr = mrr * 12;
@@ -321,7 +329,7 @@ export class RevenueAnalyticsService {
       grossRevenueRetention,
       arpu,
       ltv,
-      currency: "usd",
+      currency,
     };
   }
 
