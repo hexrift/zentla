@@ -5,7 +5,6 @@ import { PrismaService } from "../database/prisma.service";
 import { BillingService } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
 import { OutboxService } from "./outbox.service";
-import { EntitlementsService } from "../entitlements/entitlements.service";
 
 describe("ZuoraWebhookService", () => {
   let service: ZuoraWebhookService;
@@ -24,7 +23,7 @@ describe("ZuoraWebhookService", () => {
     offerVersion: { findUnique: ReturnType<typeof vi.fn> };
     entitlement: {
       create: ReturnType<typeof vi.fn>;
-      updateMany: ReturnType<typeof vi.fn>;
+      deleteMany: ReturnType<typeof vi.fn>;
     };
   };
   let billingService: {
@@ -35,7 +34,7 @@ describe("ZuoraWebhookService", () => {
     create: ReturnType<typeof vi.fn>;
   };
   let outboxService: {
-    publish: ReturnType<typeof vi.fn>;
+    createEvent: ReturnType<typeof vi.fn>;
   };
 
   const mockZuoraAdapter = {
@@ -60,7 +59,7 @@ describe("ZuoraWebhookService", () => {
       offerVersion: { findUnique: vi.fn() },
       entitlement: {
         create: vi.fn(),
-        updateMany: vi.fn(),
+        deleteMany: vi.fn(),
       },
     };
 
@@ -74,7 +73,7 @@ describe("ZuoraWebhookService", () => {
     };
 
     outboxService = {
-      publish: vi.fn(),
+      createEvent: vi.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -84,7 +83,6 @@ describe("ZuoraWebhookService", () => {
         { provide: BillingService, useValue: billingService },
         { provide: ProviderRefService, useValue: providerRefService },
         { provide: OutboxService, useValue: outboxService },
-        { provide: EntitlementsService, useValue: {} },
       ],
     }).compile();
 
@@ -265,9 +263,9 @@ describe("ZuoraWebhookService", () => {
         }),
       );
       expect(prisma.entitlement.create).toHaveBeenCalled();
-      expect(outboxService.publish).toHaveBeenCalledWith(
+      expect(outboxService.createEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "subscription.created",
+          eventType: "subscription.created",
         }),
       );
     });
@@ -388,9 +386,9 @@ describe("ZuoraWebhookService", () => {
           status: "canceled",
         }),
       });
-      expect(outboxService.publish).toHaveBeenCalledWith(
+      expect(outboxService.createEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "subscription.updated",
+          eventType: "subscription.updated",
         }),
       );
     });
@@ -493,13 +491,12 @@ describe("ZuoraWebhookService", () => {
           canceledAt: expect.any(Date),
         },
       });
-      expect(prisma.entitlement.updateMany).toHaveBeenCalledWith({
+      expect(prisma.entitlement.deleteMany).toHaveBeenCalledWith({
         where: { subscriptionId: "sub_zentla_123" },
-        data: { revokedAt: expect.any(Date) },
       });
-      expect(outboxService.publish).toHaveBeenCalledWith(
+      expect(outboxService.createEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "subscription.canceled",
+          eventType: "subscription.canceled",
         }),
       );
     });
@@ -527,11 +524,11 @@ describe("ZuoraWebhookService", () => {
       );
 
       expect(result.received).toBe(true);
-      expect(outboxService.publish).toHaveBeenCalledWith(
+      expect(outboxService.createEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "invoice.paid",
+          eventType: "invoice.paid",
           workspaceId: "ws_123",
-          data: expect.objectContaining({
+          payload: expect.objectContaining({
             invoiceId: "inv_zuora_123",
             customerId: "cust_zentla_123",
           }),
@@ -553,7 +550,7 @@ describe("ZuoraWebhookService", () => {
       );
 
       expect(result.received).toBe(true);
-      expect(outboxService.publish).not.toHaveBeenCalled();
+      expect(outboxService.createEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -592,9 +589,9 @@ describe("ZuoraWebhookService", () => {
       });
       // Should update each active subscription
       expect(prisma.subscription.update).toHaveBeenCalledTimes(2);
-      expect(outboxService.publish).toHaveBeenCalledWith(
+      expect(outboxService.createEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "invoice.payment_failed",
+          eventType: "invoice.payment_failed",
         }),
       );
     });

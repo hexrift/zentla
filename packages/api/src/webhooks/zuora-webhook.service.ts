@@ -3,8 +3,8 @@ import { PrismaService } from "../database/prisma.service";
 import { BillingService, ProviderType } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
 import { OutboxService } from "./outbox.service";
-import { EntitlementsService } from "../entitlements/entitlements.service";
 import type { ZuoraAdapter } from "@zentla/zuora-adapter";
+import type { EntitlementValueType } from "@prisma/client";
 
 const PROVIDER: ProviderType = "zuora";
 
@@ -28,7 +28,6 @@ export class ZuoraWebhookService {
     private readonly billingService: BillingService,
     private readonly providerRefService: ProviderRefService,
     private readonly outboxService: OutboxService,
-    private readonly entitlementsService: EntitlementsService,
   ) {}
 
   async processWebhook(
@@ -321,30 +320,25 @@ export class ZuoraWebhookService {
             subscriptionId: subscription.id,
             featureKey: entitlement.featureKey,
             value: String(entitlement.value),
-            valueType: entitlement.valueType,
+            valueType: entitlement.valueType as EntitlementValueType,
           },
         });
       }
     }
 
     // Emit outbox event
-    await this.outboxService.publish({
-      type: "subscription.created",
+    await this.outboxService.createEvent({
       workspaceId,
+      eventType: "subscription.created",
       aggregateType: "subscription",
       aggregateId: subscription.id,
-      data: {
+      payload: {
         subscriptionId: subscription.id,
         customerId: customerRef.entityId,
         offerId: offerVersion.offer.id,
         status: "active",
-      },
-      metadata: {
-        version: 1,
         source: "zuora",
-        provider: "zuora",
       },
-      occurredAt: new Date(),
     });
 
     this.logger.log(`Created subscription ${subscription.id} from Zuora`);
@@ -412,21 +406,16 @@ export class ZuoraWebhookService {
     });
 
     // Emit outbox event
-    await this.outboxService.publish({
-      type: "subscription.updated",
+    await this.outboxService.createEvent({
       workspaceId,
+      eventType: "subscription.updated",
       aggregateType: "subscription",
       aggregateId: subscription.id,
-      data: {
+      payload: {
         subscriptionId: subscription.id,
         status: subscription.status,
-      },
-      metadata: {
-        version: 1,
         source: "zuora",
-        provider: "zuora",
       },
-      occurredAt: new Date(),
     });
 
     this.logger.log(`Updated subscription ${subscription.id}`);
@@ -468,28 +457,22 @@ export class ZuoraWebhookService {
       },
     });
 
-    // Revoke entitlements
-    await this.prisma.entitlement.updateMany({
+    // Revoke entitlements by deleting them
+    await this.prisma.entitlement.deleteMany({
       where: { subscriptionId: subscription.id },
-      data: { revokedAt: new Date() },
     });
 
     // Emit outbox event
-    await this.outboxService.publish({
-      type: "subscription.canceled",
+    await this.outboxService.createEvent({
       workspaceId,
+      eventType: "subscription.canceled",
       aggregateType: "subscription",
       aggregateId: subscription.id,
-      data: {
+      payload: {
         subscriptionId: subscription.id,
         status: "canceled",
-      },
-      metadata: {
-        version: 1,
         source: "zuora",
-        provider: "zuora",
       },
-      occurredAt: new Date(),
     });
 
     this.logger.log(`Cancelled subscription ${subscription.id}`);
@@ -524,22 +507,17 @@ export class ZuoraWebhookService {
     workspaceId = customerRef.workspaceId;
 
     // Emit outbox event
-    await this.outboxService.publish({
-      type: "invoice.paid",
+    await this.outboxService.createEvent({
       workspaceId,
+      eventType: "invoice.paid",
       aggregateType: "invoice",
       aggregateId: invoiceId || `zuora_inv_${Date.now()}`,
-      data: {
+      payload: {
         invoiceId,
         accountId,
         customerId: customerRef.entityId,
-      },
-      metadata: {
-        version: 1,
         source: "zuora",
-        provider: "zuora",
       },
-      occurredAt: new Date(),
     });
 
     this.logger.log(`Processed payment success for invoice ${invoiceId}`);
@@ -589,22 +567,17 @@ export class ZuoraWebhookService {
     }
 
     // Emit outbox event
-    await this.outboxService.publish({
-      type: "invoice.payment_failed",
+    await this.outboxService.createEvent({
       workspaceId,
+      eventType: "invoice.payment_failed",
       aggregateType: "invoice",
       aggregateId: invoiceId || `zuora_inv_${Date.now()}`,
-      data: {
+      payload: {
         invoiceId,
         accountId,
         customerId: customerRef.entityId,
-      },
-      metadata: {
-        version: 1,
         source: "zuora",
-        provider: "zuora",
       },
-      occurredAt: new Date(),
     });
 
     this.logger.log(`Processed payment failure for invoice ${invoiceId}`);
