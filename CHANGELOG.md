@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.10.0](https://github.com/hexrift/zentla/compare/v5.9.0...v5.10.0) (2026-01-09)
+
+
+### Features
+
+* add invoices API with local storage and webhook sync ([#80](https://github.com/hexrift/zentla/issues/80)) ([6fb257c](https://github.com/hexrift/zentla/commit/6fb257cfda2757f1b9fe0f6f582d1222087e63bf))
+
 ## [5.9.0](https://github.com/hexrift/zentla/compare/v5.8.0...v5.9.0) (2026-01-07)
 
 
