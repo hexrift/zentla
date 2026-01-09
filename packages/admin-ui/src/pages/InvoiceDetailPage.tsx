@@ -102,7 +102,7 @@ export function InvoiceDetailPage() {
           <span
             className={clsx(
               "px-3 py-1 text-sm font-semibold rounded-full",
-              getStatusBadgeClass(invoice.status)
+              getStatusBadgeClass(invoice.status),
             )}
           >
             {invoice.status}
@@ -138,7 +138,9 @@ export function InvoiceDetailPage() {
         <div className="col-span-2 space-y-6">
           {/* Summary Card */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Summary</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Summary
+            </h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <dt className="text-sm text-gray-500">Subtotal</dt>
@@ -165,7 +167,7 @@ export function InvoiceDetailPage() {
                     "text-xl font-bold",
                     invoice.amountRemaining > 0
                       ? "text-red-600"
-                      : "text-green-600"
+                      : "text-green-600",
                   )}
                 >
                   {formatCurrency(invoice.amountRemaining, invoice.currency)}
@@ -263,11 +265,15 @@ export function InvoiceDetailPage() {
 
           {/* Invoice Info */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Details</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Details
+            </h2>
             <dl className="space-y-3">
               <div>
                 <dt className="text-xs text-gray-500">Invoice ID</dt>
-                <dd className="text-sm font-mono text-gray-900">{invoice.id}</dd>
+                <dd className="text-sm font-mono text-gray-900">
+                  {invoice.id}
+                </dd>
               </div>
               <div>
                 <dt className="text-xs text-gray-500">Provider</dt>

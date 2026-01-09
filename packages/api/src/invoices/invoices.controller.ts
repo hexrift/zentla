@@ -285,7 +285,10 @@ export class InvoicesController {
     description: "PDF download URL",
     type: PdfUrlResponseSchema,
   })
-  @ApiResponse({ status: 404, description: "Invoice not found or PDF not available" })
+  @ApiResponse({
+    status: 404,
+    description: "Invoice not found or PDF not available",
+  })
   async getInvoicePdf(
     @WorkspaceId() workspaceId: string,
     @Param("id", ParseUUIDPipe) id: string,

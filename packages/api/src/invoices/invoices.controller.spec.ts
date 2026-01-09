@@ -127,7 +127,7 @@ describe("InvoicesController", () => {
       invoicesService.findById.mockResolvedValue(null);
 
       await expect(
-        controller.getInvoice("ws_123", "nonexistent")
+        controller.getInvoice("ws_123", "nonexistent"),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -145,7 +145,7 @@ describe("InvoicesController", () => {
       expect(result.url).toBe("https://stripe.com/invoice.pdf");
       expect(invoicesService.getPdfUrl).toHaveBeenCalledWith(
         "ws_123",
-        "inv_123"
+        "inv_123",
       );
     });
   });
@@ -163,7 +163,7 @@ describe("InvoicesController", () => {
       expect(result.status).toBe("void");
       expect(invoicesService.voidInvoice).toHaveBeenCalledWith(
         "ws_123",
-        "inv_123"
+        "inv_123",
       );
     });
   });
@@ -177,7 +177,7 @@ describe("InvoicesController", () => {
       expect(result).toEqual(mockInvoice);
       expect(invoicesService.payInvoice).toHaveBeenCalledWith(
         "ws_123",
-        "inv_123"
+        "inv_123",
       );
     });
   });

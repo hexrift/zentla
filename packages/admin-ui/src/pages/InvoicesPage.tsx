@@ -4,7 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import type { Invoice } from "../lib/types";
 
-type StatusFilter = "all" | "draft" | "open" | "paid" | "void" | "uncollectible";
+type StatusFilter =
+  | "all"
+  | "draft"
+  | "open"
+  | "paid"
+  | "void"
+  | "uncollectible";
 
 export function InvoicesPage() {
   const navigate = useNavigate();

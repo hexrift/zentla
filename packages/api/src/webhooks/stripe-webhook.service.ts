@@ -715,7 +715,8 @@ export class StripeWebhookService {
         ? new Date(stripeInvoice.due_date * 1000)
         : undefined,
       paidAt:
-        stripeInvoice.status === "paid" && stripeInvoice.status_transitions?.paid_at
+        stripeInvoice.status === "paid" &&
+        stripeInvoice.status_transitions?.paid_at
           ? new Date(stripeInvoice.status_transitions.paid_at * 1000)
           : undefined,
       provider: "stripe",
@@ -1329,14 +1330,16 @@ export class StripeWebhookService {
   private mapStripeInvoiceStatus(
     status: Stripe.Invoice.Status | null,
   ): InvoiceStatus {
-    const statusMap: Record<NonNullable<Stripe.Invoice.Status>, InvoiceStatus> =
-      {
-        draft: "draft",
-        open: "open",
-        paid: "paid",
-        void: "void",
-        uncollectible: "uncollectible",
-      };
+    const statusMap: Record<
+      NonNullable<Stripe.Invoice.Status>,
+      InvoiceStatus
+    > = {
+      draft: "draft",
+      open: "open",
+      paid: "paid",
+      void: "void",
+      uncollectible: "uncollectible",
+    };
     return statusMap[status ?? "draft"] ?? "draft";
   }
 }
