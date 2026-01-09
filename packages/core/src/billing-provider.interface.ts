@@ -89,6 +89,11 @@ export interface BillingProvider {
     code: string,
     offerId: string,
   ): Promise<PromoCodeValidation>;
+
+  // Invoices
+  getInvoicePdfUrl?(invoiceId: string): Promise<string | null>;
+  voidInvoice?(invoiceId: string): Promise<void>;
+  payInvoice?(invoiceId: string): Promise<void>;
 }
 
 export interface SyncOfferResult {

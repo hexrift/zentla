@@ -265,6 +265,47 @@ export interface ExperimentStats {
   }>;
 }
 
+// Invoice types
+export interface InvoiceLineItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unitAmount: number;
+  amount: number;
+  currency: string;
+  periodStart?: string;
+  periodEnd?: string;
+}
+
+export interface Invoice {
+  id: string;
+  workspaceId: string;
+  customerId: string;
+  subscriptionId?: string;
+  amountDue: number;
+  amountPaid: number;
+  amountRemaining: number;
+  subtotal: number;
+  tax: number;
+  total: number;
+  currency: string;
+  status: "draft" | "open" | "paid" | "void" | "uncollectible";
+  periodStart?: string;
+  periodEnd?: string;
+  dueDate?: string;
+  paidAt?: string;
+  voidedAt?: string;
+  provider: string;
+  providerInvoiceId: string;
+  providerInvoiceUrl?: string;
+  attemptCount: number;
+  nextPaymentAttempt?: string;
+  createdAt: string;
+  updatedAt: string;
+  customer?: { id: string; email: string; name?: string };
+  lineItems?: InvoiceLineItem[];
+}
+
 // Paginated response type
 export interface PaginatedResponse<T> {
   data: T[];
