@@ -15,6 +15,7 @@ const navigation = [
   { name: "Subscriptions", href: "/subscriptions", icon: RefreshIcon },
   { name: "Invoices", href: "/invoices", icon: ReceiptIcon },
   { name: "Refunds", href: "/refunds", icon: ArrowUturnLeftIcon },
+  { name: "Dunning", href: "/dunning", icon: BellAlertIcon },
   { name: "Customers", href: "/customers", icon: UsersIcon },
   { name: "Offers", href: "/offers", icon: TagIcon },
   { name: "Promotions", href: "/promotions", icon: SparklesIcon },
@@ -111,6 +112,24 @@ function ArrowUturnLeftIcon({ className }: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+      />
+    </svg>
+  );
+}
+
+function BellAlertIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z"
       />
     </svg>
   );

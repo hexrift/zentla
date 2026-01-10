@@ -20,6 +20,12 @@ import type {
   ExperimentStats,
   Invoice,
   Refund,
+  DunningConfig,
+  DunningAttempt,
+  InvoiceInDunning,
+  DunningStats,
+  DunningEmailTemplate,
+  DunningEmailType,
 } from "./types";
 
 const API_BASE = `${import.meta.env.VITE_API_URL || ""}/api/v1`;
@@ -690,6 +696,77 @@ export const api = {
         "/auth/me",
       ),
     logout: () => fetchWithSession<void>("/auth/session", { method: "DELETE" }),
+  },
+
+  dunning: {
+    getConfig: () => fetchApi<DunningConfig>("/dunning/config"),
+    updateConfig: (data: {
+      retrySchedule?: number[];
+      maxAttempts?: number;
+      finalAction?: "suspend" | "cancel";
+      gracePeriodDays?: number;
+      emailsEnabled?: boolean;
+      fromEmail?: string;
+      fromName?: string;
+      replyToEmail?: string;
+    }) =>
+      fetchApi<DunningConfig>("/dunning/config", {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    getStats: () => fetchApi<DunningStats>("/dunning/stats"),
+    listInvoicesInDunning: (params?: { limit?: number; cursor?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.cursor) searchParams.set("cursor", params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<PaginatedResponse<InvoiceInDunning>>(
+        `/dunning/invoices${query ? `?${query}` : ""}`,
+      );
+    },
+    listAttempts: (params?: {
+      invoiceId?: string;
+      status?: string;
+      limit?: number;
+      cursor?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.invoiceId) searchParams.set("invoiceId", params.invoiceId);
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.cursor) searchParams.set("cursor", params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<PaginatedResponse<DunningAttempt>>(
+        `/dunning/attempts${query ? `?${query}` : ""}`,
+      );
+    },
+    retryInvoice: (invoiceId: string) =>
+      fetchApi<{ attemptId: string; success: boolean; failureReason?: string }>(
+        `/dunning/invoices/${invoiceId}/retry`,
+        { method: "POST" },
+      ),
+    // Email template endpoints
+    listEmailTemplates: () =>
+      fetchApi<DunningEmailTemplate[]>("/dunning/email-templates"),
+    getEmailTemplate: (type: DunningEmailType) =>
+      fetchApi<DunningEmailTemplate>(`/dunning/email-templates/${type}`),
+    updateEmailTemplate: (
+      type: DunningEmailType,
+      data: {
+        subject?: string;
+        bodyHtml?: string;
+        bodyText?: string;
+        enabled?: boolean;
+      },
+    ) =>
+      fetchApi<DunningEmailTemplate>(`/dunning/email-templates/${type}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    resetEmailTemplate: (type: DunningEmailType) =>
+      fetchApi<DunningEmailTemplate>(`/dunning/email-templates/${type}`, {
+        method: "DELETE",
+      }),
   },
 
   // Dashboard endpoints (session auth)

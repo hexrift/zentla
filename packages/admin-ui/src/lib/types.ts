@@ -335,6 +335,83 @@ export interface Refund {
   };
 }
 
+// Dunning types
+export interface DunningConfig {
+  id: string;
+  workspaceId: string;
+  retrySchedule: number[];
+  maxAttempts: number;
+  finalAction: "suspend" | "cancel";
+  gracePeriodDays: number;
+  emailsEnabled: boolean;
+  fromEmail?: string;
+  fromName?: string;
+  replyToEmail?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DunningAttempt {
+  id: string;
+  workspaceId: string;
+  invoiceId: string;
+  subscriptionId?: string;
+  customerId: string;
+  attemptNumber: number;
+  status: "pending" | "processing" | "succeeded" | "failed" | "skipped";
+  scheduledAt: string;
+  executedAt?: string;
+  success?: boolean;
+  failureReason?: string;
+  providerError?: string;
+  declineCode?: string;
+  createdAt: string;
+  customer?: { id: string; email: string; name?: string };
+  invoice?: { id: string; amountDue: number; currency: string };
+}
+
+export interface InvoiceInDunning {
+  id: string;
+  amountDue: number;
+  currency: string;
+  status: string;
+  dunningStartedAt: string;
+  dunningAttemptCount: number;
+  nextDunningAttemptAt?: string;
+  customer: { id: string; email: string; name?: string };
+  subscription?: { id: string; status: string };
+}
+
+export interface DunningStats {
+  invoicesInDunning: number;
+  totalAmountAtRisk: number;
+  currency: string;
+  amountsByCurrency: Array<{ currency: string; amount: number }>;
+  recoveryRate: number;
+  attemptsByStatus: {
+    pending: number;
+    succeeded: number;
+    failed: number;
+  };
+}
+
+export type DunningEmailType =
+  | "payment_failed"
+  | "payment_reminder"
+  | "final_warning"
+  | "subscription_suspended"
+  | "subscription_canceled"
+  | "payment_recovered";
+
+export interface DunningEmailTemplate {
+  type: DunningEmailType;
+  subject: string;
+  bodyHtml: string;
+  bodyText?: string;
+  enabled: boolean;
+  isDefault: boolean;
+}
+
 // Paginated response type
 export interface PaginatedResponse<T> {
   data: T[];

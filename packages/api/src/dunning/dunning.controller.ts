@@ -3,6 +3,7 @@ import {
   Get,
   Put,
   Post,
+  Delete,
   Body,
   Param,
   Query,
@@ -19,7 +20,7 @@ import {
   ApiSecurity,
   ApiTags,
 } from "@nestjs/swagger";
-import type { DunningFinalAction } from "@prisma/client";
+import type { DunningFinalAction, DunningEmailType } from "@prisma/client";
 import { Transform } from "class-transformer";
 import {
   IsInt,
@@ -151,6 +152,47 @@ class StopDunningDto {
   })
   @IsString()
   reason!: string;
+}
+
+const EMAIL_TYPE_ENUM = [
+  "payment_failed",
+  "payment_reminder",
+  "final_warning",
+  "subscription_suspended",
+  "subscription_canceled",
+  "payment_recovered",
+] as const;
+
+class UpdateEmailTemplateDto {
+  @ApiPropertyOptional({
+    description: "Email subject line (supports {{variables}})",
+    example: "Payment Failed for Invoice {{invoiceNumber}}",
+  })
+  @IsOptional()
+  @IsString()
+  subject?: string;
+
+  @ApiPropertyOptional({
+    description: "HTML email body (supports {{variables}} and {{#if var}}...{{/if}})",
+  })
+  @IsOptional()
+  @IsString()
+  bodyHtml?: string;
+
+  @ApiPropertyOptional({
+    description: "Plain text email body",
+  })
+  @IsOptional()
+  @IsString()
+  bodyText?: string;
+
+  @ApiPropertyOptional({
+    description: "Whether this email type is enabled",
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  enabled?: boolean;
 }
 
 // ============================================================================
@@ -305,6 +347,29 @@ class ManualRetryResultSchema {
 
   @ApiPropertyOptional({ description: "Decline code from payment provider" })
   declineCode?: string;
+}
+
+class EmailTemplateSchema {
+  @ApiProperty({
+    description: "Email type",
+    enum: EMAIL_TYPE_ENUM,
+  })
+  type!: string;
+
+  @ApiProperty({ description: "Email subject line" })
+  subject!: string;
+
+  @ApiProperty({ description: "HTML email body" })
+  bodyHtml!: string;
+
+  @ApiPropertyOptional({ description: "Plain text email body" })
+  bodyText?: string;
+
+  @ApiProperty({ description: "Whether this email type is enabled" })
+  enabled!: boolean;
+
+  @ApiProperty({ description: "Whether using the default template" })
+  isDefault!: boolean;
 }
 
 // ============================================================================
@@ -471,5 +536,122 @@ The invoice will remain unpaid but no further automatic retries will be attempte
     @Body() body: StopDunningDto,
   ) {
     await this.dunningService.stopDunning(workspaceId, invoiceId, body.reason);
+  }
+
+  // ============================================================================
+  // EMAIL TEMPLATE ENDPOINTS
+  // ============================================================================
+
+  @Get("email-templates")
+  @ApiOperation({
+    summary: "List all email templates",
+    description: `Returns all dunning email templates for the workspace.
+
+Each template shows whether it's using default content or has been customized.
+
+**Template Types:**
+- \`payment_failed\`: Sent when initial payment fails
+- \`payment_reminder\`: Sent on subsequent retry attempts
+- \`final_warning\`: Sent before final retry
+- \`subscription_suspended\`: Sent when subscription is suspended
+- \`subscription_canceled\`: Sent when subscription is canceled
+- \`payment_recovered\`: Sent when payment succeeds after failures
+
+**Available Variables:**
+- \`{{customerName}}\`: Customer's name
+- \`{{customerEmail}}\`: Customer's email
+- \`{{invoiceAmount}}\`: Formatted amount
+- \`{{invoiceCurrency}}\`: Currency code
+- \`{{invoiceNumber}}\`: Invoice ID
+- \`{{attemptNumber}}\`: Current retry attempt
+- \`{{maxAttempts}}\`: Maximum attempts configured
+- \`{{nextRetryDate}}\`: Next scheduled retry
+- \`{{updatePaymentUrl}}\`: Link to update payment method
+- \`{{companyName}}\`: Your company name
+- \`{{supportEmail}}\`: Support email address
+
+**Conditional Blocks:**
+Use \`{{#if variable}}content{{/if}}\` for conditional content.`,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "List of email templates",
+    type: [EmailTemplateSchema],
+  })
+  async listEmailTemplates(@WorkspaceId() workspaceId: string) {
+    return this.dunningConfigService.getEmailTemplates(workspaceId);
+  }
+
+  @Get("email-templates/:type")
+  @ApiOperation({
+    summary: "Get an email template",
+    description: "Returns a specific dunning email template by type.",
+  })
+  @ApiParam({
+    name: "type",
+    description: "Email template type",
+    enum: EMAIL_TYPE_ENUM,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Email template",
+    type: EmailTemplateSchema,
+  })
+  async getEmailTemplate(
+    @WorkspaceId() workspaceId: string,
+    @Param("type") type: DunningEmailType,
+  ) {
+    return this.dunningConfigService.getEmailTemplate(workspaceId, type);
+  }
+
+  @Put("email-templates/:type")
+  @AdminOnly()
+  @ApiOperation({
+    summary: "Update an email template",
+    description: `Updates a dunning email template.
+
+Provide only the fields you want to change. Omitted fields will keep their current values.
+
+See GET /dunning/email-templates for available variables and template syntax.`,
+  })
+  @ApiParam({
+    name: "type",
+    description: "Email template type",
+    enum: EMAIL_TYPE_ENUM,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Updated email template",
+    type: EmailTemplateSchema,
+  })
+  async updateEmailTemplate(
+    @WorkspaceId() workspaceId: string,
+    @Param("type") type: DunningEmailType,
+    @Body() body: UpdateEmailTemplateDto,
+  ) {
+    return this.dunningConfigService.updateEmailTemplate(workspaceId, type, body);
+  }
+
+  @Delete("email-templates/:type")
+  @AdminOnly()
+  @ApiOperation({
+    summary: "Reset email template to default",
+    description: "Deletes custom template and reverts to the default template.",
+  })
+  @ApiParam({
+    name: "type",
+    description: "Email template type",
+    enum: EMAIL_TYPE_ENUM,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Default email template",
+    type: EmailTemplateSchema,
+  })
+  async resetEmailTemplate(
+    @WorkspaceId() workspaceId: string,
+    @Param("type") type: DunningEmailType,
+  ) {
+    return this.dunningConfigService.resetEmailTemplate(workspaceId, type);
   }
 }

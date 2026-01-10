@@ -30,6 +30,7 @@ import { InvoicesPage } from "./pages/InvoicesPage";
 import { InvoiceDetailPage } from "./pages/InvoiceDetailPage";
 import { RefundsPage } from "./pages/RefundsPage";
 import { RefundDetailPage } from "./pages/RefundDetailPage";
+import { DunningPage } from "./pages/DunningPage";
 
 export default function App() {
   return (
@@ -72,6 +73,7 @@ export default function App() {
           <Route path="invoices/:id" element={<InvoiceDetailPage />} />
           <Route path="refunds" element={<RefundsPage />} />
           <Route path="refunds/:id" element={<RefundDetailPage />} />
+          <Route path="dunning" element={<DunningPage />} />
           <Route path="customers" element={<CustomersPage />} />
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="events" element={<EventsPage />} />
