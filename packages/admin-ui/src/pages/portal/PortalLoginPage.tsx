@@ -31,7 +31,9 @@ export function PortalLoginPage() {
       await portalApi.requestMagicLink(email, workspaceId, portalBaseUrl);
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send login link");
+      setError(
+        err instanceof Error ? err.message : "Failed to send login link",
+      );
     } finally {
       setIsLoading(false);
     }

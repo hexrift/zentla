@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import {
@@ -18,37 +18,41 @@ export function PortalDashboardPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabType>("subscriptions");
+  const isAuthenticated = isPortalAuthenticated();
 
   // Redirect to login if not authenticated
-  if (!isPortalAuthenticated()) {
-    navigate("/portal/login");
-    return null;
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/portal/login");
+    }
+  }, [isAuthenticated, navigate]);
 
   // Fetch customer info
   const { data: customer, isLoading: customerLoading } = useQuery({
     queryKey: ["portal-customer"],
     queryFn: () => portalApi.getMe(),
+    enabled: isAuthenticated,
   });
 
   // Fetch subscriptions
   const { data: subscriptions, isLoading: subscriptionsLoading } = useQuery({
     queryKey: ["portal-subscriptions"],
     queryFn: () => portalApi.getSubscriptions(),
+    enabled: isAuthenticated,
   });
 
   // Fetch invoices
   const { data: invoices, isLoading: invoicesLoading } = useQuery({
     queryKey: ["portal-invoices"],
     queryFn: () => portalApi.getInvoices(),
-    enabled: activeTab === "invoices",
+    enabled: isAuthenticated && activeTab === "invoices",
   });
 
   // Fetch entitlements
   const { data: entitlements, isLoading: entitlementsLoading } = useQuery({
     queryKey: ["portal-entitlements"],
     queryFn: () => portalApi.getEntitlements(),
-    enabled: activeTab === "entitlements",
+    enabled: isAuthenticated && activeTab === "entitlements",
   });
 
   // Cancel subscription mutation
@@ -77,6 +81,11 @@ export function PortalDashboardPage() {
       window.location.href = data.url;
     },
   });
+
+  // Show nothing while redirecting
+  if (!isAuthenticated) {
+    return null;
+  }
 
   const handleLogout = async () => {
     try {
@@ -132,9 +141,7 @@ export function PortalDashboardPage() {
               <h1 className="text-xl font-semibold text-gray-900">
                 Customer Portal
               </h1>
-              <p className="text-sm text-gray-500">
-                {customer?.email}
-              </p>
+              <p className="text-sm text-gray-500">{customer?.email}</p>
             </div>
             <div className="flex items-center space-x-4">
               <button
@@ -316,13 +323,19 @@ export function PortalDashboardPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {invoicesLoading ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                    <td
+                      colSpan={4}
+                      className="px-6 py-4 text-center text-gray-500"
+                    >
                       Loading...
                     </td>
                   </tr>
                 ) : !invoices || invoices.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                    <td
+                      colSpan={4}
+                      className="px-6 py-4 text-center text-gray-500"
+                    >
                       No invoices yet
                     </td>
                   </tr>
@@ -370,7 +383,9 @@ export function PortalDashboardPage() {
         {activeTab === "entitlements" && (
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Your Features</h3>
+              <h3 className="text-lg font-medium text-gray-900">
+                Your Features
+              </h3>
               <p className="text-sm text-gray-500">
                 Features available with your current subscription
               </p>

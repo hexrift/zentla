@@ -153,7 +153,9 @@ describe("CustomerPortalService", () => {
     it("should send magic link email for existing customer", async () => {
       prisma.customer.findFirst.mockResolvedValue(mockCustomer);
       prisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      prisma.customerPortalMagicLink.create.mockResolvedValue({ id: "link_123" });
+      prisma.customerPortalMagicLink.create.mockResolvedValue({
+        id: "link_123",
+      });
 
       const result = await service.requestMagicLink(
         mockWorkspaceId,
@@ -193,8 +195,13 @@ describe("CustomerPortalService", () => {
     it("should still succeed if email sending fails", async () => {
       prisma.customer.findFirst.mockResolvedValue(mockCustomer);
       prisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      prisma.customerPortalMagicLink.create.mockResolvedValue({ id: "link_123" });
-      resendProvider.send.mockResolvedValue({ success: false, error: "SMTP error" });
+      prisma.customerPortalMagicLink.create.mockResolvedValue({
+        id: "link_123",
+      });
+      resendProvider.send.mockResolvedValue({
+        success: false,
+        error: "SMTP error",
+      });
 
       const result = await service.requestMagicLink(
         mockWorkspaceId,
@@ -208,7 +215,9 @@ describe("CustomerPortalService", () => {
     it("should use default portal name if workspace not found", async () => {
       prisma.customer.findFirst.mockResolvedValue(mockCustomer);
       prisma.workspace.findUnique.mockResolvedValue(null);
-      prisma.customerPortalMagicLink.create.mockResolvedValue({ id: "link_123" });
+      prisma.customerPortalMagicLink.create.mockResolvedValue({
+        id: "link_123",
+      });
 
       await service.requestMagicLink(
         mockWorkspaceId,
@@ -226,7 +235,9 @@ describe("CustomerPortalService", () => {
     it("should create magic link with 15 minute expiry", async () => {
       prisma.customer.findFirst.mockResolvedValue(mockCustomer);
       prisma.workspace.findUnique.mockResolvedValue(mockWorkspace);
-      prisma.customerPortalMagicLink.create.mockResolvedValue({ id: "link_123" });
+      prisma.customerPortalMagicLink.create.mockResolvedValue({
+        id: "link_123",
+      });
 
       const beforeCall = Date.now();
       await service.requestMagicLink(
@@ -247,7 +258,9 @@ describe("CustomerPortalService", () => {
 
   describe("verifyMagicLink", () => {
     const mockRawToken = "raw_token_123";
-    const mockHashedToken = createHash("sha256").update(mockRawToken).digest("hex");
+    const mockHashedToken = createHash("sha256")
+      .update(mockRawToken)
+      .digest("hex");
 
     const mockMagicLink = {
       id: "link_123",
@@ -260,9 +273,14 @@ describe("CustomerPortalService", () => {
 
     it("should verify valid magic link and create session", async () => {
       prisma.customerPortalMagicLink.findFirst.mockResolvedValue(mockMagicLink);
-      prisma.customerPortalMagicLink.update.mockResolvedValue({ ...mockMagicLink, usedAt: new Date() });
+      prisma.customerPortalMagicLink.update.mockResolvedValue({
+        ...mockMagicLink,
+        usedAt: new Date(),
+      });
       prisma.customer.findUnique.mockResolvedValue(mockCustomer);
-      prisma.customerPortalSession.create.mockResolvedValue({ id: "session_123" });
+      prisma.customerPortalSession.create.mockResolvedValue({
+        id: "session_123",
+      });
 
       const result = await service.verifyMagicLink(
         mockWorkspaceId,
@@ -315,7 +333,10 @@ describe("CustomerPortalService", () => {
 
     it("should throw NotFoundException if customer deleted after magic link created", async () => {
       prisma.customerPortalMagicLink.findFirst.mockResolvedValue(mockMagicLink);
-      prisma.customerPortalMagicLink.update.mockResolvedValue({ ...mockMagicLink, usedAt: new Date() });
+      prisma.customerPortalMagicLink.update.mockResolvedValue({
+        ...mockMagicLink,
+        usedAt: new Date(),
+      });
       prisma.customer.findUnique.mockResolvedValue(null);
 
       await expect(
@@ -325,9 +346,14 @@ describe("CustomerPortalService", () => {
 
     it("should create session with 7 day expiry", async () => {
       prisma.customerPortalMagicLink.findFirst.mockResolvedValue(mockMagicLink);
-      prisma.customerPortalMagicLink.update.mockResolvedValue({ ...mockMagicLink, usedAt: new Date() });
+      prisma.customerPortalMagicLink.update.mockResolvedValue({
+        ...mockMagicLink,
+        usedAt: new Date(),
+      });
       prisma.customer.findUnique.mockResolvedValue(mockCustomer);
-      prisma.customerPortalSession.create.mockResolvedValue({ id: "session_123" });
+      prisma.customerPortalSession.create.mockResolvedValue({
+        id: "session_123",
+      });
 
       const beforeCall = Date.now();
       await service.verifyMagicLink(mockWorkspaceId, mockRawToken);
@@ -344,7 +370,9 @@ describe("CustomerPortalService", () => {
 
   describe("validateSession", () => {
     const mockSessionToken = "session_token_123";
-    const mockHashedToken = createHash("sha256").update(mockSessionToken).digest("hex");
+    const mockHashedToken = createHash("sha256")
+      .update(mockSessionToken)
+      .digest("hex");
 
     const mockSession = {
       id: "session_123",
@@ -358,7 +386,10 @@ describe("CustomerPortalService", () => {
       prisma.customerPortalSession.findFirst.mockResolvedValue(mockSession);
       prisma.customer.findUnique.mockResolvedValue(mockCustomer);
 
-      const result = await service.validateSession(mockWorkspaceId, mockSessionToken);
+      const result = await service.validateSession(
+        mockWorkspaceId,
+        mockSessionToken,
+      );
 
       expect(result.customerId).toBe(mockCustomerId);
       expect(result.customer.id).toBe(mockCustomerId);
@@ -419,7 +450,10 @@ describe("CustomerPortalService", () => {
     it("should return customer subscriptions", async () => {
       prisma.subscription.findMany.mockResolvedValue([mockSubscription]);
 
-      const result = await service.getSubscriptions(mockWorkspaceId, mockCustomerId);
+      const result = await service.getSubscriptions(
+        mockWorkspaceId,
+        mockCustomerId,
+      );
 
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe(mockSubscription.id);
@@ -432,7 +466,10 @@ describe("CustomerPortalService", () => {
     it("should return empty array if no subscriptions", async () => {
       prisma.subscription.findMany.mockResolvedValue([]);
 
-      const result = await service.getSubscriptions(mockWorkspaceId, mockCustomerId);
+      const result = await service.getSubscriptions(
+        mockWorkspaceId,
+        mockCustomerId,
+      );
 
       expect(result).toEqual([]);
     });
@@ -461,7 +498,9 @@ describe("CustomerPortalService", () => {
       expect(result[0].amountDue).toBe(2999);
       expect(result[0].currency).toBe("usd");
       expect(result[0].status).toBe("paid");
-      expect(result[0].providerInvoiceUrl).toBe("https://stripe.com/invoice/123");
+      expect(result[0].providerInvoiceUrl).toBe(
+        "https://stripe.com/invoice/123",
+      );
     });
 
     it("should return empty array if no invoices", async () => {
@@ -499,7 +538,10 @@ describe("CustomerPortalService", () => {
     it("should return active entitlements", async () => {
       prisma.entitlement.findMany.mockResolvedValue([mockEntitlement]);
 
-      const result = await service.getEntitlements(mockWorkspaceId, mockCustomerId);
+      const result = await service.getEntitlements(
+        mockWorkspaceId,
+        mockCustomerId,
+      );
 
       expect(result).toHaveLength(1);
       expect(result[0].featureKey).toBe("api_calls");
@@ -510,7 +552,10 @@ describe("CustomerPortalService", () => {
     it("should return empty array if no entitlements", async () => {
       prisma.entitlement.findMany.mockResolvedValue([]);
 
-      const result = await service.getEntitlements(mockWorkspaceId, mockCustomerId);
+      const result = await service.getEntitlements(
+        mockWorkspaceId,
+        mockCustomerId,
+      );
 
       expect(result).toEqual([]);
     });
@@ -524,10 +569,7 @@ describe("CustomerPortalService", () => {
         where: {
           workspaceId: mockWorkspaceId,
           customerId: mockCustomerId,
-          OR: [
-            { expiresAt: null },
-            { expiresAt: { gt: expect.any(Date) } },
-          ],
+          OR: [{ expiresAt: null }, { expiresAt: { gt: expect.any(Date) } }],
         },
         orderBy: { featureKey: "asc" },
       });
@@ -561,7 +603,11 @@ describe("CustomerPortalService", () => {
       prisma.subscription.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.cancelSubscription(mockWorkspaceId, mockCustomerId, "nonexistent"),
+        service.cancelSubscription(
+          mockWorkspaceId,
+          mockCustomerId,
+          "nonexistent",
+        ),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -569,7 +615,11 @@ describe("CustomerPortalService", () => {
       prisma.subscription.findFirst.mockResolvedValue(null); // Query filters by customerId
 
       await expect(
-        service.cancelSubscription(mockWorkspaceId, "other_customer", mockSubscription.id),
+        service.cancelSubscription(
+          mockWorkspaceId,
+          "other_customer",
+          mockSubscription.id,
+        ),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -606,7 +656,11 @@ describe("CustomerPortalService", () => {
       prisma.subscription.findFirst.mockResolvedValue(null);
 
       await expect(
-        service.reactivateSubscription(mockWorkspaceId, mockCustomerId, "nonexistent"),
+        service.reactivateSubscription(
+          mockWorkspaceId,
+          mockCustomerId,
+          "nonexistent",
+        ),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -614,7 +668,11 @@ describe("CustomerPortalService", () => {
       prisma.subscription.findFirst.mockResolvedValue(null); // Query filters cancelAt: { not: null }
 
       await expect(
-        service.reactivateSubscription(mockWorkspaceId, mockCustomerId, mockSubscription.id),
+        service.reactivateSubscription(
+          mockWorkspaceId,
+          mockCustomerId,
+          mockSubscription.id,
+        ),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -622,7 +680,11 @@ describe("CustomerPortalService", () => {
       prisma.subscription.findFirst.mockResolvedValue(null); // Query filters status: "active"
 
       await expect(
-        service.reactivateSubscription(mockWorkspaceId, mockCustomerId, mockSubscription.id),
+        service.reactivateSubscription(
+          mockWorkspaceId,
+          mockCustomerId,
+          mockSubscription.id,
+        ),
       ).rejects.toThrow(NotFoundException);
     });
   });

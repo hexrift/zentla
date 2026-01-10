@@ -120,7 +120,11 @@ async function fetchPublicPortal<T>(
 
 export const portalApi = {
   // Authentication
-  requestMagicLink: (email: string, workspaceId: string, portalBaseUrl: string) =>
+  requestMagicLink: (
+    email: string,
+    workspaceId: string,
+    portalBaseUrl: string,
+  ) =>
     fetchPublicPortal<{ success: boolean }>("/request-magic-link", {
       method: "POST",
       body: JSON.stringify({ email, workspaceId, portalBaseUrl }),
@@ -138,12 +142,10 @@ export const portalApi = {
   // Customer info
   getMe: () => fetchPortal<PortalCustomer>("/me"),
 
-  logout: () =>
-    fetchPortal<void>("/logout", { method: "POST" }),
+  logout: () => fetchPortal<void>("/logout", { method: "POST" }),
 
   // Subscriptions
-  getSubscriptions: () =>
-    fetchPortal<PortalSubscription[]>("/subscriptions"),
+  getSubscriptions: () => fetchPortal<PortalSubscription[]>("/subscriptions"),
 
   cancelSubscription: (subscriptionId: string) =>
     fetchPortal<PortalSubscription>(`/subscriptions/${subscriptionId}/cancel`, {

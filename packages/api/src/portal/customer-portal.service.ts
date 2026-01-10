@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, NotFoundException, Logger } from "@nestjs/common";
+import {
+  Injectable,
+  UnauthorizedException,
+  NotFoundException,
+  Logger,
+} from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
 import { ResendProvider } from "../email/providers/resend.provider";
 import { randomBytes, createHash } from "crypto";
@@ -132,7 +137,9 @@ export class CustomerPortalService {
     });
 
     if (!result.success) {
-      this.logger.warn(`Failed to send magic link email to ${email}: ${result.error}`);
+      this.logger.warn(
+        `Failed to send magic link email to ${email}: ${result.error}`,
+      );
     }
 
     return { success: true };
@@ -337,10 +344,7 @@ export class CustomerPortalService {
       where: {
         workspaceId,
         customerId,
-        OR: [
-          { expiresAt: null },
-          { expiresAt: { gt: new Date() } },
-        ],
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       },
       orderBy: { featureKey: "asc" },
     });

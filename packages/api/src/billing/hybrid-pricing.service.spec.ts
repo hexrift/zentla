@@ -11,6 +11,9 @@ describe("HybridPricingService", () => {
     subscription: {
       findUnique: ReturnType<typeof vi.fn>;
     };
+    workspace: {
+      findUnique: ReturnType<typeof vi.fn>;
+    };
   };
   let usagePricingService: {
     calculatePrice: ReturnType<typeof vi.fn>;
@@ -57,6 +60,9 @@ describe("HybridPricingService", () => {
   beforeEach(async () => {
     prisma = {
       subscription: {
+        findUnique: vi.fn(),
+      },
+      workspace: {
         findUnique: vi.fn(),
       },
     };
@@ -180,6 +186,98 @@ describe("HybridPricingService", () => {
       expect(result!.usageComponents[0].billableQuantity).toBe(0);
       expect(result!.usageComponents[0].totalPrice).toBe(0);
       expect(result!.totalPrice).toBe(4900);
+    });
+
+    it("should use workspace default currency when pricing currency is missing", async () => {
+      const subscriptionWithoutCurrency = {
+        ...mockSubscription,
+        offerVersion: {
+          config: {
+            pricing: {
+              model: "flat",
+              amount: 4900,
+              interval: "month",
+              intervalCount: 1,
+              usageType: "licensed",
+              // currency is intentionally missing
+            },
+            usageComponents: [],
+          },
+        },
+      };
+
+      prisma.subscription.findUnique.mockResolvedValue(
+        subscriptionWithoutCurrency,
+      );
+      prisma.workspace.findUnique.mockResolvedValue({
+        id: "ws_123",
+        settings: { defaultCurrency: "gbp" },
+      });
+
+      const result = await service.calculateHybridPricing("ws_123", "sub_123");
+
+      expect(result).not.toBeNull();
+      expect(result!.currency).toBe("gbp");
+      expect(prisma.workspace.findUnique).toHaveBeenCalledWith({
+        where: { id: "ws_123" },
+        select: { settings: true },
+      });
+    });
+
+    it("should fall back to usd when workspace has no default currency", async () => {
+      const subscriptionWithoutCurrency = {
+        ...mockSubscription,
+        offerVersion: {
+          config: {
+            pricing: {
+              model: "flat",
+              amount: 4900,
+              interval: "month",
+              intervalCount: 1,
+              usageType: "licensed",
+              // currency is intentionally missing
+            },
+            usageComponents: [],
+          },
+        },
+      };
+
+      prisma.subscription.findUnique.mockResolvedValue(
+        subscriptionWithoutCurrency,
+      );
+      prisma.workspace.findUnique.mockResolvedValue({
+        id: "ws_123",
+        settings: null,
+      });
+
+      const result = await service.calculateHybridPricing("ws_123", "sub_123");
+
+      expect(result).not.toBeNull();
+      expect(result!.currency).toBe("usd");
+    });
+
+    it("should return null when offerVersion is missing", async () => {
+      prisma.subscription.findUnique.mockResolvedValue({
+        ...mockSubscription,
+        offerVersion: null,
+      });
+
+      const result = await service.calculateHybridPricing("ws_123", "sub_123");
+
+      expect(result).toBeNull();
+    });
+
+    it("should return null when pricing config is missing", async () => {
+      prisma.subscription.findUnique.mockResolvedValue({
+        ...mockSubscription,
+        offerVersion: {
+          config: {},
+        },
+      });
+
+      const result = await service.calculateHybridPricing("ws_123", "sub_123");
+
+      expect(result).toBeNull();
     });
   });
 
