@@ -251,15 +251,33 @@ class DunningInvoiceSchema {
   customer!: DunningCustomerSchema;
 }
 
+class AmountByCurrencySchema {
+  @ApiProperty({ description: "Currency code (lowercase)", example: "usd" })
+  currency!: string;
+
+  @ApiProperty({ description: "Amount in cents", example: 10000 })
+  amount!: number;
+}
+
 class DunningStatsSchema {
   @ApiProperty({ description: "Number of invoices currently in dunning" })
   invoicesInDunning!: number;
 
-  @ApiProperty({ description: "Total amount at risk in cents" })
+  @ApiProperty({ description: "Total amount at risk in cents (sum across all currencies)" })
   totalAmountAtRisk!: number;
 
-  @ApiProperty({ description: "Currency code" })
+  @ApiProperty({
+    description: "Primary currency code (deprecated, use amountsByCurrency)",
+    deprecated: true,
+  })
   currency!: string;
+
+  @ApiProperty({
+    description: "Amounts at risk grouped by currency",
+    type: [AmountByCurrencySchema],
+    example: [{ currency: "usd", amount: 10000 }, { currency: "eur", amount: 5000 }],
+  })
+  amountsByCurrency!: AmountByCurrencySchema[];
 
   @ApiProperty({ description: "Payment recovery rate percentage" })
   recoveryRate!: number;

@@ -24,10 +24,17 @@ export interface PaymentRetryResult {
   declineCode?: string;
 }
 
+export interface AmountByCurrency {
+  currency: string;
+  amount: number;
+}
+
 export interface DunningStats {
   invoicesInDunning: number;
   totalAmountAtRisk: number;
+  /** @deprecated Use amountsByCurrency instead for multi-currency support */
   currency: string;
+  amountsByCurrency: AmountByCurrency[];
   recoveryRate: number;
   attemptsByStatus: {
     pending: number;
@@ -773,22 +780,30 @@ export class DunningService {
    * Get dunning statistics for dashboard.
    */
   async getDunningStats(workspaceId: string): Promise<DunningStats> {
-    const [invoicesInDunning, attemptStats] = await Promise.all([
-      this.prisma.invoice.aggregate({
-        where: {
-          workspaceId,
-          dunningStartedAt: { not: null },
-          dunningEndedAt: null,
-        },
-        _count: true,
-        _sum: { amountDue: true },
-      }),
-      this.prisma.dunningAttempt.groupBy({
-        by: ["status"],
-        where: { workspaceId },
-        _count: true,
-      }),
-    ]);
+    const [invoicesInDunning, amountsByCurrency, attemptStats] =
+      await Promise.all([
+        this.prisma.invoice.count({
+          where: {
+            workspaceId,
+            dunningStartedAt: { not: null },
+            dunningEndedAt: null,
+          },
+        }),
+        this.prisma.invoice.groupBy({
+          by: ["currency"],
+          where: {
+            workspaceId,
+            dunningStartedAt: { not: null },
+            dunningEndedAt: null,
+          },
+          _sum: { amountDue: true },
+        }),
+        this.prisma.dunningAttempt.groupBy({
+          by: ["status"],
+          where: { workspaceId },
+          _count: true,
+        }),
+      ]);
 
     const attemptsByStatus = {
       pending: 0,
@@ -812,10 +827,30 @@ export class DunningService {
         ? (attemptsByStatus.succeeded / totalAttempts) * 100
         : 0;
 
+    // Build amounts by currency array
+    const currencyAmounts: AmountByCurrency[] = amountsByCurrency.map(
+      (item) => ({
+        currency: item.currency.toLowerCase(),
+        amount: item._sum.amountDue ?? 0,
+      }),
+    );
+
+    // Calculate total and primary currency for backward compatibility
+    const totalAmountAtRisk = currencyAmounts.reduce(
+      (sum, item) => sum + item.amount,
+      0,
+    );
+    const primaryCurrency =
+      currencyAmounts.length > 0
+        ? currencyAmounts.reduce((a, b) => (a.amount > b.amount ? a : b))
+            .currency
+        : "usd";
+
     return {
-      invoicesInDunning: invoicesInDunning._count,
-      totalAmountAtRisk: invoicesInDunning._sum.amountDue ?? 0,
-      currency: "usd", // TODO: Handle multi-currency
+      invoicesInDunning,
+      totalAmountAtRisk,
+      currency: primaryCurrency,
+      amountsByCurrency: currencyAmounts,
       recoveryRate: Math.round(recoveryRate * 100) / 100,
       attemptsByStatus,
     };

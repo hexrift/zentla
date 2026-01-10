@@ -128,7 +128,7 @@ export class UsersController {
 
 **Workspace defaults:**
 - Mode: test (live mode requires explicit request)
-- Provider: Stripe
+- Provider: Stripe (configurable)
 - Currency: USD`,
   })
   @ApiResponse({

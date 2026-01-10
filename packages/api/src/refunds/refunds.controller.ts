@@ -90,14 +90,14 @@ class CreateRefundDto {
   invoiceId?: string;
 
   @ApiPropertyOptional({
-    description: "Stripe charge ID to refund",
+    description: "Provider charge ID to refund (e.g., Stripe charge ID)",
   })
   @IsOptional()
   @IsString()
   chargeId?: string;
 
   @ApiPropertyOptional({
-    description: "Stripe payment intent ID to refund",
+    description: "Provider payment intent ID to refund (e.g., Stripe payment intent ID)",
   })
   @IsOptional()
   @IsString()

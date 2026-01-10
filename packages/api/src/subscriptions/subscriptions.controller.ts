@@ -114,7 +114,7 @@ class CancelSubscriptionDto {
 **After cancellation:**
 - Customer loses entitlements at the effective cancellation time
 - A \`subscription.canceled\` webhook event is sent
-- For immediate cancellation, prorated refund may be issued based on your Stripe settings`,
+- For immediate cancellation, prorated refund may be issued based on your billing provider settings`,
     default: false,
   })
   @IsOptional()
@@ -315,13 +315,13 @@ export class SubscriptionsController {
 2. **Cancel immediately** (\`cancelAtPeriodEnd: false\` or omitted):
    - Subscription ends immediately
    - Entitlements are revoked right away
-   - Prorated refund may be issued (per Stripe settings)
+   - Prorated refund may be issued (per billing provider settings)
    - Status changes to \`canceled\` immediately
 
 **Side effects:**
 - Updates subscription status
 - Revokes entitlements (immediately or at period end)
-- Syncs cancellation to Stripe
+- Syncs cancellation to billing provider
 - Sends \`subscription.canceled\` webhook event
 
 **Note:** Canceled subscriptions cannot be reactivated. To resume service, create a new subscription.`,
@@ -376,7 +376,7 @@ export class SubscriptionsController {
 1. Subscription moves to the new offer and version
 2. Entitlements update immediately (old removed, new granted)
 3. Billing adjusts based on \`prorationBehavior\`
-4. Stripe subscription is updated
+4. Billing provider subscription is updated
 
 **Proration options:**
 - \`create_prorations\`: Credit for unused time + charge for new offer
@@ -394,7 +394,7 @@ With \`none\`: They keep $99 offer until renewal, then switch to $29.
 **Side effects:**
 - Updates subscription record with new offer
 - Revokes old entitlements, grants new ones
-- Syncs to Stripe
+- Syncs to billing provider
 - Sends \`subscription.updated\` webhook event`,
   })
   @ApiParam({

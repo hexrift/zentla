@@ -17,6 +17,8 @@ describe("DunningService", () => {
       update: ReturnType<typeof vi.fn>;
       aggregate: ReturnType<typeof vi.fn>;
       findMany: ReturnType<typeof vi.fn>;
+      count: ReturnType<typeof vi.fn>;
+      groupBy: ReturnType<typeof vi.fn>;
     };
     dunningAttempt: {
       findUnique: ReturnType<typeof vi.fn>;
@@ -116,6 +118,8 @@ describe("DunningService", () => {
         update: vi.fn(),
         aggregate: vi.fn(),
         findMany: vi.fn(),
+        count: vi.fn(),
+        groupBy: vi.fn(),
       },
       dunningAttempt: {
         findUnique: vi.fn(),
@@ -513,10 +517,10 @@ describe("DunningService", () => {
 
   describe("getDunningStats", () => {
     it("should return dunning statistics", async () => {
-      prisma.invoice.aggregate.mockResolvedValue({
-        _count: 5,
-        _sum: { amountDue: 10000 },
-      });
+      prisma.invoice.count.mockResolvedValue(5);
+      prisma.invoice.groupBy.mockResolvedValue([
+        { currency: "usd", _sum: { amountDue: 10000 } },
+      ]);
       prisma.dunningAttempt.groupBy.mockResolvedValue([
         { status: "pending", _count: 3 },
         { status: "succeeded", _count: 10 },
@@ -527,10 +531,33 @@ describe("DunningService", () => {
 
       expect(result.invoicesInDunning).toBe(5);
       expect(result.totalAmountAtRisk).toBe(10000);
+      expect(result.amountsByCurrency).toHaveLength(1);
+      expect(result.amountsByCurrency[0].currency).toBe("usd");
+      expect(result.amountsByCurrency[0].amount).toBe(10000);
       expect(result.attemptsByStatus.pending).toBe(3);
       expect(result.attemptsByStatus.succeeded).toBe(10);
       expect(result.attemptsByStatus.failed).toBe(5);
       expect(result.recoveryRate).toBeGreaterThan(0);
+    });
+
+    it("should handle multiple currencies", async () => {
+      prisma.invoice.count.mockResolvedValue(8);
+      prisma.invoice.groupBy.mockResolvedValue([
+        { currency: "usd", _sum: { amountDue: 10000 } },
+        { currency: "eur", _sum: { amountDue: 5000 } },
+      ]);
+      prisma.dunningAttempt.groupBy.mockResolvedValue([
+        { status: "pending", _count: 2 },
+        { status: "succeeded", _count: 5 },
+        { status: "failed", _count: 3 },
+      ]);
+
+      const result = await service.getDunningStats(mockWorkspaceId);
+
+      expect(result.invoicesInDunning).toBe(8);
+      expect(result.totalAmountAtRisk).toBe(15000);
+      expect(result.amountsByCurrency).toHaveLength(2);
+      expect(result.currency).toBe("usd"); // Primary currency (highest amount)
     });
   });
 });

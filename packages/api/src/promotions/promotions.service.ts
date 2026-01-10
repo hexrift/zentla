@@ -306,8 +306,9 @@ export class PromotionsService {
     // Get workspace settings to check billing provider configuration
     const workspace = await this.prisma.workspace.findUnique({
       where: { id: workspaceId },
-      select: { settings: true },
+      select: { settings: true, defaultProvider: true },
     });
+    const provider: ProviderType = workspace?.defaultProvider ?? "stripe";
     const workspaceSettings = workspace?.settings as
       | {
           stripeSecretKey?: string;
@@ -319,7 +320,6 @@ export class PromotionsService {
       | undefined;
 
     // Validate billing provider is configured
-    const provider: ProviderType = "stripe";
     if (
       !this.billingService.isConfiguredForWorkspace(
         workspaceId,
@@ -427,7 +427,7 @@ export class PromotionsService {
     workspaceId: string,
     promotion: Promotion,
     version: PromotionVersion,
-    provider: ProviderType = "stripe",
+    provider: ProviderType,
   ): Promise<void> {
     // Get workspace settings for billing provider
     const workspace = await this.prisma.workspace.findUnique({

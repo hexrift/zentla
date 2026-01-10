@@ -512,8 +512,8 @@ export class CheckoutController {
 
 **What this creates:**
 - A checkout record in Zentla with \`pending\` status
-- A Stripe Checkout Session linked to this record
-- Appropriate Stripe Product/Price if not already synced
+- A checkout session with your billing provider linked to this record
+- Appropriate Product/Price in billing provider if not already synced
 
 **Session lifecycle:**
 - \`pending\`: Created, awaiting customer action

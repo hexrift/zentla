@@ -10,7 +10,8 @@ import { ProviderRefService } from "../billing/provider-ref.service";
 import type { Customer, Prisma } from "@prisma/client";
 import type { PaginatedResult } from "@zentla/database";
 
-const DEFAULT_PROVIDER: ProviderType = "stripe";
+/** @deprecated This fallback is only used when workspace defaultProvider is not set */
+const FALLBACK_PROVIDER: ProviderType = "stripe";
 
 export interface CreateCustomerDto {
   email: string;
@@ -141,13 +142,14 @@ export class CustomersService {
   private async syncToProvider(
     workspaceId: string,
     customer: Customer,
-    provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
     // Get workspace settings for billing provider
     const workspace = await this.prisma.workspace.findUnique({
       where: { id: workspaceId },
-      select: { settings: true },
+      select: { settings: true, defaultProvider: true },
     });
+    const provider: ProviderType =
+      workspace?.defaultProvider ?? FALLBACK_PROVIDER;
     const workspaceSettings = workspace?.settings as
       | {
           stripeSecretKey?: string;
@@ -275,13 +277,14 @@ export class CustomersService {
     workspaceId: string,
     customerId: string,
     dto: UpdateCustomerDto,
-    provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
     // Get workspace settings for billing provider
     const workspace = await this.prisma.workspace.findUnique({
       where: { id: workspaceId },
-      select: { settings: true },
+      select: { settings: true, defaultProvider: true },
     });
+    const provider: ProviderType =
+      workspace?.defaultProvider ?? FALLBACK_PROVIDER;
     const workspaceSettings = workspace?.settings as
       | {
           stripeSecretKey?: string;
@@ -352,13 +355,14 @@ export class CustomersService {
   private async deleteFromProvider(
     workspaceId: string,
     customerId: string,
-    provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
     // Get workspace settings for billing provider
     const workspace = await this.prisma.workspace.findUnique({
       where: { id: workspaceId },
-      select: { settings: true },
+      select: { settings: true, defaultProvider: true },
     });
+    const provider: ProviderType =
+      workspace?.defaultProvider ?? FALLBACK_PROVIDER;
     const workspaceSettings = workspace?.settings as
       | {
           stripeSecretKey?: string;
@@ -431,7 +435,6 @@ export class CustomersService {
     workspaceId: string,
     customerId: string,
     returnUrl: string,
-    provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<{ id: string; url: string }> {
     // Verify customer exists
     const customer = await this.findById(workspaceId, customerId);
@@ -442,8 +445,10 @@ export class CustomersService {
     // Get workspace settings for billing provider
     const workspace = await this.prisma.workspace.findUnique({
       where: { id: workspaceId },
-      select: { settings: true },
+      select: { settings: true, defaultProvider: true },
     });
+    const provider: ProviderType =
+      workspace?.defaultProvider ?? FALLBACK_PROVIDER;
     const workspaceSettings = workspace?.settings as
       | {
           stripeSecretKey?: string;
