@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.12.1](https://github.com/hexrift/zentla/compare/v5.12.0...v5.12.1) (2026-01-10)
+
+
+### Bug Fixes
+
+* multi-currency support in dunning stats and provider-agnostic improvements ([#86](https://github.com/hexrift/zentla/issues/86)) ([8db9c0f](https://github.com/hexrift/zentla/commit/8db9c0fa6f13c82057acf04192f283eca3652ac4))
+
 ## [5.12.0](https://github.com/hexrift/zentla/compare/v5.11.0...v5.12.0) (2026-01-10)
 
 
