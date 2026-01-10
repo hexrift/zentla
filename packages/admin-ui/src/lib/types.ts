@@ -412,6 +412,53 @@ export interface DunningEmailTemplate {
   isDefault: boolean;
 }
 
+// Dunning Analytics types
+export interface DunningAnalytics {
+  invoicesInDunning: number;
+  totalAmountAtRisk: number;
+  amountAtRiskByCurrency: Array<{ currency: string; amount: number }>;
+  amountRecovered: number;
+  recoveryRate: number;
+  averageDaysToRecovery: number;
+  attemptsByStatus: {
+    pending: number;
+    succeeded: number;
+    failed: number;
+    skipped: number;
+  };
+  outcomes: {
+    recovered: number;
+    suspended: number;
+    canceled: number;
+    stillInDunning: number;
+  };
+}
+
+export interface DunningTrendPoint {
+  date: string;
+  invoicesInDunning: number;
+  amountAtRisk: number;
+  amountRecovered: number;
+  recoveryRate: number;
+  newDunningStarted: number;
+}
+
+export interface RecoveryFunnel {
+  totalStarted: number;
+  recoveredAttempt1: number;
+  recoveredAttempt2: number;
+  recoveredAttempt3: number;
+  recoveredAttempt4Plus: number;
+  finalActionTaken: number;
+  stillInProgress: number;
+}
+
+export interface DeclineCode {
+  code: string;
+  count: number;
+  percentage: number;
+}
+
 // Paginated response type
 export interface PaginatedResponse<T> {
   data: T[];

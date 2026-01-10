@@ -26,6 +26,10 @@ import type {
   DunningStats,
   DunningEmailTemplate,
   DunningEmailType,
+  DunningAnalytics,
+  DunningTrendPoint,
+  RecoveryFunnel,
+  DeclineCode,
 } from "./types";
 
 const API_BASE = `${import.meta.env.VITE_API_URL || ""}/api/v1`;
@@ -696,6 +700,49 @@ export const api = {
         "/auth/me",
       ),
     logout: () => fetchWithSession<void>("/auth/session", { method: "DELETE" }),
+  },
+
+  analytics: {
+    getDunningAnalytics: (params?: { startDate?: string; endDate?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.startDate) searchParams.set("startDate", params.startDate);
+      if (params?.endDate) searchParams.set("endDate", params.endDate);
+      const query = searchParams.toString();
+      return fetchApi<DunningAnalytics>(
+        `/analytics/dunning${query ? `?${query}` : ""}`,
+      );
+    },
+    getDunningTrend: (params: {
+      startDate: string;
+      endDate: string;
+      period?: "daily" | "weekly" | "monthly";
+    }) => {
+      const searchParams = new URLSearchParams();
+      searchParams.set("startDate", params.startDate);
+      searchParams.set("endDate", params.endDate);
+      if (params.period) searchParams.set("period", params.period);
+      return fetchApi<DunningTrendPoint[]>(
+        `/analytics/dunning/trend?${searchParams.toString()}`,
+      );
+    },
+    getRecoveryFunnel: (params?: { startDate?: string; endDate?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.startDate) searchParams.set("startDate", params.startDate);
+      if (params?.endDate) searchParams.set("endDate", params.endDate);
+      const query = searchParams.toString();
+      return fetchApi<RecoveryFunnel>(
+        `/analytics/dunning/funnel${query ? `?${query}` : ""}`,
+      );
+    },
+    getDeclineCodeBreakdown: (params?: { startDate?: string; endDate?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.startDate) searchParams.set("startDate", params.startDate);
+      if (params?.endDate) searchParams.set("endDate", params.endDate);
+      const query = searchParams.toString();
+      return fetchApi<DeclineCode[]>(
+        `/analytics/dunning/decline-codes${query ? `?${query}` : ""}`,
+      );
+    },
   },
 
   dunning: {

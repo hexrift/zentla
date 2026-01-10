@@ -13,6 +13,13 @@ interface AnalyticsData {
   newCustomers: number;
 }
 
+function formatCurrencyAmount(amount: number, currency = "usd") {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+  }).format(amount / 100);
+}
+
 function formatPercent(value: number): string {
   return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
 }
@@ -115,6 +122,18 @@ export function AnalyticsPage() {
   const { data: offers } = useQuery({
     queryKey: ["offers", { limit: 100 }],
     queryFn: () => api.offers.list({ limit: 100 }),
+  });
+
+  // Fetch dunning analytics
+  const { data: dunningAnalytics, isLoading: dunningLoading } = useQuery({
+    queryKey: ["analytics", "dunning"],
+    queryFn: () => api.analytics.getDunningAnalytics(),
+  });
+
+  // Fetch recovery funnel
+  const { data: recoveryFunnel, isLoading: funnelLoading } = useQuery({
+    queryKey: ["analytics", "dunning", "funnel"],
+    queryFn: () => api.analytics.getRecoveryFunnel(),
   });
 
   const isLoading = subsLoading || custLoading;
@@ -275,6 +294,162 @@ export function AnalyticsPage() {
             isLoading={isLoading}
           />
         </div>
+      </div>
+
+      {/* Dunning & Recovery Metrics */}
+      <div className="mb-8">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">
+          Payment Recovery (Dunning)
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <MetricCard
+            title="Invoices in Dunning"
+            value={dunningAnalytics?.invoicesInDunning ?? 0}
+            isLoading={dunningLoading}
+          />
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="text-sm font-medium text-gray-500">Amount at Risk</h3>
+            {dunningLoading ? (
+              <div className="mt-2 h-9 bg-gray-100 rounded animate-pulse" />
+            ) : (
+              <>
+                <p className="mt-2 text-3xl font-semibold text-red-600">
+                  {formatCurrencyAmount(
+                    dunningAnalytics?.totalAmountAtRisk ?? 0,
+                    dunningAnalytics?.amountAtRiskByCurrency?.[0]?.currency ?? "usd",
+                  )}
+                </p>
+                {dunningAnalytics?.amountAtRiskByCurrency &&
+                  dunningAnalytics.amountAtRiskByCurrency.length > 1 && (
+                    <p className="mt-1 text-xs text-gray-500">
+                      {dunningAnalytics.amountAtRiskByCurrency.map((a) => (
+                        <span key={a.currency} className="mr-2">
+                          {formatCurrencyAmount(a.amount, a.currency)}
+                        </span>
+                      ))}
+                    </p>
+                  )}
+              </>
+            )}
+          </div>
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="text-sm font-medium text-gray-500">Recovery Rate</h3>
+            {dunningLoading ? (
+              <div className="mt-2 h-9 bg-gray-100 rounded animate-pulse" />
+            ) : (
+              <>
+                <p className="mt-2 text-3xl font-semibold text-green-600">
+                  {dunningAnalytics?.recoveryRate ?? 0}%
+                </p>
+                <span
+                  className={`mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    (dunningAnalytics?.recoveryRate ?? 0) >= 70
+                      ? "bg-green-100 text-green-800"
+                      : (dunningAnalytics?.recoveryRate ?? 0) >= 50
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {(dunningAnalytics?.recoveryRate ?? 0) >= 70
+                    ? "Excellent"
+                    : (dunningAnalytics?.recoveryRate ?? 0) >= 50
+                      ? "Average"
+                      : "Needs Attention"}
+                </span>
+              </>
+            )}
+          </div>
+          <MetricCard
+            title="Avg Days to Recovery"
+            value={`${dunningAnalytics?.averageDaysToRecovery ?? 0} days`}
+            isLoading={dunningLoading}
+          />
+        </div>
+
+        {/* Recovery Funnel */}
+        <div className="mt-4 bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-sm font-medium text-gray-900 mb-4">
+            Recovery Funnel
+          </h3>
+          {funnelLoading ? (
+            <div className="h-24 bg-gray-100 rounded animate-pulse" />
+          ) : recoveryFunnel && recoveryFunnel.totalStarted > 0 ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Total entered dunning</span>
+                <span className="font-medium">{recoveryFunnel.totalStarted}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-green-500 h-2 rounded-full" style={{ width: "100%" }} />
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                <div className="text-center">
+                  <p className="text-2xl font-semibold text-green-600">
+                    {recoveryFunnel.recoveredAttempt1}
+                  </p>
+                  <p className="text-xs text-gray-500">Recovered @ Attempt 1</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-semibold text-green-500">
+                    {recoveryFunnel.recoveredAttempt2}
+                  </p>
+                  <p className="text-xs text-gray-500">Recovered @ Attempt 2</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-semibold text-yellow-500">
+                    {recoveryFunnel.recoveredAttempt3 + recoveryFunnel.recoveredAttempt4Plus}
+                  </p>
+                  <p className="text-xs text-gray-500">Recovered @ Attempt 3+</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-semibold text-red-500">
+                    {recoveryFunnel.finalActionTaken}
+                  </p>
+                  <p className="text-xs text-gray-500">Final Action Taken</p>
+                </div>
+              </div>
+
+              {recoveryFunnel.stillInProgress > 0 && (
+                <p className="text-xs text-gray-500 mt-2">
+                  {recoveryFunnel.stillInProgress} invoices still in progress
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">No dunning data available</p>
+          )}
+        </div>
+
+        {/* Dunning Outcomes */}
+        {dunningAnalytics && (
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-green-50 rounded-lg p-4 text-center">
+              <p className="text-2xl font-semibold text-green-700">
+                {dunningAnalytics.outcomes.recovered}
+              </p>
+              <p className="text-sm text-green-600">Recovered</p>
+            </div>
+            <div className="bg-yellow-50 rounded-lg p-4 text-center">
+              <p className="text-2xl font-semibold text-yellow-700">
+                {dunningAnalytics.outcomes.stillInDunning}
+              </p>
+              <p className="text-sm text-yellow-600">In Progress</p>
+            </div>
+            <div className="bg-orange-50 rounded-lg p-4 text-center">
+              <p className="text-2xl font-semibold text-orange-700">
+                {dunningAnalytics.outcomes.suspended}
+              </p>
+              <p className="text-sm text-orange-600">Suspended</p>
+            </div>
+            <div className="bg-red-50 rounded-lg p-4 text-center">
+              <p className="text-2xl font-semibold text-red-700">
+                {dunningAnalytics.outcomes.canceled}
+              </p>
+              <p className="text-sm text-red-600">Canceled</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Churn Analysis */}
