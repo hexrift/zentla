@@ -335,6 +335,229 @@ export interface Refund {
   };
 }
 
+// Dunning types
+export interface DunningConfig {
+  id: string;
+  workspaceId: string;
+  retrySchedule: number[];
+  maxAttempts: number;
+  finalAction: "suspend" | "cancel";
+  gracePeriodDays: number;
+  emailsEnabled: boolean;
+  fromEmail?: string;
+  fromName?: string;
+  replyToEmail?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DunningAttempt {
+  id: string;
+  workspaceId: string;
+  invoiceId: string;
+  subscriptionId?: string;
+  customerId: string;
+  attemptNumber: number;
+  status: "pending" | "processing" | "succeeded" | "failed" | "skipped";
+  scheduledAt: string;
+  executedAt?: string;
+  success?: boolean;
+  failureReason?: string;
+  providerError?: string;
+  declineCode?: string;
+  createdAt: string;
+  customer?: { id: string; email: string; name?: string };
+  invoice?: { id: string; amountDue: number; currency: string };
+}
+
+export interface InvoiceInDunning {
+  id: string;
+  amountDue: number;
+  currency: string;
+  status: string;
+  dunningStartedAt: string;
+  dunningAttemptCount: number;
+  nextDunningAttemptAt?: string;
+  customer: { id: string; email: string; name?: string };
+  subscription?: { id: string; status: string };
+}
+
+export interface DunningStats {
+  invoicesInDunning: number;
+  totalAmountAtRisk: number;
+  currency: string;
+  amountsByCurrency: Array<{ currency: string; amount: number }>;
+  recoveryRate: number;
+  attemptsByStatus: {
+    pending: number;
+    succeeded: number;
+    failed: number;
+  };
+}
+
+export type DunningEmailType =
+  | "payment_failed"
+  | "payment_reminder"
+  | "final_warning"
+  | "subscription_suspended"
+  | "subscription_canceled"
+  | "payment_recovered";
+
+export interface DunningEmailTemplate {
+  type: DunningEmailType;
+  subject: string;
+  bodyHtml: string;
+  bodyText?: string;
+  enabled: boolean;
+  isDefault: boolean;
+}
+
+// Dunning Analytics types
+export interface DunningAnalytics {
+  invoicesInDunning: number;
+  totalAmountAtRisk: number;
+  amountAtRiskByCurrency: Array<{ currency: string; amount: number }>;
+  amountRecovered: number;
+  recoveryRate: number;
+  averageDaysToRecovery: number;
+  attemptsByStatus: {
+    pending: number;
+    succeeded: number;
+    failed: number;
+    skipped: number;
+  };
+  outcomes: {
+    recovered: number;
+    suspended: number;
+    canceled: number;
+    stillInDunning: number;
+  };
+}
+
+export interface DunningTrendPoint {
+  date: string;
+  invoicesInDunning: number;
+  amountAtRisk: number;
+  amountRecovered: number;
+  recoveryRate: number;
+  newDunningStarted: number;
+}
+
+export interface RecoveryFunnel {
+  totalStarted: number;
+  recoveredAttempt1: number;
+  recoveredAttempt2: number;
+  recoveredAttempt3: number;
+  recoveredAttempt4Plus: number;
+  finalActionTaken: number;
+  stillInProgress: number;
+}
+
+export interface DeclineCode {
+  code: string;
+  count: number;
+  percentage: number;
+}
+
+// Webhook monitoring types
+export interface WebhookStats {
+  totalDelivered: number;
+  totalFailed: number;
+  totalPending: number;
+  totalDeadLetter: number;
+  deliveryRate: number;
+  averageAttempts: number;
+}
+
+export interface EndpointHealth {
+  id: string;
+  url: string;
+  status: string;
+  successCount: number;
+  failureCount: number;
+  deliveryRate: number;
+  lastDeliveryAt: string | null;
+  lastDeliveryStatus: number | null;
+  lastErrorAt: string | null;
+  lastError: string | null;
+  pendingEvents: number;
+  health: "healthy" | "degraded" | "unhealthy";
+}
+
+export interface WebhookEventSummary {
+  id: string;
+  endpointId: string;
+  endpointUrl: string;
+  eventType: string;
+  status: string;
+  attempts: number;
+  lastAttemptAt: string | null;
+  deliveredAt: string | null;
+  createdAt: string;
+  response?: {
+    statusCode?: number;
+    error?: string;
+  };
+}
+
+export interface WebhookDeadLetterSummary {
+  id: string;
+  endpointId: string;
+  endpointUrl: string;
+  eventType: string;
+  failureReason: string;
+  attempts: number;
+  lastAttemptAt: string;
+  createdAt: string;
+}
+
+export interface EventTypeBreakdown {
+  eventType: string;
+  count: number;
+  deliveryRate: number;
+}
+
+// Customer Portal types
+export interface PortalCustomer {
+  id: string;
+  email: string;
+  name: string | null;
+}
+
+export interface PortalSubscription {
+  id: string;
+  status: string;
+  offer: {
+    id: string;
+    name: string;
+  };
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  cancelAt: string | null;
+  createdAt: string;
+}
+
+export interface PortalInvoice {
+  id: string;
+  amountDue: number;
+  amountPaid: number;
+  total: number;
+  currency: string;
+  status: string;
+  periodStart: string | null;
+  periodEnd: string | null;
+  dueDate: string | null;
+  paidAt: string | null;
+  providerInvoiceUrl: string | null;
+  createdAt: string;
+}
+
+export interface PortalEntitlement {
+  featureKey: string;
+  value: unknown;
+  valueType: string;
+}
+
 // Paginated response type
 export interface PaginatedResponse<T> {
   data: T[];

@@ -65,7 +65,7 @@ class CreateApiKeyDto {
     description: `Environment this key operates in. Keys are isolated by environment.
 
 **Environments:**
-- **test**: Use for development and testing. Only affects test data and Stripe test mode.
+- **test**: Use for development and testing. Only affects test data and billing provider test mode.
 - **live**: Use for production. Affects real customer data and billing.
 
 **Important:** Test keys cannot access live data and vice versa. Create separate keys for each environment.`,

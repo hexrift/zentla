@@ -48,7 +48,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 class CreateCustomerDto {
   @ApiProperty({
     description: `Customer's email address. Used for:
-- Billing communications from Stripe
+- Billing communications from your billing provider
 - Account identification
 - Pre-filling checkout forms
 
@@ -195,7 +195,7 @@ class CreatePortalSessionDto {
 **The portal allows customers to:**
 - View and update payment methods
 - View invoice history
-- Manage subscription (if configured in Stripe)
+- Manage subscription (if configured in your billing provider)
 
 **Requirements:**
 - Must be a valid HTTPS URL (HTTP allowed for localhost)
@@ -343,11 +343,11 @@ Use this value in the \`If-Match\` header when updating to prevent concurrent mo
 
 **Note:** Customers are also created automatically when:
 - A checkout session completes for a new email
-- Webhooks sync a new Stripe customer
+- Webhooks sync a new customer from your billing provider
 
 **Side effects:**
 - Creates customer record in Zentla database
-- Creates corresponding Stripe customer
+- Creates corresponding customer in your billing provider
 - Stores provider reference for future syncing`,
   })
   @ApiResponse({
@@ -399,7 +399,7 @@ If the resource has been modified since you fetched it, the update will fail wit
 
 **Side effects:**
 - Updates Zentla customer record
-- Syncs changes to Stripe customer
+- Syncs changes to billing provider customer
 - Increments version number
 
 **Note on metadata:** The metadata update replaces the entire object. To preserve existing keys, include them in your update request.`,
@@ -478,9 +478,9 @@ If the resource has been modified since you fetched it, the update will fail wit
 - Associated entitlements
 
 **What is NOT deleted:**
-- Stripe customer (preserved for billing records)
+- Billing provider customer (preserved for billing records)
 - Historical subscription data (preserved for compliance)
-- Invoices and payment history (in Stripe)
+- Invoices and payment history (in billing provider)
 
 **Constraints:**
 - Cannot delete customers with active subscriptions
@@ -522,9 +522,9 @@ If the resource has been modified since you fetched it, the update will fail wit
   @MemberOnly()
   @ApiOperation({
     summary: "Create billing portal session",
-    description: `Creates a Stripe Customer Portal session for self-service billing management.
+    description: `Creates a Customer Portal session for self-service billing management.
 
-**Portal capabilities (configurable in Stripe Dashboard):**
+**Portal capabilities (configurable in your billing provider's dashboard):**
 - View and download invoices
 - Update payment methods
 - Update billing information
@@ -578,7 +578,8 @@ If the resource has been modified since you fetched it, the update will fail wit
   })
   @ApiResponse({
     status: 404,
-    description: "Customer not found or has no Stripe customer record",
+    description:
+      "Customer not found or has no billing provider customer record",
   })
   async createPortalSession(
     @WorkspaceId() workspaceId: string,

@@ -278,11 +278,11 @@ export class SubscriptionsService {
     }
 
     // 3. Get workspace settings and check if billing provider is configured
-    const provider: ProviderType = "stripe";
     const workspace = await this.prisma.workspace.findUnique({
       where: { id: workspaceId },
-      select: { settings: true },
+      select: { settings: true, defaultProvider: true },
     });
+    const provider: ProviderType = workspace?.defaultProvider ?? "stripe";
     const workspaceSettings = workspace?.settings as
       | {
           stripeSecretKey?: string;

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
 import { DunningConfigService } from "./dunning-config.service";
 import { PrismaService } from "../database/prisma.service";
+import { EmailTemplateService } from "../email/email-template.service";
 
 describe("DunningConfigService", () => {
   let service: DunningConfigService;
@@ -11,6 +12,14 @@ describe("DunningConfigService", () => {
       upsert: ReturnType<typeof vi.fn>;
       delete: ReturnType<typeof vi.fn>;
     };
+    dunningEmailTemplate: {
+      findUnique: ReturnType<typeof vi.fn>;
+      upsert: ReturnType<typeof vi.fn>;
+      deleteMany: ReturnType<typeof vi.fn>;
+    };
+  };
+  let emailTemplateService: {
+    getDefaultTemplate: ReturnType<typeof vi.fn>;
   };
 
   const mockWorkspaceId = "ws_123";
@@ -30,6 +39,12 @@ describe("DunningConfigService", () => {
     updatedAt: new Date(),
   };
 
+  const mockDefaultTemplate = {
+    subject: "Payment Failed for Invoice {{invoiceNumber}}",
+    html: "<p>Payment failed</p>",
+    text: "Payment failed",
+  };
+
   beforeEach(async () => {
     prisma = {
       dunningConfig: {
@@ -37,12 +52,22 @@ describe("DunningConfigService", () => {
         upsert: vi.fn(),
         delete: vi.fn(),
       },
+      dunningEmailTemplate: {
+        findUnique: vi.fn(),
+        upsert: vi.fn(),
+        deleteMany: vi.fn(),
+      },
+    };
+
+    emailTemplateService = {
+      getDefaultTemplate: vi.fn().mockReturnValue(mockDefaultTemplate),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DunningConfigService,
         { provide: PrismaService, useValue: prisma },
+        { provide: EmailTemplateService, useValue: emailTemplateService },
       ],
     }).compile();
 

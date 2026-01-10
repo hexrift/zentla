@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
 import { AnalyticsController } from "./analytics.controller";
 import { RevenueAnalyticsService } from "./revenue-analytics.service";
+import { DunningAnalyticsService } from "./dunning-analytics.service";
 
 describe("AnalyticsController", () => {
   let controller: AnalyticsController;
@@ -12,6 +13,12 @@ describe("AnalyticsController", () => {
     getPeriodComparison: ReturnType<typeof vi.fn>;
     getTopCustomers: ReturnType<typeof vi.fn>;
     getRevenueEvents: ReturnType<typeof vi.fn>;
+  };
+  let dunningAnalyticsService: {
+    getDunningAnalytics: ReturnType<typeof vi.fn>;
+    getDunningTrend: ReturnType<typeof vi.fn>;
+    getRecoveryFunnel: ReturnType<typeof vi.fn>;
+    getDeclineCodeBreakdown: ReturnType<typeof vi.fn>;
   };
 
   const mockMetrics = {
@@ -161,10 +168,18 @@ describe("AnalyticsController", () => {
       getRevenueEvents: vi.fn(),
     };
 
+    dunningAnalyticsService = {
+      getDunningAnalytics: vi.fn(),
+      getDunningTrend: vi.fn(),
+      getRecoveryFunnel: vi.fn(),
+      getDeclineCodeBreakdown: vi.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AnalyticsController],
       providers: [
         { provide: RevenueAnalyticsService, useValue: revenueAnalyticsService },
+        { provide: DunningAnalyticsService, useValue: dunningAnalyticsService },
       ],
     }).compile();
 

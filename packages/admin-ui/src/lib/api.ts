@@ -20,6 +20,21 @@ import type {
   ExperimentStats,
   Invoice,
   Refund,
+  DunningConfig,
+  DunningAttempt,
+  InvoiceInDunning,
+  DunningStats,
+  DunningEmailTemplate,
+  DunningEmailType,
+  DunningAnalytics,
+  DunningTrendPoint,
+  RecoveryFunnel,
+  DeclineCode,
+  WebhookStats,
+  EndpointHealth,
+  WebhookEventSummary,
+  WebhookDeadLetterSummary,
+  EventTypeBreakdown,
 } from "./types";
 
 const API_BASE = `${import.meta.env.VITE_API_URL || ""}/api/v1`;
@@ -313,6 +328,65 @@ export const api = {
       }),
     delete: (id: string) =>
       fetchApi<void>(`/webhook-endpoints/${id}`, { method: "DELETE" }),
+    // Monitoring endpoints
+    getStats: (params?: { startDate?: string; endDate?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.startDate) searchParams.set("startDate", params.startDate);
+      if (params?.endDate) searchParams.set("endDate", params.endDate);
+      const query = searchParams.toString();
+      return fetchApi<WebhookStats>(
+        `/webhook-monitoring/stats${query ? `?${query}` : ""}`,
+      );
+    },
+    getEndpointHealth: () =>
+      fetchApi<EndpointHealth[]>("/webhook-monitoring/endpoints/health"),
+    getRecentEvents: (params?: {
+      endpointId?: string;
+      status?: string;
+      limit?: number;
+      cursor?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.endpointId) searchParams.set("endpointId", params.endpointId);
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.cursor) searchParams.set("cursor", params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<PaginatedResponse<WebhookEventSummary>>(
+        `/webhook-monitoring/events${query ? `?${query}` : ""}`,
+      );
+    },
+    getDeadLetterEvents: (params?: {
+      endpointId?: string;
+      limit?: number;
+      cursor?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.endpointId) searchParams.set("endpointId", params.endpointId);
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.cursor) searchParams.set("cursor", params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<PaginatedResponse<WebhookDeadLetterSummary>>(
+        `/webhook-monitoring/dead-letter${query ? `?${query}` : ""}`,
+      );
+    },
+    retryDeadLetterEvent: (id: string) =>
+      fetchApi<{ webhookEventId: string }>(
+        `/webhook-monitoring/dead-letter/${id}/retry`,
+        { method: "POST" },
+      ),
+    getEventTypeBreakdown: (params?: {
+      startDate?: string;
+      endDate?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.startDate) searchParams.set("startDate", params.startDate);
+      if (params?.endDate) searchParams.set("endDate", params.endDate);
+      const query = searchParams.toString();
+      return fetchApi<EventTypeBreakdown[]>(
+        `/webhook-monitoring/event-types${query ? `?${query}` : ""}`,
+      );
+    },
   },
   apiKeys: {
     list: () => fetchApi<ApiKey[]>("/api-keys"),
@@ -690,6 +764,126 @@ export const api = {
         "/auth/me",
       ),
     logout: () => fetchWithSession<void>("/auth/session", { method: "DELETE" }),
+  },
+
+  analytics: {
+    getDunningAnalytics: (params?: {
+      startDate?: string;
+      endDate?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.startDate) searchParams.set("startDate", params.startDate);
+      if (params?.endDate) searchParams.set("endDate", params.endDate);
+      const query = searchParams.toString();
+      return fetchApi<DunningAnalytics>(
+        `/analytics/dunning${query ? `?${query}` : ""}`,
+      );
+    },
+    getDunningTrend: (params: {
+      startDate: string;
+      endDate: string;
+      period?: "daily" | "weekly" | "monthly";
+    }) => {
+      const searchParams = new URLSearchParams();
+      searchParams.set("startDate", params.startDate);
+      searchParams.set("endDate", params.endDate);
+      if (params.period) searchParams.set("period", params.period);
+      return fetchApi<DunningTrendPoint[]>(
+        `/analytics/dunning/trend?${searchParams.toString()}`,
+      );
+    },
+    getRecoveryFunnel: (params?: { startDate?: string; endDate?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.startDate) searchParams.set("startDate", params.startDate);
+      if (params?.endDate) searchParams.set("endDate", params.endDate);
+      const query = searchParams.toString();
+      return fetchApi<RecoveryFunnel>(
+        `/analytics/dunning/funnel${query ? `?${query}` : ""}`,
+      );
+    },
+    getDeclineCodeBreakdown: (params?: {
+      startDate?: string;
+      endDate?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.startDate) searchParams.set("startDate", params.startDate);
+      if (params?.endDate) searchParams.set("endDate", params.endDate);
+      const query = searchParams.toString();
+      return fetchApi<DeclineCode[]>(
+        `/analytics/dunning/decline-codes${query ? `?${query}` : ""}`,
+      );
+    },
+  },
+
+  dunning: {
+    getConfig: () => fetchApi<DunningConfig>("/dunning/config"),
+    updateConfig: (data: {
+      retrySchedule?: number[];
+      maxAttempts?: number;
+      finalAction?: "suspend" | "cancel";
+      gracePeriodDays?: number;
+      emailsEnabled?: boolean;
+      fromEmail?: string;
+      fromName?: string;
+      replyToEmail?: string;
+    }) =>
+      fetchApi<DunningConfig>("/dunning/config", {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    getStats: () => fetchApi<DunningStats>("/dunning/stats"),
+    listInvoicesInDunning: (params?: { limit?: number; cursor?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.cursor) searchParams.set("cursor", params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<PaginatedResponse<InvoiceInDunning>>(
+        `/dunning/invoices${query ? `?${query}` : ""}`,
+      );
+    },
+    listAttempts: (params?: {
+      invoiceId?: string;
+      status?: string;
+      limit?: number;
+      cursor?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.invoiceId) searchParams.set("invoiceId", params.invoiceId);
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.cursor) searchParams.set("cursor", params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<PaginatedResponse<DunningAttempt>>(
+        `/dunning/attempts${query ? `?${query}` : ""}`,
+      );
+    },
+    retryInvoice: (invoiceId: string) =>
+      fetchApi<{ attemptId: string; success: boolean; failureReason?: string }>(
+        `/dunning/invoices/${invoiceId}/retry`,
+        { method: "POST" },
+      ),
+    // Email template endpoints
+    listEmailTemplates: () =>
+      fetchApi<DunningEmailTemplate[]>("/dunning/email-templates"),
+    getEmailTemplate: (type: DunningEmailType) =>
+      fetchApi<DunningEmailTemplate>(`/dunning/email-templates/${type}`),
+    updateEmailTemplate: (
+      type: DunningEmailType,
+      data: {
+        subject?: string;
+        bodyHtml?: string;
+        bodyText?: string;
+        enabled?: boolean;
+      },
+    ) =>
+      fetchApi<DunningEmailTemplate>(`/dunning/email-templates/${type}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    resetEmailTemplate: (type: DunningEmailType) =>
+      fetchApi<DunningEmailTemplate>(`/dunning/email-templates/${type}`, {
+        method: "DELETE",
+      }),
   },
 
   // Dashboard endpoints (session auth)

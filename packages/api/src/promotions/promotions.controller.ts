@@ -422,12 +422,12 @@ Only one version can be \`published\` at a time. Each version contains the compl
 1. Draft version status changes to \`published\`
 2. Previously published version (if any) changes to \`archived\`
 3. Configuration syncs to billing provider:
-   - Creates or updates Stripe coupon with discount settings
-   - Creates Stripe promotion code linked to the coupon
+   - Creates or updates coupon with discount settings
+   - Creates promotion code linked to the coupon
 4. Promotion code becomes usable at checkout
 
 **Side effects:**
-- Syncs to Stripe: Creates coupon + promotion_code
+- Syncs to billing provider: Creates coupon + promotion_code
 - New checkouts with this code use the new discount settings
 - Existing subscriptions with this promotion are NOT affected
 

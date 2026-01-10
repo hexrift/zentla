@@ -264,6 +264,22 @@ export class CheckoutService {
       );
     }
 
+    // Get workspace default provider and settings
+    const workspaceData = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { defaultProvider: true, settings: true },
+    });
+    const provider: ProviderType = workspaceData?.defaultProvider ?? "stripe";
+    const workspaceSettings = workspaceData?.settings as
+      | {
+          stripeSecretKey?: string;
+          stripeWebhookSecret?: string;
+          zuoraClientId?: string;
+          zuoraClientSecret?: string;
+          zuoraBaseUrl?: string;
+        }
+      | undefined;
+
     // Get the offer version to use
     // If a specific version is provided, use that
     // Otherwise, get the currently effective version (time-aware for scheduled versions)
@@ -290,7 +306,6 @@ export class CheckoutService {
     }
 
     // Get the provider price ID for this offer version
-    const provider: ProviderType = "stripe";
     const providerPriceId = await this.providerRefService.getProviderPriceId(
       workspaceId,
       offerVersionId,
@@ -392,21 +407,6 @@ export class CheckoutService {
         );
       }
     }
-
-    // Get workspace settings to check billing provider configuration
-    const workspace = await this.prisma.workspace.findUnique({
-      where: { id: workspaceId },
-      select: { settings: true },
-    });
-    const workspaceSettings = workspace?.settings as
-      | {
-          stripeSecretKey?: string;
-          stripeWebhookSecret?: string;
-          zuoraClientId?: string;
-          zuoraClientSecret?: string;
-          zuoraBaseUrl?: string;
-        }
-      | undefined;
 
     // Create checkout session via billing provider
     if (
@@ -772,13 +772,14 @@ export class CheckoutService {
 
     // Create billing provider PaymentIntent or SetupIntent
     let clientSecret: string | null = null;
-    const intentProvider: ProviderType = "stripe";
 
     // Get workspace settings for billing provider
     const intentWorkspace = await this.prisma.workspace.findUnique({
       where: { id: workspaceId },
-      select: { settings: true },
+      select: { settings: true, defaultProvider: true },
     });
+    const intentProvider: ProviderType =
+      intentWorkspace?.defaultProvider ?? "stripe";
     const intentWorkspaceSettings = intentWorkspace?.settings as
       | {
           stripeSecretKey?: string;

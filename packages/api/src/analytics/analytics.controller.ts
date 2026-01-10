@@ -26,6 +26,7 @@ import {
 } from "class-validator";
 import { MemberOnly, WorkspaceId } from "../common/decorators";
 import { RevenueAnalyticsService } from "./revenue-analytics.service";
+import { DunningAnalyticsService } from "./dunning-analytics.service";
 
 // ============================================================================
 // REQUEST DTOs
@@ -166,6 +167,49 @@ class GetRevenueEventsDto {
   @Min(1)
   @Max(1000)
   limit?: number;
+}
+
+class GetDunningAnalyticsDto {
+  @ApiPropertyOptional({
+    description: "Start date for the analytics period (ISO 8601 format)",
+    example: "2024-01-01",
+  })
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @ApiPropertyOptional({
+    description: "End date for the analytics period (ISO 8601 format)",
+    example: "2024-12-31",
+  })
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
+}
+
+class GetDunningTrendDto {
+  @ApiProperty({
+    description: "Start date for the trend data (ISO 8601 format)",
+    example: "2024-01-01",
+  })
+  @IsDateString()
+  startDate!: string;
+
+  @ApiProperty({
+    description: "End date for the trend data (ISO 8601 format)",
+    example: "2024-12-31",
+  })
+  @IsDateString()
+  endDate!: string;
+
+  @ApiPropertyOptional({
+    description: "Aggregation period for the trend data",
+    enum: ["daily", "weekly", "monthly"],
+    default: "daily",
+  })
+  @IsOptional()
+  @IsString()
+  period?: "daily" | "weekly" | "monthly";
 }
 
 // ============================================================================
@@ -311,6 +355,125 @@ class TopCustomerSchema {
   subscriptionCount!: number;
 }
 
+class AmountByCurrencySchema {
+  @ApiProperty({ description: "Currency code", example: "usd" })
+  currency!: string;
+
+  @ApiProperty({ description: "Amount in cents", example: 50000 })
+  amount!: number;
+}
+
+class AttemptsByStatusSchema {
+  @ApiProperty({ description: "Pending attempts" })
+  pending!: number;
+
+  @ApiProperty({ description: "Succeeded attempts" })
+  succeeded!: number;
+
+  @ApiProperty({ description: "Failed attempts" })
+  failed!: number;
+
+  @ApiProperty({ description: "Skipped attempts" })
+  skipped!: number;
+}
+
+class DunningOutcomesSchema {
+  @ApiProperty({ description: "Successfully recovered" })
+  recovered!: number;
+
+  @ApiProperty({ description: "Subscription suspended" })
+  suspended!: number;
+
+  @ApiProperty({ description: "Subscription canceled" })
+  canceled!: number;
+
+  @ApiProperty({ description: "Still in dunning process" })
+  stillInDunning!: number;
+}
+
+class DunningAnalyticsSchema {
+  @ApiProperty({ description: "Total invoices currently in dunning" })
+  invoicesInDunning!: number;
+
+  @ApiProperty({ description: "Total amount at risk in cents" })
+  totalAmountAtRisk!: number;
+
+  @ApiProperty({
+    description: "Amount at risk by currency",
+    type: [AmountByCurrencySchema],
+  })
+  amountAtRiskByCurrency!: AmountByCurrencySchema[];
+
+  @ApiProperty({ description: "Amount recovered this period in cents" })
+  amountRecovered!: number;
+
+  @ApiProperty({ description: "Recovery rate percentage (0-100)" })
+  recoveryRate!: number;
+
+  @ApiProperty({ description: "Average days to recover payment" })
+  averageDaysToRecovery!: number;
+
+  @ApiProperty({ description: "Attempts grouped by status" })
+  attemptsByStatus!: AttemptsByStatusSchema;
+
+  @ApiProperty({ description: "Dunning outcomes" })
+  outcomes!: DunningOutcomesSchema;
+}
+
+class DunningTrendPointSchema {
+  @ApiProperty({ description: "Date of the data point" })
+  date!: Date;
+
+  @ApiProperty({ description: "Invoices in dunning on this date" })
+  invoicesInDunning!: number;
+
+  @ApiProperty({ description: "Amount at risk in cents" })
+  amountAtRisk!: number;
+
+  @ApiProperty({ description: "Amount recovered in cents" })
+  amountRecovered!: number;
+
+  @ApiProperty({ description: "Recovery rate percentage" })
+  recoveryRate!: number;
+
+  @ApiProperty({ description: "New dunning cases started" })
+  newDunningStarted!: number;
+}
+
+class RecoveryFunnelSchema {
+  @ApiProperty({ description: "Total invoices that entered dunning" })
+  totalStarted!: number;
+
+  @ApiProperty({ description: "Recovered on first attempt" })
+  recoveredAttempt1!: number;
+
+  @ApiProperty({ description: "Recovered on second attempt" })
+  recoveredAttempt2!: number;
+
+  @ApiProperty({ description: "Recovered on third attempt" })
+  recoveredAttempt3!: number;
+
+  @ApiProperty({ description: "Recovered on fourth+ attempt" })
+  recoveredAttempt4Plus!: number;
+
+  @ApiProperty({ description: "Final action taken (suspend/cancel)" })
+  finalActionTaken!: number;
+
+  @ApiProperty({ description: "Still in progress" })
+  stillInProgress!: number;
+}
+
+class DeclineCodeSchema {
+  @ApiProperty({ description: "Decline code", example: "insufficient_funds" })
+  code!: string;
+
+  @ApiProperty({ description: "Number of occurrences" })
+  count!: number;
+
+  @ApiProperty({ description: "Percentage of total declines" })
+  percentage!: number;
+}
+
 // ============================================================================
 // CONTROLLER
 // ============================================================================
@@ -322,6 +485,7 @@ class TopCustomerSchema {
 export class AnalyticsController {
   constructor(
     private readonly revenueAnalyticsService: RevenueAnalyticsService,
+    private readonly dunningAnalyticsService: DunningAnalyticsService,
   ) {}
 
   @Get("metrics")
@@ -525,5 +689,139 @@ export class AnalyticsController {
       endDate: query.endDate ? new Date(query.endDate) : undefined,
       limit: query.limit,
     });
+  }
+
+  // ============================================================================
+  // DUNNING ANALYTICS ENDPOINTS
+  // ============================================================================
+
+  @Get("dunning")
+  @ApiOperation({
+    summary: "Get dunning analytics",
+    description: `Returns comprehensive dunning analytics for the workspace.
+
+**Metrics included:**
+- Invoices currently in dunning
+- Amount at risk (by currency)
+- Amount recovered
+- Recovery rate percentage
+- Average days to recovery
+- Attempts by status
+- Dunning outcomes (recovered, suspended, canceled)
+
+**Use cases:**
+- Payment recovery performance monitoring
+- Dunning process optimization
+- Revenue risk assessment`,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Dunning analytics",
+    type: DunningAnalyticsSchema,
+  })
+  async getDunningAnalytics(
+    @WorkspaceId() workspaceId: string,
+    @Query() query: GetDunningAnalyticsDto,
+  ) {
+    return this.dunningAnalyticsService.getDunningAnalytics(
+      workspaceId,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
+    );
+  }
+
+  @Get("dunning/trend")
+  @ApiOperation({
+    summary: "Get dunning trend over time",
+    description: `Returns historical dunning metrics over a date range.
+
+**Use cases:**
+- Track dunning volume trends
+- Monitor recovery rate changes
+- Identify seasonal patterns
+
+**Periods:**
+- \`daily\`: One data point per day
+- \`weekly\`: One data point per week
+- \`monthly\`: One data point per month`,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Dunning trend data points",
+    type: [DunningTrendPointSchema],
+  })
+  async getDunningTrend(
+    @WorkspaceId() workspaceId: string,
+    @Query() query: GetDunningTrendDto,
+  ) {
+    return this.dunningAnalyticsService.getDunningTrend(
+      workspaceId,
+      new Date(query.startDate),
+      new Date(query.endDate),
+      query.period || "daily",
+    );
+  }
+
+  @Get("dunning/funnel")
+  @ApiOperation({
+    summary: "Get recovery funnel",
+    description: `Returns recovery funnel showing how many invoices were recovered at each attempt.
+
+**Funnel stages:**
+- Recovered at attempt 1, 2, 3, or 4+
+- Final action taken (suspended/canceled)
+- Still in progress
+
+**Use cases:**
+- Optimize retry schedule
+- Understand recovery patterns
+- Identify when most recoveries happen`,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Recovery funnel data",
+    type: RecoveryFunnelSchema,
+  })
+  async getRecoveryFunnel(
+    @WorkspaceId() workspaceId: string,
+    @Query() query: GetDunningAnalyticsDto,
+  ) {
+    return this.dunningAnalyticsService.getRecoveryFunnel(
+      workspaceId,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
+    );
+  }
+
+  @Get("dunning/decline-codes")
+  @ApiOperation({
+    summary: "Get decline code breakdown",
+    description: `Returns a breakdown of payment decline codes from failed dunning attempts.
+
+**Use cases:**
+- Understand why payments fail
+- Identify card network issues
+- Guide customer communication
+
+**Common codes:**
+- \`insufficient_funds\`: Card has no funds
+- \`card_declined\`: Generic decline
+- \`expired_card\`: Card has expired
+- \`fraudulent\`: Suspected fraud`,
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Decline code breakdown",
+    type: [DeclineCodeSchema],
+  })
+  async getDeclineCodeBreakdown(
+    @WorkspaceId() workspaceId: string,
+    @Query() query: GetDunningAnalyticsDto,
+  ) {
+    return this.dunningAnalyticsService.getDeclineCodeBreakdown(
+      workspaceId,
+      query.startDate ? new Date(query.startDate) : undefined,
+      query.endDate ? new Date(query.endDate) : undefined,
+    );
   }
 }

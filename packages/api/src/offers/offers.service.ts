@@ -10,7 +10,8 @@ import { ProviderRefService } from "../billing/provider-ref.service";
 import type { Offer, OfferVersion, OfferStatus, Prisma } from "@prisma/client";
 import type { PaginatedResult } from "@zentla/database";
 
-const DEFAULT_PROVIDER: ProviderType = "stripe";
+/** @deprecated This fallback is only used when workspace defaultProvider is not set */
+const FALLBACK_PROVIDER: ProviderType = "stripe";
 
 export interface OfferWithVersions extends Offer {
   versions: OfferVersion[];
@@ -233,13 +234,14 @@ export class OffersService {
   private async archiveInProvider(
     workspaceId: string,
     offerId: string,
-    provider: ProviderType = DEFAULT_PROVIDER,
   ): Promise<void> {
     // Get workspace settings for billing provider
     const workspace = await this.prisma.workspace.findUnique({
       where: { id: workspaceId },
-      select: { settings: true },
+      select: { settings: true, defaultProvider: true },
     });
+    const provider: ProviderType =
+      workspace?.defaultProvider ?? FALLBACK_PROVIDER;
     const workspaceSettings = workspace?.settings as
       | {
           stripeSecretKey?: string;
@@ -481,8 +483,10 @@ export class OffersService {
     // Get workspace settings to check billing provider configuration
     const workspace = await this.prisma.workspace.findUnique({
       where: { id: workspaceId },
-      select: { settings: true },
+      select: { settings: true, defaultProvider: true },
     });
+    const provider: ProviderType =
+      workspace?.defaultProvider ?? FALLBACK_PROVIDER;
     const workspaceSettings = workspace?.settings as
       | {
           stripeSecretKey?: string;
@@ -497,12 +501,12 @@ export class OffersService {
     if (
       !this.billingService.isConfiguredForWorkspace(
         workspaceId,
-        DEFAULT_PROVIDER,
+        provider,
         workspaceSettings,
       )
     ) {
       throw new BadRequestException(
-        `Cannot publish: ${DEFAULT_PROVIDER} is not configured. Check your billing settings.`,
+        `Cannot publish: ${provider} is not configured. Check your billing settings.`,
       );
     }
 
@@ -553,7 +557,7 @@ export class OffersService {
 
     // Sync to billing provider - if this fails, rollback database changes
     try {
-      await this.syncToProvider(workspaceId, offer, publishedVersion);
+      await this.syncToProvider(workspaceId, offer, publishedVersion, provider);
     } catch (error) {
       this.logger.error(
         `Provider sync failed, rolling back publish for offer ${offerId}:`,
@@ -607,7 +611,7 @@ export class OffersService {
     workspaceId: string,
     offer: Offer,
     version: OfferVersion,
-    provider: ProviderType = DEFAULT_PROVIDER,
+    provider: ProviderType,
   ): Promise<void> {
     // Get workspace settings to check billing provider configuration
     const workspace = await this.prisma.workspace.findUnique({
@@ -706,12 +710,20 @@ export class OffersService {
   async syncOfferToProvider(
     workspaceId: string,
     offerId: string,
-    provider: ProviderType = DEFAULT_PROVIDER,
+    providerOverride?: ProviderType,
   ): Promise<{ success: boolean; message: string }> {
     const offer = await this.prisma.offer.findFirst({
       where: { id: offerId, workspaceId },
       include: { currentVersion: true },
     });
+
+    // Get workspace default provider if not overridden
+    const workspace = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { defaultProvider: true },
+    });
+    const provider: ProviderType =
+      providerOverride ?? workspace?.defaultProvider ?? FALLBACK_PROVIDER;
 
     if (!offer) {
       throw new NotFoundException(`Offer ${offerId} not found`);

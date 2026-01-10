@@ -30,6 +30,10 @@ import { InvoicesPage } from "./pages/InvoicesPage";
 import { InvoiceDetailPage } from "./pages/InvoiceDetailPage";
 import { RefundsPage } from "./pages/RefundsPage";
 import { RefundDetailPage } from "./pages/RefundDetailPage";
+import { DunningPage } from "./pages/DunningPage";
+import { PortalLoginPage } from "./pages/portal/PortalLoginPage";
+import { PortalVerifyPage } from "./pages/portal/PortalVerifyPage";
+import { PortalDashboardPage } from "./pages/portal/PortalDashboardPage";
 
 export default function App() {
   return (
@@ -38,6 +42,11 @@ export default function App() {
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+
+        {/* Customer Portal routes (public) */}
+        <Route path="/portal/login" element={<PortalLoginPage />} />
+        <Route path="/portal/verify" element={<PortalVerifyPage />} />
+        <Route path="/portal" element={<PortalDashboardPage />} />
 
         {/* Protected routes */}
         <Route
@@ -72,6 +81,7 @@ export default function App() {
           <Route path="invoices/:id" element={<InvoiceDetailPage />} />
           <Route path="refunds" element={<RefundsPage />} />
           <Route path="refunds/:id" element={<RefundDetailPage />} />
+          <Route path="dunning" element={<DunningPage />} />
           <Route path="customers" element={<CustomersPage />} />
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="events" element={<EventsPage />} />

@@ -484,7 +484,7 @@ Only one version can be \`published\` at a time.`,
 **Immediate publish (default):**
 1. Draft version status changes to \`published\`
 2. Previously published version (if any) changes to \`archived\`
-3. Configuration syncs to billing provider (creates/updates Stripe Product and Price)
+3. Configuration syncs to billing provider (creates/updates Product and Price)
 4. Offer becomes available for checkout sessions immediately
 
 **Scheduled publish (with effectiveFrom):**

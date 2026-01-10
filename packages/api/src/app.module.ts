@@ -32,6 +32,7 @@ import { InvoicesModule } from "./invoices/invoices.module";
 import { RefundsModule } from "./refunds/refunds.module";
 import { DunningModule } from "./dunning/dunning.module";
 import { EmailModule } from "./email/email.module";
+import { PortalModule } from "./portal/portal.module";
 
 // Guards
 import { ApiKeyGuard } from "./auth/guards/api-key.guard";
@@ -112,6 +113,7 @@ import { configuration, validationSchema } from "./config/configuration";
     RefundsModule,
     DunningModule,
     EmailModule,
+    PortalModule,
   ],
   providers: [
     // Global interceptors
