@@ -315,9 +315,7 @@ curl "http://localhost:3002/api/v1/refunds?invoiceId=inv_123" \\
               <td className="py-2 pr-4">
                 <code>fraudulent</code>
               </td>
-              <td className="py-2 text-gray-600">
-                Charge was fraudulent
-              </td>
+              <td className="py-2 text-gray-600">Charge was fraudulent</td>
             </tr>
             <tr>
               <td className="py-2 pr-4">

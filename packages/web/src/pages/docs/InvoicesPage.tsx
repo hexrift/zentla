@@ -71,7 +71,9 @@ curl "http://localhost:3002/api/v1/invoices?customerId=cust_123" \\
                 <code>limit</code>
               </td>
               <td className="py-2 pr-4 text-gray-600">number</td>
-              <td className="py-2 text-gray-600">Max items (default: 20, max: 100)</td>
+              <td className="py-2 text-gray-600">
+                Max items (default: 20, max: 100)
+              </td>
             </tr>
             <tr>
               <td className="py-2 pr-4">
@@ -297,9 +299,7 @@ await zentla.invoices.pay('inv_123');`}</CodeBlock>
             >
               Webhooks →
             </a>
-            <span className="text-gray-500 ml-2">
-              Handle invoice events
-            </span>
+            <span className="text-gray-500 ml-2">Handle invoice events</span>
           </li>
         </ul>
       </div>

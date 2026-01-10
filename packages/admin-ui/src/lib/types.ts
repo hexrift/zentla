@@ -314,7 +314,11 @@ export interface Refund {
   amount: number;
   currency: string;
   status: "pending" | "succeeded" | "failed" | "canceled";
-  reason?: "duplicate" | "fraudulent" | "requested_by_customer" | "expired_uncaptured_charge";
+  reason?:
+    | "duplicate"
+    | "fraudulent"
+    | "requested_by_customer"
+    | "expired_uncaptured_charge";
   failureReason?: string;
   provider: "stripe" | "zuora";
   providerRefundId: string;
@@ -323,7 +327,12 @@ export interface Refund {
   createdAt: string;
   updatedAt: string;
   customer?: { id: string; email: string; name?: string };
-  invoice?: { id: string; providerInvoiceId: string; total: number; currency: string };
+  invoice?: {
+    id: string;
+    providerInvoiceId: string;
+    total: number;
+    currency: string;
+  };
 }
 
 // Paginated response type

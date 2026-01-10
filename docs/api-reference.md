@@ -488,12 +488,12 @@ GET /invoices
 
 **Query Parameters:**
 
-| Parameter      | Type   | Description                                                      |
-| -------------- | ------ | ---------------------------------------------------------------- |
-| limit          | number | Max items to return (default: 20, max: 100)                      |
-| cursor         | string | Pagination cursor                                                |
-| customerId     | string | Filter by customer                                               |
-| subscriptionId | string | Filter by subscription                                           |
+| Parameter      | Type   | Description                                                        |
+| -------------- | ------ | ------------------------------------------------------------------ |
+| limit          | number | Max items to return (default: 20, max: 100)                        |
+| cursor         | string | Pagination cursor                                                  |
+| customerId     | string | Filter by customer                                                 |
+| subscriptionId | string | Filter by subscription                                             |
 | status         | string | Filter by status: `draft`, `open`, `paid`, `void`, `uncollectible` |
 
 **Response:**
@@ -618,6 +618,7 @@ POST /invoices/:id/void
 Voids an open or draft invoice. This action cannot be undone.
 
 **Requirements:**
+
 - Invoice must be in `draft` or `open` status
 - Requires admin role
 
@@ -642,6 +643,7 @@ POST /invoices/:id/pay
 Triggers a payment attempt for an open invoice using the customer's default payment method.
 
 **Requirements:**
+
 - Invoice must be in `open` status
 - Requires admin role
 
@@ -671,12 +673,12 @@ GET /refunds
 
 **Query Parameters:**
 
-| Parameter  | Type   | Description                                                |
-| ---------- | ------ | ---------------------------------------------------------- |
-| limit      | number | Max items to return (default: 20, max: 100)                |
-| cursor     | string | Pagination cursor                                          |
-| customerId | string | Filter by customer                                         |
-| invoiceId  | string | Filter by invoice                                          |
+| Parameter  | Type   | Description                                                    |
+| ---------- | ------ | -------------------------------------------------------------- |
+| limit      | number | Max items to return (default: 20, max: 100)                    |
+| cursor     | string | Pagination cursor                                              |
+| customerId | string | Filter by customer                                             |
+| invoiceId  | string | Filter by invoice                                              |
 | status     | string | Filter by status: `pending`, `succeeded`, `failed`, `canceled` |
 
 **Response:**
@@ -759,6 +761,7 @@ POST /refunds
 Creates a refund for a paid invoice or charge.
 
 **Requirements:**
+
 - Requires admin role
 - Must provide at least one of: `invoiceId`, `chargeId`, or `paymentIntentId`
 
@@ -772,15 +775,15 @@ Creates a refund for a paid invoice or charge.
 }
 ```
 
-| Field           | Type   | Required | Description                                                    |
-| --------------- | ------ | -------- | -------------------------------------------------------------- |
-| invoiceId       | string | No*      | Invoice ID to refund                                           |
-| chargeId        | string | No*      | Stripe charge ID to refund                                     |
-| paymentIntentId | string | No*      | Stripe payment intent ID to refund                             |
-| amount          | number | No       | Amount in cents (defaults to full amount)                      |
-| reason          | string | No       | `duplicate`, `fraudulent`, or `requested_by_customer`          |
+| Field           | Type   | Required | Description                                           |
+| --------------- | ------ | -------- | ----------------------------------------------------- |
+| invoiceId       | string | No\*     | Invoice ID to refund                                  |
+| chargeId        | string | No\*     | Stripe charge ID to refund                            |
+| paymentIntentId | string | No\*     | Stripe payment intent ID to refund                    |
+| amount          | number | No       | Amount in cents (defaults to full amount)             |
+| reason          | string | No       | `duplicate`, `fraudulent`, or `requested_by_customer` |
 
-*At least one of `invoiceId`, `chargeId`, or `paymentIntentId` is required.
+\*At least one of `invoiceId`, `chargeId`, or `paymentIntentId` is required.
 
 **Response:**
 
@@ -804,20 +807,20 @@ Creates a refund for a paid invoice or charge.
 
 **Refund Statuses:**
 
-| Status     | Description                         |
-| ---------- | ----------------------------------- |
-| `pending`  | Refund is being processed           |
-| `succeeded`| Refund completed successfully       |
-| `failed`   | Refund failed (see `failureReason`) |
-| `canceled` | Refund was canceled                 |
+| Status      | Description                         |
+| ----------- | ----------------------------------- |
+| `pending`   | Refund is being processed           |
+| `succeeded` | Refund completed successfully       |
+| `failed`    | Refund failed (see `failureReason`) |
+| `canceled`  | Refund was canceled                 |
 
 **Refund Reasons:**
 
-| Reason                  | Description                          |
-| ----------------------- | ------------------------------------ |
-| `duplicate`             | Duplicate charge                     |
-| `fraudulent`            | Charge was fraudulent                |
-| `requested_by_customer` | Customer requested the refund        |
+| Reason                  | Description                   |
+| ----------------------- | ----------------------------- |
+| `duplicate`             | Duplicate charge              |
+| `fraudulent`            | Charge was fraudulent         |
+| `requested_by_customer` | Customer requested the refund |
 
 ---
 

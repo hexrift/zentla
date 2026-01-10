@@ -1393,9 +1393,7 @@ export class StripeWebhookService {
     let invoiceId: string | undefined;
     if (charge.invoice) {
       const stripeInvoiceId =
-        typeof charge.invoice === "string"
-          ? charge.invoice
-          : charge.invoice.id;
+        typeof charge.invoice === "string" ? charge.invoice : charge.invoice.id;
       const invoice = await this.prisma.invoice.findFirst({
         where: {
           workspaceId: customerRef.workspaceId,

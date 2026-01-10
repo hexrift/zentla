@@ -261,7 +261,8 @@ export class RefundsController {
   @Get(":id")
   @ApiOperation({
     summary: "Get a refund",
-    description: "Returns a single refund by ID with customer and invoice details.",
+    description:
+      "Returns a single refund by ID with customer and invoice details.",
   })
   @ApiParam({ name: "id", description: "Refund ID" })
   @ApiResponse({
