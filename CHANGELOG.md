@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.12.0](https://github.com/hexrift/zentla/compare/v5.11.0...v5.12.0) (2026-01-10)
+
+
+### Features
+
+* add dunning system with payment retry and email notifications ([#84](https://github.com/hexrift/zentla/issues/84)) ([c61d054](https://github.com/hexrift/zentla/commit/c61d0547e3d978f99eee3a44152dd4fe04666454))
+
 ## [5.11.0](https://github.com/hexrift/zentla/compare/v5.10.0...v5.11.0) (2026-01-10)
 
 
