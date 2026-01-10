@@ -517,6 +517,47 @@ export interface EventTypeBreakdown {
   deliveryRate: number;
 }
 
+// Customer Portal types
+export interface PortalCustomer {
+  id: string;
+  email: string;
+  name: string | null;
+}
+
+export interface PortalSubscription {
+  id: string;
+  status: string;
+  offer: {
+    id: string;
+    name: string;
+  };
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  cancelAt: string | null;
+  createdAt: string;
+}
+
+export interface PortalInvoice {
+  id: string;
+  amountDue: number;
+  amountPaid: number;
+  total: number;
+  currency: string;
+  status: string;
+  periodStart: string | null;
+  periodEnd: string | null;
+  dueDate: string | null;
+  paidAt: string | null;
+  providerInvoiceUrl: string | null;
+  createdAt: string;
+}
+
+export interface PortalEntitlement {
+  featureKey: string;
+  value: unknown;
+  valueType: string;
+}
+
 // Paginated response type
 export interface PaginatedResponse<T> {
   data: T[];

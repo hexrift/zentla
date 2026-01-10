@@ -1552,3 +1552,38 @@ enum EmailNotificationStatus {
 
   @@map("email_notification_status")
 }
+
+// ============================================================================
+// CUSTOMER PORTAL
+// ============================================================================
+
+model CustomerPortalSession {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  customerId  String   @map("customer_id") @db.Uuid
+  token       String   @unique @db.VarChar(255)
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz
+  ipAddress   String?  @map("ip_address") @db.VarChar(45)
+  userAgent   String?  @map("user_agent") @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([token])
+  @@index([customerId])
+  @@index([expiresAt])
+  @@map("customer_portal_session")
+}
+
+model CustomerPortalMagicLink {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  customerId  String   @map("customer_id") @db.Uuid
+  token       String   @unique @db.VarChar(255)
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz
+  usedAt      DateTime? @map("used_at") @db.Timestamptz
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([token])
+  @@index([customerId])
+  @@index([expiresAt])
+  @@map("customer_portal_magic_link")
+}
