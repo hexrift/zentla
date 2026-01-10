@@ -5,9 +5,10 @@ import { ProviderRefService } from "../billing/provider-ref.service";
 import { OutboxService } from "./outbox.service";
 import { EntitlementsService } from "../entitlements/entitlements.service";
 import { InvoicesService } from "../invoices/invoices.service";
+import { RefundsService } from "../refunds/refunds.service";
 import type { StripeAdapter } from "@zentla/stripe-adapter";
 import type Stripe from "stripe";
-import type { Prisma, InvoiceStatus } from "@prisma/client";
+import type { Prisma, InvoiceStatus, RefundStatus } from "@prisma/client";
 
 const PROVIDER: ProviderType = "stripe";
 
@@ -22,6 +23,7 @@ export class StripeWebhookService {
     private readonly outboxService: OutboxService,
     private readonly entitlementsService: EntitlementsService,
     private readonly invoicesService: InvoicesService,
+    private readonly refundsService: RefundsService,
   ) {}
 
   async processWebhook(
@@ -156,6 +158,12 @@ export class StripeWebhookService {
         break;
       case "invoice.voided":
         await this.handleInvoiceVoided(event);
+        break;
+      case "charge.refunded":
+        await this.handleChargeRefunded(event);
+        break;
+      case "charge.refund.updated":
+        await this.handleRefundUpdated(event);
         break;
       case "payment_intent.succeeded":
         await this.handlePaymentIntentSucceeded(event);
@@ -1341,5 +1349,175 @@ export class StripeWebhookService {
       uncollectible: "uncollectible",
     };
     return statusMap[status ?? "draft"] ?? "draft";
+  }
+
+  private mapStripeRefundStatus(status: string | null): RefundStatus {
+    const statusMap: Record<string, RefundStatus> = {
+      pending: "pending",
+      succeeded: "succeeded",
+      failed: "failed",
+      canceled: "canceled",
+    };
+    return statusMap[status ?? "pending"] ?? "pending";
+  }
+
+  /**
+   * Handle charge.refunded event.
+   * This is triggered when a charge is refunded (fully or partially).
+   */
+  private async handleChargeRefunded(event: Stripe.Event): Promise<void> {
+    const charge = event.data.object as Stripe.Charge;
+
+    if (!charge.refunds?.data?.length) {
+      return;
+    }
+
+    // Get customer to find workspace
+    const stripeCustomerId = charge.customer as string;
+    const customerRef = await this.prisma.providerRef.findFirst({
+      where: {
+        provider: "stripe",
+        entityType: "customer",
+        externalId: stripeCustomerId,
+      },
+    });
+
+    if (!customerRef) {
+      this.logger.warn(
+        `Customer not found for Stripe customer ${stripeCustomerId}`,
+      );
+      return;
+    }
+
+    // Find the associated invoice if any
+    let invoiceId: string | undefined;
+    if (charge.invoice) {
+      const stripeInvoiceId =
+        typeof charge.invoice === "string"
+          ? charge.invoice
+          : charge.invoice.id;
+      const invoice = await this.prisma.invoice.findFirst({
+        where: {
+          workspaceId: customerRef.workspaceId,
+          providerInvoiceId: stripeInvoiceId,
+        },
+        select: { id: true },
+      });
+      invoiceId = invoice?.id;
+    }
+
+    // Process each refund in the charge
+    for (const stripeRefund of charge.refunds.data) {
+      await this.refundsService.upsertFromProvider(customerRef.workspaceId, {
+        customerId: customerRef.entityId,
+        invoiceId,
+        amount: stripeRefund.amount,
+        currency: stripeRefund.currency,
+        status: this.mapStripeRefundStatus(stripeRefund.status),
+        reason: this.mapStripeRefundReason(stripeRefund.reason),
+        failureReason: stripeRefund.failure_reason ?? undefined,
+        provider: "stripe",
+        providerRefundId: stripeRefund.id,
+        providerChargeId: charge.id,
+        providerPaymentIntentId:
+          typeof charge.payment_intent === "string"
+            ? charge.payment_intent
+            : charge.payment_intent?.id,
+      });
+
+      // Create outbox event for webhook delivery
+      await this.outboxService.createEvent({
+        workspaceId: customerRef.workspaceId,
+        eventType: "refund.created",
+        aggregateType: "refund",
+        aggregateId: stripeRefund.id,
+        payload: {
+          refund: {
+            id: stripeRefund.id,
+            amount: stripeRefund.amount,
+            currency: stripeRefund.currency,
+            status: stripeRefund.status,
+            reason: stripeRefund.reason,
+          },
+        },
+      });
+
+      this.logger.log(`Refund processed: ${stripeRefund.id}`);
+    }
+  }
+
+  /**
+   * Handle charge.refund.updated event.
+   * This is triggered when a refund status changes.
+   */
+  private async handleRefundUpdated(event: Stripe.Event): Promise<void> {
+    const refund = event.data.object as Stripe.Refund;
+
+    if (!refund.id) {
+      return;
+    }
+
+    // Get the charge to find the customer
+    const stripeChargeId =
+      typeof refund.charge === "string" ? refund.charge : refund.charge?.id;
+
+    if (!stripeChargeId) {
+      this.logger.warn(`Refund ${refund.id} has no associated charge`);
+      return;
+    }
+
+    // Find existing refund by provider ID
+    const existingRefund = await this.prisma.refund.findFirst({
+      where: {
+        provider: "stripe",
+        providerRefundId: refund.id,
+      },
+    });
+
+    if (!existingRefund) {
+      this.logger.warn(`Refund not found for Stripe refund ${refund.id}`);
+      return;
+    }
+
+    // Update refund status
+    await this.refundsService.updateStatus(
+      existingRefund.workspaceId,
+      refund.id,
+      "stripe",
+      this.mapStripeRefundStatus(refund.status),
+      refund.failure_reason ?? undefined,
+    );
+
+    // Create outbox event for webhook delivery
+    await this.outboxService.createEvent({
+      workspaceId: existingRefund.workspaceId,
+      eventType: "refund.updated",
+      aggregateType: "refund",
+      aggregateId: refund.id,
+      payload: {
+        refund: {
+          id: refund.id,
+          status: refund.status,
+          failureReason: refund.failure_reason,
+        },
+      },
+    });
+
+    this.logger.log(`Refund updated: ${refund.id}, status: ${refund.status}`);
+  }
+
+  private mapStripeRefundReason(
+    reason: Stripe.Refund.Reason | null,
+  ): "duplicate" | "fraudulent" | "requested_by_customer" | undefined {
+    switch (reason) {
+      case "duplicate":
+        return "duplicate";
+      case "fraudulent":
+        return "fraudulent";
+      case "requested_by_customer":
+        return "requested_by_customer";
+      default:
+        return undefined;
+    }
   }
 }

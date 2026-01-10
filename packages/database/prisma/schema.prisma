@@ -99,6 +99,7 @@ model Workspace {
   revenueEvents     RevenueEvent[]
   customerCohorts   CustomerCohort[]
   invoices          Invoice[]
+  refunds           Refund[]
 
   @@map("workspace")
 }
@@ -165,6 +166,7 @@ model Customer {
   appliedPromotions AppliedPromotion[]
   seatAssignments   SeatAssignment[]
   invoices          Invoice[]
+  refunds           Refund[]
 
   @@unique([workspaceId, email])
   @@unique([workspaceId, externalId])
@@ -1280,6 +1282,7 @@ model Invoice {
   workspace          Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   customer           Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
   lineItems          InvoiceLineItem[]
+  refunds            Refund[]
 
   @@unique([workspaceId, provider, providerInvoiceId])
   @@index([workspaceId])
@@ -1324,4 +1327,64 @@ model InvoiceLineItem {
 
   @@index([invoiceId])
   @@map("invoice_line_item")
+}
+
+// ============================================================================
+// REFUNDS
+// ============================================================================
+
+model Refund {
+  id                String       @id @default(uuid()) @db.Uuid
+  workspaceId       String       @map("workspace_id") @db.Uuid
+  customerId        String       @map("customer_id") @db.Uuid
+  invoiceId         String?      @map("invoice_id") @db.Uuid
+
+  // Financial (cents)
+  amount            Int
+  currency          String       @db.VarChar(3)
+
+  status            RefundStatus @default(pending)
+  reason            RefundReason?
+  failureReason     String?      @map("failure_reason") @db.VarChar(500)
+
+  // Provider info
+  provider          Provider
+  providerRefundId  String       @map("provider_refund_id") @db.VarChar(255)
+  providerChargeId  String?      @map("provider_charge_id") @db.VarChar(255)
+  providerPaymentIntentId String? @map("provider_payment_intent_id") @db.VarChar(255)
+
+  metadata          Json         @default("{}")
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  workspace         Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer          Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  invoice           Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, provider, providerRefundId])
+  @@index([workspaceId])
+  @@index([workspaceId, customerId])
+  @@index([workspaceId, invoiceId])
+  @@index([workspaceId, status])
+  @@index([providerRefundId])
+  @@map("refund")
+}
+
+enum RefundStatus {
+  pending
+  succeeded
+  failed
+  canceled
+
+  @@map("refund_status")
+}
+
+enum RefundReason {
+  duplicate
+  fraudulent
+  requested_by_customer
+  expired_uncaptured_charge
+
+  @@map("refund_reason")
 }

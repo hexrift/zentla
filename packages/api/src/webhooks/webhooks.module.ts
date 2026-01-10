@@ -8,9 +8,10 @@ import { ZuoraWebhookService } from "./zuora-webhook.service";
 import { WebhookDeliveryService } from "./webhook-delivery.service";
 import { EntitlementsModule } from "../entitlements/entitlements.module";
 import { InvoicesModule } from "../invoices/invoices.module";
+import { RefundsModule } from "../refunds/refunds.module";
 
 @Module({
-  imports: [EntitlementsModule, InvoicesModule],
+  imports: [EntitlementsModule, InvoicesModule, RefundsModule],
   controllers: [WebhooksController, WebhookEndpointsController],
   providers: [
     WebhooksService,
