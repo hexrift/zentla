@@ -10,6 +10,9 @@ describe("UsagePricingService", () => {
     subscription: {
       findUnique: ReturnType<typeof vi.fn>;
     };
+    workspace: {
+      findUnique: ReturnType<typeof vi.fn>;
+    };
   };
   let usageService: {
     getUsageSummary: ReturnType<typeof vi.fn>;
@@ -18,6 +21,9 @@ describe("UsagePricingService", () => {
   beforeEach(async () => {
     prisma = {
       subscription: {
+        findUnique: vi.fn(),
+      },
+      workspace: {
         findUnique: vi.fn(),
       },
     };
@@ -284,6 +290,102 @@ describe("UsagePricingService", () => {
       prisma.subscription.findUnique.mockResolvedValue({
         ...mockSubscription,
         workspaceId: "ws_other",
+      });
+
+      const result = await service.calculateSubscriptionUsage(
+        "ws_123",
+        "sub_123",
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it("should use workspace default currency when pricing currency is missing", async () => {
+      const subscriptionWithoutCurrency = {
+        ...mockSubscription,
+        offerVersion: {
+          config: {
+            pricing: {
+              model: "flat",
+              amount: 4900,
+              usageType: "licensed",
+              // currency is intentionally missing
+            },
+            entitlements: [],
+          },
+        },
+      };
+
+      prisma.subscription.findUnique.mockResolvedValue(subscriptionWithoutCurrency);
+      prisma.workspace.findUnique.mockResolvedValue({
+        id: "ws_123",
+        settings: { defaultCurrency: "eur" },
+      });
+
+      const result = await service.calculateSubscriptionUsage(
+        "ws_123",
+        "sub_123",
+      );
+
+      expect(result).not.toBeNull();
+      expect(result!.currency).toBe("eur");
+      expect(prisma.workspace.findUnique).toHaveBeenCalledWith({
+        where: { id: "ws_123" },
+        select: { settings: true },
+      });
+    });
+
+    it("should fall back to usd when workspace has no default currency", async () => {
+      const subscriptionWithoutCurrency = {
+        ...mockSubscription,
+        offerVersion: {
+          config: {
+            pricing: {
+              model: "flat",
+              amount: 4900,
+              usageType: "licensed",
+              // currency is intentionally missing
+            },
+            entitlements: [],
+          },
+        },
+      };
+
+      prisma.subscription.findUnique.mockResolvedValue(subscriptionWithoutCurrency);
+      prisma.workspace.findUnique.mockResolvedValue({
+        id: "ws_123",
+        settings: {},
+      });
+
+      const result = await service.calculateSubscriptionUsage(
+        "ws_123",
+        "sub_123",
+      );
+
+      expect(result).not.toBeNull();
+      expect(result!.currency).toBe("usd");
+    });
+
+    it("should return null when offerVersion is missing", async () => {
+      prisma.subscription.findUnique.mockResolvedValue({
+        ...mockSubscription,
+        offerVersion: null,
+      });
+
+      const result = await service.calculateSubscriptionUsage(
+        "ws_123",
+        "sub_123",
+      );
+
+      expect(result).toBeNull();
+    });
+
+    it("should return null when pricing config is missing", async () => {
+      prisma.subscription.findUnique.mockResolvedValue({
+        ...mockSubscription,
+        offerVersion: {
+          config: {},
+        },
       });
 
       const result = await service.calculateSubscriptionUsage(
