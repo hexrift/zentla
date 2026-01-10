@@ -30,6 +30,11 @@ export interface AppConfig {
   logging: {
     level: string;
   };
+  email: {
+    resendApiKey: string;
+    defaultFromEmail: string;
+    defaultFromName: string;
+  };
 }
 
 export const configuration = (): AppConfig => ({
@@ -62,6 +67,11 @@ export const configuration = (): AppConfig => ({
   logging: {
     level: process.env.LOG_LEVEL ?? "debug",
   },
+  email: {
+    resendApiKey: process.env.RESEND_API_KEY ?? "",
+    defaultFromEmail: process.env.EMAIL_DEFAULT_FROM ?? "billing@example.com",
+    defaultFromName: process.env.EMAIL_DEFAULT_FROM_NAME ?? "Billing Team",
+  },
 });
 
 export const validationSchema = Joi.object({
@@ -82,4 +92,7 @@ export const validationSchema = Joi.object({
   LOG_LEVEL: Joi.string()
     .valid("debug", "info", "warn", "error")
     .default("debug"),
+  RESEND_API_KEY: Joi.string().allow("").optional(),
+  EMAIL_DEFAULT_FROM: Joi.string().email().default("billing@example.com"),
+  EMAIL_DEFAULT_FROM_NAME: Joi.string().default("Billing Team"),
 });
