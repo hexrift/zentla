@@ -138,7 +138,18 @@ export class HybridPricingService {
 
     const pricing = config.pricing;
     const usageComponents = config.usageComponents || [];
-    const currency = pricing.currency || "usd";
+
+    // Determine currency from pricing config, falling back to workspace default
+    let currency = pricing.currency;
+    if (!currency) {
+      const workspace = await this.prisma.workspace.findUnique({
+        where: { id: workspaceId },
+        select: { settings: true },
+      });
+      const settings = workspace?.settings as { defaultCurrency?: string } | null;
+      currency = settings?.defaultCurrency || "usd";
+    }
+
     const interval = pricing.interval || "month";
     const intervalCount = pricing.intervalCount || 1;
 

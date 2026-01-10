@@ -170,8 +170,10 @@ export function SettingsPage() {
   const handleSaveWorkspaceSettings = () => {
     updateWorkspaceMutation.mutate(
       {
-        defaultCurrency,
-        defaultCountry,
+        settings: {
+          defaultCurrency,
+          defaultCountry,
+        },
       },
       {
         onSuccess: () => {

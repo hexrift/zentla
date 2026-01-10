@@ -268,8 +268,16 @@ export class UsagePricingService {
 
     const pricing = config.pricing;
 
-    // Determine currency from pricing config
-    const currency = pricing.currency || "usd";
+    // Determine currency from pricing config, falling back to workspace default
+    let currency = pricing.currency;
+    if (!currency) {
+      const workspace = await this.prisma.workspace.findUnique({
+        where: { id: workspaceId },
+        select: { settings: true },
+      });
+      const settings = workspace?.settings as { defaultCurrency?: string } | null;
+      currency = settings?.defaultCurrency || "usd";
+    }
 
     // Add base price for flat/licensed pricing
     if (pricing.model === "flat" || pricing.usageType !== "metered") {

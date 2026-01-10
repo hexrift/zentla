@@ -626,10 +626,20 @@ export class PromotionsService {
       orderAmount !== undefined &&
       orderAmount < config.minimumAmount
     ) {
+      // Get currency for error message from config or workspace default
+      let displayCurrency = config.currency;
+      if (!displayCurrency) {
+        const workspace = await this.prisma.workspace.findUnique({
+          where: { id: workspaceId },
+          select: { settings: true },
+        });
+        const settings = workspace?.settings as { defaultCurrency?: string } | null;
+        displayCurrency = settings?.defaultCurrency || "USD";
+      }
       return {
         isValid: false,
         errorCode: "minimum_not_met",
-        errorMessage: `Minimum order of ${config.minimumAmount / 100} ${config.currency || "USD"} required`,
+        errorMessage: `Minimum order of ${config.minimumAmount / 100} ${displayCurrency} required`,
       };
     }
 
