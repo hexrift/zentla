@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.12.2](https://github.com/hexrift/zentla/compare/v5.12.1...v5.12.2) (2026-01-10)
+
+
+### Bug Fixes
+
+* use workspace default currency throughout the system ([#89](https://github.com/hexrift/zentla/issues/89)) ([feb0e89](https://github.com/hexrift/zentla/commit/feb0e89dde46545fbd504ec5c15c6cda40479d78))
+
 ## [5.12.1](https://github.com/hexrift/zentla/compare/v5.12.0...v5.12.1) (2026-01-10)
 
 
