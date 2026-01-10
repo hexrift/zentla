@@ -146,7 +146,9 @@ export class HybridPricingService {
         where: { id: workspaceId },
         select: { settings: true },
       });
-      const settings = workspace?.settings as { defaultCurrency?: string } | null;
+      const settings = workspace?.settings as {
+        defaultCurrency?: string;
+      } | null;
       currency = settings?.defaultCurrency || "usd";
     }
 

@@ -206,7 +206,9 @@ describe("HybridPricingService", () => {
         },
       };
 
-      prisma.subscription.findUnique.mockResolvedValue(subscriptionWithoutCurrency);
+      prisma.subscription.findUnique.mockResolvedValue(
+        subscriptionWithoutCurrency,
+      );
       prisma.workspace.findUnique.mockResolvedValue({
         id: "ws_123",
         settings: { defaultCurrency: "gbp" },
@@ -240,7 +242,9 @@ describe("HybridPricingService", () => {
         },
       };
 
-      prisma.subscription.findUnique.mockResolvedValue(subscriptionWithoutCurrency);
+      prisma.subscription.findUnique.mockResolvedValue(
+        subscriptionWithoutCurrency,
+      );
       prisma.workspace.findUnique.mockResolvedValue({
         id: "ws_123",
         settings: null,

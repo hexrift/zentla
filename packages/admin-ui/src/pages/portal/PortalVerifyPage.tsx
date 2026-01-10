@@ -48,9 +48,7 @@ export function PortalVerifyPage() {
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <div className="text-center">
               <div className="animate-spin mx-auto h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full"></div>
-              <p className="mt-4 text-sm text-gray-500">
-                Signing you in...
-              </p>
+              <p className="mt-4 text-sm text-gray-500">Signing you in...</p>
             </div>
           </div>
         </div>

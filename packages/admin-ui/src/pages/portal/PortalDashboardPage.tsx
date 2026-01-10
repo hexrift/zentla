@@ -141,9 +141,7 @@ export function PortalDashboardPage() {
               <h1 className="text-xl font-semibold text-gray-900">
                 Customer Portal
               </h1>
-              <p className="text-sm text-gray-500">
-                {customer?.email}
-              </p>
+              <p className="text-sm text-gray-500">{customer?.email}</p>
             </div>
             <div className="flex items-center space-x-4">
               <button
@@ -325,13 +323,19 @@ export function PortalDashboardPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {invoicesLoading ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                    <td
+                      colSpan={4}
+                      className="px-6 py-4 text-center text-gray-500"
+                    >
                       Loading...
                     </td>
                   </tr>
                 ) : !invoices || invoices.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                    <td
+                      colSpan={4}
+                      className="px-6 py-4 text-center text-gray-500"
+                    >
                       No invoices yet
                     </td>
                   </tr>
@@ -379,7 +383,9 @@ export function PortalDashboardPage() {
         {activeTab === "entitlements" && (
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Your Features</h3>
+              <h3 className="text-lg font-medium text-gray-900">
+                Your Features
+              </h3>
               <p className="text-sm text-gray-500">
                 Features available with your current subscription
               </p>

@@ -633,7 +633,9 @@ export class PromotionsService {
           where: { id: workspaceId },
           select: { settings: true },
         });
-        const settings = workspace?.settings as { defaultCurrency?: string } | null;
+        const settings = workspace?.settings as {
+          defaultCurrency?: string;
+        } | null;
         displayCurrency = settings?.defaultCurrency || "USD";
       }
       return {
