@@ -14,6 +14,7 @@ const navigation = [
   { name: "Checkouts", href: "/checkouts", icon: CreditCardIcon },
   { name: "Subscriptions", href: "/subscriptions", icon: RefreshIcon },
   { name: "Invoices", href: "/invoices", icon: ReceiptIcon },
+  { name: "Refunds", href: "/refunds", icon: ArrowUturnLeftIcon },
   { name: "Customers", href: "/customers", icon: UsersIcon },
   { name: "Offers", href: "/offers", icon: TagIcon },
   { name: "Promotions", href: "/promotions", icon: SparklesIcon },
@@ -92,6 +93,24 @@ function ReceiptIcon({ className }: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185zM9.75 9h.008v.008H9.75V9zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm4.125 4.5h.008v.008h-.008V13.5zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+      />
+    </svg>
+  );
+}
+
+function ArrowUturnLeftIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
       />
     </svg>
   );

@@ -7,6 +7,7 @@ import { ProviderRefService } from "../billing/provider-ref.service";
 import { OutboxService } from "./outbox.service";
 import { EntitlementsService } from "../entitlements/entitlements.service";
 import { InvoicesService } from "../invoices/invoices.service";
+import { RefundsService } from "../refunds/refunds.service";
 
 describe("StripeWebhookService", () => {
   let service: StripeWebhookService;
@@ -70,6 +71,7 @@ describe("StripeWebhookService", () => {
         { provide: OutboxService, useValue: outboxService },
         { provide: EntitlementsService, useValue: {} },
         { provide: InvoicesService, useValue: {} },
+        { provide: RefundsService, useValue: {} },
       ],
     }).compile();
 

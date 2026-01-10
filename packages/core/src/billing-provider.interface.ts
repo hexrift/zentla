@@ -94,6 +94,27 @@ export interface BillingProvider {
   getInvoicePdfUrl?(invoiceId: string): Promise<string | null>;
   voidInvoice?(invoiceId: string): Promise<void>;
   payInvoice?(invoiceId: string): Promise<void>;
+
+  // Refunds
+  createRefund?(params: CreateRefundParams): Promise<RefundResult>;
+}
+
+export interface CreateRefundParams {
+  invoiceId?: string;
+  chargeId?: string;
+  paymentIntentId?: string;
+  amount?: number;
+  reason?: "duplicate" | "fraudulent" | "requested_by_customer";
+}
+
+export interface RefundResult {
+  id: string;
+  amount: number;
+  currency: string;
+  status: "pending" | "succeeded" | "failed" | "canceled";
+  chargeId?: string;
+  paymentIntentId?: string;
+  customerId?: string;
 }
 
 export interface SyncOfferResult {
