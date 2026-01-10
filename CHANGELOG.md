@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.11.0](https://github.com/hexrift/zentla/compare/v5.10.0...v5.11.0) (2026-01-10)
+
+
+### Features
+
+* add refunds API with provider-agnostic design ([#82](https://github.com/hexrift/zentla/issues/82)) ([53794e7](https://github.com/hexrift/zentla/commit/53794e7de2f77c345385253d49e60657f6db13c3))
+
 ## [5.10.0](https://github.com/hexrift/zentla/compare/v5.9.0...v5.10.0) (2026-01-09)
 
 
