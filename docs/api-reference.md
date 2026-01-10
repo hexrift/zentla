@@ -476,6 +476,354 @@ Changes the subscription to a different offer (plan upgrade or downgrade).
 
 ---
 
+## Invoices
+
+Invoices are synced from your billing provider (Stripe or Zuora) via webhooks. You can list, view, and manage invoices through the API.
+
+### List Invoices
+
+```
+GET /invoices
+```
+
+**Query Parameters:**
+
+| Parameter      | Type   | Description                                                        |
+| -------------- | ------ | ------------------------------------------------------------------ |
+| limit          | number | Max items to return (default: 20, max: 100)                        |
+| cursor         | string | Pagination cursor                                                  |
+| customerId     | string | Filter by customer                                                 |
+| subscriptionId | string | Filter by subscription                                             |
+| status         | string | Filter by status: `draft`, `open`, `paid`, `void`, `uncollectible` |
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "inv_123",
+      "workspaceId": "ws_xyz",
+      "customerId": "cust_456",
+      "subscriptionId": "sub_789",
+      "amountDue": 2900,
+      "amountPaid": 2900,
+      "amountRemaining": 0,
+      "subtotal": 2900,
+      "tax": 0,
+      "total": 2900,
+      "currency": "usd",
+      "status": "paid",
+      "periodStart": "2024-01-15T00:00:00Z",
+      "periodEnd": "2024-02-15T00:00:00Z",
+      "dueDate": "2024-01-30T00:00:00Z",
+      "paidAt": "2024-01-15T10:30:00Z",
+      "provider": "stripe",
+      "providerInvoiceId": "in_1234567890",
+      "attemptCount": 1,
+      "createdAt": "2024-01-15T00:00:00Z",
+      "updatedAt": "2024-01-15T10:30:00Z",
+      "customer": {
+        "id": "cust_456",
+        "email": "customer@example.com",
+        "name": "John Doe"
+      }
+    }
+  ],
+  "hasMore": false
+}
+```
+
+### Get Invoice
+
+```
+GET /invoices/:id
+```
+
+Returns invoice details with line items.
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "inv_123",
+    "workspaceId": "ws_xyz",
+    "customerId": "cust_456",
+    "subscriptionId": "sub_789",
+    "amountDue": 2900,
+    "amountPaid": 2900,
+    "amountRemaining": 0,
+    "subtotal": 2900,
+    "tax": 0,
+    "total": 2900,
+    "currency": "usd",
+    "status": "paid",
+    "periodStart": "2024-01-15T00:00:00Z",
+    "periodEnd": "2024-02-15T00:00:00Z",
+    "dueDate": "2024-01-30T00:00:00Z",
+    "paidAt": "2024-01-15T10:30:00Z",
+    "provider": "stripe",
+    "providerInvoiceId": "in_1234567890",
+    "providerInvoiceUrl": "https://pay.stripe.com/...",
+    "attemptCount": 1,
+    "createdAt": "2024-01-15T00:00:00Z",
+    "updatedAt": "2024-01-15T10:30:00Z",
+    "customer": {
+      "id": "cust_456",
+      "email": "customer@example.com",
+      "name": "John Doe"
+    },
+    "lineItems": [
+      {
+        "id": "li_123",
+        "description": "Pro Plan (Jan 15 - Feb 15)",
+        "quantity": 1,
+        "unitAmount": 2900,
+        "amount": 2900,
+        "currency": "usd",
+        "periodStart": "2024-01-15T00:00:00Z",
+        "periodEnd": "2024-02-15T00:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+### Get Invoice PDF URL
+
+```
+GET /invoices/:id/pdf
+```
+
+Returns a temporary download URL for the invoice PDF.
+
+**Response:**
+
+```json
+{
+  "data": {
+    "url": "https://pay.stripe.com/invoice/acct_.../...",
+    "expiresAt": "2024-01-15T11:30:00Z"
+  }
+}
+```
+
+### Void Invoice
+
+```
+POST /invoices/:id/void
+```
+
+Voids an open or draft invoice. This action cannot be undone.
+
+**Requirements:**
+
+- Invoice must be in `draft` or `open` status
+- Requires admin role
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "inv_123",
+    "status": "void",
+    "voidedAt": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+### Pay Invoice
+
+```
+POST /invoices/:id/pay
+```
+
+Triggers a payment attempt for an open invoice using the customer's default payment method.
+
+**Requirements:**
+
+- Invoice must be in `open` status
+- Requires admin role
+
+**Note:** The actual status update will come via webhook after payment processing.
+
+**Invoice Statuses:**
+
+| Status          | Description                                           |
+| --------------- | ----------------------------------------------------- |
+| `draft`         | Invoice created but not finalized                     |
+| `open`          | Invoice sent, awaiting payment                        |
+| `paid`          | Invoice has been paid                                 |
+| `void`          | Invoice was voided                                    |
+| `uncollectible` | Invoice marked as uncollectible after failed attempts |
+
+---
+
+## Refunds
+
+Refunds can be created programmatically or synced from your billing provider via webhooks.
+
+### List Refunds
+
+```
+GET /refunds
+```
+
+**Query Parameters:**
+
+| Parameter  | Type   | Description                                                    |
+| ---------- | ------ | -------------------------------------------------------------- |
+| limit      | number | Max items to return (default: 20, max: 100)                    |
+| cursor     | string | Pagination cursor                                              |
+| customerId | string | Filter by customer                                             |
+| invoiceId  | string | Filter by invoice                                              |
+| status     | string | Filter by status: `pending`, `succeeded`, `failed`, `canceled` |
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "ref_123",
+      "workspaceId": "ws_xyz",
+      "customerId": "cust_456",
+      "invoiceId": "inv_789",
+      "amount": 2900,
+      "currency": "usd",
+      "status": "succeeded",
+      "reason": "requested_by_customer",
+      "provider": "stripe",
+      "providerRefundId": "re_1234567890",
+      "providerChargeId": "ch_1234567890",
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-15T10:30:00Z",
+      "customer": {
+        "id": "cust_456",
+        "email": "customer@example.com",
+        "name": "John Doe"
+      }
+    }
+  ],
+  "hasMore": false
+}
+```
+
+### Get Refund
+
+```
+GET /refunds/:id
+```
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "ref_123",
+    "workspaceId": "ws_xyz",
+    "customerId": "cust_456",
+    "invoiceId": "inv_789",
+    "amount": 2900,
+    "currency": "usd",
+    "status": "succeeded",
+    "reason": "requested_by_customer",
+    "failureReason": null,
+    "provider": "stripe",
+    "providerRefundId": "re_1234567890",
+    "providerChargeId": "ch_1234567890",
+    "providerPaymentIntentId": "pi_1234567890",
+    "createdAt": "2024-01-15T10:30:00Z",
+    "updatedAt": "2024-01-15T10:30:00Z",
+    "customer": {
+      "id": "cust_456",
+      "email": "customer@example.com",
+      "name": "John Doe"
+    },
+    "invoice": {
+      "id": "inv_789",
+      "providerInvoiceId": "in_1234567890",
+      "total": 2900,
+      "currency": "usd"
+    }
+  }
+}
+```
+
+### Create Refund
+
+```
+POST /refunds
+```
+
+Creates a refund for a paid invoice or charge.
+
+**Requirements:**
+
+- Requires admin role
+- Must provide at least one of: `invoiceId`, `chargeId`, or `paymentIntentId`
+
+**Request Body:**
+
+```json
+{
+  "invoiceId": "inv_789",
+  "amount": 1450,
+  "reason": "requested_by_customer"
+}
+```
+
+| Field           | Type   | Required | Description                                           |
+| --------------- | ------ | -------- | ----------------------------------------------------- |
+| invoiceId       | string | No\*     | Invoice ID to refund                                  |
+| chargeId        | string | No\*     | Stripe charge ID to refund                            |
+| paymentIntentId | string | No\*     | Stripe payment intent ID to refund                    |
+| amount          | number | No       | Amount in cents (defaults to full amount)             |
+| reason          | string | No       | `duplicate`, `fraudulent`, or `requested_by_customer` |
+
+\*At least one of `invoiceId`, `chargeId`, or `paymentIntentId` is required.
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "ref_123",
+    "workspaceId": "ws_xyz",
+    "customerId": "cust_456",
+    "invoiceId": "inv_789",
+    "amount": 1450,
+    "currency": "usd",
+    "status": "pending",
+    "reason": "requested_by_customer",
+    "provider": "stripe",
+    "providerRefundId": "re_1234567890",
+    "createdAt": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+**Refund Statuses:**
+
+| Status      | Description                         |
+| ----------- | ----------------------------------- |
+| `pending`   | Refund is being processed           |
+| `succeeded` | Refund completed successfully       |
+| `failed`    | Refund failed (see `failureReason`) |
+| `canceled`  | Refund was canceled                 |
+
+**Refund Reasons:**
+
+| Reason                  | Description                   |
+| ----------------------- | ----------------------------- |
+| `duplicate`             | Duplicate charge              |
+| `fraudulent`            | Charge was fraudulent         |
+| `requested_by_customer` | Customer requested the refund |
+
+---
+
 ## Checkout
 
 ### Create Checkout Session

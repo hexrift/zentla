@@ -19,6 +19,7 @@ import type {
   ExperimentVariant,
   ExperimentStats,
   Invoice,
+  Refund,
 } from "./types";
 
 const API_BASE = `${import.meta.env.VITE_API_URL || ""}/api/v1`;
@@ -631,6 +632,39 @@ export const api = {
       fetchApi<Invoice>(`/invoices/${id}/void`, { method: "POST" }),
     pay: (id: string) =>
       fetchApi<Invoice>(`/invoices/${id}/pay`, { method: "POST" }),
+  },
+
+  refunds: {
+    list: (params?: {
+      customerId?: string;
+      invoiceId?: string;
+      status?: string;
+      limit?: number;
+      cursor?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.customerId) searchParams.set("customerId", params.customerId);
+      if (params?.invoiceId) searchParams.set("invoiceId", params.invoiceId);
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.cursor) searchParams.set("cursor", params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<PaginatedResponse<Refund>>(
+        `/refunds${query ? `?${query}` : ""}`,
+      );
+    },
+    get: (id: string) => fetchApi<Refund>(`/refunds/${id}`),
+    create: (data: {
+      invoiceId?: string;
+      chargeId?: string;
+      paymentIntentId?: string;
+      amount?: number;
+      reason?: "duplicate" | "fraudulent" | "requested_by_customer";
+    }) =>
+      fetchApi<Refund>("/refunds", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
   },
 
   // Auth endpoints (public, no token required)

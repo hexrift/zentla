@@ -29,6 +29,7 @@ import { UsageModule } from "./usage/usage.module";
 import { ExperimentsModule } from "./experiments/experiments.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 import { InvoicesModule } from "./invoices/invoices.module";
+import { RefundsModule } from "./refunds/refunds.module";
 
 // Guards
 import { ApiKeyGuard } from "./auth/guards/api-key.guard";
@@ -106,6 +107,7 @@ import { configuration, validationSchema } from "./config/configuration";
     ExperimentsModule,
     AnalyticsModule,
     InvoicesModule,
+    RefundsModule,
   ],
   providers: [
     // Global interceptors

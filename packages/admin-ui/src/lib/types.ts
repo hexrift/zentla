@@ -306,6 +306,35 @@ export interface Invoice {
   lineItems?: InvoiceLineItem[];
 }
 
+export interface Refund {
+  id: string;
+  workspaceId: string;
+  customerId: string;
+  invoiceId?: string;
+  amount: number;
+  currency: string;
+  status: "pending" | "succeeded" | "failed" | "canceled";
+  reason?:
+    | "duplicate"
+    | "fraudulent"
+    | "requested_by_customer"
+    | "expired_uncaptured_charge";
+  failureReason?: string;
+  provider: "stripe" | "zuora";
+  providerRefundId: string;
+  providerChargeId?: string;
+  providerPaymentIntentId?: string;
+  createdAt: string;
+  updatedAt: string;
+  customer?: { id: string; email: string; name?: string };
+  invoice?: {
+    id: string;
+    providerInvoiceId: string;
+    total: number;
+    currency: string;
+  };
+}
+
 // Paginated response type
 export interface PaginatedResponse<T> {
   data: T[];

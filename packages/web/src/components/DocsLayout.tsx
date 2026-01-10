@@ -22,6 +22,8 @@ const navigation = [
     items: [
       { name: "Headless Checkout", href: "/docs/headless-checkout" },
       { name: "Webhooks", href: "/docs/webhooks" },
+      { name: "Invoices", href: "/docs/invoices" },
+      { name: "Refunds", href: "/docs/refunds" },
     ],
   },
   {
@@ -102,6 +104,26 @@ const tableOfContents: Record<
     { id: "step-5-frontend", title: "Frontend Integration", level: 2 },
     { id: "step-6-testing", title: "Testing the Flow", level: 2 },
     { id: "summary", title: "Summary", level: 2 },
+  ],
+  "/docs/invoices": [
+    { id: "overview", title: "Overview", level: 2 },
+    { id: "list-invoices", title: "List Invoices", level: 2 },
+    { id: "get-invoice", title: "Get Invoice Details", level: 2 },
+    { id: "invoice-statuses", title: "Invoice Statuses", level: 2 },
+    { id: "download-pdf", title: "Download PDF", level: 2 },
+    { id: "void-invoice", title: "Void an Invoice", level: 2 },
+    { id: "pay-invoice", title: "Retry Payment", level: 2 },
+    { id: "sdk", title: "SDK Usage", level: 2 },
+  ],
+  "/docs/refunds": [
+    { id: "overview", title: "Overview", level: 2 },
+    { id: "create-refund", title: "Create a Refund", level: 2 },
+    { id: "list-refunds", title: "List Refunds", level: 2 },
+    { id: "get-refund", title: "Get Refund Details", level: 2 },
+    { id: "refund-statuses", title: "Refund Statuses", level: 2 },
+    { id: "refund-reasons", title: "Refund Reasons", level: 2 },
+    { id: "webhooks", title: "Webhook Events", level: 2 },
+    { id: "sdk", title: "SDK Usage", level: 2 },
   ],
 };
 

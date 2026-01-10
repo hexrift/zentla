@@ -24,6 +24,8 @@ import type {
   CreateCustomerParams,
   UpdateCustomerParams,
   CustomerResult,
+  CreateRefundParams,
+  RefundResult,
 } from "@zentla/core";
 import type { StripeConfig } from "./stripe.config";
 import { validateStripeConfig } from "./stripe.config";
@@ -851,5 +853,78 @@ export class StripeAdapter implements BillingProvider {
    */
   async payInvoice(invoiceId: string): Promise<void> {
     await this.stripe.invoices.pay(invoiceId);
+  }
+
+  /**
+   * Create a refund for a charge or payment intent.
+   */
+  async createRefund(params: CreateRefundParams): Promise<RefundResult> {
+    const refundParams: Stripe.RefundCreateParams = {};
+
+    // If invoiceId provided, we need to find the charge from the invoice
+    if (params.invoiceId) {
+      const invoice = await this.stripe.invoices.retrieve(params.invoiceId);
+      if (invoice.charge && typeof invoice.charge === "string") {
+        refundParams.charge = invoice.charge;
+      } else if (
+        invoice.payment_intent &&
+        typeof invoice.payment_intent === "string"
+      ) {
+        refundParams.payment_intent = invoice.payment_intent;
+      } else {
+        throw new Error("Invoice has no associated charge or payment intent");
+      }
+    } else if (params.chargeId) {
+      refundParams.charge = params.chargeId;
+    } else if (params.paymentIntentId) {
+      refundParams.payment_intent = params.paymentIntentId;
+    } else {
+      throw new Error(
+        "Must provide invoiceId, chargeId, or paymentIntentId for refund",
+      );
+    }
+
+    // Optional amount (defaults to full amount)
+    if (params.amount) {
+      refundParams.amount = params.amount;
+    }
+
+    // Optional reason
+    if (params.reason) {
+      refundParams.reason = params.reason;
+    }
+
+    const refund = await this.stripe.refunds.create(refundParams);
+
+    return {
+      id: refund.id,
+      amount: refund.amount,
+      currency: refund.currency,
+      status: this.mapRefundStatus(refund.status),
+      chargeId:
+        typeof refund.charge === "string" ? refund.charge : refund.charge?.id,
+      paymentIntentId:
+        typeof refund.payment_intent === "string"
+          ? refund.payment_intent
+          : refund.payment_intent?.id,
+      customerId: undefined, // Will be resolved from charge/payment_intent if needed
+    };
+  }
+
+  private mapRefundStatus(
+    status: string | null,
+  ): "pending" | "succeeded" | "failed" | "canceled" {
+    switch (status) {
+      case "succeeded":
+        return "succeeded";
+      case "pending":
+        return "pending";
+      case "failed":
+        return "failed";
+      case "canceled":
+        return "canceled";
+      default:
+        return "pending";
+    }
   }
 }

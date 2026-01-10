@@ -28,6 +28,8 @@ import { ExperimentNewPage } from "./pages/ExperimentNewPage";
 import { ExperimentDetailPage } from "./pages/ExperimentDetailPage";
 import { InvoicesPage } from "./pages/InvoicesPage";
 import { InvoiceDetailPage } from "./pages/InvoiceDetailPage";
+import { RefundsPage } from "./pages/RefundsPage";
+import { RefundDetailPage } from "./pages/RefundDetailPage";
 
 export default function App() {
   return (
@@ -68,6 +70,8 @@ export default function App() {
           />
           <Route path="invoices" element={<InvoicesPage />} />
           <Route path="invoices/:id" element={<InvoiceDetailPage />} />
+          <Route path="refunds" element={<RefundsPage />} />
+          <Route path="refunds/:id" element={<RefundDetailPage />} />
           <Route path="customers" element={<CustomersPage />} />
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="events" element={<EventsPage />} />

@@ -287,6 +287,66 @@ Fired when an invoice payment attempt fails.
 }
 ```
 
+#### `invoice.voided`
+
+Fired when an invoice is voided.
+
+```json
+{
+  "id": "evt_132",
+  "type": "invoice.voided",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "data": {
+    "invoice": {
+      "id": "inv_123",
+      "voidedAt": "2024-01-15T10:30:00Z"
+    }
+  }
+}
+```
+
+### Refund Events
+
+#### `refund.created`
+
+Fired when a refund is created.
+
+```json
+{
+  "id": "evt_133",
+  "type": "refund.created",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "data": {
+    "refund": {
+      "id": "re_1234567890",
+      "amount": 2900,
+      "currency": "usd",
+      "status": "succeeded",
+      "reason": "requested_by_customer"
+    }
+  }
+}
+```
+
+#### `refund.updated`
+
+Fired when a refund status changes (e.g., from `pending` to `succeeded` or `failed`).
+
+```json
+{
+  "id": "evt_134",
+  "type": "refund.updated",
+  "timestamp": "2024-01-15T10:35:00Z",
+  "data": {
+    "refund": {
+      "id": "re_1234567890",
+      "status": "succeeded",
+      "failureReason": null
+    }
+  }
+}
+```
+
 ## Signature Format
 
 Webhook signatures use HMAC-SHA256 and include a timestamp:
