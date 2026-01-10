@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, Inject, forwardRef } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
 import { BillingService, ProviderType } from "../billing/billing.service";
 import { ProviderRefService } from "../billing/provider-ref.service";
@@ -6,6 +6,7 @@ import { OutboxService } from "./outbox.service";
 import { EntitlementsService } from "../entitlements/entitlements.service";
 import { InvoicesService } from "../invoices/invoices.service";
 import { RefundsService } from "../refunds/refunds.service";
+import { DunningService } from "../dunning/dunning.service";
 import type { StripeAdapter } from "@zentla/stripe-adapter";
 import type Stripe from "stripe";
 import type { Prisma, InvoiceStatus, RefundStatus } from "@prisma/client";
@@ -24,6 +25,8 @@ export class StripeWebhookService {
     private readonly entitlementsService: EntitlementsService,
     private readonly invoicesService: InvoicesService,
     private readonly refundsService: RefundsService,
+    @Inject(forwardRef(() => DunningService))
+    private readonly dunningService: DunningService,
   ) {}
 
   async processWebhook(
@@ -808,6 +811,29 @@ export class StripeWebhookService {
           },
         },
       });
+
+      // Handle payment recovery if invoice was in dunning
+      if (invoice.id) {
+        const localInvoice = await this.prisma.invoice.findFirst({
+          where: {
+            workspaceId: subscriptionRef.workspaceId,
+            providerInvoiceId: invoice.id,
+          },
+        });
+
+        if (localInvoice?.dunningStartedAt && !localInvoice.dunningEndedAt) {
+          try {
+            await this.dunningService.handlePaymentSuccess(
+              subscriptionRef.workspaceId,
+              localInvoice.id,
+            );
+          } catch (error) {
+            this.logger.warn(
+              `Failed to handle dunning recovery for invoice ${localInvoice.id}: ${error}`,
+            );
+          }
+        }
+      }
     }
 
     this.logger.log(
@@ -867,6 +893,29 @@ export class StripeWebhookService {
         },
       },
     });
+
+    // Start dunning process for the failed invoice
+    if (invoice.id) {
+      const localInvoice = await this.prisma.invoice.findFirst({
+        where: {
+          workspaceId: subscriptionRef.workspaceId,
+          providerInvoiceId: invoice.id,
+        },
+      });
+
+      if (localInvoice) {
+        try {
+          await this.dunningService.startDunning(
+            subscriptionRef.workspaceId,
+            localInvoice.id,
+          );
+        } catch (error) {
+          this.logger.warn(
+            `Failed to start dunning for invoice ${localInvoice.id}: ${error}`,
+          );
+        }
+      }
+    }
 
     this.logger.log(
       `Payment failed for subscription ${subscriptionRef.entityId}`,
