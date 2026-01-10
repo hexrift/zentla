@@ -119,7 +119,10 @@ export class WebhookMonitoringController {
         totalFailed: { type: "number" },
         totalPending: { type: "number" },
         totalDeadLetter: { type: "number" },
-        deliveryRate: { type: "number", description: "Success rate percentage" },
+        deliveryRate: {
+          type: "number",
+          description: "Success rate percentage",
+        },
         averageAttempts: { type: "number" },
       },
     },
@@ -165,7 +168,10 @@ export class WebhookMonitoringController {
           lastErrorAt: { type: "string", nullable: true },
           lastError: { type: "string", nullable: true },
           pendingEvents: { type: "number" },
-          health: { type: "string", enum: ["healthy", "degraded", "unhealthy"] },
+          health: {
+            type: "string",
+            enum: ["healthy", "degraded", "unhealthy"],
+          },
         },
       },
     },

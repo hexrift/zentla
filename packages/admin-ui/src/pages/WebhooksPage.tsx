@@ -308,7 +308,10 @@ export function WebhooksPage() {
           ) : (
             <div className="space-y-4">
               {data?.data?.map((endpoint: WebhookEndpoint) => (
-                <div key={endpoint.id} className="p-4 bg-white rounded-lg shadow">
+                <div
+                  key={endpoint.id}
+                  className="p-4 bg-white rounded-lg shadow"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2">
@@ -344,7 +347,9 @@ export function WebhooksPage() {
                     <button
                       onClick={() => {
                         if (
-                          confirm("Are you sure you want to delete this endpoint?")
+                          confirm(
+                            "Are you sure you want to delete this endpoint?",
+                          )
                         ) {
                           deleteMutation.mutate(endpoint.id);
                         }
@@ -399,7 +404,9 @@ export function WebhooksPage() {
           {/* Endpoint Health */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-4 py-3 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Endpoint Health</h3>
+              <h3 className="text-lg font-medium text-gray-900">
+                Endpoint Health
+              </h3>
             </div>
             <div className="p-4">
               {!endpointHealth || endpointHealth.length === 0 ? (
@@ -435,7 +442,9 @@ export function WebhooksPage() {
                             </span>
                           )}
                           {ep.lastDeliveryAt && (
-                            <span>Last delivery: {formatDate(ep.lastDeliveryAt)}</span>
+                            <span>
+                              Last delivery: {formatDate(ep.lastDeliveryAt)}
+                            </span>
                           )}
                         </div>
                         {ep.lastError && (
@@ -462,7 +471,10 @@ export function WebhooksPage() {
               <div className="p-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {eventTypeBreakdown.map((et) => (
-                    <div key={et.eventType} className="p-3 bg-gray-50 rounded-lg">
+                    <div
+                      key={et.eventType}
+                      className="p-3 bg-gray-50 rounded-lg"
+                    >
                       <div className="text-xs text-gray-500 truncate">
                         {et.eventType}
                       </div>
@@ -482,7 +494,9 @@ export function WebhooksPage() {
           {/* Recent Events */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-900">Recent Events</h3>
+              <h3 className="text-lg font-medium text-gray-900">
+                Recent Events
+              </h3>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -518,7 +532,10 @@ export function WebhooksPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {!recentEvents?.data || recentEvents.data.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                      <td
+                        colSpan={5}
+                        className="px-4 py-8 text-center text-gray-500"
+                      >
                         No recent events
                       </td>
                     </tr>
@@ -560,7 +577,9 @@ export function WebhooksPage() {
       {activeTab === "dead-letter" && (
         <div className="bg-white rounded-lg shadow">
           <div className="px-4 py-3 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Dead Letter Queue</h3>
+            <h3 className="text-lg font-medium text-gray-900">
+              Dead Letter Queue
+            </h3>
             <p className="text-sm text-gray-500">
               Events that have exhausted all retry attempts
             </p>
@@ -590,47 +609,55 @@ export function WebhooksPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {!deadLetterEvents?.data || deadLetterEvents.data.length === 0 ? (
+                {!deadLetterEvents?.data ||
+                deadLetterEvents.data.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                    <td
+                      colSpan={6}
+                      className="px-4 py-8 text-center text-gray-500"
+                    >
                       No dead letter events
                     </td>
                   </tr>
                 ) : (
-                  deadLetterEvents.data.map((event: WebhookDeadLetterSummary) => (
-                    <tr key={event.id}>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {event.eventType}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-500 font-mono truncate max-w-xs">
-                        {event.endpointUrl}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-red-600 max-w-xs truncate">
-                        {event.failureReason}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-500">
-                        {event.attempts}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-500">
-                        {formatDate(event.lastAttemptAt)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => {
-                            if (
-                              confirm("Retry this event? It will be requeued for delivery.")
-                            ) {
-                              retryMutation.mutate(event.id);
-                            }
-                          }}
-                          disabled={retryMutation.isPending}
-                          className="text-sm text-primary-600 hover:text-primary-800 disabled:opacity-50"
-                        >
-                          Retry
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                  deadLetterEvents.data.map(
+                    (event: WebhookDeadLetterSummary) => (
+                      <tr key={event.id}>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {event.eventType}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-500 font-mono truncate max-w-xs">
+                          {event.endpointUrl}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-red-600 max-w-xs truncate">
+                          {event.failureReason}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-500">
+                          {event.attempts}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-500">
+                          {formatDate(event.lastAttemptAt)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => {
+                              if (
+                                confirm(
+                                  "Retry this event? It will be requeued for delivery.",
+                                )
+                              ) {
+                                retryMutation.mutate(event.id);
+                              }
+                            }}
+                            disabled={retryMutation.isPending}
+                            className="text-sm text-primary-600 hover:text-primary-800 disabled:opacity-50"
+                          >
+                            Retry
+                          </button>
+                        </td>
+                      </tr>
+                    ),
+                  )
                 )}
               </tbody>
             </table>

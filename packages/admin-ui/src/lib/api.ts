@@ -375,7 +375,10 @@ export const api = {
         `/webhook-monitoring/dead-letter/${id}/retry`,
         { method: "POST" },
       ),
-    getEventTypeBreakdown: (params?: { startDate?: string; endDate?: string }) => {
+    getEventTypeBreakdown: (params?: {
+      startDate?: string;
+      endDate?: string;
+    }) => {
       const searchParams = new URLSearchParams();
       if (params?.startDate) searchParams.set("startDate", params.startDate);
       if (params?.endDate) searchParams.set("endDate", params.endDate);
@@ -764,7 +767,10 @@ export const api = {
   },
 
   analytics: {
-    getDunningAnalytics: (params?: { startDate?: string; endDate?: string }) => {
+    getDunningAnalytics: (params?: {
+      startDate?: string;
+      endDate?: string;
+    }) => {
       const searchParams = new URLSearchParams();
       if (params?.startDate) searchParams.set("startDate", params.startDate);
       if (params?.endDate) searchParams.set("endDate", params.endDate);
@@ -795,7 +801,10 @@ export const api = {
         `/analytics/dunning/funnel${query ? `?${query}` : ""}`,
       );
     },
-    getDeclineCodeBreakdown: (params?: { startDate?: string; endDate?: string }) => {
+    getDeclineCodeBreakdown: (params?: {
+      startDate?: string;
+      endDate?: string;
+    }) => {
       const searchParams = new URLSearchParams();
       if (params?.startDate) searchParams.set("startDate", params.startDate);
       if (params?.endDate) searchParams.set("endDate", params.endDate);

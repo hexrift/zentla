@@ -308,7 +308,9 @@ export function AnalyticsPage() {
             isLoading={dunningLoading}
           />
           <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-sm font-medium text-gray-500">Amount at Risk</h3>
+            <h3 className="text-sm font-medium text-gray-500">
+              Amount at Risk
+            </h3>
             {dunningLoading ? (
               <div className="mt-2 h-9 bg-gray-100 rounded animate-pulse" />
             ) : (
@@ -316,7 +318,8 @@ export function AnalyticsPage() {
                 <p className="mt-2 text-3xl font-semibold text-red-600">
                   {formatCurrencyAmount(
                     dunningAnalytics?.totalAmountAtRisk ?? 0,
-                    dunningAnalytics?.amountAtRiskByCurrency?.[0]?.currency ?? "usd",
+                    dunningAnalytics?.amountAtRiskByCurrency?.[0]?.currency ??
+                      "usd",
                   )}
                 </p>
                 {dunningAnalytics?.amountAtRiskByCurrency &&
@@ -377,10 +380,15 @@ export function AnalyticsPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-600">Total entered dunning</span>
-                <span className="font-medium">{recoveryFunnel.totalStarted}</span>
+                <span className="font-medium">
+                  {recoveryFunnel.totalStarted}
+                </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: "100%" }} />
+                <div
+                  className="bg-green-500 h-2 rounded-full"
+                  style={{ width: "100%" }}
+                />
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
@@ -398,9 +406,12 @@ export function AnalyticsPage() {
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-semibold text-yellow-500">
-                    {recoveryFunnel.recoveredAttempt3 + recoveryFunnel.recoveredAttempt4Plus}
+                    {recoveryFunnel.recoveredAttempt3 +
+                      recoveryFunnel.recoveredAttempt4Plus}
                   </p>
-                  <p className="text-xs text-gray-500">Recovered @ Attempt 3+</p>
+                  <p className="text-xs text-gray-500">
+                    Recovered @ Attempt 3+
+                  </p>
                 </div>
                 <div className="text-center">
                   <p className="text-2xl font-semibold text-red-500">

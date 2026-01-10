@@ -173,7 +173,8 @@ class UpdateEmailTemplateDto {
   subject?: string;
 
   @ApiPropertyOptional({
-    description: "HTML email body (supports {{variables}} and {{#if var}}...{{/if}})",
+    description:
+      "HTML email body (supports {{variables}} and {{#if var}}...{{/if}})",
   })
   @IsOptional()
   @IsString()
@@ -305,7 +306,9 @@ class DunningStatsSchema {
   @ApiProperty({ description: "Number of invoices currently in dunning" })
   invoicesInDunning!: number;
 
-  @ApiProperty({ description: "Total amount at risk in cents (sum across all currencies)" })
+  @ApiProperty({
+    description: "Total amount at risk in cents (sum across all currencies)",
+  })
   totalAmountAtRisk!: number;
 
   @ApiProperty({
@@ -317,7 +320,10 @@ class DunningStatsSchema {
   @ApiProperty({
     description: "Amounts at risk grouped by currency",
     type: [AmountByCurrencySchema],
-    example: [{ currency: "usd", amount: 10000 }, { currency: "eur", amount: 5000 }],
+    example: [
+      { currency: "usd", amount: 10000 },
+      { currency: "eur", amount: 5000 },
+    ],
   })
   amountsByCurrency!: AmountByCurrencySchema[];
 
@@ -629,7 +635,11 @@ See GET /dunning/email-templates for available variables and template syntax.`,
     @Param("type") type: DunningEmailType,
     @Body() body: UpdateEmailTemplateDto,
   ) {
-    return this.dunningConfigService.updateEmailTemplate(workspaceId, type, body);
+    return this.dunningConfigService.updateEmailTemplate(
+      workspaceId,
+      type,
+      body,
+    );
   }
 
   @Delete("email-templates/:type")

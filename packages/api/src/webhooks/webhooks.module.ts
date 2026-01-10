@@ -20,7 +20,11 @@ import { DunningModule } from "../dunning/dunning.module";
     RefundsModule,
     forwardRef(() => DunningModule),
   ],
-  controllers: [WebhooksController, WebhookEndpointsController, WebhookMonitoringController],
+  controllers: [
+    WebhooksController,
+    WebhookEndpointsController,
+    WebhookMonitoringController,
+  ],
   providers: [
     WebhooksService,
     OutboxService,

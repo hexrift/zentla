@@ -71,7 +71,8 @@ export class DunningAnalyticsService {
     endDate?: Date,
   ): Promise<DunningAnalytics> {
     const now = new Date();
-    const periodStart = startDate ?? new Date(now.getFullYear(), now.getMonth(), 1);
+    const periodStart =
+      startDate ?? new Date(now.getFullYear(), now.getMonth(), 1);
     const periodEnd = endDate ?? now;
 
     // Get invoices currently in dunning
@@ -148,7 +149,9 @@ export class DunningAnalyticsService {
 
     const recoveryRate =
       totalDunningStartedThisPeriod > 0
-        ? Math.round((recoveredThisPeriod / totalDunningStartedThisPeriod) * 100)
+        ? Math.round(
+            (recoveredThisPeriod / totalDunningStartedThisPeriod) * 100,
+          )
         : 0;
 
     // Calculate average days to recovery
@@ -271,7 +274,8 @@ export class DunningAnalyticsService {
         });
 
         for (const sub of subscriptions) {
-          if (sub.status === "suspended" || sub.status === "payment_failed") suspended++;
+          if (sub.status === "suspended" || sub.status === "payment_failed")
+            suspended++;
           else if (sub.status === "canceled") canceled++;
         }
       }
@@ -310,51 +314,49 @@ export class DunningAnalyticsService {
       const periodEnd = this.getNextPeriodDate(current, period);
 
       // Get metrics for this period
-      const [invoicesInDunning, amountAtRiskResult, recoveredAmount, newDunningStarted] =
-        await Promise.all([
-          this.prisma.invoice.count({
-            where: {
-              workspaceId,
-              dunningStartedAt: { lte: current },
-              OR: [
-                { dunningEndedAt: null },
-                { dunningEndedAt: { gt: current } },
-              ],
+      const [
+        invoicesInDunning,
+        amountAtRiskResult,
+        recoveredAmount,
+        newDunningStarted,
+      ] = await Promise.all([
+        this.prisma.invoice.count({
+          where: {
+            workspaceId,
+            dunningStartedAt: { lte: current },
+            OR: [{ dunningEndedAt: null }, { dunningEndedAt: { gt: current } }],
+          },
+        }),
+        this.prisma.invoice.aggregate({
+          where: {
+            workspaceId,
+            dunningStartedAt: { lte: current },
+            OR: [{ dunningEndedAt: null }, { dunningEndedAt: { gt: current } }],
+          },
+          _sum: { amountDue: true },
+        }),
+        this.prisma.invoice.aggregate({
+          where: {
+            workspaceId,
+            dunningStartedAt: { not: null },
+            status: "paid",
+            paidAt: {
+              gte: current,
+              lt: periodEnd,
             },
-          }),
-          this.prisma.invoice.aggregate({
-            where: {
-              workspaceId,
-              dunningStartedAt: { lte: current },
-              OR: [
-                { dunningEndedAt: null },
-                { dunningEndedAt: { gt: current } },
-              ],
+          },
+          _sum: { amountPaid: true },
+        }),
+        this.prisma.invoice.count({
+          where: {
+            workspaceId,
+            dunningStartedAt: {
+              gte: current,
+              lt: periodEnd,
             },
-            _sum: { amountDue: true },
-          }),
-          this.prisma.invoice.aggregate({
-            where: {
-              workspaceId,
-              dunningStartedAt: { not: null },
-              status: "paid",
-              paidAt: {
-                gte: current,
-                lt: periodEnd,
-              },
-            },
-            _sum: { amountPaid: true },
-          }),
-          this.prisma.invoice.count({
-            where: {
-              workspaceId,
-              dunningStartedAt: {
-                gte: current,
-                lt: periodEnd,
-              },
-            },
-          }),
-        ]);
+          },
+        }),
+      ]);
 
       // Calculate recovery rate for this period
       const totalInPeriod = await this.prisma.invoice.count({
@@ -408,7 +410,8 @@ export class DunningAnalyticsService {
     endDate?: Date,
   ): Promise<RecoveryFunnel> {
     const now = new Date();
-    const periodStart = startDate ?? new Date(now.getFullYear(), now.getMonth() - 3, 1);
+    const periodStart =
+      startDate ?? new Date(now.getFullYear(), now.getMonth() - 3, 1);
     const periodEnd = endDate ?? now;
 
     // Get all invoices that entered dunning in the period
@@ -471,7 +474,8 @@ export class DunningAnalyticsService {
     endDate?: Date,
   ): Promise<Array<{ code: string; count: number; percentage: number }>> {
     const now = new Date();
-    const periodStart = startDate ?? new Date(now.getFullYear(), now.getMonth(), 1);
+    const periodStart =
+      startDate ?? new Date(now.getFullYear(), now.getMonth(), 1);
     const periodEnd = endDate ?? now;
 
     const attempts = await this.prisma.dunningAttempt.findMany({

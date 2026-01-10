@@ -578,7 +578,8 @@ If the resource has been modified since you fetched it, the update will fail wit
   })
   @ApiResponse({
     status: 404,
-    description: "Customer not found or has no billing provider customer record",
+    description:
+      "Customer not found or has no billing provider customer record",
   })
   async createPortalSession(
     @WorkspaceId() workspaceId: string,

@@ -38,8 +38,11 @@ export function DunningPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isEditingConfig, setIsEditingConfig] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<DunningEmailType | null>(null);
-  const [templateForm, setTemplateForm] = useState<Partial<DunningEmailTemplate>>({});
+  const [editingTemplate, setEditingTemplate] =
+    useState<DunningEmailType | null>(null);
+  const [templateForm, setTemplateForm] = useState<
+    Partial<DunningEmailTemplate>
+  >({});
 
   // Fetch dunning stats
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -70,7 +73,8 @@ export function DunningPage() {
 
   // Update config mutation
   const updateConfigMutation = useMutation({
-    mutationFn: (data: Partial<DunningConfig>) => api.dunning.updateConfig(data),
+    mutationFn: (data: Partial<DunningConfig>) =>
+      api.dunning.updateConfig(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dunning", "config"] });
       setIsEditingConfig(false);
@@ -95,16 +99,21 @@ export function DunningPage() {
       data: Partial<DunningEmailTemplate>;
     }) => api.dunning.updateEmailTemplate(type, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["dunning", "email-templates"] });
+      queryClient.invalidateQueries({
+        queryKey: ["dunning", "email-templates"],
+      });
       setEditingTemplate(null);
     },
   });
 
   // Reset email template mutation
   const resetTemplateMutation = useMutation({
-    mutationFn: (type: DunningEmailType) => api.dunning.resetEmailTemplate(type),
+    mutationFn: (type: DunningEmailType) =>
+      api.dunning.resetEmailTemplate(type),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["dunning", "email-templates"] });
+      queryClient.invalidateQueries({
+        queryKey: ["dunning", "email-templates"],
+      });
     },
   });
 
@@ -152,7 +161,9 @@ export function DunningPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dunning Management</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Dunning Management
+          </h1>
           <p className="mt-1 text-sm text-gray-500">
             Manage payment recovery for failed invoices
           </p>
@@ -162,9 +173,11 @@ export function DunningPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         <div className="bg-white rounded-lg shadow p-6">
-          <dt className="text-sm font-medium text-gray-500">Invoices in Dunning</dt>
+          <dt className="text-sm font-medium text-gray-500">
+            Invoices in Dunning
+          </dt>
           <dd className="mt-1 text-3xl font-semibold text-gray-900">
-            {statsLoading ? "..." : stats?.invoicesInDunning ?? 0}
+            {statsLoading ? "..." : (stats?.invoicesInDunning ?? 0)}
           </dd>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
@@ -173,7 +186,10 @@ export function DunningPage() {
             {statsLoading
               ? "..."
               : stats
-                ? formatCurrency(stats.totalAmountAtRisk, stats.currency || "usd")
+                ? formatCurrency(
+                    stats.totalAmountAtRisk,
+                    stats.currency || "usd",
+                  )
                 : "$0.00"}
           </dd>
           {stats?.amountsByCurrency && stats.amountsByCurrency.length > 1 && (
@@ -193,9 +209,11 @@ export function DunningPage() {
           </dd>
         </div>
         <div className="bg-white rounded-lg shadow p-6">
-          <dt className="text-sm font-medium text-gray-500">Pending Attempts</dt>
+          <dt className="text-sm font-medium text-gray-500">
+            Pending Attempts
+          </dt>
           <dd className="mt-1 text-3xl font-semibold text-yellow-600">
-            {statsLoading ? "..." : stats?.attemptsByStatus.pending ?? 0}
+            {statsLoading ? "..." : (stats?.attemptsByStatus.pending ?? 0)}
           </dd>
         </div>
       </div>
@@ -203,7 +221,9 @@ export function DunningPage() {
       {/* Configuration Section */}
       <div className="bg-white rounded-lg shadow mb-8">
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Dunning Configuration</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Dunning Configuration
+          </h2>
           {!isEditingConfig && (
             <button
               onClick={handleEditConfig}
@@ -321,7 +341,10 @@ export function DunningPage() {
                     }
                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="emailsEnabled" className="ml-2 block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="emailsEnabled"
+                    className="ml-2 block text-sm font-medium text-gray-700"
+                  >
                     Enable email notifications
                   </label>
                 </div>
@@ -329,36 +352,51 @@ export function DunningPage() {
                 {configForm.emailsEnabled && (
                   <div className="space-y-4 pl-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">From Email</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        From Email
+                      </label>
                       <input
                         type="email"
                         value={configForm.fromEmail ?? ""}
                         onChange={(e) =>
-                          setConfigForm({ ...configForm, fromEmail: e.target.value })
+                          setConfigForm({
+                            ...configForm,
+                            fromEmail: e.target.value,
+                          })
                         }
                         placeholder="billing@example.com"
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">From Name</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        From Name
+                      </label>
                       <input
                         type="text"
                         value={configForm.fromName ?? ""}
                         onChange={(e) =>
-                          setConfigForm({ ...configForm, fromName: e.target.value })
+                          setConfigForm({
+                            ...configForm,
+                            fromName: e.target.value,
+                          })
                         }
                         placeholder="Billing Team"
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Reply-To Email</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Reply-To Email
+                      </label>
                       <input
                         type="email"
                         value={configForm.replyToEmail ?? ""}
                         onChange={(e) =>
-                          setConfigForm({ ...configForm, replyToEmail: e.target.value })
+                          setConfigForm({
+                            ...configForm,
+                            replyToEmail: e.target.value,
+                          })
                         }
                         placeholder="support@example.com"
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -381,7 +419,9 @@ export function DunningPage() {
                   disabled={updateConfigMutation.isPending}
                   className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
                 >
-                  {updateConfigMutation.isPending ? "Saving..." : "Save Configuration"}
+                  {updateConfigMutation.isPending
+                    ? "Saving..."
+                    : "Save Configuration"}
                 </button>
               </div>
 
@@ -394,27 +434,41 @@ export function DunningPage() {
           ) : (
             <dl className="grid grid-cols-3 gap-6">
               <div>
-                <dt className="text-sm font-medium text-gray-500">Retry Schedule</dt>
+                <dt className="text-sm font-medium text-gray-500">
+                  Retry Schedule
+                </dt>
                 <dd className="mt-1 text-sm text-gray-900">
                   {config?.retrySchedule?.join(", ")} days
                 </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500">Max Attempts</dt>
-                <dd className="mt-1 text-sm text-gray-900">{config?.maxAttempts}</dd>
+                <dt className="text-sm font-medium text-gray-500">
+                  Max Attempts
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {config?.maxAttempts}
+                </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500">Final Action</dt>
+                <dt className="text-sm font-medium text-gray-500">
+                  Final Action
+                </dt>
                 <dd className="mt-1 text-sm text-gray-900 capitalize">
                   {config?.finalAction} subscription
                 </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500">Grace Period</dt>
-                <dd className="mt-1 text-sm text-gray-900">{config?.gracePeriodDays} days</dd>
+                <dt className="text-sm font-medium text-gray-500">
+                  Grace Period
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {config?.gracePeriodDays} days
+                </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500">Email Notifications</dt>
+                <dt className="text-sm font-medium text-gray-500">
+                  Email Notifications
+                </dt>
                 <dd className="mt-1 text-sm text-gray-900">
                   {config?.emailsEnabled ? (
                     <span className="text-green-600">Enabled</span>
@@ -425,8 +479,12 @@ export function DunningPage() {
               </div>
               {config?.emailsEnabled && config?.fromEmail && (
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">From Email</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{config.fromEmail}</dd>
+                  <dt className="text-sm font-medium text-gray-500">
+                    From Email
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {config.fromEmail}
+                  </dd>
                 </div>
               )}
             </dl>
@@ -437,7 +495,9 @@ export function DunningPage() {
       {/* Email Templates Section */}
       <div className="bg-white rounded-lg shadow mb-8">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Email Templates</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Email Templates
+          </h2>
           <p className="mt-1 text-sm text-gray-500">
             Customize the emails sent during the dunning process
           </p>
@@ -466,46 +526,76 @@ export function DunningPage() {
                   id="templateEnabled"
                   checked={templateForm.enabled ?? true}
                   onChange={(e) =>
-                    setTemplateForm({ ...templateForm, enabled: e.target.checked })
+                    setTemplateForm({
+                      ...templateForm,
+                      enabled: e.target.checked,
+                    })
                   }
                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                 />
-                <label htmlFor="templateEnabled" className="ml-2 text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="templateEnabled"
+                  className="ml-2 text-sm font-medium text-gray-700"
+                >
                   Enable this email
                 </label>
               </div>
 
               {/* Subject */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Subject</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Subject
+                </label>
                 <input
                   type="text"
                   value={templateForm.subject ?? ""}
-                  onChange={(e) => setTemplateForm({ ...templateForm, subject: e.target.value })}
+                  onChange={(e) =>
+                    setTemplateForm({
+                      ...templateForm,
+                      subject: e.target.value,
+                    })
+                  }
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
 
               {/* HTML Body */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">HTML Body</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  HTML Body
+                </label>
                 <textarea
                   value={templateForm.bodyHtml ?? ""}
-                  onChange={(e) => setTemplateForm({ ...templateForm, bodyHtml: e.target.value })}
+                  onChange={(e) =>
+                    setTemplateForm({
+                      ...templateForm,
+                      bodyHtml: e.target.value,
+                    })
+                  }
                   rows={12}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Variables: {"{{customerName}}, {{invoiceAmount}}, {{invoiceNumber}}, {{updatePaymentUrl}}, {{companyName}}, {{supportEmail}}"}
+                  Variables:{" "}
+                  {
+                    "{{customerName}}, {{invoiceAmount}}, {{invoiceNumber}}, {{updatePaymentUrl}}, {{companyName}}, {{supportEmail}}"
+                  }
                 </p>
               </div>
 
               {/* Plain Text Body */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Plain Text Body</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Plain Text Body
+                </label>
                 <textarea
                   value={templateForm.bodyText ?? ""}
-                  onChange={(e) => setTemplateForm({ ...templateForm, bodyText: e.target.value })}
+                  onChange={(e) =>
+                    setTemplateForm({
+                      ...templateForm,
+                      bodyText: e.target.value,
+                    })
+                  }
                   rows={8}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                 />
@@ -524,7 +614,9 @@ export function DunningPage() {
                   disabled={updateTemplateMutation.isPending}
                   className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 disabled:opacity-50"
                 >
-                  {updateTemplateMutation.isPending ? "Saving..." : "Save Template"}
+                  {updateTemplateMutation.isPending
+                    ? "Saving..."
+                    : "Save Template"}
                 </button>
               </div>
 
@@ -571,7 +663,9 @@ export function DunningPage() {
                   <div className="flex items-center gap-2">
                     {!template.isDefault && (
                       <button
-                        onClick={() => resetTemplateMutation.mutate(template.type)}
+                        onClick={() =>
+                          resetTemplateMutation.mutate(template.type)
+                        }
                         disabled={resetTemplateMutation.isPending}
                         className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-800"
                       >
@@ -595,7 +689,9 @@ export function DunningPage() {
       {/* Invoices in Dunning Table */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Invoices in Dunning</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Invoices in Dunning
+          </h2>
         </div>
         {invoicesLoading ? (
           <div className="p-6 text-gray-500">Loading invoices...</div>
@@ -603,7 +699,8 @@ export function DunningPage() {
           <div className="p-6 text-center text-gray-500">
             <p className="text-lg font-medium">No invoices in dunning</p>
             <p className="mt-1 text-sm">
-              When payment failures occur, invoices will appear here for recovery.
+              When payment failures occur, invoices will appear here for
+              recovery.
             </p>
           </div>
         ) : (
@@ -641,7 +738,9 @@ export function DunningPage() {
                     <div className="text-sm font-medium text-gray-900">
                       {invoice.customer.name || invoice.customer.email}
                     </div>
-                    <div className="text-sm text-gray-500">{invoice.customer.email}</div>
+                    <div className="text-sm text-gray-500">
+                      {invoice.customer.email}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
                     {formatCurrency(invoice.amountDue, invoice.currency)}
@@ -649,7 +748,8 @@ export function DunningPage() {
                   <td className="px-6 py-4">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        invoice.dunningAttemptCount >= (config?.maxAttempts ?? 4)
+                        invoice.dunningAttemptCount >=
+                        (config?.maxAttempts ?? 4)
                           ? "bg-red-100 text-red-800"
                           : "bg-yellow-100 text-yellow-800"
                       }`}
@@ -659,7 +759,9 @@ export function DunningPage() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {invoice.nextDunningAttemptAt
-                      ? new Date(invoice.nextDunningAttemptAt).toLocaleDateString()
+                      ? new Date(
+                          invoice.nextDunningAttemptAt,
+                        ).toLocaleDateString()
                       : "—"}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">

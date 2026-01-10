@@ -77,7 +77,8 @@ export class WebhookMonitoringService {
     endDate?: Date,
   ): Promise<WebhookStats> {
     const now = new Date();
-    const periodStart = startDate ?? new Date(now.getTime() - 24 * 60 * 60 * 1000); // Last 24 hours
+    const periodStart =
+      startDate ?? new Date(now.getTime() - 24 * 60 * 60 * 1000); // Last 24 hours
     const periodEnd = endDate ?? now;
 
     const statusCounts = await this.prisma.webhookEvent.groupBy({
@@ -115,7 +116,8 @@ export class WebhookMonitoringService {
     }
 
     const total = totalDelivered + totalFailed + totalDeadLetter;
-    const deliveryRate = total > 0 ? Math.round((totalDelivered / total) * 100) : 100;
+    const deliveryRate =
+      total > 0 ? Math.round((totalDelivered / total) * 100) : 100;
 
     // Calculate average attempts for delivered events
     const avgAttempts = await this.prisma.webhookEvent.aggregate({
@@ -162,9 +164,8 @@ export class WebhookMonitoringService {
 
       // Calculate delivery rate
       const total = endpoint.successCount + endpoint.failureCount;
-      const deliveryRate = total > 0
-        ? Math.round((endpoint.successCount / total) * 100)
-        : 100;
+      const deliveryRate =
+        total > 0 ? Math.round((endpoint.successCount / total) * 100) : 100;
 
       // Determine health status
       let health: "healthy" | "degraded" | "unhealthy";
@@ -217,7 +218,11 @@ export class WebhookMonitoringService {
       limit?: number;
       cursor?: string;
     } = {},
-  ): Promise<{ data: WebhookEventSummary[]; hasMore: boolean; nextCursor?: string }> {
+  ): Promise<{
+    data: WebhookEventSummary[];
+    hasMore: boolean;
+    nextCursor?: string;
+  }> {
     const limit = Math.min(options.limit ?? 20, 100);
 
     const where: Record<string, unknown> = { workspaceId };
@@ -249,7 +254,9 @@ export class WebhookMonitoringService {
       lastAttemptAt: event.lastAttemptAt,
       deliveredAt: event.deliveredAt,
       createdAt: event.createdAt,
-      response: event.response as { statusCode?: number; error?: string } | undefined,
+      response: event.response as
+        | { statusCode?: number; error?: string }
+        | undefined,
     }));
 
     return {
@@ -269,7 +276,11 @@ export class WebhookMonitoringService {
       limit?: number;
       cursor?: string;
     } = {},
-  ): Promise<{ data: DeadLetterEventSummary[]; hasMore: boolean; nextCursor?: string }> {
+  ): Promise<{
+    data: DeadLetterEventSummary[];
+    hasMore: boolean;
+    nextCursor?: string;
+  }> {
     const limit = Math.min(options.limit ?? 20, 100);
 
     const where: Record<string, unknown> = { workspaceId };
@@ -353,9 +364,12 @@ export class WebhookMonitoringService {
     workspaceId: string,
     startDate?: Date,
     endDate?: Date,
-  ): Promise<Array<{ eventType: string; count: number; deliveryRate: number }>> {
+  ): Promise<
+    Array<{ eventType: string; count: number; deliveryRate: number }>
+  > {
     const now = new Date();
-    const periodStart = startDate ?? new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
+    const periodStart =
+      startDate ?? new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
     const periodEnd = endDate ?? now;
 
     const breakdown = await this.prisma.webhookEvent.groupBy({
@@ -374,7 +388,10 @@ export class WebhookMonitoringService {
     const eventTypes = new Map<string, { total: number; delivered: number }>();
 
     for (const item of breakdown) {
-      const current = eventTypes.get(item.eventType) ?? { total: 0, delivered: 0 };
+      const current = eventTypes.get(item.eventType) ?? {
+        total: 0,
+        delivered: 0,
+      };
       current.total += item._count;
       if (item.status === "delivered") {
         current.delivered += item._count;
@@ -386,7 +403,10 @@ export class WebhookMonitoringService {
       .map(([eventType, stats]) => ({
         eventType,
         count: stats.total,
-        deliveryRate: stats.total > 0 ? Math.round((stats.delivered / stats.total) * 100) : 100,
+        deliveryRate:
+          stats.total > 0
+            ? Math.round((stats.delivered / stats.total) * 100)
+            : 100,
       }))
       .sort((a, b) => b.count - a.count);
   }

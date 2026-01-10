@@ -218,7 +218,8 @@ export class DunningConfigService {
         };
       }
 
-      const defaultTemplate = this.emailTemplateService.getDefaultTemplate(type);
+      const defaultTemplate =
+        this.emailTemplateService.getDefaultTemplate(type);
       return {
         type,
         subject: defaultTemplate.subject,
@@ -312,7 +313,8 @@ export class DunningConfigService {
         type,
         subject: data.subject ?? current.subject,
         bodyHtml: data.bodyHtml ?? current.bodyHtml,
-        bodyText: data.bodyText !== undefined ? data.bodyText : current.bodyText,
+        bodyText:
+          data.bodyText !== undefined ? data.bodyText : current.bodyText,
         enabled: data.enabled ?? current.enabled,
       },
       update: {
