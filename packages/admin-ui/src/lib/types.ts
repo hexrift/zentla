@@ -459,6 +459,64 @@ export interface DeclineCode {
   percentage: number;
 }
 
+// Webhook monitoring types
+export interface WebhookStats {
+  totalDelivered: number;
+  totalFailed: number;
+  totalPending: number;
+  totalDeadLetter: number;
+  deliveryRate: number;
+  averageAttempts: number;
+}
+
+export interface EndpointHealth {
+  id: string;
+  url: string;
+  status: string;
+  successCount: number;
+  failureCount: number;
+  deliveryRate: number;
+  lastDeliveryAt: string | null;
+  lastDeliveryStatus: number | null;
+  lastErrorAt: string | null;
+  lastError: string | null;
+  pendingEvents: number;
+  health: "healthy" | "degraded" | "unhealthy";
+}
+
+export interface WebhookEventSummary {
+  id: string;
+  endpointId: string;
+  endpointUrl: string;
+  eventType: string;
+  status: string;
+  attempts: number;
+  lastAttemptAt: string | null;
+  deliveredAt: string | null;
+  createdAt: string;
+  response?: {
+    statusCode?: number;
+    error?: string;
+  };
+}
+
+export interface WebhookDeadLetterSummary {
+  id: string;
+  endpointId: string;
+  endpointUrl: string;
+  eventType: string;
+  failureReason: string;
+  attempts: number;
+  lastAttemptAt: string;
+  createdAt: string;
+}
+
+export interface EventTypeBreakdown {
+  eventType: string;
+  count: number;
+  deliveryRate: number;
+}
+
 // Paginated response type
 export interface PaginatedResponse<T> {
   data: T[];

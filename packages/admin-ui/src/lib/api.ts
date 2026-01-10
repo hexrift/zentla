@@ -30,6 +30,11 @@ import type {
   DunningTrendPoint,
   RecoveryFunnel,
   DeclineCode,
+  WebhookStats,
+  EndpointHealth,
+  WebhookEventSummary,
+  WebhookDeadLetterSummary,
+  EventTypeBreakdown,
 } from "./types";
 
 const API_BASE = `${import.meta.env.VITE_API_URL || ""}/api/v1`;
@@ -323,6 +328,62 @@ export const api = {
       }),
     delete: (id: string) =>
       fetchApi<void>(`/webhook-endpoints/${id}`, { method: "DELETE" }),
+    // Monitoring endpoints
+    getStats: (params?: { startDate?: string; endDate?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.startDate) searchParams.set("startDate", params.startDate);
+      if (params?.endDate) searchParams.set("endDate", params.endDate);
+      const query = searchParams.toString();
+      return fetchApi<WebhookStats>(
+        `/webhook-monitoring/stats${query ? `?${query}` : ""}`,
+      );
+    },
+    getEndpointHealth: () =>
+      fetchApi<EndpointHealth[]>("/webhook-monitoring/endpoints/health"),
+    getRecentEvents: (params?: {
+      endpointId?: string;
+      status?: string;
+      limit?: number;
+      cursor?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.endpointId) searchParams.set("endpointId", params.endpointId);
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.cursor) searchParams.set("cursor", params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<PaginatedResponse<WebhookEventSummary>>(
+        `/webhook-monitoring/events${query ? `?${query}` : ""}`,
+      );
+    },
+    getDeadLetterEvents: (params?: {
+      endpointId?: string;
+      limit?: number;
+      cursor?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.endpointId) searchParams.set("endpointId", params.endpointId);
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.cursor) searchParams.set("cursor", params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<PaginatedResponse<WebhookDeadLetterSummary>>(
+        `/webhook-monitoring/dead-letter${query ? `?${query}` : ""}`,
+      );
+    },
+    retryDeadLetterEvent: (id: string) =>
+      fetchApi<{ webhookEventId: string }>(
+        `/webhook-monitoring/dead-letter/${id}/retry`,
+        { method: "POST" },
+      ),
+    getEventTypeBreakdown: (params?: { startDate?: string; endDate?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.startDate) searchParams.set("startDate", params.startDate);
+      if (params?.endDate) searchParams.set("endDate", params.endDate);
+      const query = searchParams.toString();
+      return fetchApi<EventTypeBreakdown[]>(
+        `/webhook-monitoring/event-types${query ? `?${query}` : ""}`,
+      );
+    },
   },
   apiKeys: {
     list: () => fetchApi<ApiKey[]>("/api-keys"),
