@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
+import { useWorkspace } from "../lib/workspace-context";
 import type {
   DunningConfig,
   InvoiceInDunning,
@@ -27,7 +28,7 @@ const EMAIL_TYPE_DESCRIPTIONS: Record<DunningEmailType, string> = {
   payment_recovered: "Sent when payment succeeds after failures",
 };
 
-function formatCurrency(amount: number, currency: string) {
+function formatCurrencyAmount(amount: number, currency: string) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currency.toUpperCase(),
@@ -36,6 +37,7 @@ function formatCurrency(amount: number, currency: string) {
 
 export function DunningPage() {
   const navigate = useNavigate();
+  const { formatCurrency, settings } = useWorkspace();
   const queryClient = useQueryClient();
   const [isEditingConfig, setIsEditingConfig] = useState(false);
   const [editingTemplate, setEditingTemplate] =
@@ -186,17 +188,17 @@ export function DunningPage() {
             {statsLoading
               ? "..."
               : stats
-                ? formatCurrency(
+                ? formatCurrencyAmount(
                     stats.totalAmountAtRisk,
-                    stats.currency || "usd",
+                    stats.currency || settings.defaultCurrency,
                   )
-                : "$0.00"}
+                : formatCurrency(0)}
           </dd>
           {stats?.amountsByCurrency && stats.amountsByCurrency.length > 1 && (
             <dd className="mt-1 text-xs text-gray-500">
               {stats.amountsByCurrency.map((a) => (
                 <span key={a.currency} className="mr-2">
-                  {formatCurrency(a.amount, a.currency)}
+                  {formatCurrencyAmount(a.amount, a.currency)}
                 </span>
               ))}
             </dd>
@@ -743,7 +745,7 @@ export function DunningPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    {formatCurrency(invoice.amountDue, invoice.currency)}
+                    {formatCurrencyAmount(invoice.amountDue, invoice.currency)}
                   </td>
                   <td className="px-6 py-4">
                     <span
