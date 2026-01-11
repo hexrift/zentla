@@ -1493,22 +1493,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/testing@npm:^10.3.0":
-  version: 10.4.20
-  resolution: "@nestjs/testing@npm:10.4.20"
+"@nestjs/testing@npm:^11.1.11":
+  version: 11.1.11
+  resolution: "@nestjs/testing@npm:11.1.11"
   dependencies:
     tslib: "npm:2.8.1"
   peerDependencies:
-    "@nestjs/common": ^10.0.0
-    "@nestjs/core": ^10.0.0
-    "@nestjs/microservices": ^10.0.0
-    "@nestjs/platform-express": ^10.0.0
+    "@nestjs/common": ^11.0.0
+    "@nestjs/core": ^11.0.0
+    "@nestjs/microservices": ^11.0.0
+    "@nestjs/platform-express": ^11.0.0
   peerDependenciesMeta:
     "@nestjs/microservices":
       optional: true
     "@nestjs/platform-express":
       optional: true
-  checksum: 10c0/128e8608fc54f26fc07db5ff6c8230da50269d4d55a64a4ab3a5018c268b97b8c3d79233cbd36d70e9d872920680375be2650a0dcc6338a190c26e024fe5e2f2
+  checksum: 10c0/ceb5633578205155693647aea806894818d7e7366b8f8f9b6fa90ff01c8f21a5dc9b60d1dff9baa0633dc8a9ce7ad8cc56b4b5af936e08b9d47b201822ddde63
   languageName: node
   linkType: hard
 
@@ -2935,7 +2935,7 @@ __metadata:
     "@nestjs/schedule": "npm:^6.1.0"
     "@nestjs/schematics": "npm:^10.0.0"
     "@nestjs/swagger": "npm:^11.2.3"
-    "@nestjs/testing": "npm:^10.3.0"
+    "@nestjs/testing": "npm:^11.1.11"
     "@nestjs/throttler": "npm:^5.1.0"
     "@scalar/nestjs-api-reference": "npm:^1.0.13"
     "@swc/core": "npm:^1.15.8"
