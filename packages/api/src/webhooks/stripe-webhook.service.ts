@@ -707,41 +707,44 @@ export class StripeWebhookService {
       providerLineItemId: line.id,
     }));
 
-    const invoice = await this.invoicesService.upsertFromProvider(customerRef.workspaceId, {
-      customerId: customerRef.entityId,
-      subscriptionId,
-      amountDue: stripeInvoice.amount_due,
-      amountPaid: stripeInvoice.amount_paid,
-      amountRemaining: stripeInvoice.amount_remaining,
-      subtotal: stripeInvoice.subtotal,
-      tax: stripeInvoice.tax ?? 0,
-      total: stripeInvoice.total,
-      currency: stripeInvoice.currency,
-      status,
-      periodStart: stripeInvoice.period_start
-        ? new Date(stripeInvoice.period_start * 1000)
-        : undefined,
-      periodEnd: stripeInvoice.period_end
-        ? new Date(stripeInvoice.period_end * 1000)
-        : undefined,
-      dueDate: stripeInvoice.due_date
-        ? new Date(stripeInvoice.due_date * 1000)
-        : undefined,
-      paidAt:
-        stripeInvoice.status === "paid" &&
-        stripeInvoice.status_transitions?.paid_at
-          ? new Date(stripeInvoice.status_transitions.paid_at * 1000)
+    const invoice = await this.invoicesService.upsertFromProvider(
+      customerRef.workspaceId,
+      {
+        customerId: customerRef.entityId,
+        subscriptionId,
+        amountDue: stripeInvoice.amount_due,
+        amountPaid: stripeInvoice.amount_paid,
+        amountRemaining: stripeInvoice.amount_remaining,
+        subtotal: stripeInvoice.subtotal,
+        tax: stripeInvoice.tax ?? 0,
+        total: stripeInvoice.total,
+        currency: stripeInvoice.currency,
+        status,
+        periodStart: stripeInvoice.period_start
+          ? new Date(stripeInvoice.period_start * 1000)
           : undefined,
-      provider: "stripe",
-      providerInvoiceId: stripeInvoice.id,
-      providerInvoiceUrl: stripeInvoice.hosted_invoice_url ?? undefined,
-      providerPdfUrl: stripeInvoice.invoice_pdf ?? undefined,
-      attemptCount: stripeInvoice.attempt_count ?? 0,
-      nextPaymentAttempt: stripeInvoice.next_payment_attempt
-        ? new Date(stripeInvoice.next_payment_attempt * 1000)
-        : undefined,
-      lineItems,
-    });
+        periodEnd: stripeInvoice.period_end
+          ? new Date(stripeInvoice.period_end * 1000)
+          : undefined,
+        dueDate: stripeInvoice.due_date
+          ? new Date(stripeInvoice.due_date * 1000)
+          : undefined,
+        paidAt:
+          stripeInvoice.status === "paid" &&
+          stripeInvoice.status_transitions?.paid_at
+            ? new Date(stripeInvoice.status_transitions.paid_at * 1000)
+            : undefined,
+        provider: "stripe",
+        providerInvoiceId: stripeInvoice.id,
+        providerInvoiceUrl: stripeInvoice.hosted_invoice_url ?? undefined,
+        providerPdfUrl: stripeInvoice.invoice_pdf ?? undefined,
+        attemptCount: stripeInvoice.attempt_count ?? 0,
+        nextPaymentAttempt: stripeInvoice.next_payment_attempt
+          ? new Date(stripeInvoice.next_payment_attempt * 1000)
+          : undefined,
+        lineItems,
+      },
+    );
 
     this.logger.log(`Upserted invoice ${stripeInvoice.id} (${event.type})`);
 

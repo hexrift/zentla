@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Zentla Docs — Get started</title>
+    <meta
+      name="description"
+      content="Zentla documentation: quickstart, API reference, usage metering, entitlements, provider adapters."
+    />
+
+    <style>
+      :root {
+        --bg0: #060913;
+        --bg1: #0b1220;
+        --panel: rgba(255, 255, 255, 0.06);
+        --panel2: rgba(255, 255, 255, 0.1);
+        --border: rgba(255, 255, 255, 0.12);
+        --text: rgba(255, 255, 255, 0.92);
+        --muted: rgba(255, 255, 255, 0.72);
+        --muted2: rgba(255, 255, 255, 0.56);
+        --brand1: rgba(92, 110, 255, 1);
+        --brand2: rgba(40, 220, 220, 1);
+        --accent: rgba(255, 184, 0, 1);
+        --radius: 16px;
+        --radius2: 22px;
+        --shadow: 0 14px 44px rgba(0, 0, 0, 0.38);
+        --max: 1240px;
+        --mono:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        --sans:
+          ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
+          Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(
+            1100px 700px at 20% -10%,
+            rgba(92, 110, 255, 0.28),
+            transparent 60%
+          ),
+          radial-gradient(
+            900px 600px at 82% 0%,
+            rgba(40, 220, 220, 0.18),
+            transparent 60%
+          ),
+          linear-gradient(180deg, var(--bg0) 0%, var(--bg1) 55%, #070b14 100%);
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .blur {
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+      .wrap {
+        width: min(var(--max), calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      /* Top docs bar */
+      .top {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(6, 9, 19, 0.62);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .top-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        gap: 12px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 900;
+      }
+      .logo {
+        width: 32px;
+        height: 32px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+      .logo svg {
+        width: 24px;
+        height: 24px;
+      }
+      .flow {
+        stroke-dasharray: 7 10;
+        animation: flow 3.6s linear infinite;
+      }
+      @keyframes flow {
+        to {
+          stroke-dashoffset: -68;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .flow {
+          animation: none;
+        }
+      }
+
+      .search {
+        flex: 1;
+        max-width: 560px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--muted2);
+        cursor: pointer;
+      }
+      .search b {
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .kbd {
+        margin-left: auto;
+        font-family: var(--mono);
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(0, 0, 0, 0.22);
+        color: rgba(255, 255, 255, 0.78);
+      }
+      .top-links {
+        display: flex;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .top-links a {
+        padding: 8px 10px;
+        border-radius: 12px;
+      }
+      .top-links a:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+      }
+
+      /* Layout */
+      .layout {
+        display: grid;
+        grid-template-columns: 260px 1fr 220px;
+        gap: 18px;
+        padding: 18px 0 44px;
+        align-items: start;
+      }
+      .side {
+        position: sticky;
+        top: 72px;
+        max-height: calc(100vh - 92px);
+        overflow: auto;
+        padding-right: 6px;
+      }
+      .panel {
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: var(--radius2);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+      }
+      .nav {
+        padding: 12px;
+      }
+      .nav h4 {
+        margin: 8px 10px 10px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted2);
+      }
+      .nav a {
+        display: block;
+        padding: 9px 10px;
+        border-radius: 12px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .nav a:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+      }
+      .nav a.active {
+        background: linear-gradient(
+          135deg,
+          rgba(92, 110, 255, 0.22),
+          rgba(40, 220, 220, 0.14)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text);
+      }
+
+      /* Main content */
+      .content {
+        padding: 18px;
+      }
+      .crumbs {
+        color: var(--muted2);
+        font-size: 13px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .crumbs a {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      h1 {
+        margin: 10px 0 10px;
+        font-size: 34px;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+      .lead {
+        margin: 0 0 18px;
+        color: var(--muted);
+        line-height: 1.6;
+        font-size: 15.5px;
+        max-width: 72ch;
+      }
+
+      .callout {
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: var(--radius2);
+        padding: 14px;
+        margin: 16px 0;
+      }
+      .callout b {
+        display: block;
+        margin-bottom: 6px;
+      }
+      .callout p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      h2 {
+        margin: 22px 0 10px;
+        font-size: 18px;
+        letter-spacing: -0.01em;
+      }
+      p {
+        margin: 0 0 12px;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      .code {
+        position: relative;
+        margin: 12px 0 18px;
+      }
+      pre {
+        margin: 0;
+        padding: 14px 14px;
+        border-radius: 16px;
+        background: rgba(0, 0, 0, 0.32);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: auto;
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: rgba(255, 255, 255, 0.92);
+      }
+      code {
+        font-family: var(--mono);
+      }
+      .copy {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 12px;
+        padding: 8px 10px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.86);
+        cursor: pointer;
+      }
+      .copy:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 10px 0 6px;
+      }
+      .tag {
+        font-size: 12px;
+        color: var(--muted2);
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      /* Right TOC */
+      .toc {
+        position: sticky;
+        top: 72px;
+        max-height: calc(100vh - 92px);
+        overflow: auto;
+        padding: 12px;
+      }
+      .toc h4 {
+        margin: 8px 10px 10px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted2);
+      }
+      .toc a {
+        display: block;
+        padding: 8px 10px;
+        border-radius: 12px;
+        color: var(--muted);
+        font-size: 13.5px;
+      }
+      .toc a:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+      }
+
+      /* Responsive */
+      @media (max-width: 1100px) {
+        .layout {
+          grid-template-columns: 260px 1fr;
+        }
+        .tocWrap {
+          display: none;
+        }
+      }
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .side {
+          position: relative;
+          top: auto;
+          max-height: none;
+        }
+        .top-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="top blur">
+      <div class="wrap top-inner">
+        <a class="brand" href="/docs" aria-label="Zentla docs home">
+          <span class="logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <defs>
+                <linearGradient id="g" x1="2" y1="2" x2="22" y2="22">
+                  <stop stop-color="rgba(92,110,255,1)" />
+                  <stop offset="0.55" stop-color="rgba(40,220,220,1)" />
+                  <stop offset="1" stop-color="rgba(255,184,0,1)" />
+                </linearGradient>
+              </defs>
+              <circle
+                cx="12"
+                cy="12"
+                r="3.3"
+                stroke="url(#g)"
+                stroke-width="2.2"
+              />
+              <circle cx="5" cy="7" r="1.6" fill="url(#g)" opacity=".92" />
+              <circle cx="19" cy="7" r="1.6" fill="url(#g)" opacity=".92" />
+              <circle cx="7" cy="19" r="1.6" fill="url(#g)" opacity=".92" />
+              <path
+                class="flow"
+                d="M6.2 7.4C8.2 8.2 9.5 9.3 10.8 10.8"
+                stroke="url(#g)"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                class="flow"
+                d="M17.8 7.4C15.8 8.2 14.5 9.3 13.2 10.8"
+                stroke="url(#g)"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                class="flow"
+                d="M7.4 18.2C8.5 16.2 9.6 14.8 10.9 13.4"
+                stroke="url(#g)"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+          </span>
+          <span>Zentla Docs</span>
+        </a>
+
+        <div class="search" role="button" tabindex="0" aria-label="Search docs">
+          <span>Search docs</span>
+          <b>e.g. “idempotency”</b>
+          <span class="kbd">⌘K</span>
+        </div>
+
+        <nav class="top-links" aria-label="Docs top links">
+          <a href="/">Home</a>
+          <a href="https://api.zentla.dev">API</a>
+          <a href="#">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="wrap layout">
+      <!-- Sidebar -->
+      <aside class="side">
+        <div class="panel nav blur">
+          <h4>Getting started</h4>
+          <a class="active" href="/docs/get-started">Get started</a>
+          <a href="/docs/quickstart">Quickstart</a>
+          <a href="/docs/auth">Authentication</a>
+
+          <h4>Core concepts</h4>
+          <a href="/docs/subscriptions">Subscriptions</a>
+          <a href="/docs/usage">Usage metering</a>
+          <a href="/docs/entitlements">Entitlements</a>
+          <a href="/docs/events">Events & idempotency</a>
+
+          <h4>Providers</h4>
+          <a href="/docs/providers/stripe">Stripe adapter</a>
+          <a href="/docs/providers/zuora">Zuora adapter</a>
+
+          <h4>Reference</h4>
+          <a href="/docs/api">API reference</a>
+          <a href="/docs/sdks">SDKs</a>
+          <a href="/docs/webhooks">Webhooks</a>
+        </div>
+      </aside>
+
+      <!-- Content -->
+      <article class="panel content blur">
+        <div class="crumbs">
+          <a href="/docs">Docs</a> <span>›</span> <span>Getting started</span>
+          <span>›</span>
+          <span>Get started</span>
+        </div>
+
+        <h1>Get started</h1>
+        <p class="lead">
+          Zentla is a provider-agnostic billing layer. You keep your domain
+          model stable; adapters handle Stripe/Zuora differences. This guide
+          gets you to “usage recorded + entitlements enforced” fast.
+        </p>
+
+        <div class="row">
+          <span class="tag">TypeScript</span>
+          <span class="tag">Node.js</span>
+          <span class="tag">Idempotency-first</span>
+        </div>
+
+        <div class="callout">
+          <b>Principle: money-safe semantics</b>
+          <p>
+            Treat every billing-side action as potentially retried. Always send
+            an idempotency key. Zentla is designed so replaying events is safe.
+          </p>
+        </div>
+
+        <h2 id="install">Install</h2>
+        <div class="code">
+          <button class="copy" data-copy="npm i zentla">Copy</button>
+          <pre><code>npm i zentla</code></pre>
+        </div>
+
+        <h2 id="init">Initialize the client</h2>
+        <div class="code">
+          <button class="copy" data-copy='import { Zentla } from "zentla";'>
+            Copy
+          </button>
+          <pre><code>import { Zentla } from "zentla";
+
+const z = new Zentla({
+  apiKey: process.env.ZENTLA_API_KEY,
+});</code></pre>
+        </div>
+
+        <h2 id="usage">Record usage (replay-safe)</h2>
+        <p>
+          Record a usage event with an idempotency key so the exact same event
+          can be retried safely.
+        </p>
+        <div class="code">
+          <button
+            class="copy"
+            data-copy='await z.usage.record({ tenantId: "tnt_123", metric: "api_calls", quantity: 1200, idempotencyKey: "evt_0001" });'
+          >
+            Copy
+          </button>
+          <pre><code>await z.usage.record({
+  tenantId: "tnt_123",
+  metric: "api_calls",
+  quantity: 1200,
+  idempotencyKey: "evt_0001",
+});</code></pre>
+        </div>
+
+        <h2 id="entitlements">Enforce entitlements in-app</h2>
+        <p>
+          Entitlements let you gate features consistently, regardless of
+          provider.
+        </p>
+        <div class="code">
+          <button
+            class="copy"
+            data-copy='const ent = await z.entitlements.get("tnt_123");'
+          >
+            Copy
+          </button>
+          <pre><code>const ent = await z.entitlements.get("tnt_123");
+
+if (!ent.features.advancedReports) {
+  throw new Error("Upgrade required");
+}</code></pre>
+        </div>
+
+        <h2 id="next">Next steps</h2>
+        <p>
+          Continue with
+          <a
+            href="/docs/auth"
+            style="text-decoration: underline; text-underline-offset: 3px"
+            >Authentication</a
+          >, then wire your provider adapter.
+        </p>
+      </article>
+
+      <!-- Right TOC -->
+      <aside class="tocWrap">
+        <div class="panel toc blur">
+          <h4>On this page</h4>
+          <a href="#install">Install</a>
+          <a href="#init">Initialize</a>
+          <a href="#usage">Record usage</a>
+          <a href="#entitlements">Entitlements</a>
+          <a href="#next">Next steps</a>
+        </div>
+      </aside>
+    </div>
+
+    <script>
+      // Cmd/Ctrl+K mock
+      window.addEventListener("keydown", (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+          e.preventDefault();
+          alert(
+            "Mock: open doc search. (In real: Algolia DocSearch / Orama / Typesense.)"
+          );
+        }
+      });
+
+      // Copy buttons mock
+      document.querySelectorAll(".copy").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(btn.dataset.copy || "");
+            const old = btn.textContent;
+            btn.textContent = "Copied";
+            setTimeout(() => (btn.textContent = old), 900);
+          } catch {
+            alert("Copy failed (clipboard permissions).");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

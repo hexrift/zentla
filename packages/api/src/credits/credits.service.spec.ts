@@ -99,10 +99,7 @@ describe("CreditsService", () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CreditsService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [CreditsService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get<CreditsService>(CreditsService);
@@ -244,7 +241,11 @@ describe("CreditsService", () => {
         balance: 0,
       });
 
-      const result = await service.voidCredit("ws_123", "cred_123", "Refund requested");
+      const result = await service.voidCredit(
+        "ws_123",
+        "cred_123",
+        "Refund requested",
+      );
 
       expect(result.status).toBe("voided");
       expect(result.balance).toBe(0);
@@ -253,9 +254,9 @@ describe("CreditsService", () => {
     it("should throw NotFoundException when credit not found", async () => {
       prisma.credit.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.voidCredit("ws_123", "cred_999"),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.voidCredit("ws_123", "cred_999")).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it("should throw BadRequestException when credit is not active", async () => {
@@ -264,9 +265,9 @@ describe("CreditsService", () => {
         status: "depleted",
       });
 
-      await expect(
-        service.voidCredit("ws_123", "cred_123"),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.voidCredit("ws_123", "cred_123")).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -326,9 +327,9 @@ describe("CreditsService", () => {
     it("should throw NotFoundException when invoice not found", async () => {
       prisma.invoice.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.applyToInvoice("ws_123", "inv_999"),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.applyToInvoice("ws_123", "inv_999")).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it("should throw BadRequestException when invoice is not open", async () => {
@@ -337,9 +338,9 @@ describe("CreditsService", () => {
         status: "paid",
       });
 
-      await expect(
-        service.applyToInvoice("ws_123", "inv_123"),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.applyToInvoice("ws_123", "inv_123")).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it("should respect maxAmount parameter", async () => {

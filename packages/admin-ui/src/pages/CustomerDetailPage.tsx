@@ -660,7 +660,9 @@ function VoidCreditModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Void Credit</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Void Credit
+        </h2>
         <p className="text-sm text-gray-600 mb-4">
           Are you sure you want to void this credit? This will set its balance
           to zero and cannot be undone.
