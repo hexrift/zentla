@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.13.0](https://github.com/hexrift/zentla/compare/v5.12.2...v5.13.0) (2026-01-11)
+
+
+### Features
+
+* add credit management system ([#92](https://github.com/hexrift/zentla/issues/92)) ([91fd50a](https://github.com/hexrift/zentla/commit/91fd50ae3ce2be4735e01d8ee4a47ca68fde4def))
+
 ## [5.12.2](https://github.com/hexrift/zentla/compare/v5.12.1...v5.12.2) (2026-01-10)
 
 
