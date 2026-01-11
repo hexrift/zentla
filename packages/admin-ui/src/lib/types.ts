@@ -558,6 +558,49 @@ export interface PortalEntitlement {
   valueType: string;
 }
 
+// Credit types
+export interface Credit {
+  id: string;
+  workspaceId: string;
+  customerId: string;
+  amount: number;
+  balance: number;
+  currency: string;
+  status: "active" | "depleted" | "expired" | "voided";
+  reason?:
+    | "promotional"
+    | "refund_alternative"
+    | "goodwill"
+    | "billing_error"
+    | "service_credit"
+    | "other";
+  description?: string;
+  expiresAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  customer?: { id: string; email: string; name?: string };
+}
+
+export interface CreditTransaction {
+  id: string;
+  creditId: string;
+  customerId: string;
+  invoiceId?: string;
+  type: "issued" | "applied" | "expired" | "voided" | "adjusted";
+  amount: number;
+  balanceBefore: number;
+  balanceAfter: number;
+  description?: string;
+  createdAt: string;
+}
+
+export interface CreditBalance {
+  customerId: string;
+  totalBalance: number;
+  currency: string;
+  activeCredits: number;
+}
+
 // Paginated response type
 export interface PaginatedResponse<T> {
   data: T[];

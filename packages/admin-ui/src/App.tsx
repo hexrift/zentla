@@ -16,6 +16,7 @@ import { PromotionDetailPage } from "./pages/PromotionDetailPage";
 import { SubscriptionsPage } from "./pages/SubscriptionsPage";
 import { SubscriptionDetailPage } from "./pages/SubscriptionDetailPage";
 import { CustomersPage } from "./pages/CustomersPage";
+import { CustomerDetailPage } from "./pages/CustomerDetailPage";
 import { WebhooksPage } from "./pages/WebhooksPage";
 import { EventsPage } from "./pages/EventsPage";
 import { AuditLogsPage } from "./pages/AuditLogsPage";
@@ -83,6 +84,7 @@ export default function App() {
           <Route path="refunds/:id" element={<RefundDetailPage />} />
           <Route path="dunning" element={<DunningPage />} />
           <Route path="customers" element={<CustomersPage />} />
+          <Route path="customers/:id" element={<CustomerDetailPage />} />
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="events" element={<EventsPage />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />
