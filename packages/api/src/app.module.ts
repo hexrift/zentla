@@ -30,6 +30,7 @@ import { ExperimentsModule } from "./experiments/experiments.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 import { InvoicesModule } from "./invoices/invoices.module";
 import { RefundsModule } from "./refunds/refunds.module";
+import { CreditsModule } from "./credits/credits.module";
 import { DunningModule } from "./dunning/dunning.module";
 import { EmailModule } from "./email/email.module";
 import { PortalModule } from "./portal/portal.module";
@@ -111,6 +112,7 @@ import { configuration, validationSchema } from "./config/configuration";
     AnalyticsModule,
     InvoicesModule,
     RefundsModule,
+    CreditsModule,
     DunningModule,
     EmailModule,
     PortalModule,

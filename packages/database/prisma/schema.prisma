@@ -101,8 +101,10 @@ model Workspace {
   invoices          Invoice[]
   refunds           Refund[]
   dunningConfig     DunningConfig?
-  dunningAttempts   DunningAttempt[]
-  emailNotifications EmailNotification[]
+  dunningAttempts      DunningAttempt[]
+  emailNotifications   EmailNotification[]
+  credits              Credit[]
+  creditTransactions   CreditTransaction[]
 
   @@map("workspace")
 }
@@ -170,6 +172,7 @@ model Customer {
   seatAssignments   SeatAssignment[]
   invoices          Invoice[]
   refunds           Refund[]
+  credits           Credit[]
 
   @@unique([workspaceId, email])
   @@unique([workspaceId, externalId])
@@ -1251,6 +1254,7 @@ model Invoice {
   amountDue          Int           @map("amount_due")
   amountPaid         Int           @default(0) @map("amount_paid")
   amountRemaining    Int           @default(0) @map("amount_remaining")
+  creditsApplied     Int           @default(0) @map("credits_applied")
   subtotal           Int           @default(0)
   tax                Int           @default(0)
   total              Int           @default(0)
@@ -1292,6 +1296,7 @@ model Invoice {
   customer           Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
   lineItems          InvoiceLineItem[]
   refunds            Refund[]
+  creditTransactions CreditTransaction[]
 
   @@unique([workspaceId, provider, providerInvoiceId])
   @@index([workspaceId])
@@ -1396,6 +1401,99 @@ enum RefundReason {
   expired_uncaptured_charge
 
   @@map("refund_reason")
+}
+
+// ============================================================================
+// CREDITS & ACCOUNT BALANCE
+// ============================================================================
+
+model Credit {
+  id          String        @id @default(uuid()) @db.Uuid
+  workspaceId String        @map("workspace_id") @db.Uuid
+  customerId  String        @map("customer_id") @db.Uuid
+
+  amount      Int           // Original amount issued (cents)
+  balance     Int           // Remaining balance (cents)
+  currency    String        @db.VarChar(3)
+
+  status      CreditStatus  @default(active)
+  reason      CreditReason?
+  description String?       @db.VarChar(500)
+
+  expiresAt   DateTime?     @map("expires_at") @db.Timestamptz
+
+  metadata    Json          @default("{}")
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  workspace    Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customer     Customer            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  transactions CreditTransaction[]
+
+  @@index([workspaceId])
+  @@index([workspaceId, customerId])
+  @@index([workspaceId, status])
+  @@index([expiresAt])
+  @@map("credit")
+}
+
+enum CreditStatus {
+  active
+  depleted
+  expired
+  voided
+
+  @@map("credit_status")
+}
+
+enum CreditReason {
+  promotional
+  refund_alternative
+  goodwill
+  billing_error
+  service_credit
+  other
+
+  @@map("credit_reason")
+}
+
+model CreditTransaction {
+  id            String                @id @default(uuid()) @db.Uuid
+  workspaceId   String                @map("workspace_id") @db.Uuid
+  creditId      String                @map("credit_id") @db.Uuid
+  customerId    String                @map("customer_id") @db.Uuid
+  invoiceId     String?               @map("invoice_id") @db.Uuid
+
+  type          CreditTransactionType
+  amount        Int                   // Amount in cents (positive)
+  balanceBefore Int                   @map("balance_before")
+  balanceAfter  Int                   @map("balance_after")
+
+  description   String?               @db.VarChar(500)
+  metadata      Json                  @default("{}")
+  createdAt     DateTime              @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  credit    Credit    @relation(fields: [creditId], references: [id], onDelete: Cascade)
+  invoice   Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([creditId])
+  @@index([workspaceId, customerId])
+  @@index([invoiceId])
+  @@map("credit_transaction")
+}
+
+enum CreditTransactionType {
+  issued
+  applied
+  expired
+  voided
+  adjusted
+
+  @@map("credit_transaction_type")
 }
 
 // ============================================================================

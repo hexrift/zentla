@@ -6,6 +6,7 @@ import { OutboxService } from "./outbox.service";
 import { EntitlementsService } from "../entitlements/entitlements.service";
 import { InvoicesService } from "../invoices/invoices.service";
 import { RefundsService } from "../refunds/refunds.service";
+import { CreditsService } from "../credits/credits.service";
 import { DunningService } from "../dunning/dunning.service";
 import type { StripeAdapter } from "@zentla/stripe-adapter";
 import type Stripe from "stripe";
@@ -25,6 +26,7 @@ export class StripeWebhookService {
     private readonly entitlementsService: EntitlementsService,
     private readonly invoicesService: InvoicesService,
     private readonly refundsService: RefundsService,
+    private readonly creditsService: CreditsService,
     @Inject(forwardRef(() => DunningService))
     private readonly dunningService: DunningService,
   ) {}
@@ -705,7 +707,7 @@ export class StripeWebhookService {
       providerLineItemId: line.id,
     }));
 
-    await this.invoicesService.upsertFromProvider(customerRef.workspaceId, {
+    const invoice = await this.invoicesService.upsertFromProvider(customerRef.workspaceId, {
       customerId: customerRef.entityId,
       subscriptionId,
       amountDue: stripeInvoice.amount_due,
@@ -742,6 +744,25 @@ export class StripeWebhookService {
     });
 
     this.logger.log(`Upserted invoice ${stripeInvoice.id} (${event.type})`);
+
+    // Auto-apply credits when invoice is finalized (open status)
+    if (event.type === "invoice.finalized" && status === "open" && invoice) {
+      try {
+        const application = await this.creditsService.autoApplyToInvoice(
+          customerRef.workspaceId,
+          invoice.id,
+        );
+        if (application) {
+          this.logger.log(
+            `Auto-applied ${application.totalApplied} credits to invoice ${invoice.id}`,
+          );
+        }
+      } catch (error) {
+        this.logger.warn(
+          `Failed to auto-apply credits to invoice ${invoice.id}: ${error}`,
+        );
+      }
+    }
   }
 
   private async handleInvoicePaid(event: Stripe.Event): Promise<void> {
