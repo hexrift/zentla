@@ -30,7 +30,7 @@
     "@zentla/zuora-adapter": "workspace:*",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
-    "helmet": "^7.1.0",
+    "helmet": "^8.1.0",
     "ioredis": "^5.3.0",
     "joi": "^17.11.0",
     "pino": "^8.17.0",
