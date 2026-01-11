@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import type { Customer } from "../lib/types";
 
 export function CustomersPage() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
   const { data, isLoading, error } = useQuery({
@@ -50,8 +52,12 @@ export function CustomersPage() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {data?.data?.map((customer: Customer) => (
-                <tr key={customer.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                <tr
+                  key={customer.id}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => navigate(`/customers/${customer.id}`)}
+                >
+                  <td className="px-6 py-4 text-sm font-medium text-primary-600">
                     {customer.email}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">

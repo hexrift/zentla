@@ -11,6 +11,7 @@ import { WebhookMonitoringService } from "./webhook-monitoring.service";
 import { EntitlementsModule } from "../entitlements/entitlements.module";
 import { InvoicesModule } from "../invoices/invoices.module";
 import { RefundsModule } from "../refunds/refunds.module";
+import { CreditsModule } from "../credits/credits.module";
 import { DunningModule } from "../dunning/dunning.module";
 
 @Module({
@@ -18,6 +19,7 @@ import { DunningModule } from "../dunning/dunning.module";
     EntitlementsModule,
     InvoicesModule,
     RefundsModule,
+    CreditsModule,
     forwardRef(() => DunningModule),
   ],
   controllers: [

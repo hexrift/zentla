@@ -20,6 +20,9 @@ import type {
   ExperimentStats,
   Invoice,
   Refund,
+  Credit,
+  CreditTransaction,
+  CreditBalance,
   DunningConfig,
   DunningAttempt,
   InvoiceInDunning,
@@ -738,6 +741,53 @@ export const api = {
       fetchApi<Refund>("/refunds", {
         method: "POST",
         body: JSON.stringify(data),
+      }),
+  },
+
+  credits: {
+    list: (params?: {
+      customerId?: string;
+      status?: string;
+      limit?: number;
+      cursor?: string;
+    }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.customerId) searchParams.set("customerId", params.customerId);
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.cursor) searchParams.set("cursor", params.cursor);
+      const query = searchParams.toString();
+      return fetchApi<PaginatedResponse<Credit>>(
+        `/credits${query ? `?${query}` : ""}`,
+      );
+    },
+    get: (id: string) => fetchApi<Credit>(`/credits/${id}`),
+    getBalance: (customerId: string) =>
+      fetchApi<CreditBalance[]>(`/credits/balance/${customerId}`),
+    getTransactions: (creditId: string) =>
+      fetchApi<CreditTransaction[]>(`/credits/${creditId}/transactions`),
+    create: (data: {
+      customerId: string;
+      amount: number;
+      currency: string;
+      reason?:
+        | "promotional"
+        | "refund_alternative"
+        | "goodwill"
+        | "billing_error"
+        | "service_credit"
+        | "other";
+      description?: string;
+      expiresAt?: string;
+    }) =>
+      fetchApi<Credit>("/credits", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    void: (id: string, reason?: string) =>
+      fetchApi<Credit>(`/credits/${id}/void`, {
+        method: "POST",
+        body: JSON.stringify({ reason }),
       }),
   },
 

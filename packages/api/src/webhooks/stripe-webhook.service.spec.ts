@@ -8,6 +8,7 @@ import { OutboxService } from "./outbox.service";
 import { EntitlementsService } from "../entitlements/entitlements.service";
 import { InvoicesService } from "../invoices/invoices.service";
 import { RefundsService } from "../refunds/refunds.service";
+import { CreditsService } from "../credits/credits.service";
 import { DunningService } from "../dunning/dunning.service";
 
 describe("StripeWebhookService", () => {
@@ -73,6 +74,7 @@ describe("StripeWebhookService", () => {
         { provide: EntitlementsService, useValue: {} },
         { provide: InvoicesService, useValue: {} },
         { provide: RefundsService, useValue: {} },
+        { provide: CreditsService, useValue: { autoApplyToInvoice: vi.fn() } },
         { provide: DunningService, useValue: {} },
       ],
     }).compile();
