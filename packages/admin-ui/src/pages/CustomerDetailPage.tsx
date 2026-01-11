@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import { api } from "../lib/api";
+import { useWorkspace } from "../lib/workspace-context";
 import type {
   Customer,
   Subscription,
@@ -18,6 +19,7 @@ export function CustomerDetailPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>("details");
   const queryClient = useQueryClient();
+  const { formatCurrency: formatCurrencyFromWorkspace } = useWorkspace();
 
   const { data: customer, isLoading } = useQuery({
     queryKey: ["customer", id],
@@ -124,6 +126,7 @@ export function CustomerDetailPage() {
             credits={credits?.data ?? []}
             balance={creditBalance ?? []}
             queryClient={queryClient}
+            defaultCurrencyFormatter={formatCurrencyFromWorkspace}
           />
         )}
       </div>
@@ -325,11 +328,13 @@ function CreditsTab({
   credits,
   balance,
   queryClient,
+  defaultCurrencyFormatter,
 }: {
   customerId: string;
   credits: Credit[];
   balance: CreditBalance[];
   queryClient: ReturnType<typeof useQueryClient>;
+  defaultCurrencyFormatter: (amount: number, currency?: string) => string;
 }) {
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [showVoidModal, setShowVoidModal] = useState<string | null>(null);
@@ -377,7 +382,9 @@ function CreditsTab({
             Credit Balance
           </h3>
           {balance.length === 0 ? (
-            <p className="text-2xl font-bold text-gray-900">$0.00</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {defaultCurrencyFormatter(0)}
+            </p>
           ) : (
             <div className="flex space-x-4">
               {balance.map((b) => (
